@@ -667,7 +667,7 @@ Responda em JSON:
         Returns:
             Análise semântica com embeddings
         """
-        self.logger.info("Iniciando análise semântica com Voyage embeddings")
+        self.logger.info("🚀 Iniciando análise TF-IDF semântica com Voyage embeddings")
         
         try:
             # Extrair apenas os termos para embedding
@@ -676,12 +676,18 @@ Responda em JSON:
             if not self.voyage_analyzer:
                 raise ValueError("Voyage analyzer não inicializado")
             
-            # Gerar embeddings para os termos
-            term_embeddings = self.voyage_analyzer.generate_embeddings(terms_to_embed)
+            # Gerar embeddings para os termos com otimização de custo
+            self.logger.info(f"📊 Gerando embeddings para {len(terms_to_embed)} termos TF-IDF")
+            embedding_result = self.voyage_analyzer.generate_embeddings(
+                terms_to_embed,
+                input_type="query",  # Terms are queries for semantic analysis
+                cache_key=f"tfidf_terms_{len(terms_to_embed)}"
+            )
             
-            # Verificar se embeddings foram gerados corretamente
-            if not isinstance(term_embeddings, np.ndarray):
-                raise ValueError("Embeddings não retornaram como array numpy")
+            if not embedding_result['embeddings']:
+                raise ValueError("Nenhum embedding gerado")
+            
+            term_embeddings = np.array(embedding_result['embeddings'])
             
             # Calcular similaridade entre termos para agrupamento
             similarity_matrix = cosine_similarity(term_embeddings)
@@ -691,9 +697,9 @@ Responda em JSON:
                 terms_to_embed, term_embeddings, similarity_matrix
             )
             
-            # Análise de relevância usando embeddings
-            relevance_analysis = self._analyze_relevance_with_embeddings(
-                terms_to_embed, term_embeddings, texts
+            # Análise de relevância usando embeddings context
+            relevance_analysis = self._analyze_relevance_with_embeddings_enhanced(
+                terms_to_embed, term_embeddings, texts, top_terms
             )
             
             # Combinar com análise AI tradicional para insights mais ricos
@@ -704,19 +710,23 @@ Responda em JSON:
                 'relevance_analysis': relevance_analysis,
                 'terms_analyzed': len(terms_to_embed),
                 'embeddings_used': True,
-                'embedding_model': self.voyage_analyzer.model_name if self.voyage_analyzer else None
+                'embedding_model': self.voyage_analyzer.model_name if self.voyage_analyzer else None,
+                'embedding_stats': embedding_result.get('processing_stats', {}),
+                'cost_optimized': hasattr(self.voyage_analyzer, 'enable_sampling') and self.voyage_analyzer.enable_sampling
             }
             
             # Análise comparativa por categoria se disponível
             if category_terms:
-                category_semantic_analysis = self._analyze_category_with_embeddings(category_terms)
+                category_semantic_analysis = self._analyze_category_with_embeddings_enhanced(category_terms)
                 result['category_semantic_analysis'] = category_semantic_analysis
             
+            self.logger.info(f"✅ Análise TF-IDF semântica concluída com {len(ai_enhanced_groups)} grupos")
             return result
             
         except Exception as e:
-            self.logger.error(f"Erro na análise com Voyage embeddings: {e}")
+            self.logger.error(f"❌ Erro na análise TF-IDF com Voyage embeddings: {e}")
             # Fallback para análise tradicional
+            self.logger.info("🔄 Usando fallback para análise tradicional")
             if category_terms is not None:
                 return self._analyze_terms_semantically(top_terms, category_terms)
             else:
@@ -775,6 +785,71 @@ Responda em JSON:
         semantic_groups.sort(key=lambda x: x['cohesion_score'], reverse=True)
         
         return semantic_groups
+    
+    def _analyze_relevance_with_embeddings_enhanced(self, terms: List[str], embeddings: np.ndarray,
+                                                  texts: pd.Series, top_terms: List[Dict]) -> Dict[str, Any]:
+        """
+        Análise aprimorada de relevância dos termos usando embeddings contextuais
+        """
+        try:
+            if not self.voyage_analyzer:
+                raise ValueError("Voyage analyzer não disponível")
+            
+            # Combinar embeddings com scores TF-IDF originais
+            tfidf_scores = {term['term']: term['score'] for term in top_terms}
+            
+            # Calcular medidas de relevância mais sofisticadas
+            term_relevances = []
+            embedding_variances = np.var(embeddings, axis=1)
+            embedding_norms = np.linalg.norm(embeddings, axis=1)
+            
+            for i, term in enumerate(terms):
+                if i >= len(embeddings):
+                    continue
+                    
+                # Combinar múltiplas métricas
+                tfidf_score = tfidf_scores.get(term, 0.0)
+                embedding_variance = float(embedding_variances[i])
+                embedding_norm = float(embedding_norms[i])
+                
+                # Score composto: TF-IDF + características semânticas
+                composite_score = (
+                    tfidf_score * 0.4 +                    # Importância estatística
+                    embedding_variance * 0.3 +             # Diversidade semântica
+                    (embedding_norm / np.max(embedding_norms)) * 0.3  # Magnitude semântica
+                )
+                
+                term_relevances.append({
+                    'term': term,
+                    'tfidf_score': float(tfidf_score),
+                    'semantic_variance': embedding_variance,
+                    'semantic_magnitude': embedding_norm,
+                    'composite_relevance': float(composite_score),
+                    'embedding_dimension': len(embeddings[i]) if i < len(embeddings) else 0
+                })
+            
+            # Identificar termos de alta relevância usando score composto
+            sorted_terms = sorted(term_relevances, key=lambda x: x['composite_relevance'], reverse=True)
+            composite_scores = [t['composite_relevance'] for t in term_relevances]
+            high_relevance_threshold = float(np.percentile(composite_scores, 75)) if composite_scores else 0.5
+            
+            return {
+                'term_relevance': term_relevances,
+                'high_relevance_terms': [t['term'] for t in sorted_terms if t['composite_relevance'] >= high_relevance_threshold],
+                'relevance_statistics': {
+                    'mean_composite': float(np.mean(composite_scores)) if composite_scores else 0,
+                    'std_composite': float(np.std(composite_scores)) if composite_scores else 0,
+                    'threshold': high_relevance_threshold,
+                    'total_terms': len(term_relevances)
+                },
+                'method': 'enhanced_embedding_composite',
+                'features_combined': ['tfidf', 'semantic_variance', 'semantic_magnitude']
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Erro na análise de relevância aprimorada: {e}")
+            # Fallback para método simples
+            return self._analyze_relevance_with_embeddings(terms, embeddings, texts)
     
     def _analyze_relevance_with_embeddings(self, terms: List[str], embeddings: np.ndarray,
                                           texts: pd.Series) -> Dict[str, Any]:
@@ -900,6 +975,122 @@ Responda em JSON:
                 'description': f"Grupo com {len(g['terms'])} termos",
                 'embedding_based': True
             } for g in embedding_groups]
+    
+    def _analyze_category_with_embeddings_enhanced(self, category_terms: Dict[str, List[Dict]]) -> Dict[str, Any]:
+        """
+        Análise aprimorada de categorias usando embeddings contextuais
+        """
+        try:
+            self.logger.info(f"🔍 Analisando {len(category_terms)} categorias com embeddings")
+            category_profiles = []
+            
+            for category, terms in list(category_terms.items())[:5]:  # Processar até 5 categorias
+                # Extrair top termos da categoria
+                cat_terms = [t['term'] for t in terms[:15]]  # Mais termos para análise
+                
+                if not cat_terms:
+                    continue
+                
+                try:
+                    # Gerar embeddings para termos da categoria
+                    cat_embedding_result = self.voyage_analyzer.generate_embeddings(
+                        cat_terms,
+                        input_type="query",
+                        cache_key=f"category_{category}_{len(cat_terms)}"
+                    )
+                    
+                    if cat_embedding_result['embeddings']:
+                        cat_embeddings = np.array(cat_embedding_result['embeddings'])
+                        
+                        # Calcular coesão semântica da categoria
+                        cat_similarity_matrix = cosine_similarity(cat_embeddings)
+                        np.fill_diagonal(cat_similarity_matrix, 0)
+                        category_cohesion = float(np.mean(cat_similarity_matrix))
+                        
+                        # Identificar termos centrais da categoria
+                        centrality_scores = np.mean(cat_similarity_matrix, axis=1)
+                        central_term_indices = np.argsort(centrality_scores)[-3:][::-1]
+                        central_terms = [cat_terms[i] for i in central_term_indices if i < len(cat_terms)]
+                        
+                        category_profiles.append({
+                            'category': category,
+                            'term_count': len(cat_terms),
+                            'top_terms': cat_terms[:5],
+                            'central_terms': central_terms,
+                            'semantic_cohesion': category_cohesion,
+                            'embedding_dimension': len(cat_embeddings[0]) if len(cat_embeddings) > 0 else 0,
+                            'embedding_analysis': 'enhanced',
+                            'processing_stats': cat_embedding_result.get('processing_stats', {})
+                        })
+                        
+                    else:
+                        # Fallback para análise simples
+                        category_profiles.append({
+                            'category': category,
+                            'term_count': len(cat_terms),
+                            'top_terms': cat_terms[:5],
+                            'embedding_analysis': 'fallback_simple'
+                        })
+                        
+                except Exception as cat_error:
+                    self.logger.warning(f"Erro ao analisar categoria {category}: {cat_error}")
+                    continue
+            
+            # Análise comparativa entre categorias
+            if len(category_profiles) > 1:
+                comparative_analysis = self._analyze_category_relationships(category_profiles)
+            else:
+                comparative_analysis = {}
+            
+            return {
+                'category_profiles': category_profiles,
+                'comparative_analysis': comparative_analysis,
+                'categories_processed': len(category_profiles),
+                'embeddings_used': True,
+                'method': 'enhanced_contextual'
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Erro na análise aprimorada de categorias: {e}")
+            # Fallback para método simples
+            return self._analyze_category_with_embeddings(category_terms)
+    
+    def _analyze_category_relationships(self, category_profiles: List[Dict]) -> Dict[str, Any]:
+        """
+        Analisa relacionamentos semânticos entre categorias
+        """
+        try:
+            # Identificar categorias com alta coesão
+            high_cohesion_categories = [
+                cat for cat in category_profiles 
+                if cat.get('semantic_cohesion', 0) > 0.5
+            ]
+            
+            # Identificar categorias com baixa coesão (mais diversas)
+            diverse_categories = [
+                cat for cat in category_profiles 
+                if cat.get('semantic_cohesion', 0) < 0.3
+            ]
+            
+            # Estatísticas comparativas
+            cohesion_scores = [cat.get('semantic_cohesion', 0) for cat in category_profiles]
+            
+            return {
+                'high_cohesion_categories': [cat['category'] for cat in high_cohesion_categories],
+                'diverse_categories': [cat['category'] for cat in diverse_categories],
+                'cohesion_statistics': {
+                    'mean': float(np.mean(cohesion_scores)) if cohesion_scores else 0,
+                    'std': float(np.std(cohesion_scores)) if cohesion_scores else 0,
+                    'max': float(np.max(cohesion_scores)) if cohesion_scores else 0,
+                    'min': float(np.min(cohesion_scores)) if cohesion_scores else 0
+                },
+                'most_cohesive_category': max(category_profiles, key=lambda x: x.get('semantic_cohesion', 0))['category'] if category_profiles else None,
+                'most_diverse_category': min(category_profiles, key=lambda x: x.get('semantic_cohesion', 0))['category'] if category_profiles else None
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Erro na análise de relacionamentos entre categorias: {e}")
+            return {'error': str(e)}
     
     def _analyze_category_with_embeddings(self, category_terms: Dict[str, List[Dict]]) -> Dict[str, Any]:
         """

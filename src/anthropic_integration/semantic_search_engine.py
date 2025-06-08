@@ -43,7 +43,7 @@ class SemanticSearchEngine(AnthropicBase):
     def __init__(self, config: Dict[str, Any], embedding_analyzer: VoyageEmbeddingAnalyzer = None):
         super().__init__(config)
         
-        # Initialize or use provided embedding analyzer
+        # Initialize or use provided embedding analyzer with Voyage optimization
         self.embedding_analyzer = embedding_analyzer or VoyageEmbeddingAnalyzer(config)
         
         # Initialize hybrid search engine
@@ -56,6 +56,18 @@ class SemanticSearchEngine(AnthropicBase):
         self.cluster_eps = search_config.get('cluster_eps', 0.3)
         self.min_cluster_size = search_config.get('min_cluster_size', 5)
         self.enable_caching = search_config.get('enable_caching', True)
+        
+        # Voyage.ai optimization settings
+        self.voyage_optimized = hasattr(self.embedding_analyzer, 'voyage_available') and self.embedding_analyzer.voyage_available
+        
+        if self.voyage_optimized:
+            logger.info("✅ Semantic Search: Voyage.ai integration active")
+            # Optimize for Voyage.ai usage
+            self.similarity_threshold = max(0.75, self.similarity_threshold)  # Higher precision
+            self.enable_query_optimization = True
+        else:
+            logger.info("⚠️ Semantic Search: Using fallback embeddings")
+            self.enable_query_optimization = False
         
         # Search index storage (legacy - for backward compatibility)
         self.search_index = {}

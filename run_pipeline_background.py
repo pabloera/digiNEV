@@ -73,11 +73,11 @@ class PipelineRunner:
         
         stages = {
             "02_encoding_fixed": "*_02_encoding_fixed.csv",
-            "02b_deduplicated": "*_02b_deduplicated.csv", 
-            "01b_features_extracted": "*_01b_features_extracted.csv",
-            "03_text_cleaned": "*_03_text_cleaned.csv",
-            "04_sentiment_analyzed": "*_04_sentiment_analyzed.csv",
-            "05_topic_modeled": "*_05_topic_modeled.csv"
+            "03_deduplicated": "*_03_deduplicated.csv", 
+            "04_features_extracted": "*_04_features_extracted.csv",
+            "06_text_cleaned": "*_06_text_cleaned.csv",
+            "07_sentiment_analyzed": "*_07_sentiment_analyzed.csv",
+            "08_topic_modeled": "*_08_topic_modeled.csv"
         }
         
         total_files = 0

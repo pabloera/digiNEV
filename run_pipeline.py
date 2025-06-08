@@ -10,14 +10,16 @@ Pipeline completo com todas as 16 etapas implementadas:
 - Validação científica automática
 """
 
-import sys
-import os
-import yaml
-import time
+import json
 import logging
-from pathlib import Path
+import os
+import sys
+import time
 from datetime import datetime
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 # Add src to path
 src_path = Path(__file__).parent / "src"
@@ -33,6 +35,110 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+def load_protection_checklist() -> Dict[str, Any]:
+    """Carrega checklist de proteção de etapas"""
+    checklist_file = Path("checkpoints/checklist.json")
+    
+    if checklist_file.exists():
+        try:
+            with open(checklist_file, 'r', encoding='utf-8') as f:
+                checklist = json.load(f)
+            
+            stats = checklist['statistics']
+            logger.info(f"Protection checklist loaded: {stats['completed_stages']}/{stats['total_stages']} completed, {stats['locked_stages']} locked")
+            return checklist
+        except Exception as e:
+            logger.error(f"Failed to load protection checklist: {e}")
+    
+    logger.info("No protection checklist found")
+    return None
+
+def check_stage_protection(stage_id: str, checklist: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Verifica se uma etapa está protegida contra reescrita"""
+    if not checklist:
+        return {'can_overwrite': True, 'reason': 'No protection checklist'}
+    
+    stage_flags = checklist.get('stage_flags', {}).get(stage_id, {})
+    
+    if stage_flags.get('locked', False):
+        return {
+            'can_overwrite': False,
+            'reason': 'Stage is locked - requires manual unlock',
+            'protection_level': stage_flags.get('protection_level', 'unknown'),
+            'success_count': stage_flags.get('success_count', 0),
+            'requires_override': True,
+            'override_codes': checklist.get('override_codes', {})
+        }
+    
+    if not stage_flags.get('can_overwrite', True):
+        return {
+            'can_overwrite': False,
+            'reason': 'Stage is protected against overwrite',
+            'protection_level': stage_flags.get('protection_level', 'unknown'),
+            'success_count': stage_flags.get('success_count', 0),
+            'requires_override': False
+        }
+    
+    return {'can_overwrite': True, 'reason': 'Stage not protected'}
+
+def should_skip_protected_stage(stage_id: str, checklist: Dict[str, Any] = None) -> bool:
+    """Verifica se deve pular uma etapa protegida/completada"""
+    if not checklist:
+        return False
+    
+    stage_flags = checklist.get('stage_flags', {}).get(stage_id, {})
+    
+    # Skip if completed and protected
+    if (stage_flags.get('completed', False) and 
+        stage_flags.get('verified', False) and
+        not stage_flags.get('can_overwrite', True)):
+        
+        logger.info(f"Skipping protected completed stage: {stage_id} (success_count: {stage_flags.get('success_count', 0)})")
+        return True
+    
+    return False
+
+def load_checkpoints() -> Dict[str, Any]:
+    """Carrega estado atual dos checkpoints"""
+    checkpoints_file = Path("checkpoints/checkpoints.json")
+    
+    if checkpoints_file.exists():
+        try:
+            with open(checkpoints_file, 'r', encoding='utf-8') as f:
+                checkpoints = json.load(f)
+            logger.info(f"Checkpoints loaded: {checkpoints['execution_summary']['completed_stages']}/{checkpoints['execution_summary']['total_stages']} stages completed")
+            return checkpoints
+        except Exception as e:
+            logger.error(f"Failed to load checkpoints: {e}")
+    
+    logger.info("No checkpoints found - starting fresh")
+    return None
+
+def get_resume_point(checkpoints: Dict[str, Any] = None) -> str:
+    """Determina ponto de resumo baseado nos checkpoints"""
+    if not checkpoints:
+        return "01_chunk_processing"
+    
+    resume_from = checkpoints.get('execution_summary', {}).get('resume_from', "01_chunk_processing")
+    completed_stages = checkpoints.get('execution_summary', {}).get('completed_stages', 0)
+    
+    logger.info(f"Resume point: {resume_from} (after {completed_stages} completed stages)")
+    return resume_from
+
+def should_skip_stage(stage_id: str, checkpoints: Dict[str, Any] = None) -> bool:
+    """Verifica se uma etapa pode ser pulada (já completada)"""
+    if not checkpoints:
+        return False
+    
+    stage_info = checkpoints.get('stages', {}).get(stage_id, {})
+    is_completed = stage_info.get('status') == 'completed' and stage_info.get('success', False)
+    
+    if is_completed:
+        logger.info(f"Skipping completed stage: {stage_id}")
+        return True
+    
+    return False
 
 def load_configuration():
     """Carrega configuração completa do projeto"""
@@ -113,7 +219,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
     try:
         # Import do pipeline unificado
         from src.anthropic_integration.unified_pipeline import UnifiedAnthropicPipeline
-        
+
         # Criar instância do pipeline
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
         logger.info("Pipeline unificado inicializado")
@@ -121,24 +227,24 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         # Executar todas as etapas sequencialmente
         all_stages = [
             '01_chunk_processing',
-            '02a_encoding_validation', 
-            '02b_deduplication',
-            '01b_features_validation',
-            '01c_political_analysis',
-            '03_text_cleaning',
-            '04_sentiment_analysis',
-            '05_topic_modeling',
-            '06_tfidf_extraction',
-            '07_clustering',
-            '08_hashtag_normalization',
-            '09_domain_analysis',
-            '10_temporal_analysis',
-            '11_network_analysis',
-            '12_qualitative_analysis',
-            '13_smart_pipeline_review',
-            '14_topic_interpretation',
-            '15_semantic_search',
-            '16_pipeline_validation'
+            '02_encoding_validation', 
+            '03_deduplication',
+            '04_features_validation',
+            '05_political_analysis',
+            '06_text_cleaning',
+            '07_sentiment_analysis',
+            '08_topic_modeling',
+            '09_tfidf_extraction',
+            '10_clustering',
+            '11_hashtag_normalization',
+            '12_domain_analysis',
+            '13_temporal_analysis',
+            '14_network_analysis',
+            '15_qualitative_analysis',
+            '16_smart_pipeline_review',
+            '17_topic_interpretation',
+            '18_semantic_search',
+            '19_pipeline_validation'
         ]
         
         logger.info(f"Executando {len(all_stages)} etapas do pipeline")
@@ -217,23 +323,46 @@ def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
         return False
 
 def main():
-    """Entry point principal para execução completa"""
+    """Entry point principal para execução completa com checkpoints e proteção"""
     
-    print("🎯 PIPELINE BOLSONARISMO v4.6 - EXECUÇÃO COMPLETA")
-    print("=" * 60)
+    print("🎯 PIPELINE BOLSONARISMO v4.6 - EXECUÇÃO COM CHECKPOINTS E PROTEÇÃO")
+    print("=" * 75)
     
     start_time = time.time()
     
     try:
-        # 1. Carregar configuração
+        # 1. Carregar checkpoints e proteção
+        print("🔄 Carregando checkpoints...")
+        checkpoints = load_checkpoints()
+        
+        print("🛡️ Carregando proteção de etapas...")
+        protection_checklist = load_protection_checklist()
+        
+        resume_point = get_resume_point(checkpoints)
+        
+        if checkpoints:
+            completed = checkpoints['execution_summary']['completed_stages']
+            total = checkpoints['execution_summary']['total_stages']
+            progress = checkpoints['execution_summary']['overall_progress']
+            print(f"📊 Progresso atual: {completed}/{total} etapas ({progress*100:.1f}%)")
+            print(f"🚀 Resumindo a partir de: {resume_point}")
+        else:
+            print("🆕 Iniciando pipeline do zero")
+        
+        # Show protection status
+        if protection_checklist:
+            stats = protection_checklist['statistics']
+            print(f"🛡️ Proteção: {stats['locked_stages']} etapas bloqueadas, {stats['protected_stages']} protegidas")
+        
+        # 2. Carregar configuração
         print("📋 Carregando configuração...")
         config = load_configuration()
         
-        # 2. Configurar dashboard
+        # 3. Configurar dashboard
         print("🖥️  Configurando integração com dashboard...")
         dashboard_ready = setup_dashboard_integration(config)
         
-        # 3. Descobrir datasets
+        # 4. Descobrir datasets
         print("📊 Descobrindo datasets...")
         data_paths = [
             config.get('data', {}).get('path', 'data/uploads'),
@@ -252,16 +381,35 @@ def main():
         if len(datasets) > 5:
             print(f"   ... e mais {len(datasets) - 5} datasets")
         
-        # 4. Executar pipeline completo
-        print(f"\n🚀 Iniciando execução de todas as 16 etapas...")
-        results = run_complete_pipeline_execution(datasets, config)
+        # 5. Verificar etapas protegidas antes da execução
+        if protection_checklist:
+            print("\n🛡️ Verificando proteção de etapas...")
+            protected_count = 0
+            locked_count = 0
+            
+            for stage_id in protection_checklist['stage_flags']:
+                if should_skip_protected_stage(stage_id, protection_checklist):
+                    protected_count += 1
+                
+                protection_info = check_stage_protection(stage_id, protection_checklist)
+                if not protection_info['can_overwrite'] and protection_info.get('requires_override', False):
+                    locked_count += 1
+            
+            if protected_count > 0:
+                print(f"   ⚠️  {protected_count} etapas serão puladas (protegidas e completadas)")
+            if locked_count > 0:
+                print(f"   🔒 {locked_count} etapas estão bloqueadas (requer unlock manual)")
         
-        # 5. Integrar com dashboard
+        # 6. Executar pipeline completo com proteção
+        print(f"\n🚀 Iniciando execução das etapas (a partir de {resume_point})...")
+        results = run_complete_pipeline_execution(datasets, config, checkpoints, protection_checklist)
+        
+        # 7. Integrar com dashboard
         if dashboard_ready:
             print("🖥️  Integrando resultados com dashboard...")
             integrate_with_dashboard(results, config)
         
-        # 6. Mostrar resultado final
+        # 8. Mostrar resultado final
         duration = time.time() - start_time
         
         print(f"\n{'✅' if results['overall_success'] else '❌'} EXECUÇÃO {'CONCLUÍDA' if results['overall_success'] else 'FALHOU'}")
@@ -270,13 +418,25 @@ def main():
         print(f"📈 Records processados: {results['total_records_processed']}")
         print(f"🔧 Etapas executadas: {len(results['stages_completed'])}")
         
+        # 9. Mostrar informações finais de proteção
+        final_checkpoints = load_checkpoints()
+        final_protection = load_protection_checklist()
+        
+        if final_checkpoints:
+            final_progress = final_checkpoints['execution_summary']['overall_progress']
+            print(f"📊 Progresso final: {final_progress*100:.1f}%")
+        
+        if final_protection:
+            final_stats = final_protection['statistics']
+            print(f"🛡️ Proteção final: {final_stats['locked_stages']} bloqueadas, {final_stats['success_rate']*100:.1f}% taxa de sucesso")
+        
         if results.get('final_outputs'):
             print(f"\n📁 Arquivos finais gerados:")
             for output in results['final_outputs']:
                 print(f"   - {output}")
         
         print(f"\n🖥️  Dashboard: Execute 'python src/dashboard/start_dashboard.py' para visualizar")
-        print("=" * 60)
+        print("=" * 75)
         
     except Exception as e:
         print(f"❌ ERRO CRÍTICO: {e}")

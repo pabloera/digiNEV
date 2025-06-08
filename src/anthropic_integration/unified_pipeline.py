@@ -1,7 +1,7 @@
 """
 UNIFIED ANTHROPIC PIPELINE SYSTEM v4.6
 =======================================
-Consolida todas as 16 etapas do pipeline com integração Anthropic centralizada
+Consolida todas as 19 etapas do pipeline com integração Anthropic centralizada
 e integração completa com dashboard para análise em tempo real.
 """
 
@@ -34,6 +34,10 @@ from .smart_pipeline_reviewer import SmartPipelineReviewer
 from .pipeline_validator import CompletePipelineValidator
 from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
+# Importar novos componentes Voyage.ai aprimorados
+from .voyage_topic_modeler import VoyageTopicModeler
+from .voyage_clustering_analyzer import VoyageClusteringAnalyzer
+
 # Importar novo sistema de busca semântica e inteligência
 from .semantic_search_engine import SemanticSearchEngine
 from .hybrid_search_engine import HybridSearchEngine
@@ -56,28 +60,28 @@ logger = logging.getLogger(__name__)
 
 class UnifiedAnthropicPipeline(AnthropicBase):
     """
-    Pipeline unificado com integração Anthropic para todas as 16 etapas
+    Pipeline unificado com integração Anthropic para todas as 19 etapas
     
     Etapas do Pipeline v4.6:
     01. chunk_processing - Processamento robusto em chunks
-    02a. encoding_validation - Validação estrutural e encoding
-    02b. deduplication - Deduplicação inteligente
-    01b. feature_validation - Validação e enriquecimento de features básicas
-    01c. political_analysis - Análise política profunda via API
-    03. text_cleaning - Limpeza inteligente de texto
-    04. sentiment_analysis - Análise de sentimento multidimensional
-    05. topic_modeling - Modelagem de tópicos com interpretação
-    06. tfidf_extraction - Extração TF-IDF semântica
-    07. clustering - Clustering com validação automática
-    08. hashtag_normalization - Normalização e categorização de hashtags
-    09. domain_analysis - Análise completa de domínios e credibilidade
-    10. temporal_analysis - Análise temporal inteligente
-    11. network_analysis - Análise de estrutura de rede e comunidades
-    12. qualitative_analysis - Análise qualitativa com taxonomias
-    13. pipeline_review - Revisão inteligente e reprodutibilidade
-    14. topic_interpretation - Interpretação contextualizada de tópicos
-    15. semantic_search - Busca semântica inteligente e indexação
-    16. pipeline_validation - Validação final completa do pipeline
+    02. encoding_validation - Validação estrutural e encoding
+    03. deduplication - Deduplicação inteligente
+    04. feature_validation - Validação e enriquecimento de features básicas
+    05. political_analysis - Análise política profunda via API
+    06. text_cleaning - Limpeza inteligente de texto
+    07. sentiment_analysis - Análise de sentimento multidimensional
+    08. topic_modeling - Modelagem de tópicos com interpretação
+    09. tfidf_extraction - Extração TF-IDF semântica
+    10. clustering - Clustering com validação automática
+    11. hashtag_normalization - Normalização e categorização de hashtags
+    12. domain_analysis - Análise completa de domínios e credibilidade
+    13. temporal_analysis - Análise temporal inteligente
+    14. network_analysis - Análise de estrutura de rede e comunidades
+    15. qualitative_analysis - Análise qualitativa com taxonomias
+    16. pipeline_review - Revisão inteligente e reprodutibilidade
+    17. topic_interpretation - Interpretação contextualizada de tópicos
+    18. semantic_search - Busca semântica inteligente e indexação
+    19. pipeline_validation - Validação final completa do pipeline
     """
     
     def __init__(self, config: Dict[str, Any] = None, project_root: str = None):
@@ -204,6 +208,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("pipeline_reviewer", lambda: SmartPipelineReviewer(self.config)),
             ("pipeline_validator", lambda: CompletePipelineValidator(self.config, str(self.project_root))),
             ("voyage_embeddings", lambda: VoyageEmbeddingAnalyzer(self.config)),
+            # Novos componentes Voyage.ai aprimorados
+            ("voyage_topic_modeler", lambda: VoyageTopicModeler(self.config)),
+            ("voyage_clustering_analyzer", lambda: VoyageClusteringAnalyzer(self.config)),
             # Novo sistema de busca semântica e inteligência
             ("hybrid_search_engine", lambda: HybridSearchEngine(self.config, self.voyage_embeddings)),
             ("semantic_search_engine", lambda: SemanticSearchEngine(self.config, self.voyage_embeddings)),
@@ -380,27 +387,27 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
             
-            # Executar todas as 16 etapas sequencialmente
+            # Executar todas as 19 etapas sequencialmente
             all_pipeline_stages = [
                 "01_chunk_processing",
-                "02a_encoding_validation",
-                "02b_deduplication", 
-                "01b_feature_validation",
-                "01c_political_analysis",
-                "03_clean_text",
-                "04_sentiment_analysis",
-                "05_topic_modeling",
-                "06_tfidf_extraction",
-                "07_clustering",
-                "08_hashtag_normalization",
-                "09_domain_analysis",
-                "10_temporal_analysis",
-                "11_network_analysis",
-                "12_qualitative_analysis",
-                "13_pipeline_review",
-                "14_topic_interpretation",
-                "15_semantic_search",
-                "16_pipeline_validation"
+                "02_encoding_validation",
+                "03_deduplication", 
+                "04_feature_validation",
+                "05_political_analysis",
+                "06_text_cleaning",
+                "07_sentiment_analysis",
+                "08_topic_modeling",
+                "09_tfidf_extraction",
+                "10_clustering",
+                "11_hashtag_normalization",
+                "12_domain_analysis",
+                "13_temporal_analysis",
+                "14_network_analysis",
+                "15_qualitative_analysis",
+                "16_smart_pipeline_review",
+                "17_topic_interpretation",
+                "18_semantic_search",
+                "19_pipeline_validation"
             ]
             
             logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.6")
@@ -1337,31 +1344,67 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_05_topic_modeling(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 05: Modelagem de tópicos"""
+        """Etapa 08: Modelagem de tópicos com Voyage.ai"""
         
+        logger.info("🎯 INICIANDO ETAPA 08: TOPIC MODELING COM VOYAGE.AI")
         results = {"topic_reports": {}}
         
         for dataset_path in dataset_paths:
+            logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
+            
             # Carregar dados com sentimento
-            # Se dataset_path já aponta para arquivo com sentimento, usar diretamente
-            if "04_sentiment_analyzed" in dataset_path:
+            if "07_sentiment_analyzed" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("04_sentiment_analyzed", dataset_path)
+                input_path = self._get_stage_output_path("07_sentiment_analyzed", dataset_path)
             
             df = self._load_processed_data(input_path)
+            logger.info(f"📊 Dataset carregado: {len(df)} registros")
             
-            if self.config.get("lda", {}).get("use_anthropic_interpretation", True) and self.api_available:
-                # Usar modelagem Anthropic
+            # Verificar se Voyage.ai está disponível e habilitado
+            voyage_enabled = (hasattr(self, 'voyage_topic_modeler') and 
+                            hasattr(self, 'voyage_embeddings') and 
+                            getattr(self.voyage_embeddings, 'voyage_available', False))
+            
+            if voyage_enabled:
+                logger.info("🚀 Usando Voyage.ai para topic modeling avançado")
+                # Usar novo modelador de tópicos com Voyage.ai
+                topic_result = self.voyage_topic_modeler.extract_semantic_topics(df)
+                
+                if topic_result.get('success', False):
+                    topic_df = topic_result.get('enhanced_dataframe', df)
+                    topic_report = {
+                        'topics': topic_result.get('topics', []),
+                        'n_topics': topic_result.get('n_topics_extracted', 0),
+                        'method': topic_result.get('method', 'voyage_embeddings'),
+                        'model_used': topic_result.get('model_used'),
+                        'cost_optimized': topic_result.get('cost_optimized', False),
+                        'sample_ratio': topic_result.get('sample_ratio', 1.0),
+                        'embedding_stats': topic_result.get('embedding_stats', {}),
+                        'analysis_timestamp': topic_result.get('analysis_timestamp')
+                    }
+                    results["voyage_used"] = True
+                    logger.info(f"✅ Voyage topic modeling concluído: {topic_result.get('n_topics_extracted', 0)} tópicos")
+                else:
+                    # Fallback para método tradicional
+                    logger.warning("⚠️ Voyage topic modeling falhou, usando fallback")
+                    topic_df, topic_report = self._enhanced_traditional_topic_modeling(df)
+                    results["fallback_used"] = True
+            
+            elif self.config.get("lda", {}).get("use_anthropic_interpretation", True) and self.api_available:
+                logger.info("🤖 Usando modelagem tradicional + interpretação Anthropic")
+                # Usar modelagem Anthropic tradicional
                 topic_df = self.topic_interpreter.extract_and_interpret_topics(df)
                 topic_report = self.topic_interpreter.generate_topic_report(topic_df)
                 results["anthropic_used"] = True
             else:
+                logger.info("📚 Usando modelagem tradicional")
                 # Usar modelagem tradicional
                 topic_df, topic_report = self._traditional_topic_modeling(df)
+                results["traditional_used"] = True
             
             # Salvar dados com tópicos
-            output_path = self._get_stage_output_path("05_topic_modeled", dataset_path)
+            output_path = self._get_stage_output_path("08_topic_modeled", dataset_path)
             self._save_processed_data(topic_df, output_path)
             
             results["topic_reports"][dataset_path] = {
@@ -1369,6 +1412,8 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["topic_reports"])
+            
+            logger.info(f"✅ Topic modeling salvo em: {output_path}")
         
         return results
     
@@ -1456,31 +1501,69 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_07_clustering(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 07: Clustering com validação"""
+        """Etapa 10: Clustering semântico com Voyage.ai"""
         
+        logger.info("🎯 INICIANDO ETAPA 10: CLUSTERING SEMÂNTICO COM VOYAGE.AI")
         results = {"clustering_reports": {}}
         
         for dataset_path in dataset_paths:
+            logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
+            
             # Carregar dados com TF-IDF
-            # Se dataset_path já aponta para arquivo com TF-IDF, usar diretamente
-            if "06_tfidf_extracted" in dataset_path:
+            if "09_tfidf_extracted" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("06_tfidf_extracted", dataset_path)
+                input_path = self._get_stage_output_path("09_tfidf_extracted", dataset_path)
             
             df = self._load_processed_data(input_path)
+            logger.info(f"📊 Dataset carregado: {len(df)} registros")
             
-            if self.pipeline_config["use_anthropic"] and self.api_available:
-                # Usar clustering Anthropic
+            # Verificar se Voyage.ai está disponível e habilitado
+            voyage_enabled = (hasattr(self, 'voyage_clustering_analyzer') and 
+                            hasattr(self, 'voyage_embeddings') and 
+                            getattr(self.voyage_embeddings, 'voyage_available', False))
+            
+            if voyage_enabled:
+                logger.info("🚀 Usando Voyage.ai para clustering semântico avançado")
+                # Usar novo analisador de clustering com Voyage.ai
+                clustering_result = self.voyage_clustering_analyzer.perform_semantic_clustering(df)
+                
+                if clustering_result.get('success', False):
+                    clustered_df = clustering_result.get('enhanced_dataframe', df)
+                    cluster_report = {
+                        'clusters': clustering_result.get('clusters', []),
+                        'n_clusters': clustering_result.get('n_clusters', 0),
+                        'algorithm_used': clustering_result.get('algorithm_used'),
+                        'cluster_metrics': clustering_result.get('cluster_metrics', {}),
+                        'embedding_model': clustering_result.get('embedding_model'),
+                        'cost_optimized': clustering_result.get('cost_optimized', False),
+                        'sample_ratio': clustering_result.get('sample_ratio', 1.0),
+                        'clustering_quality': clustering_result.get('clustering_quality', 0),
+                        'analysis_timestamp': clustering_result.get('analysis_timestamp')
+                    }
+                    results["voyage_used"] = True
+                    logger.info(f"✅ Voyage clustering concluído: {clustering_result.get('n_clusters', 0)} clusters")
+                else:
+                    # Fallback para método tradicional
+                    logger.warning("⚠️ Voyage clustering falhou, usando fallback")
+                    clustered_df = self.cluster_validator.validate_and_enhance_clusters(df)
+                    cluster_report = self.cluster_validator.generate_clustering_report(clustered_df)
+                    results["fallback_used"] = True
+            
+            elif self.pipeline_config["use_anthropic"] and self.api_available:
+                logger.info("🤖 Usando clustering tradicional + validação Anthropic")
+                # Usar clustering Anthropic tradicional
                 clustered_df = self.cluster_validator.validate_and_enhance_clusters(df)
                 cluster_report = self.cluster_validator.generate_clustering_report(clustered_df)
                 results["anthropic_used"] = True
             else:
+                logger.info("📚 Usando clustering tradicional")
                 # Usar clustering tradicional
                 clustered_df, cluster_report = self._traditional_clustering(df)
+                results["traditional_used"] = True
             
             # Salvar dados clusterizados
-            output_path = self._get_stage_output_path("07_clustered", dataset_path)
+            output_path = self._get_stage_output_path("10_clustered", dataset_path)
             self._save_processed_data(clustered_df, output_path)
             
             results["clustering_reports"][dataset_path] = {
@@ -1488,8 +1571,30 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["clustering_reports"])
+            
+            logger.info(f"✅ Clustering salvo em: {output_path}")
         
         return results
+    
+    def _enhanced_traditional_topic_modeling(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+        """Modelagem de tópicos tradicional aprimorada"""
+        try:
+            logger.info("📚 Executando topic modeling tradicional aprimorado")
+            
+            # Use enhanced traditional method with better AI interpretation
+            if self.api_available and hasattr(self, 'topic_interpreter'):
+                topic_df = self.topic_interpreter.extract_and_interpret_topics(df)
+                topic_report = self.topic_interpreter.generate_topic_report(topic_df) if hasattr(self.topic_interpreter, 'generate_topic_report') else {"method": "enhanced_traditional"}
+            else:
+                # Pure traditional fallback
+                topic_df, topic_report = self._traditional_topic_modeling(df)
+                topic_report["enhanced"] = True
+            
+            return topic_df, topic_report
+            
+        except Exception as e:
+            logger.error(f"Erro no topic modeling aprimorado: {e}")
+            return self._traditional_topic_modeling(df)
     
     def _stage_08_hashtag_normalization(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 08: Normalização de hashtags"""

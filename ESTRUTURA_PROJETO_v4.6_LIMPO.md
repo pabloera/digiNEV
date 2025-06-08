@@ -8,7 +8,7 @@
 
 ### ✅ IMPLEMENTAÇÕES CONFIRMADAS (v4.6)
 
-- ✅ **Pipeline Completo**: 16 etapas sequenciais implementadas
+- ✅ **Pipeline Completo**: 19 etapas sequenciais implementadas
 - ✅ **JSON Parsing Robusto**: Sistema ultra-robusto para Claude API
 - ✅ **Dashboard Integrado**: Interface web com visualizações
 - ✅ **Sistema de Validação**: CompletePipelineValidator funcional
@@ -24,38 +24,38 @@
 
 ## 🔄 SEQUÊNCIA DE ESTÁGIOS DO PIPELINE
 
-O pipeline executa **16 etapas sequenciais** de processamento:
+O pipeline executa **19 etapas sequenciais** de processamento:
 
 ### **FASE 1: Preparação e Validação de Dados**
 
 1. **01_chunk_processing** - Processamento em chunks para datasets grandes
-2. **02a_encoding_validation** - Validação e correção de encoding
-3. **02b_deduplication** - Deduplicação inteligente de registros
-4. **01b_features_validation** - Validação e enriquecimento de features
-5. **01c_political_analysis** - Análise política via API Anthropic
+2. **02_encoding_validation** - Validação e correção de encoding
+3. **03_deduplication** - Deduplicação inteligente de registros
+4. **04_features_validation** - Validação e enriquecimento de features
+5. **05_political_analysis** - Análise política via API Anthropic
 
 ### **FASE 2: Processamento de Texto e Análise**
 
-6. **03_text_cleaning** - Limpeza inteligente de texto
-7. **04_sentiment_analysis** - Análise de sentimento avançada
-8. **05_topic_modeling** - Modelagem de tópicos com LDA/Anthropic
-9. **06_tfidf_extraction** - Extração TF-IDF semântica com Voyage.ai
+6. **06_text_cleaning** - Limpeza inteligente de texto
+7. **07_sentiment_analysis** - Análise de sentimento avançada
+8. **08_topic_modeling** - Modelagem de tópicos com LDA/Anthropic
+9. **09_tfidf_extraction** - Extração TF-IDF semântica com Voyage.ai
 
 ### **FASE 3: Análise Estrutural e de Rede**
 
-10. **07_clustering** - Clustering semântico de mensagens
-11. **08_hashtag_normalization** - Normalização e análise de hashtags
-12. **09_domain_analysis** - Análise inteligente de domínios
-13. **10_temporal_analysis** - Análise de evolução temporal
+10. **10_clustering** - Clustering semântico de mensagens
+11. **11_hashtag_normalization** - Normalização e análise de hashtags
+12. **12_domain_analysis** - Análise inteligente de domínios
+13. **13_temporal_analysis** - Análise de evolução temporal
 
 ### **FASE 4: Análise Avançada e Finalização**
 
-14. **11_network_analysis** - Análise de estrutura de rede social
-15. **12_qualitative_analysis** - Classificação qualitativa avançada
-16. **13_smart_pipeline_review** - Revisão inteligente do pipeline
-17. **14_topic_interpretation** - Interpretação semântica de tópicos
-18. **15_semantic_search** - Sistema de busca semântica
-19. **16_pipeline_validation** - Validação holística final
+14. **14_network_analysis** - Análise de estrutura de rede social
+15. **15_qualitative_analysis** - Classificação qualitativa avançada
+16. **16_smart_pipeline_review** - Revisão inteligente do pipeline
+17. **17_topic_interpretation** - Interpretação semântica de tópicos
+18. **18_semantic_search** - Sistema de busca semântica
+19. **19_pipeline_validation** - Validação holística final
 
 ## 🎨 INTEGRAÇÃO PIPELINE ↔ DASHBOARD
 
@@ -77,9 +77,9 @@ Pipeline Processing → data/interim/ → data/dashboard_results/ → Dashboard 
 ### **Arquivos Monitorados**
 
 - `*_01_chunked.csv` - Dados processados em chunks
-- `*_02b_deduplicated.csv` - Dados após deduplicação
-- `*_01c_politically_analyzed.csv` - Com análise política
-- `*_04_sentiment_analyzed.csv` - Com análise de sentimento
+- `*_03_deduplicated.csv` - Dados após deduplicação
+- `*_05_politically_analyzed.csv` - Com análise política
+- `*_07_sentiment_analyzed.csv` - Com análise de sentimento
 - `*_final_processed.csv` - Resultado final completo
 
 ## 📊 FUNCIONALIDADES DO DASHBOARD

@@ -1,0 +1,250 @@
+{
+  "pipeline_version": "4.6",
+  "protection_mode": "enabled",
+  "last_updated": "2025-01-08T00:00:00Z",
+  "description": "Flags de proteção para impedir reescrita de etapas funcionais",
+  "stage_flags": {
+    "01_chunk_processing": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "02_encoding_validation": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "03_deduplication": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "04_features_validation": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "05_political_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "06_text_cleaning": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "07_sentiment_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "08_topic_modeling": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "09_tfidf_extraction": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "10_clustering": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "11_hashtag_normalization": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "12_domain_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "13_temporal_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "14_network_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "15_qualitative_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "16_smart_pipeline_review": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "17_topic_interpretation": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "18_semantic_search": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "19_pipeline_validation": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "critical",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    }
+  },
+  "protection_rules": {
+    "critical_stages": {
+      "min_success_count": 3,
+      "auto_lock_after_success": true,
+      "requires_manual_unlock": true,
+      "backup_before_overwrite": true
+    },
+    "medium_stages": {
+      "min_success_count": 2,
+      "auto_lock_after_success": false,
+      "requires_manual_unlock": false,
+      "backup_before_overwrite": true
+    },
+    "low_stages": {
+      "min_success_count": 1,
+      "auto_lock_after_success": false,
+      "requires_manual_unlock": false,
+      "backup_before_overwrite": false
+    }
+  },
+  "override_codes": {
+    "emergency_override": "FORCE_OVERWRITE_2025",
+    "development_mode": "DEV_MODE_UNSAFE",
+    "admin_unlock": "ADMIN_UNLOCK_ALL"
+  },
+  "statistics": {
+    "total_stages": 19,
+    "completed_stages": 0,
+    "locked_stages": 0,
+    "protected_stages": 0,
+    "success_rate": 0.0,
+    "last_validation": null
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "pipeline_version": "4.6",
+  "last_updated": "2025-01-08T00:00:00Z",
+  "current_dataset": "",
+  "stages": {
+    "01_chunk_processing": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "02_encoding_validation": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "03_deduplication": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "04_features_validation": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "05_political_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "06_text_cleaning": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "07_sentiment_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "08_topic_modeling": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "09_tfidf_extraction": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "10_clustering": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "11_hashtag_normalization": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "12_domain_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "13_temporal_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "14_network_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "15_qualitative_analysis": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "16_smart_pipeline_review": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "17_topic_interpretation": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "18_semantic_search": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    },
+    "19_pipeline_validation": {
+      "status": "pending",
+      "completed_at": null,
+      "execution_time": 0,
+      "records_processed": 0,
+      "output_file": "",
+      "success": false,
+      "error": null
+    }
+  },
+  "execution_summary": {
+    "total_stages": 19,
+    "completed_stages": 0,
+    "failed_stages": 0,
+    "current_stage": "01_chunk_processing",
+    "overall_progress": 0.0,
+    "total_execution_time": 0,
+    "last_successful_stage": null,
+    "resume_from": "01_chunk_processing"
+  }
+}
