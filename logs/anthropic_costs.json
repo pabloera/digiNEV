@@ -1,0 +1,119 @@
+{
+  "total_cost": 0.175572,
+  "sessions": [
+    {
+      "session_id": "20250608_053235",
+      "start_time": "2025-06-08T05:32:35.978297",
+      "total_cost": 0.175572,
+      "operations": [
+        {
+          "timestamp": "2025-06-08T05:32:40.735890",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 320,
+          "output_tokens": 202,
+          "input_cost": 0.00096,
+          "output_cost": 0.00303,
+          "total_cost": 0.0039900000000000005
+        },
+        {
+          "timestamp": "2025-06-08T05:32:47.755610",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "quality_analysis",
+          "input_tokens": 1388,
+          "output_tokens": 387,
+          "input_cost": 0.004164,
+          "output_cost": 0.005805,
+          "total_cost": 0.009969
+        },
+        {
+          "timestamp": "2025-06-08T05:33:08.511666",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "01c_political_analysis",
+          "operation": "content_analysis",
+          "input_tokens": 839,
+          "output_tokens": 1994,
+          "input_cost": 0.002517,
+          "output_cost": 0.02991,
+          "total_cost": 0.032427
+        },
+        {
+          "timestamp": "2025-06-08T05:33:27.683825",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "01c_political_analysis",
+          "operation": "content_analysis",
+          "input_tokens": 854,
+          "output_tokens": 1937,
+          "input_cost": 0.002562,
+          "output_cost": 0.029055,
+          "total_cost": 0.031617
+        },
+        {
+          "timestamp": "2025-06-08T05:33:48.897346",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "01c_political_analysis",
+          "operation": "content_analysis",
+          "input_tokens": 802,
+          "output_tokens": 2000,
+          "input_cost": 0.002406,
+          "output_cost": 0.030000000000000002,
+          "total_cost": 0.032406000000000004
+        },
+        {
+          "timestamp": "2025-06-08T05:34:11.198665",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "01c_political_analysis",
+          "operation": "content_analysis",
+          "input_tokens": 843,
+          "output_tokens": 2000,
+          "input_cost": 0.002529,
+          "output_cost": 0.030000000000000002,
+          "total_cost": 0.032529
+        },
+        {
+          "timestamp": "2025-06-08T05:34:33.885646",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "01c_political_analysis",
+          "operation": "content_analysis",
+          "input_tokens": 878,
+          "output_tokens": 2000,
+          "input_cost": 0.002634,
+          "output_cost": 0.030000000000000002,
+          "total_cost": 0.032634
+        }
+      ]
+    }
+  ],
+  "daily_usage": {
+    "2025-06-08": {
+      "cost": 0.175572,
+      "input_tokens": 5924,
+      "output_tokens": 10520,
+      "requests": 7
+    }
+  },
+  "by_model": {
+    "claude-3-5-haiku-latest": {
+      "cost": 0.175572,
+      "input_tokens": 5924,
+      "output_tokens": 10520,
+      "requests": 7
+    }
+  },
+  "by_stage": {
+    "02b_deduplication_validation": {
+      "cost": 0.013959000000000001,
+      "input_tokens": 1708,
+      "output_tokens": 589,
+      "requests": 2
+    },
+    "01c_political_analysis": {
+      "cost": 0.161613,
+      "input_tokens": 4216,
+      "output_tokens": 9931,
+      "requests": 5
+    }
+  }
+}

@@ -1,20 +1,25 @@
-# ESTRUTURA DO PROJETO BOLSONARISMO v4.8 - RENUMERAÇÃO SEQUENCIAL
+# ESTRUTURA DO PROJETO BOLSONARISMO v4.9 - ENHANCED IMPLEMENTATION
 
 **Data:** 08/06/2025 05:35  
-**Status:** Sistema renumerado 01-20, Voyage.ai + spaCy integrados, pronto para execução  
-**Tamanho total:** 854MB
+**Status:** Sistema aprimorado com 22 etapas, 6 melhorias críticas implementadas, pronto para execução  
+**Tamanho total:** 890MB+ (enhanced modules)
 
 ## 📋 RESUMO DO ESTADO ATUAL
 
-### ✅ IMPLEMENTAÇÕES CONFIRMADAS (v4.8)
+### ✅ IMPLEMENTAÇÕES CONFIRMADAS (v4.9 - Enhanced)
 
-- ✅ **Pipeline Completo**: 20 etapas sequenciais implementadas (01-20)
+- ✅ **Pipeline Enhanced**: 22 etapas implementadas (01-20 + 04b/06b)
+- ✅ **Enhanced Encoding Detection**: Detecção robusta com chardet + fallbacks
+- ✅ **Global Deduplication**: Estratégias múltiplas (ID, conteúdo, temporal)
+- ✅ **Statistical Analysis Dual**: Análise antes/depois da limpeza 
+- ✅ **Enhanced Text Cleaning**: Limpeza graduada com validação
+- ✅ **API Performance Optimization**: Sampling inteligente 96% economia
 - ✅ **JSON Parsing Robusto**: Sistema ultra-robusto para Claude API
 - ✅ **Dashboard Integrado**: Interface web com visualizações
 - ✅ **Sistema de Validação**: CompletePipelineValidator funcional
 - ✅ **Cost Monitoring**: Tracking automático de custos
 - ✅ **Error Recovery**: Sistema de retry e fallbacks
-- ✅ **API Integration**: 32 componentes Anthropic integrados
+- ✅ **API Integration**: 35+ componentes Anthropic integrados
 
 ### 🔧 CORREÇÕES APLICADAS
 
@@ -24,7 +29,7 @@
 
 ## 🔄 SEQUÊNCIA DE ESTÁGIOS DO PIPELINE
 
-O pipeline executa **20 etapas sequenciais** de processamento (renumeração v4.8):
+O pipeline executa **22 etapas sequenciais** de processamento (enhanced v4.9):
 
 ### **FASE 1: Preparação e Validação de Dados**
 

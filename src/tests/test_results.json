@@ -1,5 +1,5 @@
 {
-  "start_time": "2025-06-08T04:29:37.484121",
+  "start_time": "2025-06-08T06:45:16.674782",
   "stages_tested": [
     "01_chunk_processing",
     "02_encoding_validation",
@@ -43,10 +43,10 @@
     "19_pipeline_validation"
   ],
   "stages_failed": [],
-  "overall_success": true,
+  "overall_success": false,
   "test_data_used": "/Users/pabloalmada/development/project/dataanalysis-bolsonarismo/data/uploads/test_dataset_comprehensive.csv",
   "checkpoints_verified": true,
-  "protection_system_tested": true,
-  "end_time": "2025-06-08T04:29:37.948943",
-  "total_execution_time": 0.46478700637817383
+  "protection_system_tested": false,
+  "end_time": "2025-06-08T06:45:16.706073",
+  "total_execution_time": 0.03124690055847168
 }

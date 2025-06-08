@@ -631,3 +631,584 @@ Responda APENAS com o texto corrigido:
         analysis["critical_terms_lost"] = critical_lost_count
         
         return analysis
+    
+    def enhance_text_cleaning_with_validation(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+        """
+        Limpeza de texto aprimorada com validação robusta
+        
+        Args:
+            df: DataFrame para limpar
+            
+        Returns:
+            Tuple com DataFrame limpo e relatório de limpeza
+        """
+        logger.info(f"Iniciando limpeza de texto aprimorada para {len(df)} registros")
+        
+        cleaning_report = {
+            "timestamp": datetime.now().isoformat(),
+            "original_count": len(df),
+            "cleaning_strategy": "enhanced_with_validation",
+            "pre_cleaning_analysis": {},
+            "cleaning_results": {},
+            "post_cleaning_analysis": {},
+            "validation_results": {},
+            "quality_score": 0.0,
+            "recommendations": []
+        }
+        
+        # Fazer backup
+        backup_file = f"data/interim/enhanced_cleaning_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        df.to_csv(backup_file, index=False, sep=';', encoding='utf-8')
+        logger.info(f"Backup criado: {backup_file}")
+        
+        result_df = df.copy()
+        
+        # Detectar coluna de texto
+        text_column = self._detect_text_column(result_df)
+        cleaning_report["text_column_used"] = text_column
+        
+        # Análise pré-limpeza
+        pre_analysis = self._pre_cleaning_analysis(result_df, text_column)
+        cleaning_report["pre_cleaning_analysis"] = pre_analysis
+        
+        # Aplicar estratégias de limpeza graduais
+        result_df = self._apply_graduated_cleaning(result_df, text_column)
+        
+        # Análise pós-limpeza
+        post_analysis = self._post_cleaning_analysis(result_df, text_column)
+        cleaning_report["post_cleaning_analysis"] = post_analysis
+        
+        # Validação robusta
+        validation_results = self._robust_cleaning_validation(df, result_df, text_column)
+        cleaning_report["validation_results"] = validation_results
+        
+        # Correção de problemas detectados
+        if validation_results.get("critical_issues"):
+            result_df = self._fix_critical_cleaning_issues(df, result_df, text_column, validation_results)
+            cleaning_report["corrections_applied"] = True
+        
+        # Calcular score de qualidade final
+        cleaning_report["quality_score"] = self._calculate_cleaning_quality_score(cleaning_report)
+        
+        # Gerar recomendações
+        cleaning_report["recommendations"] = self._generate_cleaning_recommendations(cleaning_report)
+        
+        logger.info(f"Limpeza aprimorada concluída. Score de qualidade: {cleaning_report['quality_score']:.2f}")
+        
+        return result_df, cleaning_report
+    
+    def _detect_text_column(self, df: pd.DataFrame) -> str:
+        """Detecta automaticamente a melhor coluna de texto"""
+        
+        # Prioridade: body_cleaned > body > texto > content
+        text_candidates = ['body_cleaned', 'body', 'texto', 'content', 'text', 'message']
+        
+        for candidate in text_candidates:
+            if candidate in df.columns:
+                # Verificar se tem conteúdo útil
+                non_empty = df[candidate].dropna().astype(str).str.len().gt(10).sum()
+                if non_empty > len(df) * 0.1:  # Pelo menos 10% com conteúdo
+                    logger.info(f"Coluna de texto detectada: {candidate}")
+                    return candidate
+        
+        # Fallback para primeira coluna string
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                logger.warning(f"Usando fallback para coluna de texto: {col}")
+                return col
+        
+        logger.error("Nenhuma coluna de texto encontrada")
+        return 'body'  # Fallback final
+    
+    def _pre_cleaning_analysis(self, df: pd.DataFrame, text_column: str) -> Dict[str, Any]:
+        """Análise detalhada antes da limpeza"""
+        
+        if text_column not in df.columns:
+            return {"error": f"Coluna '{text_column}' não encontrada"}
+        
+        text_series = df[text_column].fillna("").astype(str)
+        
+        analysis = {
+            "total_texts": len(text_series),
+            "empty_texts": (text_series.str.strip() == "").sum(),
+            "very_short_texts": (text_series.str.len() < 10).sum(),
+            "very_long_texts": (text_series.str.len() > 1000).sum(),
+            "avg_length": round(text_series.str.len().mean(), 2),
+            "encoding_issues": self._detect_encoding_issues(text_series),
+            "formatting_issues": self._detect_formatting_issues(text_series),
+            "content_diversity": text_series.nunique(),
+            "special_characters": self._analyze_special_characters(text_series)
+        }
+        
+        return analysis
+    
+    def _detect_encoding_issues(self, text_series: pd.Series) -> Dict[str, int]:
+        """Detecta problemas de encoding"""
+        
+        issues = {
+            "replacement_chars": text_series.str.contains('�').sum(),
+            "control_chars": text_series.str.contains(r'[\x00-\x1f]', regex=True).sum(),
+            "suspicious_sequences": text_series.str.contains(r'Ã[²³¹°]|â€[œ™"]', regex=True).sum(),
+            "mixed_encodings": text_series.str.contains(r'[À-ÿ]{3,}', regex=True).sum()
+        }
+        
+        return issues
+    
+    def _detect_formatting_issues(self, text_series: pd.Series) -> Dict[str, int]:
+        """Detecta problemas de formatação"""
+        
+        issues = {
+            "multiple_spaces": text_series.str.contains(r'  +').sum(),
+            "multiple_newlines": text_series.str.contains(r'\n{2,}').sum(),
+            "leading_trailing_spaces": (text_series != text_series.str.strip()).sum(),
+            "html_tags": text_series.str.contains(r'<[^>]+>').sum(),
+            "url_fragments": text_series.str.contains(r'https?://').sum()
+        }
+        
+        return issues
+    
+    def _analyze_special_characters(self, text_series: pd.Series) -> Dict[str, int]:
+        """Analisa caracteres especiais"""
+        
+        analysis = {
+            "hashtags": text_series.str.count(r'#\w+').sum(),
+            "mentions": text_series.str.count(r'@\w+').sum(),
+            "emojis": text_series.str.count(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF]').sum(),
+            "punctuation_clusters": text_series.str.count(r'[.!?]{2,}').sum()
+        }
+        
+        return analysis
+    
+    def _apply_graduated_cleaning(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Aplica limpeza em etapas graduais com validação"""
+        
+        result_df = df.copy()
+        cleaned_column = f"{text_column}_cleaned"
+        
+        # Etapa 1: Normalização Unicode (NFKC)
+        logger.info("Aplicando normalização Unicode...")
+        result_df[cleaned_column] = result_df[text_column].fillna("").astype(str)
+        result_df[cleaned_column] = result_df[cleaned_column].apply(
+            lambda x: unicodedata.normalize('NFKC', x) if x else x
+        )
+        
+        # Etapa 2: Limpeza básica de caracteres de controle
+        logger.info("Removendo caracteres de controle...")
+        result_df[cleaned_column] = result_df[cleaned_column].str.replace(
+            r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', regex=True
+        )
+        
+        # Etapa 3: Normalização de espaços
+        logger.info("Normalizando espaços em branco...")
+        result_df[cleaned_column] = result_df[cleaned_column].str.replace(
+            r'\s+', ' ', regex=True
+        ).str.strip()
+        
+        # Etapa 4: Remoção de artefatos do Telegram
+        logger.info("Removendo artefatos do Telegram...")
+        result_df[cleaned_column] = self._remove_telegram_artifacts(result_df[cleaned_column])
+        
+        # Etapa 5: Limpeza conservadora com fallback
+        logger.info("Aplicando limpeza conservadora...")
+        result_df[cleaned_column] = self._conservative_cleaning_with_fallback(
+            result_df[text_column], result_df[cleaned_column]
+        )
+        
+        return result_df
+    
+    def _remove_telegram_artifacts(self, text_series: pd.Series) -> pd.Series:
+        """Remove artefatos específicos do Telegram"""
+        
+        # Padrões de artefatos do Telegram
+        telegram_patterns = [
+            r'\[.*?\]',  # [foto], [vídeo], etc.
+            r'Mensagem encaminhada.*?\n',
+            r'Forwarded from.*?\n',
+            r'\n\n+',  # Múltiplas quebras de linha
+            r'^\s*-\s*',  # Hífens iniciais
+            r'\s*Sent via.*$',  # Assinaturas de apps
+        ]
+        
+        cleaned_series = text_series.copy()
+        
+        for pattern in telegram_patterns:
+            cleaned_series = cleaned_series.str.replace(pattern, ' ', regex=True)
+        
+        # Normalizar espaços novamente
+        cleaned_series = cleaned_series.str.replace(r'\s+', ' ', regex=True).str.strip()
+        
+        return cleaned_series
+    
+    def _conservative_cleaning_with_fallback(
+        self, 
+        original_series: pd.Series, 
+        partially_cleaned_series: pd.Series
+    ) -> pd.Series:
+        """Aplica limpeza conservadora com fallback para original"""
+        
+        result_series = partially_cleaned_series.copy()
+        
+        for i in range(len(result_series)):
+            original = str(original_series.iloc[i])
+            cleaned = str(result_series.iloc[i])
+            
+            # Validação por item
+            if len(original.strip()) > 20 and len(cleaned.strip()) == 0:
+                # Fallback: manter original se limpeza resultou em vazio
+                result_series.iloc[i] = original
+            elif len(original) > 50 and len(cleaned) < len(original) * 0.3:
+                # Fallback: re-aplicar limpeza mais conservadora
+                conservative_clean = self._single_text_conservative_clean(original)
+                result_series.iloc[i] = conservative_clean if conservative_clean else original
+        
+        return result_series
+    
+    def _single_text_conservative_clean(self, text: str) -> str:
+        """Limpeza conservadora para um único texto"""
+        
+        if not text or len(text.strip()) == 0:
+            return text
+        
+        # Aplicar apenas limpezas seguras
+        cleaned = text
+        
+        # Normalizar Unicode
+        cleaned = unicodedata.normalize('NFKC', cleaned)
+        
+        # Remover apenas caracteres de controle óbvios
+        cleaned = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', cleaned)
+        
+        # Normalizar espaços (conservador)
+        cleaned = re.sub(r'[ \t]+', ' ', cleaned)
+        cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+        cleaned = cleaned.strip()
+        
+        return cleaned
+    
+    def _post_cleaning_analysis(self, df: pd.DataFrame, text_column: str) -> Dict[str, Any]:
+        """Análise após a limpeza"""
+        
+        cleaned_column = f"{text_column}_cleaned"
+        
+        if cleaned_column not in df.columns:
+            return {"error": f"Coluna '{cleaned_column}' não encontrada"}
+        
+        text_series = df[cleaned_column].fillna("").astype(str)
+        
+        analysis = {
+            "total_texts": len(text_series),
+            "empty_texts": (text_series.str.strip() == "").sum(),
+            "avg_length": round(text_series.str.len().mean(), 2),
+            "content_diversity": text_series.nunique(),
+            "preserved_elements": self._count_preserved_elements(text_series),
+            "cleaning_artifacts": self._detect_cleaning_artifacts(text_series)
+        }
+        
+        return analysis
+    
+    def _count_preserved_elements(self, text_series: pd.Series) -> Dict[str, int]:
+        """Conta elementos preservados após limpeza"""
+        
+        preserved = {
+            "hashtags": text_series.str.count(r'#\w+').sum(),
+            "mentions": text_series.str.count(r'@\w+').sum(),
+            "urls": text_series.str.count(r'https?://\S+').sum(),
+            "emojis": text_series.str.count(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF]').sum()
+        }
+        
+        return preserved
+    
+    def _detect_cleaning_artifacts(self, text_series: pd.Series) -> Dict[str, int]:
+        """Detecta artefatos deixados pela limpeza"""
+        
+        artifacts = {
+            "double_spaces": text_series.str.contains(r'  +').sum(),
+            "orphaned_punctuation": text_series.str.count(r'\s[.!?]\s').sum(),
+            "incomplete_sentences": text_series.str.count(r'\w\s*$').sum(),
+            "empty_lines": text_series.str.count(r'\n\s*\n').sum()
+        }
+        
+        return artifacts
+    
+    def _robust_cleaning_validation(
+        self, 
+        original_df: pd.DataFrame, 
+        cleaned_df: pd.DataFrame, 
+        text_column: str
+    ) -> Dict[str, Any]:
+        """Validação robusta do processo de limpeza"""
+        
+        cleaned_column = f"{text_column}_cleaned"
+        
+        validation = {
+            "validation_passed": True,
+            "critical_issues": [],
+            "warnings": [],
+            "statistics": {},
+            "quality_metrics": {}
+        }
+        
+        if text_column in original_df.columns and cleaned_column in cleaned_df.columns:
+            original_texts = original_df[text_column].fillna("").astype(str)
+            cleaned_texts = cleaned_df[cleaned_column].fillna("").astype(str)
+            
+            # Estatísticas de transformação
+            validation["statistics"] = {
+                "texts_processed": len(cleaned_texts),
+                "texts_unchanged": (original_texts == cleaned_texts).sum(),
+                "texts_empty_after": (cleaned_texts.str.strip() == "").sum(),
+                "avg_length_change": round(
+                    cleaned_texts.str.len().mean() - original_texts.str.len().mean(), 2
+                ),
+                "length_reduction_ratio": round(
+                    1 - (cleaned_texts.str.len().mean() / original_texts.str.len().mean()), 4
+                ) if original_texts.str.len().mean() > 0 else 0
+            }
+            
+            # Verificações críticas
+            empty_rate = validation["statistics"]["texts_empty_after"] / len(cleaned_texts)
+            if empty_rate > 0.1:  # Mais de 10% vazios
+                validation["critical_issues"].append(f"Taxa alta de textos vazios: {empty_rate:.1%}")
+                validation["validation_passed"] = False
+            
+            length_reduction = validation["statistics"]["length_reduction_ratio"]
+            if length_reduction > 0.5:  # Mais de 50% de redução
+                validation["critical_issues"].append(f"Redução excessiva de conteúdo: {length_reduction:.1%}")
+                validation["validation_passed"] = False
+            
+            # Análise de preservação
+            preservation_analysis = self._detailed_preservation_analysis(original_texts, cleaned_texts)
+            validation["preservation_analysis"] = preservation_analysis
+            
+            if preservation_analysis["critical_terms_lost"] > 50:
+                validation["critical_issues"].append("Muitos termos críticos perdidos")
+                validation["validation_passed"] = False
+            
+            if preservation_analysis["hashtag_preservation_rate"] < 70:
+                validation["warnings"].append("Taxa baixa de preservação de hashtags")
+            
+            # Métricas de qualidade
+            validation["quality_metrics"] = {
+                "content_preservation": 100 - (length_reduction * 100),
+                "structure_preservation": preservation_analysis["structure_preservation_rate"],
+                "element_preservation": preservation_analysis["element_preservation_rate"],
+                "overall_quality": self._calculate_validation_quality_score(validation)
+            }
+        
+        return validation
+    
+    def _detailed_preservation_analysis(self, original_texts: pd.Series, cleaned_texts: pd.Series) -> Dict[str, Any]:
+        """Análise detalhada de preservação de elementos"""
+        
+        analysis = {
+            "hashtag_preservation_rate": 0,
+            "mention_preservation_rate": 0,
+            "url_preservation_rate": 0,
+            "emoji_preservation_rate": 0,
+            "critical_terms_lost": 0,
+            "structure_preservation_rate": 0,
+            "element_preservation_rate": 0
+        }
+        
+        total_samples = min(500, len(original_texts))  # Amostra para performance
+        preserved_elements = 0
+        total_elements = 0
+        structure_preserved = 0
+        
+        for i in range(total_samples):
+            original = original_texts.iloc[i]
+            cleaned = cleaned_texts.iloc[i]
+            
+            # Hashtags
+            orig_hashtags = set(re.findall(r'#\w+', original.lower()))
+            clean_hashtags = set(re.findall(r'#\w+', cleaned.lower()))
+            if orig_hashtags:
+                preserved = len(orig_hashtags.intersection(clean_hashtags))
+                analysis["hashtag_preservation_rate"] += preserved / len(orig_hashtags)
+                preserved_elements += preserved
+                total_elements += len(orig_hashtags)
+            
+            # Mentions  
+            orig_mentions = set(re.findall(r'@\w+', original.lower()))
+            clean_mentions = set(re.findall(r'@\w+', cleaned.lower()))
+            if orig_mentions:
+                preserved = len(orig_mentions.intersection(clean_mentions))
+                analysis["mention_preservation_rate"] += preserved / len(orig_mentions)
+                preserved_elements += preserved
+                total_elements += len(orig_mentions)
+            
+            # URLs
+            orig_urls = set(re.findall(r'https?://\S+', original))
+            clean_urls = set(re.findall(r'https?://\S+', cleaned))
+            if orig_urls:
+                preserved = len(orig_urls.intersection(clean_urls))
+                analysis["url_preservation_rate"] += preserved / len(orig_urls)
+                preserved_elements += preserved
+                total_elements += len(orig_urls)
+            
+            # Termos críticos
+            critical_lost = self._check_critical_terms_lost(original, cleaned)
+            analysis["critical_terms_lost"] += len(critical_lost)
+            
+            # Estrutura (frases básicas)
+            orig_sentences = len(re.findall(r'[.!?]+', original))
+            clean_sentences = len(re.findall(r'[.!?]+', cleaned))
+            if orig_sentences > 0:
+                structure_preserved += min(clean_sentences / orig_sentences, 1.0)
+        
+        # Calcular médias
+        if total_samples > 0:
+            analysis["hashtag_preservation_rate"] = round((analysis["hashtag_preservation_rate"] / total_samples) * 100, 2)
+            analysis["mention_preservation_rate"] = round((analysis["mention_preservation_rate"] / total_samples) * 100, 2)
+            analysis["url_preservation_rate"] = round((analysis["url_preservation_rate"] / total_samples) * 100, 2)
+            analysis["structure_preservation_rate"] = round((structure_preserved / total_samples) * 100, 2)
+        
+        if total_elements > 0:
+            analysis["element_preservation_rate"] = round((preserved_elements / total_elements) * 100, 2)
+        
+        return analysis
+    
+    def _fix_critical_cleaning_issues(
+        self, 
+        original_df: pd.DataFrame, 
+        cleaned_df: pd.DataFrame, 
+        text_column: str, 
+        validation_results: Dict[str, Any]
+    ) -> pd.DataFrame:
+        """Corrige problemas críticos detectados na validação"""
+        
+        logger.info("Aplicando correções para problemas críticos de limpeza")
+        
+        cleaned_column = f"{text_column}_cleaned"
+        result_df = cleaned_df.copy()
+        
+        # Identificar textos problemáticos
+        problematic_indices = []
+        
+        for i in range(len(result_df)):
+            original = str(original_df.iloc[i][text_column])
+            cleaned = str(result_df.iloc[i][cleaned_column])
+            
+            # Critérios para problemas críticos
+            if len(original.strip()) > 20 and len(cleaned.strip()) == 0:
+                problematic_indices.append(i)
+            elif len(original) > 100 and len(cleaned) < len(original) * 0.2:
+                problematic_indices.append(i)
+            elif self._check_critical_terms_lost(original, cleaned):
+                problematic_indices.append(i)
+        
+        # Aplicar correções
+        for idx in problematic_indices[:100]:  # Limitar para performance
+            original = str(original_df.iloc[idx][text_column])
+            
+            # Estratégia 1: Limpeza ultra-conservadora
+            ultra_conservative = self._ultra_conservative_clean(original)
+            
+            if ultra_conservative and len(ultra_conservative.strip()) > len(original) * 0.5:
+                result_df.iloc[idx, result_df.columns.get_loc(cleaned_column)] = ultra_conservative
+            else:
+                # Estratégia 2: Manter original se tudo falhar
+                result_df.iloc[idx, result_df.columns.get_loc(cleaned_column)] = original
+        
+        logger.info(f"Correções aplicadas a {len(problematic_indices)} textos problemáticos")
+        
+        return result_df
+    
+    def _ultra_conservative_clean(self, text: str) -> str:
+        """Limpeza ultra-conservadora que apenas remove ruído óbvio"""
+        
+        if not text or len(text.strip()) == 0:
+            return text
+        
+        cleaned = text
+        
+        # Apenas remoções muito seguras
+        cleaned = unicodedata.normalize('NFKC', cleaned)  # Normalização Unicode
+        cleaned = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', cleaned)  # Caracteres de controle
+        cleaned = re.sub(r'  +', ' ', cleaned)  # Espaços duplos
+        cleaned = cleaned.strip()  # Espaços nas bordas
+        
+        return cleaned
+    
+    def _calculate_validation_quality_score(self, validation: Dict[str, Any]) -> float:
+        """Calcula score de qualidade da validação"""
+        
+        score = 1.0
+        
+        # Penalizar problemas críticos
+        critical_issues = len(validation.get("critical_issues", []))
+        score -= critical_issues * 0.3
+        
+        # Penalizar avisos
+        warnings = len(validation.get("warnings", []))
+        score -= warnings * 0.1
+        
+        # Considerar estatísticas
+        stats = validation.get("statistics", {})
+        empty_rate = stats.get("texts_empty_after", 0) / max(stats.get("texts_processed", 1), 1)
+        score -= empty_rate * 0.5
+        
+        return max(0.0, min(1.0, score))
+    
+    def _calculate_cleaning_quality_score(self, cleaning_report: Dict[str, Any]) -> float:
+        """Calcula score geral de qualidade da limpeza"""
+        
+        validation_results = cleaning_report.get("validation_results", {})
+        quality_metrics = validation_results.get("quality_metrics", {})
+        
+        # Fatores de qualidade
+        content_preservation = quality_metrics.get("content_preservation", 0) / 100
+        structure_preservation = quality_metrics.get("structure_preservation", 0) / 100
+        element_preservation = quality_metrics.get("element_preservation", 0) / 100
+        
+        # Penalizar problemas críticos
+        critical_penalty = len(validation_results.get("critical_issues", [])) * 0.2
+        
+        # Calcular score ponderado
+        score = (
+            content_preservation * 0.4 +
+            structure_preservation * 0.3 +
+            element_preservation * 0.3
+        ) - critical_penalty
+        
+        return max(0.0, min(1.0, score))
+    
+    def _generate_cleaning_recommendations(self, cleaning_report: Dict[str, Any]) -> List[str]:
+        """Gera recomendações baseadas no relatório de limpeza"""
+        
+        recommendations = []
+        quality_score = cleaning_report.get("quality_score", 0)
+        validation_results = cleaning_report.get("validation_results", {})
+        
+        # Baseado no score de qualidade
+        if quality_score < 0.5:
+            recommendations.append("Qualidade da limpeza insatisfatória - revisar parâmetros e estratégia")
+        elif quality_score < 0.7:
+            recommendations.append("Qualidade da limpeza razoável - considerar ajustes menores")
+        else:
+            recommendations.append("Qualidade da limpeza satisfatória")
+        
+        # Baseado em problemas críticos
+        critical_issues = validation_results.get("critical_issues", [])
+        if critical_issues:
+            recommendations.extend([f"Corrigir problema crítico: {issue}" for issue in critical_issues])
+        
+        # Baseado em avisos
+        warnings = validation_results.get("warnings", [])
+        if warnings:
+            recommendations.extend([f"Atenção: {warning}" for warning in warnings])
+        
+        # Baseado em estatísticas
+        stats = validation_results.get("statistics", {})
+        empty_rate = stats.get("texts_empty_after", 0) / max(stats.get("texts_processed", 1), 1)
+        if empty_rate > 0.05:
+            recommendations.append(f"Taxa de textos vazios alta ({empty_rate:.1%}) - ajustar critérios")
+        
+        length_reduction = stats.get("length_reduction_ratio", 0)
+        if length_reduction > 0.4:
+            recommendations.append(f"Redução de conteúdo excessiva ({length_reduction:.1%}) - usar limpeza mais conservadora")
+        
+        if not recommendations:
+            recommendations.append("Processo de limpeza executado com êxito - nenhuma ação adicional necessária")
+        
+        return recommendations

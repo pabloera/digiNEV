@@ -1,0 +1,152 @@
+{
+  "stage": "02_encoding_validation",
+  "stage_result": {
+    "stage": "02_encoding_validation",
+    "timestamp": "2025-06-08T05:32:36.247304",
+    "success": true,
+    "datasets_processed": 1,
+    "results": {},
+    "anthropic_used": false,
+    "execution_time": 0.016900300979614258,
+    "memory_usage": "psutil not available",
+    "encoding_reports": {
+      "data/uploads/test_dataset_comprehensive.csv": {
+        "timestamp": "2025-06-08T05:32:36.263728",
+        "total_records": 100,
+        "text_columns_analyzed": [
+          "body",
+          "channel"
+        ],
+        "quick_analysis": {
+          "body": {
+            "total_values": 100,
+            "non_null_values": "100",
+            "problematic_chars_count": 0,
+            "encoding_artifacts_count": 0,
+            "problematic_patterns": []
+          },
+          "channel": {
+            "total_values": 100,
+            "non_null_values": "100",
+            "problematic_chars_count": 0,
+            "encoding_artifacts_count": 0,
+            "problematic_patterns": []
+          }
+        },
+        "detailed_analysis": {},
+        "overall_quality_score": 1.0,
+        "recommendations": [
+          "Qualidade de encoding satisfatória - nenhuma ação necessária"
+        ]
+      }
+    },
+    "corrections_applied": {
+      "data/uploads/test_dataset_comprehensive.csv": {
+        "corrections": 0,
+        "output_path": "data/uploads/test_dataset_comprehensive_02a_encoding_validated.csv",
+        "success": true,
+        "message": "Nenhuma correção necessária"
+      }
+    }
+  },
+  "pipeline_state": {
+    "start_time": "2025-06-08 05:32:36.238399",
+    "current_stage": "02_encoding_validation",
+    "completed_stages": [
+      "01_chunk_processing",
+      "02_encoding_validation"
+    ],
+    "failed_stages": [],
+    "stage_results": {
+      "01_chunk_processing": {
+        "stage": "01_chunk_processing",
+        "timestamp": "2025-06-08T05:32:36.238785",
+        "success": true,
+        "datasets_processed": 1,
+        "results": {},
+        "anthropic_used": false,
+        "execution_time": 0.00825190544128418,
+        "memory_usage": "psutil not available",
+        "chunks_processed": {
+          "data/uploads/test_dataset_comprehensive.csv": {
+            "records": 100,
+            "success": true
+          }
+        },
+        "validation_reports": {
+          "data/uploads/test_dataset_comprehensive.csv": {
+            "total_records": 100,
+            "columns": [
+              "id",
+              "body",
+              "date",
+              "channel",
+              "author",
+              "message_id",
+              "forwards",
+              "views",
+              "replies"
+            ],
+            "memory_usage": "0.01 MB",
+            "chunk_processed": true
+          }
+        }
+      },
+      "02_encoding_validation": {
+        "stage": "02_encoding_validation",
+        "timestamp": "2025-06-08T05:32:36.247304",
+        "success": true,
+        "datasets_processed": 1,
+        "results": {},
+        "anthropic_used": false,
+        "execution_time": 0.016900300979614258,
+        "memory_usage": "psutil not available",
+        "encoding_reports": {
+          "data/uploads/test_dataset_comprehensive.csv": {
+            "timestamp": "2025-06-08T05:32:36.263728",
+            "total_records": 100,
+            "text_columns_analyzed": [
+              "body",
+              "channel"
+            ],
+            "quick_analysis": {
+              "body": {
+                "total_values": 100,
+                "non_null_values": "100",
+                "problematic_chars_count": 0,
+                "encoding_artifacts_count": 0,
+                "problematic_patterns": []
+              },
+              "channel": {
+                "total_values": 100,
+                "non_null_values": "100",
+                "problematic_chars_count": 0,
+                "encoding_artifacts_count": 0,
+                "problematic_patterns": []
+              }
+            },
+            "detailed_analysis": {},
+            "overall_quality_score": 1.0,
+            "recommendations": [
+              "Qualidade de encoding satisfatória - nenhuma ação necessária"
+            ]
+          }
+        },
+        "corrections_applied": {
+          "data/uploads/test_dataset_comprehensive.csv": {
+            "corrections": 0,
+            "output_path": "data/uploads/test_dataset_comprehensive_02a_encoding_validated.csv",
+            "success": true,
+            "message": "Nenhuma correção necessária"
+          }
+        }
+      }
+    },
+    "checkpoints": {
+      "01_chunk_processing": "/Users/pabloalmada/development/project/dataanalysis-bolsonarismo/checkpoints/pipeline_01_chunk_processing_20250608_053236.json"
+    },
+    "data_versions": {},
+    "initialization_errors": []
+  },
+  "timestamp": "2025-06-08T05:32:36.264274"
+}

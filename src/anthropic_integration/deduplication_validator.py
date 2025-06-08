@@ -858,3 +858,406 @@ Responda em formato JSON:
         recommendations.extend(api_recommendations)
         
         return list(set(recommendations))  # Remover duplicatas
+    
+    def enhance_global_deduplication(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+        """
+        Deduplicação global aprimorada com múltiplas estratégias
+        
+        Args:
+            df: DataFrame para deduplicar
+            
+        Returns:
+            Tuple com DataFrame deduplicado e relatório de deduplicação
+        """
+        logger.info(f"Iniciando deduplicação global aprimorada para {len(df)} registros")
+        
+        deduplication_report = {
+            "timestamp": datetime.now().isoformat(),
+            "original_count": len(df),
+            "strategies_applied": [],
+            "duplicate_patterns": {},
+            "final_count": 0,
+            "reduction_metrics": {},
+            "quality_scores": {}
+        }
+        
+        # Fazer backup dos dados originais
+        backup_file = f"data/interim/deduplication_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        df.to_csv(backup_file, index=False, sep=';', encoding='utf-8')
+        logger.info(f"Backup criado: {backup_file}")
+        
+        result_df = df.copy()
+        
+        # Estratégia 1: Deduplicação por ID único
+        result_df, id_stats = self._deduplicate_by_unique_id(result_df)
+        deduplication_report["strategies_applied"].append("unique_id_deduplication")
+        deduplication_report["duplicate_patterns"]["id_duplicates"] = id_stats
+        
+        # Estratégia 2: Deduplicação por conteúdo semântico
+        result_df, content_stats = self._deduplicate_by_semantic_content(result_df)
+        deduplication_report["strategies_applied"].append("semantic_content_deduplication")
+        deduplication_report["duplicate_patterns"]["content_duplicates"] = content_stats
+        
+        # Estratégia 3: Deduplicação temporal com janela deslizante
+        result_df, temporal_stats = self._deduplicate_by_temporal_window(result_df)
+        deduplication_report["strategies_applied"].append("temporal_window_deduplication")
+        deduplication_report["duplicate_patterns"]["temporal_duplicates"] = temporal_stats
+        
+        # Estratégia 4: Análise de padrões de duplicação
+        duplicate_patterns = self._analyze_duplicate_patterns(df, result_df)
+        deduplication_report["duplicate_patterns"]["analysis"] = duplicate_patterns
+        
+        # Calcular métricas finais
+        deduplication_report["final_count"] = len(result_df)
+        deduplication_report["reduction_metrics"] = self._calculate_reduction_metrics(
+            deduplication_report["original_count"], 
+            deduplication_report["final_count"]
+        )
+        
+        # Avaliar qualidade da deduplicação
+        deduplication_report["quality_scores"] = self._assess_deduplication_quality(df, result_df)
+        
+        logger.info(f"Deduplicação global concluída: {len(df)} -> {len(result_df)} registros")
+        logger.info(f"Redução: {deduplication_report['reduction_metrics']['reduction_percentage']:.2f}%")
+        
+        return result_df, deduplication_report
+    
+    def _deduplicate_by_unique_id(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+        """Deduplicação por ID único (message_id, id, etc.)"""
+        
+        stats = {
+            "strategy": "unique_id",
+            "duplicates_found": 0,
+            "duplicates_removed": 0,
+            "id_columns_used": []
+        }
+        
+        # Identificar colunas de ID possíveis
+        id_candidates = ['message_id', 'id', 'unique_id', 'telegram_id', 'msg_id']
+        id_column = None
+        
+        for candidate in id_candidates:
+            if candidate in df.columns:
+                # Verificar se a coluna tem valores únicos suficientes
+                unique_count = df[candidate].nunique()
+                total_count = len(df)
+                uniqueness_ratio = unique_count / total_count if total_count > 0 else 0
+                
+                if uniqueness_ratio > 0.8:  # 80% de valores únicos
+                    id_column = candidate
+                    stats["id_columns_used"].append(candidate)
+                    break
+        
+        if id_column:
+            # Contar duplicatas por ID
+            id_counts = df[id_column].value_counts()
+            duplicates = id_counts[id_counts > 1]
+            stats["duplicates_found"] = duplicates.sum() - len(duplicates)
+            
+            # Remover duplicatas mantendo primeira ocorrência
+            deduplicated_df = df.drop_duplicates(subset=[id_column], keep='first')
+            stats["duplicates_removed"] = len(df) - len(deduplicated_df)
+            
+            logger.info(f"Deduplicação por ID '{id_column}': removidas {stats['duplicates_removed']} duplicatas")
+            return deduplicated_df, stats
+        else:
+            logger.info("Nenhuma coluna de ID única encontrada")
+            return df, stats
+    
+    def _deduplicate_by_semantic_content(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+        """Deduplicação por conteúdo semântico (texto normalizado)"""
+        
+        stats = {
+            "strategy": "semantic_content",
+            "duplicates_found": 0,
+            "duplicates_removed": 0,
+            "text_column_used": None,
+            "normalization_applied": []
+        }
+        
+        # Detectar coluna de texto
+        text_column = self._detect_text_column(df)
+        stats["text_column_used"] = text_column
+        
+        if text_column and text_column in df.columns:
+            # Criar versão normalizada do texto
+            normalized_texts = self._normalize_text_for_deduplication(df[text_column])
+            stats["normalization_applied"] = [
+                "lowercase", "whitespace_normalization", "punctuation_removal",
+                "special_chars_removal", "emoji_normalization"
+            ]
+            
+            # Contar duplicatas semânticas
+            text_counts = normalized_texts.value_counts()
+            duplicates = text_counts[text_counts > 1]
+            stats["duplicates_found"] = duplicates.sum() - len(duplicates)
+            
+            # Adicionar coluna de texto normalizado temporária
+            df_with_normalized = df.copy()
+            df_with_normalized['_normalized_text'] = normalized_texts
+            
+            # Remover duplicatas semânticas
+            deduplicated_df = df_with_normalized.drop_duplicates(subset=['_normalized_text'], keep='first')
+            deduplicated_df = deduplicated_df.drop('_normalized_text', axis=1)
+            
+            stats["duplicates_removed"] = len(df) - len(deduplicated_df)
+            
+            logger.info(f"Deduplicação semântica: removidas {stats['duplicates_removed']} duplicatas")
+            return deduplicated_df, stats
+        else:
+            logger.warning("Coluna de texto não encontrada para deduplicação semântica")
+            return df, stats
+    
+    def _deduplicate_by_temporal_window(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+        """Deduplicação temporal com janela deslizante"""
+        
+        stats = {
+            "strategy": "temporal_window",
+            "duplicates_found": 0,
+            "duplicates_removed": 0,
+            "window_size_minutes": 5,
+            "datetime_column_used": None
+        }
+        
+        # Detectar coluna de datetime
+        datetime_candidates = ['datetime', 'timestamp', 'date', 'created_at', 'sent_at']
+        datetime_column = None
+        
+        for candidate in datetime_candidates:
+            if candidate in df.columns:
+                try:
+                    # Tentar converter para datetime
+                    pd.to_datetime(df[candidate].dropna().head(10))
+                    datetime_column = candidate
+                    stats["datetime_column_used"] = candidate
+                    break
+                except:
+                    continue
+        
+        if datetime_column and datetime_column in df.columns:
+            # Converter para datetime
+            df_temporal = df.copy()
+            df_temporal[datetime_column] = pd.to_datetime(df_temporal[datetime_column], errors='coerce')
+            
+            # Ordenar por datetime
+            df_temporal = df_temporal.sort_values(datetime_column)
+            
+            # Detectar coluna de texto para comparação
+            text_column = self._detect_text_column(df_temporal)
+            
+            if text_column and text_column in df_temporal.columns:
+                # Encontrar duplicatas temporais
+                duplicates_to_remove = []
+                window_minutes = stats["window_size_minutes"]
+                
+                for i in range(len(df_temporal)):
+                    if i in duplicates_to_remove:
+                        continue
+                    
+                    current_row = df_temporal.iloc[i]
+                    current_time = current_row[datetime_column]
+                    current_text = str(current_row[text_column]).strip().lower()
+                    
+                    if pd.isna(current_time) or not current_text:
+                        continue
+                    
+                    # Buscar duplicatas na janela temporal
+                    for j in range(i + 1, len(df_temporal)):
+                        if j in duplicates_to_remove:
+                            continue
+                        
+                        next_row = df_temporal.iloc[j]
+                        next_time = next_row[datetime_column]
+                        next_text = str(next_row[text_column]).strip().lower()
+                        
+                        if pd.isna(next_time):
+                            continue
+                        
+                        # Verificar se está dentro da janela temporal
+                        time_diff = abs((next_time - current_time).total_seconds() / 60)
+                        if time_diff > window_minutes:
+                            break  # Sair da janela temporal
+                        
+                        # Verificar similaridade do texto
+                        if current_text == next_text or self._calculate_text_similarity(current_text, next_text) > 0.9:
+                            duplicates_to_remove.append(j)
+                            stats["duplicates_found"] += 1
+                
+                # Remover duplicatas temporais
+                if duplicates_to_remove:
+                    df_temporal = df_temporal.drop(df_temporal.index[duplicates_to_remove])
+                    stats["duplicates_removed"] = len(duplicates_to_remove)
+                
+                logger.info(f"Deduplicação temporal: removidas {stats['duplicates_removed']} duplicatas")
+                return df_temporal.reset_index(drop=True), stats
+            else:
+                logger.warning("Coluna de texto não encontrada para deduplicação temporal")
+        else:
+            logger.warning("Coluna de datetime não encontrada para deduplicação temporal")
+        
+        return df, stats
+    
+    def _normalize_text_for_deduplication(self, text_series: pd.Series) -> pd.Series:
+        """Normaliza texto para deduplicação semântica robusta"""
+        
+        normalized = text_series.fillna("").astype(str)
+        
+        # 1. Converter para minúsculas
+        normalized = normalized.str.lower()
+        
+        # 2. Normalizar Unicode (NFKC)
+        normalized = normalized.apply(lambda x: unicodedata.normalize('NFKC', x))
+        
+        # 3. Remover caracteres de controle e invisíveis
+        normalized = normalized.str.replace(r'[\x00-\x1f\x7f-\x9f]', '', regex=True)
+        normalized = normalized.str.replace(r'[\u200b-\u200d\ufeff]', '', regex=True)
+        
+        # 4. Normalizar espaços em branco
+        normalized = normalized.str.replace(r'\s+', ' ', regex=True)
+        normalized = normalized.str.strip()
+        
+        # 5. Remover pontuação redundante (manter estrutura básica)
+        normalized = normalized.str.replace(r'[.]{2,}', '.', regex=True)
+        normalized = normalized.str.replace(r'[!]{2,}', '!', regex=True)
+        normalized = normalized.str.replace(r'[?]{2,}', '?', regex=True)
+        
+        # 6. Normalizar emojis repetidos
+        normalized = normalized.str.replace(r'([\U0001F600-\U0001F64F])\1+', r'\1', regex=True)
+        
+        # 7. Remover URLs (podem variar mas conteúdo é igual)
+        normalized = normalized.str.replace(r'https?://\S+', '[URL]', regex=True)
+        
+        # 8. Normalizar menções e hashtags
+        normalized = normalized.str.replace(r'@\w+', '[MENTION]', regex=True)
+        normalized = normalized.str.replace(r'#\w+', '[HASHTAG]', regex=True)
+        
+        return normalized
+    
+    def _analyze_duplicate_patterns(self, original_df: pd.DataFrame, deduplicated_df: pd.DataFrame) -> Dict[str, Any]:
+        """Analisa padrões de duplicação encontrados"""
+        
+        analysis = {
+            "total_reduction": len(original_df) - len(deduplicated_df),
+            "reduction_percentage": ((len(original_df) - len(deduplicated_df)) / len(original_df)) * 100 if len(original_df) > 0 else 0,
+            "duplicate_distribution": {},
+            "temporal_patterns": {},
+            "content_patterns": {},
+            "suspicious_patterns": []
+        }
+        
+        # Analisar distribuição de duplicatas por frequência
+        if 'duplicate_frequency' in deduplicated_df.columns:
+            freq_dist = deduplicated_df['duplicate_frequency'].value_counts().sort_index()
+            analysis["duplicate_distribution"] = {
+                "frequency_counts": freq_dist.to_dict(),
+                "max_frequency": int(deduplicated_df['duplicate_frequency'].max()),
+                "mean_frequency": float(deduplicated_df['duplicate_frequency'].mean()),
+                "messages_with_high_frequency": int((deduplicated_df['duplicate_frequency'] > 10).sum())
+            }
+        
+        # Analisar padrões temporais se coluna de data disponível
+        datetime_column = None
+        for col in ['datetime', 'timestamp', 'date']:
+            if col in deduplicated_df.columns:
+                datetime_column = col
+                break
+        
+        if datetime_column:
+            try:
+                deduplicated_df[datetime_column] = pd.to_datetime(deduplicated_df[datetime_column], errors='coerce')
+                
+                # Agrupar por hora para detectar picos
+                hourly_counts = deduplicated_df.groupby(deduplicated_df[datetime_column].dt.hour).size()
+                daily_counts = deduplicated_df.groupby(deduplicated_df[datetime_column].dt.date).size()
+                
+                analysis["temporal_patterns"] = {
+                    "peak_hour": int(hourly_counts.idxmax()) if not hourly_counts.empty else None,
+                    "peak_hour_count": int(hourly_counts.max()) if not hourly_counts.empty else 0,
+                    "peak_day_count": int(daily_counts.max()) if not daily_counts.empty else 0,
+                    "temporal_distribution": "normal" if daily_counts.std() < daily_counts.mean() else "irregular"
+                }
+            except Exception as e:
+                logger.warning(f"Erro na análise temporal: {e}")
+        
+        # Detectar padrões suspeitos
+        if 'duplicate_frequency' in deduplicated_df.columns:
+            high_freq_messages = deduplicated_df[deduplicated_df['duplicate_frequency'] > 50]
+            if len(high_freq_messages) > 0:
+                analysis["suspicious_patterns"].append(f"Encontradas {len(high_freq_messages)} mensagens com frequência > 50")
+            
+            # Detectar possível atividade automatizada
+            very_high_freq = deduplicated_df[deduplicated_df['duplicate_frequency'] > 100]
+            if len(very_high_freq) > 0:
+                analysis["suspicious_patterns"].append(f"Possível atividade automatizada: {len(very_high_freq)} mensagens com frequência > 100")
+        
+        return analysis
+    
+    def _calculate_reduction_metrics(self, original_count: int, final_count: int) -> Dict[str, Any]:
+        """Calcula métricas de redução"""
+        
+        if original_count == 0:
+            return {"error": "Original count is zero"}
+        
+        reduction_count = original_count - final_count
+        reduction_percentage = (reduction_count / original_count) * 100
+        
+        return {
+            "original_count": original_count,
+            "final_count": final_count,
+            "reduction_count": reduction_count,
+            "reduction_percentage": reduction_percentage,
+            "retention_percentage": 100 - reduction_percentage,
+            "efficiency_score": min(1.0, reduction_percentage / 30)  # Score baseado em 30% como eficiência ótima
+        }
+    
+    def _assess_deduplication_quality(self, original_df: pd.DataFrame, deduplicated_df: pd.DataFrame) -> Dict[str, Any]:
+        """Avalia qualidade geral da deduplicação"""
+        
+        quality_assessment = {
+            "overall_score": 0.0,
+            "quality_factors": {},
+            "recommendations": []
+        }
+        
+        reduction_percentage = ((len(original_df) - len(deduplicated_df)) / len(original_df)) * 100 if len(original_df) > 0 else 0
+        
+        # Fator 1: Taxa de redução apropriada (5-60% é considerado normal)
+        if 5 <= reduction_percentage <= 60:
+            quality_assessment["quality_factors"]["reduction_rate"] = {"score": 1.0, "status": "optimal"}
+        elif reduction_percentage < 5:
+            quality_assessment["quality_factors"]["reduction_rate"] = {"score": 0.5, "status": "low_reduction"}
+            quality_assessment["recommendations"].append("Taxa de redução baixa - verificar critérios de deduplicação")
+        else:
+            quality_assessment["quality_factors"]["reduction_rate"] = {"score": 0.3, "status": "high_reduction"}
+            quality_assessment["recommendations"].append("Taxa de redução muito alta - verificar falsos positivos")
+        
+        # Fator 2: Preservação de dados importantes
+        important_columns = ['datetime', 'channel', 'canal', 'message_id']
+        preserved_columns = sum(1 for col in important_columns if col in deduplicated_df.columns)
+        preservation_score = preserved_columns / len(important_columns)
+        quality_assessment["quality_factors"]["data_preservation"] = {"score": preservation_score, "preserved_columns": preserved_columns}
+        
+        # Fator 3: Consistência de frequências (se disponível)
+        if 'duplicate_frequency' in deduplicated_df.columns:
+            freq_stats = deduplicated_df['duplicate_frequency'].describe()
+            if freq_stats['min'] >= 1 and freq_stats['max'] < 1000:
+                quality_assessment["quality_factors"]["frequency_consistency"] = {"score": 1.0, "status": "consistent"}
+            else:
+                quality_assessment["quality_factors"]["frequency_consistency"] = {"score": 0.7, "status": "inconsistent"}
+                quality_assessment["recommendations"].append("Verificar consistência das frequências de duplicatas")
+        
+        # Calcular score geral
+        factor_scores = [factor["score"] for factor in quality_assessment["quality_factors"].values()]
+        quality_assessment["overall_score"] = sum(factor_scores) / len(factor_scores) if factor_scores else 0.0
+        
+        # Determinar nível de qualidade
+        if quality_assessment["overall_score"] >= 0.9:
+            quality_assessment["quality_level"] = "excellent"
+        elif quality_assessment["overall_score"] >= 0.7:
+            quality_assessment["quality_level"] = "good"
+        elif quality_assessment["overall_score"] >= 0.5:
+            quality_assessment["quality_level"] = "satisfactory"
+        else:
+            quality_assessment["quality_level"] = "poor"
+        
+        return quality_assessment

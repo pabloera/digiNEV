@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.8
+MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.9
 ============================================
 
 Controlador principal do pipeline com checkpoints e recuperação automática.
 Integra com o sistema unificado de anthropic_integration.
-Pipeline renumerado sequencialmente: 20 etapas (01-20).
+Pipeline aprimorado: 22 etapas (01-20 + 04b/06b) com melhorias de implementação.
 """
 
 import os
@@ -39,14 +39,16 @@ class PipelineController:
         self.checkpoints_dir = self.base_path / "checkpoints"
         self.checkpoints_dir.mkdir(exist_ok=True)
         
-        # Pipeline stages configuration (v4.8 - 20 etapas renumeradas sequencialmente)
+        # Pipeline stages configuration (v4.9 - 22 etapas com melhorias de implementação)
         self.stages = [
             {'id': '01_chunk_processing', 'name': 'Chunk Processing', 'critical': True},
-            {'id': '02_encoding_validation', 'name': 'Encoding Validation', 'critical': True},
-            {'id': '03_deduplication', 'name': 'Deduplication', 'critical': True},
+            {'id': '02_encoding_validation', 'name': 'Enhanced Encoding Validation', 'critical': True},
+            {'id': '03_deduplication', 'name': 'Global Deduplication', 'critical': True},
             {'id': '04_feature_validation', 'name': 'Feature Validation', 'critical': True},
+            {'id': '04b_statistical_analysis_pre', 'name': 'Statistical Analysis (Pre-Cleaning)', 'critical': False},
             {'id': '05_political_analysis', 'name': 'Political Analysis', 'critical': False},
-            {'id': '06_text_cleaning', 'name': 'Text Cleaning', 'critical': True},
+            {'id': '06_text_cleaning', 'name': 'Enhanced Text Cleaning', 'critical': True},
+            {'id': '06b_statistical_analysis_post', 'name': 'Statistical Analysis (Post-Cleaning)', 'critical': False},
             {'id': '07_linguistic_processing', 'name': 'Linguistic Processing (spaCy)', 'critical': False},
             {'id': '08_sentiment_analysis', 'name': 'Sentiment Analysis', 'critical': False},
             {'id': '09_topic_modeling', 'name': 'Topic Modeling (Voyage.ai)', 'critical': False},
@@ -153,7 +155,7 @@ class PipelineController:
             }
         
         return {
-            'pipeline_version': '4.6',
+            'pipeline_version': '4.9',
             'last_updated': datetime.now().isoformat(),
             'current_dataset': '',
             'stages': stages_dict,
@@ -257,9 +259,10 @@ class PipelineController:
         stage_flags = {}
         for stage in self.stages:
             protection_level = 'critical' if stage.get('critical', False) else 'medium'
-            if stage['id'] in ['11_hashtag_normalization', '12_domain_analysis', 
-                              '13_temporal_analysis', '14_network_analysis', 
-                              '15_qualitative_analysis', '18_semantic_search']:
+            if stage['id'] in ['04b_statistical_analysis_pre', '06b_statistical_analysis_post', 
+                              '12_hashtag_normalization', '13_domain_analysis', 
+                              '14_temporal_analysis', '15_network_analysis', 
+                              '16_qualitative_analysis', '19_semantic_search']:
                 protection_level = 'low'
             
             stage_flags[stage['id']] = {
@@ -275,7 +278,7 @@ class PipelineController:
             }
         
         return {
-            'pipeline_version': '4.6',
+            'pipeline_version': '4.9',
             'protection_mode': 'enabled',
             'last_updated': datetime.now().isoformat(),
             'description': 'Flags de proteção para impedir reescrita de etapas funcionais',
@@ -580,7 +583,7 @@ class PipelineController:
 
 def main():
     """Entry point principal"""
-    print("🎯 PIPELINE CONTROLLER - BOLSONARISMO v4.6")
+    print("🎯 PIPELINE CONTROLLER - BOLSONARISMO v4.9")
     print("=" * 50)
     
     try:

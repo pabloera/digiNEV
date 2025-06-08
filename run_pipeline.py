@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v4.8 - EXECUÇÃO COMPLETA INTEGRADA
+PIPELINE BOLSONARISMO v4.9 - EXECUÇÃO COMPLETA APRIMORADA
 =========================================================
 
-Pipeline completo com todas as 20 etapas implementadas (renumeração sequencial):
+Pipeline aprimorado com 22 etapas implementadas (01-20 + 04b/06b):
 - Integração completa com Dashboard
 - Voyage.ai + spaCy totalmente implementados
-- Execução sequencial otimizada (01-20)
+- Análise estatística dual (antes/depois da limpeza)
+- Enhanced encoding detection e global deduplication
+- Enhanced text cleaning com validação graduada
+- API optimization com sampling inteligente (96% economia)
+- Execução sequencial otimizada com melhorias
 - Monitoramento em tempo real
 - Validação científica automática
 """
@@ -205,7 +209,7 @@ def setup_dashboard_integration(config: Dict[str, Any]):
         return False
 
 def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any]) -> Dict[str, Any]:
-    """Execução completa do pipeline com todas as 20 etapas"""
+    """Execução completa do pipeline com todas as 22 etapas aprimoradas"""
     
     start_time = time.time()
     execution_results = {
@@ -225,27 +229,30 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
         logger.info("Pipeline unificado inicializado")
         
-        # Executar todas as etapas sequencialmente
+        # Executar todas as etapas sequencialmente (v4.9 - Enhanced Pipeline)
         all_stages = [
             '01_chunk_processing',
-            '02_encoding_validation', 
-            '03_deduplication',
-            '04_features_validation',
+            '02_encoding_validation',  # Enhanced with chardet detection
+            '03_deduplication',        # Global multi-strategy deduplication  
+            '04_feature_validation',
+            '04b_statistical_analysis_pre',  # NEW: Pre-cleaning statistics
             '05_political_analysis',
-            '06_text_cleaning',
-            '07_sentiment_analysis',
-            '08_topic_modeling',
-            '09_tfidf_extraction',
-            '10_clustering',
-            '11_hashtag_normalization',
-            '12_domain_analysis',
-            '13_temporal_analysis',
-            '14_network_analysis',
-            '15_qualitative_analysis',
-            '16_smart_pipeline_review',
-            '17_topic_interpretation',
-            '18_semantic_search',
-            '19_pipeline_validation'
+            '06_text_cleaning',        # Enhanced with validation and graduated cleaning
+            '06b_statistical_analysis_post', # NEW: Post-cleaning statistics and comparison
+            '07_linguistic_processing', # spaCy integration
+            '08_sentiment_analysis',
+            '09_topic_modeling',       # Voyage.ai enhanced
+            '10_tfidf_extraction',     # Voyage.ai enhanced
+            '11_clustering',           # Voyage.ai enhanced
+            '12_hashtag_normalization',
+            '13_domain_analysis',
+            '14_temporal_analysis',
+            '15_network_analysis',
+            '16_qualitative_analysis',
+            '17_smart_pipeline_review',
+            '18_topic_interpretation',
+            '19_semantic_search',      # Voyage.ai enhanced
+            '20_pipeline_validation'
         ]
         
         logger.info(f"Executando {len(all_stages)} etapas do pipeline")
@@ -326,7 +333,7 @@ def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
 def main():
     """Entry point principal para execução completa com checkpoints e proteção"""
     
-    print("🎯 PIPELINE BOLSONARISMO v4.6 - EXECUÇÃO COM CHECKPOINTS E PROTEÇÃO")
+    print("🎯 PIPELINE BOLSONARISMO v4.9 - EXECUÇÃO APRIMORADA COM CHECKPOINTS E PROTEÇÃO")
     print("=" * 75)
     
     start_time = time.time()

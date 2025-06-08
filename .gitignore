@@ -1,9 +1,19 @@
+echo ".venv/
 __pycache__/
-*.ipynb_checkpoints/
-.env/
-venv/
-.DS_Store
-*.pyc
-.idea/
+*.py[cod]
+*.so
+.mypy_cache/
+.env
+.envrc
+*.json
+poetry.lock
+poetry.toml
+pyproject.toml
+.vscode/
 *.log
-output/
+*.tmp
+*.swp
+*.egg-info/
+build/
+dist/
+.casv/" > .gitignore

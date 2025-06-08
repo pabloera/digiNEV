@@ -111,3 +111,104 @@ clustering:
   n_clusters: 10
   use_anthropic_validation: true
   min_coherence_score: 0.7
+
+# Enhanced Encoding Detection (NEW)
+enhanced_encoding:
+  enable_chardet: true
+  confidence_threshold: 0.7
+  fallback_encodings: ["utf-8", "latin-1", "iso-8859-1", "cp1252"]
+  separator_fallbacks: [",", ";", "\t", "|"]
+  validate_loading: true
+  conservative_fallback: true
+
+# Global Deduplication (NEW) 
+enhanced_deduplication:
+  enable_global_strategy: true
+  multiple_strategies: true
+  dedup_by_id: true
+  dedup_by_content: true
+  dedup_by_temporal: true
+  temporal_window_minutes: 5
+  normalize_unicode: true
+  preserve_elements: ["#", "@", "http"]
+  backup_before_dedup: true
+  quality_assessment: true
+
+# Statistical Analysis (NEW)
+statistical_analysis:
+  enable_dual_analysis: true
+  pre_cleaning_analysis: true
+  post_cleaning_analysis: true
+  generate_comparison_reports: true
+  export_format: "json"
+  save_intermediate_results: true
+  analyze_patterns: true
+  
+  # Categorias para análise de conteúdo
+  content_categories:
+    political: ["bolsonaro", "lula", "eleição", "voto", "política", "presidente", "brasil"]
+    media: ["foto", "vídeo", "áudio", "imagem", "link", "arquivo"]
+    social: ["família", "amigos", "grupo", "pessoal", "privado"]
+    news: ["notícia", "jornal", "reportagem", "mídia", "imprensa"]
+    conspiracy: ["fake", "mentira", "conspiração", "teoria", "verdade"]
+    religious: ["deus", "igreja", "oração", "fé", "religião", "jesus"]
+
+# Enhanced Text Cleaning (NEW)
+enhanced_text_cleaning:
+  enable_validation: true
+  graduated_cleaning: true
+  conservative_fallback: true
+  preserve_elements: ["#", "@", "http"]
+  telegram_artifact_removal: true
+  unicode_normalization: "NFKC"
+  quality_score_threshold: 0.8
+  auto_correction: true
+  
+  # Termos críticos para preservação
+  preserve_critical_terms: true
+  critical_terms:
+    political_figures: ["bolsonaro", "lula", "temer", "dilma", "moro"]
+    political_expressions: ["mito", "lula livre", "fora bolsonaro", "brasil acima de tudo"]
+    institutions: ["stf", "tse", "pf", "mpf", "congresso", "senado"]
+
+# API Performance Optimization (NEW)
+api_optimization:
+  enable_sampling: true
+  max_messages_per_api: 50000
+  sampling_strategy: "mixed"  # "importance", "random", "mixed"
+  importance_ratio: 0.7  # 70% alta importância + 30% aleatório
+  batch_size: 100
+  cache_results: true
+  cache_duration_hours: 24
+  retry_strategy: "exponential"
+  max_retries: 3
+  enable_fallbacks: true
+  cost_limit_usd: 10.0
+  time_limit_minutes: 120
+  
+  # Critérios de importância para sampling
+  importance_criteria:
+    length_weight: 0.2
+    political_keywords_weight: 0.3
+    engagement_weight: 0.2
+    temporal_weight: 0.15
+    hashtag_weight: 0.15
+    min_text_length: 50
+    min_hashtags: 1
+
+# Enhanced Pipeline Features (NEW)
+enhanced_pipeline:
+  enable_all_enhancements: true
+  robust_error_handling: true
+  comprehensive_logging: true
+  backup_strategy: "always"
+  validation_at_each_stage: true
+  quality_monitoring: true
+  performance_tracking: true
+  
+  # Configurações de qualidade
+  quality_thresholds:
+    encoding_quality: 0.8
+    deduplication_quality: 0.7
+    cleaning_quality: 0.8
+    overall_pipeline: 0.7

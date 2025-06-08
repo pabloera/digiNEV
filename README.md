@@ -1,10 +1,10 @@
-# Pipeline Bolsonarismo 2025 - Sistema Renumerado e Otimizado 🚀
+# Pipeline Bolsonarismo 2025 - Sistema Aprimorado e Otimizado 🚀
 
 > **Análise de Discurso Político Brasileiro com Inteligência Artificial**
 > 
 > Pipeline unificado ultra-robusto para análise de mensagens do Telegram (2019-2023) focado em bolsonarismo, negacionismo e autoritarismo digital.
 > 
-> **v4.8 - Junho 2025**: Sistema com renumeração sequencial (20 etapas), Voyage.ai + spaCy completamente integrados e economia de 96%+ nos custos de API.
+> **v4.9 - Junho 2025**: Sistema com 22 etapas implementadas, 6 melhorias críticas, Voyage.ai + spaCy + análise estatística dual, economia de 96%+ nos custos de API.
 
 ## 🚨 **COMECE AQUI - LEIA PRIMEIRO!**
 
@@ -14,7 +14,7 @@
 2. **`CLAUDE.md`** - Instruções para Claude Code e configurações
 3. **`GUIDELINES.md`** - Diretrizes detalhadas de desenvolvimento
 
-### 🚀 **Início Rápido (Sistema v4.8)**
+### 🚀 **Início Rápido (Sistema v4.9)**
 ```bash
 # 1. Configurar API Anthropic
 echo "ANTHROPIC_API_KEY=sk-ant-api03-xxxxx" > .env
@@ -26,13 +26,18 @@ python run_pipeline.py
 cd src/dashboard && python start_dashboard.py
 ```
 
-### ✨ **Melhorias v4.8 - Junho 2025**
-- 🔢 **Renumeração Sequencial**: 20 etapas numeradas 01-20 de forma consistente
+### ✨ **Melhorias v4.9 - Junho 2025 (Enhanced Implementation)**
+- 🔢 **22 Etapas Implementadas**: Pipeline expandido (01-20 + 04b/06b)
+- ⚡ **Enhanced Encoding Detection**: Detecção robusta com chardet + fallbacks
+- ⚡ **Global Deduplication**: Estratégias múltiplas (ID, conteúdo, temporal)
+- ⚡ **Statistical Analysis Dual**: Análise antes/depois da limpeza com comparação
+- ⚡ **Enhanced Text Cleaning**: Limpeza graduada com validação robusta
+- ⚡ **API Performance Optimization**: Sampling inteligente com 96% economia
 - 🚀 **Voyage.ai Integrado**: 4 estágios com embeddings semânticos otimizados
 - 🔤 **spaCy NLP**: Processamento linguístico avançado com pt_core_news_lg
 - 🔧 **CSV Parsing Ultra-Robusto**: 10 configurações + detecção automática
-- 🎯 **Deduplicação Perfeita**: Fluxo sequencial entre todas as 20 etapas
-- 💰 **90%+ Economia**: Custos API drasticamente reduzidos
+- 🎯 **Deduplicação Global**: Fluxo sequencial entre todas as 22 etapas
+- 💰 **96%+ Economia**: Custos API drasticamente reduzidos (1.3M → 50K)
 - 🧹 **Sistema Pristino**: Logs, checkpoints e cache zerados
 - 📊 **Dashboard Integrado**: Parser unificado pipeline + interface web
 

@@ -61,6 +61,10 @@ except ImportError:
     SPACY_PROCESSOR_AVAILABLE = False
     SpacyNLPProcessor = None
 
+# Importar novos componentes aprimorados
+from .statistical_analyzer import StatisticalAnalyzer
+from .performance_optimizer import PerformanceOptimizer
+
 # Importar processadores de dados
 from src.data.processors.chunk_processor import ChunkProcessor
 
@@ -229,7 +233,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("content_discovery_engine", lambda: ContentDiscoveryEngine(self.config, self.semantic_search_engine)),
             ("temporal_evolution_tracker", lambda: TemporalEvolutionTracker(self.config, self.semantic_search_engine)),
             ("analytics_dashboard", lambda: AnalyticsDashboard(self.config, self.semantic_search_engine, self.content_discovery_engine, self.intelligent_query_system)),
-            ("dataset_statistics_generator", lambda: DatasetStatisticsGenerator(self.config))
+            ("dataset_statistics_generator", lambda: DatasetStatisticsGenerator(self.config)),
+            # Novos componentes aprimorados do implementation guide
+            ("statistical_analyzer", lambda: StatisticalAnalyzer(self.config)),
+            ("performance_optimizer", lambda: PerformanceOptimizer(self.config))
         ]
         
         for component_name, component_factory in component_configs:
@@ -411,15 +418,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
             
-            # Executar todas as 20 etapas sequencialmente (numeração renumerada v4.8)
+            # Executar todas as 22 etapas sequencialmente (versão aprimorada v4.9)
             all_pipeline_stages = [
                 "01_chunk_processing",
-                "02_encoding_validation",
-                "03_deduplication", 
+                "02_encoding_validation",  # ✨ ENHANCED: chardet + robust fallbacks
+                "03_deduplication",  # ✨ ENHANCED: global multi-strategy
                 "04_feature_validation",
+                "04b_statistical_analysis_pre",  # 📊 NEW: análise estatística pré-limpeza
                 "05_political_analysis",
-                "06_text_cleaning",
-                "07_linguistic_processing",  # 🔤 SPACY (renumerado de 06b)
+                "06_text_cleaning",  # ✨ ENHANCED: validation + graduated cleaning
+                "06b_statistical_analysis_post",  # 📊 NEW: análise estatística pós-limpeza
+                "07_linguistic_processing",  # 🔤 SPACY
                 "08_sentiment_analysis",
                 "09_topic_modeling",  # 🚀 VOYAGE.AI
                 "10_tfidf_extraction",  # 🚀 VOYAGE.AI
@@ -435,7 +444,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "20_pipeline_validation"
             ]
             
-            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.8 (numeração renumerada)")
+            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.9 (aprimorado com análises estatísticas)")
             
             for stage_num, stage_name in enumerate(all_pipeline_stages, 1):
                 
@@ -807,10 +816,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "02_encoding_validation": self._stage_02a_encoding_validation,
                 "03_deduplication": self._stage_02b_deduplication,
                 "04_feature_validation": self._stage_01b_feature_validation,
+                "04b_statistical_analysis_pre": self._stage_04b_statistical_analysis_pre,
                 "05_political_analysis": self._stage_01c_political_analysis,
                 
                 # FASE 2: Processamento de Texto e Análise (06-11)
                 "06_text_cleaning": self._stage_03_clean_text,
+                "06b_statistical_analysis_post": self._stage_06b_statistical_analysis_post,
                 "07_linguistic_processing": self._stage_06b_linguistic_processing,  # 🔤 SPACY
                 "08_sentiment_analysis": self._stage_04_sentiment_analysis,
                 "09_topic_modeling": self._stage_05_topic_modeling,  # 🚀 VOYAGE.AI
@@ -937,26 +948,45 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         "reduction_ratio": (len(original_df) - len(deduplicated_df)) / len(original_df)
                     }
                 else:
-                    # Usar deduplicação inteligente
+                    # Usar deduplicação aprimorada global
                     if self.pipeline_config.get("use_anthropic", True) and self.api_available:
-                        logger.info("🤖 Usando deduplicação inteligente com API Anthropic")
+                        logger.info("🤖 Usando deduplicação global aprimorada")
                         
-                        # Executar deduplicação inteligente
-                        deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
+                        # Estratégia 1: Deduplicação global aprimorada (se disponível)
+                        if hasattr(self.deduplication_validator, 'enhance_global_deduplication'):
+                            try:
+                                deduplicated_df, deduplication_report = self.deduplication_validator.enhance_global_deduplication(original_df)
+                                logger.info(f"Deduplicação global aplicada: {deduplication_report.get('reduction_metrics', {}).get('reduction_percentage', 0):.1f}% redução")
+                            except Exception as e:
+                                logger.warning(f"Fallback para deduplicação inteligente: {e}")
+                                deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
+                                deduplication_report = {"method": "intelligent_fallback"}
+                        else:
+                            # Fallback para método original
+                            deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
+                            deduplication_report = {"method": "intelligent_original"}
                         
-                        # Calcular estatísticas
-                        original_count = len(original_df)
-                        final_count = len(deduplicated_df)
-                        duplicates_removed = original_count - final_count
-                        reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
+                        # Calcular estatísticas se não foi feito na deduplicação aprimorada
+                        if "reduction_metrics" not in deduplication_report:
+                            original_count = len(original_df)
+                            final_count = len(deduplicated_df)
+                            duplicates_removed = original_count - final_count
+                            reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
+                            
+                            deduplication_report.update({
+                                "original_count": original_count,
+                                "final_count": final_count,
+                                "duplicates_removed": duplicates_removed,
+                                "reduction_ratio": reduction_ratio
+                            })
                         
                         # Validar resultado da deduplicação
                         validation_report = self.deduplication_validator.validate_deduplication_process(
                             original_df, deduplicated_df, "duplicate_frequency"
                         )
                         
-                        deduplication_report = {
-                            "method": "intelligent_anthropic",
+                        deduplication_report.update({
+                            "method": deduplication_report.get("method", "enhanced_global"),
                             "original_count": original_count,
                             "deduplicated_count": final_count,
                             "duplicates_removed": duplicates_removed,
@@ -1292,20 +1322,35 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 quality_report = {}
                 method_used = "unknown"
                 
-                # Tentativa 1: Limpeza Anthropic (se disponível)
+                # Tentativa 1: Limpeza aprimorada com validação (se disponível)
                 if self.pipeline_config["use_anthropic"] and self.api_available:
                     try:
-                        logger.info("Tentando limpeza inteligente via Anthropic...")
-                        cleaned_df = self.text_cleaner.clean_text_intelligent(df)
-                        if hasattr(self.text_cleaner, 'validate_cleaning_quality'):
-                            quality_report = self.text_cleaner.validate_cleaning_quality(df, cleaned_df)
+                        # Estratégia 1: Limpeza aprimorada com validação robusta
+                        if hasattr(self.text_cleaner, 'enhance_text_cleaning_with_validation'):
+                            logger.info("Aplicando limpeza aprimorada com validação...")
+                            cleaned_df, cleaning_report = self.text_cleaner.enhance_text_cleaning_with_validation(df)
+                            quality_report = {
+                                "method": "enhanced_with_validation",
+                                "success": True,
+                                "cleaning_report": cleaning_report,
+                                "quality_score": cleaning_report.get("quality_score", 0.0)
+                            }
+                            method_used = "enhanced_validation"
+                            logger.info(f"✅ Limpeza aprimorada concluída - Score: {cleaning_report.get('quality_score', 0.0):.2f}")
                         else:
-                            quality_report = {"method": "anthropic", "success": True}
-                        method_used = "anthropic"
+                            # Fallback para método inteligente original
+                            logger.info("Tentando limpeza inteligente via Anthropic...")
+                            cleaned_df = self.text_cleaner.clean_text_intelligent(df)
+                            if hasattr(self.text_cleaner, 'validate_cleaning_quality'):
+                                quality_report = self.text_cleaner.validate_cleaning_quality(df, cleaned_df)
+                            else:
+                                quality_report = {"method": "anthropic", "success": True}
+                            method_used = "anthropic"
+                            logger.info("✅ Limpeza Anthropic bem-sucedida")
+                        
                         results["anthropic_used"] = True
-                        logger.info("✅ Limpeza Anthropic bem-sucedida")
                     except Exception as e:
-                        logger.warning(f"Limpeza Anthropic falhou: {e}. Tentando fallback...")
+                        logger.warning(f"Limpeza aprimorada falhou: {e}. Tentando fallback...")
                         cleaned_df = None
                 
                 # Tentativa 2: Limpeza simples (fallback)
@@ -2858,38 +2903,57 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_02a_encoding_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 02a: Validação de encoding - Detecta e corrige problemas de codificação"""
+        """Etapa 02a: Validação de encoding aprimorada com detecção robusta"""
         
-        logger.info("Iniciando validação de encoding")
-        results = {"encoding_reports": {}, "corrections_applied": {}}
+        logger.info("Iniciando validação de encoding aprimorada com chardet")
+        results = {"encoding_reports": {}, "corrections_applied": {}, "enhanced_detection": {}}
         
         for dataset_path in dataset_paths:
             try:
-                # Carregar dados primeiro
-                df = self._load_processed_data(dataset_path)
+                # Estratégia 1: Detecção de encoding robusta antes de carregar
+                if hasattr(self.encoding_validator, 'detect_encoding_with_chardet'):
+                    encoding_detection = self.encoding_validator.detect_encoding_with_chardet(dataset_path)
+                    results["enhanced_detection"][dataset_path] = encoding_detection
+                    
+                    # Estratégia 2: Carregamento aprimorado com fallbacks
+                    if hasattr(self.encoding_validator, 'enhance_csv_loading_with_fallbacks'):
+                        try:
+                            df = self.encoding_validator.enhance_csv_loading_with_fallbacks(dataset_path)
+                            logger.info(f"CSV carregado com encoding otimizado: {encoding_detection.get('recommended_encoding', 'utf-8')}")
+                        except Exception as e:
+                            logger.warning(f"Fallback para carregamento tradicional: {e}")
+                            df = self._load_processed_data(dataset_path)
+                    else:
+                        df = self._load_processed_data(dataset_path)
+                else:
+                    # Fallback para método original
+                    df = self._load_processed_data(dataset_path)
                 
                 if df is not None and not df.empty:
-                    # Usar EncodingValidator
+                    # Validação de qualidade aprimorada
                     validation_result = self.encoding_validator.validate_encoding_quality(df)
                     results["encoding_reports"][dataset_path] = validation_result
                     
                     # Aplicar correções se necessário
-                    if validation_result.get("encoding_issues", []):
-                        from ..utils.encoding_fixer import EncodingFixer
-                        fixer = EncodingFixer()
+                    if validation_result.get("overall_quality_score", 1.0) < 0.8:
+                        logger.info("Aplicando correções de encoding...")
+                        corrected_df, correction_report = self.encoding_validator.detect_and_fix_encoding_issues(
+                            df, fix_mode="conservative"
+                        )
                         
-                        corrected_df = fixer.fix_encoding_issues(df)
                         if corrected_df is not None:
                             # Salvar dados corrigidos
                             output_path = dataset_path.replace('.csv', '_02a_encoding_validated.csv')
                             corrected_df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
                             
                             results["corrections_applied"][dataset_path] = {
-                                "corrections": len(validation_result.get("encoding_issues", [])),
+                                "corrections": len(correction_report.get("corrections_applied", [])),
                                 "output_path": output_path,
-                                "success": True
+                                "success": True,
+                                "correction_report": correction_report,
+                                "quality_improvement": validation_result.get("overall_quality_score", 0)
                             }
-                            logger.info(f"Encoding corrigido e salvo: {output_path}")
+                            logger.info(f"Encoding corrigido com sucesso: {output_path}")
                         else:
                             results["corrections_applied"][dataset_path] = {
                                 "corrections": 0,
@@ -2897,14 +2961,15 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                 "error": "Falha na correção de encoding"
                             }
                     else:
-                        # Nenhuma correção necessária, copiar arquivo
+                        # Qualidade satisfatória, apenas copiar
                         output_path = dataset_path.replace('.csv', '_02a_encoding_validated.csv')
                         df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
                         results["corrections_applied"][dataset_path] = {
                             "corrections": 0,
                             "output_path": output_path,
                             "success": True,
-                            "message": "Nenhuma correção necessária"
+                            "message": "Qualidade de encoding satisfatória",
+                            "quality_score": validation_result.get("overall_quality_score", 1.0)
                         }
                         
                 else:
@@ -3071,3 +3136,156 @@ def create_unified_pipeline(config: Dict[str, Any] = None, project_root: str = N
     """
     
     return UnifiedAnthropicPipeline(config, project_root)
+
+
+# Métodos de extensão para melhorias do implementation guide
+def add_enhanced_methods_to_pipeline():
+    """Adiciona métodos aprimorados ao pipeline"""
+    
+    def _stage_04b_statistical_analysis_pre(self, dataset_paths: List[str]) -> Dict[str, Any]:
+        """Etapa 04b: Análise estatística antes da limpeza"""
+        
+        logger.info("Iniciando análise estatística pré-limpeza")
+        results = {"pre_cleaning_analysis": {}}
+        
+        if not hasattr(self, 'statistical_analyzer') or self.statistical_analyzer is None:
+            logger.warning("StatisticalAnalyzer não disponível, pulando análise")
+            return results
+        
+        for dataset_path in dataset_paths:
+            try:
+                # Carregar dados antes da limpeza
+                df = self._load_processed_data(dataset_path)
+                
+                if df is not None and not df.empty:
+                    # Gerar análise pré-limpeza
+                    output_file = dataset_path.replace('.csv', '_04b_pre_cleaning_stats.json')
+                    pre_analysis = self.statistical_analyzer.analyze_pre_cleaning_statistics(
+                        df, output_file=output_file
+                    )
+                    
+                    results["pre_cleaning_analysis"][dataset_path] = {
+                        "analysis": pre_analysis,
+                        "output_file": output_file,
+                        "success": True
+                    }
+                    
+                    logger.info(f"Análise pré-limpeza salva: {output_file}")
+                else:
+                    results["pre_cleaning_analysis"][dataset_path] = {
+                        "error": "Dataset vazio ou inválido",
+                        "success": False
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Erro na análise pré-limpeza para {dataset_path}: {e}")
+                results["pre_cleaning_analysis"][dataset_path] = {
+                    "error": str(e),
+                    "success": False
+                }
+        
+        return results
+    
+    def _stage_06b_statistical_analysis_post(self, dataset_paths: List[str]) -> Dict[str, Any]:
+        """Etapa 06b: Análise estatística após a limpeza com comparação"""
+        
+        logger.info("Iniciando análise estatística pós-limpeza")
+        results = {"post_cleaning_analysis": {}, "comparison_reports": {}}
+        
+        if not hasattr(self, 'statistical_analyzer') or self.statistical_analyzer is None:
+            logger.warning("StatisticalAnalyzer não disponível, pulando análise")
+            return results
+        
+        for dataset_path in dataset_paths:
+            try:
+                # Carregar dados após limpeza
+                df = self._load_processed_data(dataset_path)
+                
+                if df is not None and not df.empty:
+                    # Gerar análise pós-limpeza
+                    output_file = dataset_path.replace('.csv', '_06b_post_cleaning_stats.json')
+                    post_analysis = self.statistical_analyzer.analyze_post_cleaning_statistics(
+                        df, output_file=output_file
+                    )
+                    
+                    results["post_cleaning_analysis"][dataset_path] = {
+                        "analysis": post_analysis,
+                        "output_file": output_file,
+                        "success": True
+                    }
+                    
+                    # Tentar carregar análise pré-limpeza para comparação
+                    pre_analysis_file = dataset_path.replace('.csv', '_04b_pre_cleaning_stats.json')
+                    if Path(pre_analysis_file).exists():
+                        try:
+                            with open(pre_analysis_file, 'r', encoding='utf-8') as f:
+                                pre_analysis = json.load(f)
+                            
+                            # Gerar comparação
+                            comparison_file = dataset_path.replace('.csv', '_06b_cleaning_comparison.json')
+                            comparison = self.statistical_analyzer.compare_before_after_cleaning(
+                                pre_analysis, post_analysis, output_file=comparison_file
+                            )
+                            
+                            results["comparison_reports"][dataset_path] = {
+                                "comparison": comparison,
+                                "comparison_file": comparison_file,
+                                "success": True
+                            }
+                            
+                            logger.info(f"Comparação antes/depois salva: {comparison_file}")
+                            
+                        except Exception as e:
+                            logger.warning(f"Erro na comparação para {dataset_path}: {e}")
+                            results["comparison_reports"][dataset_path] = {
+                                "error": str(e),
+                                "success": False
+                            }
+                    
+                    logger.info(f"Análise pós-limpeza salva: {output_file}")
+                else:
+                    results["post_cleaning_analysis"][dataset_path] = {
+                        "error": "Dataset vazio ou inválido",
+                        "success": False
+                    }
+                    
+            except Exception as e:
+                logger.error(f"Erro na análise pós-limpeza para {dataset_path}: {e}")
+                results["post_cleaning_analysis"][dataset_path] = {
+                    "error": str(e),
+                    "success": False
+                }
+        
+        return results
+    
+    def _apply_performance_optimization(self, df: pd.DataFrame, target_apis: List[str]) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+        """Aplica otimização de performance com amostragem inteligente"""
+        
+        if not hasattr(self, 'performance_optimizer') or self.performance_optimizer is None:
+            logger.warning("PerformanceOptimizer não disponível, usando dataset completo")
+            return df, {"optimization_applied": False}
+        
+        try:
+            logger.info("Aplicando otimização de performance com amostragem inteligente")
+            
+            # Aplicar otimização
+            optimized_df, optimization_report = self.performance_optimizer.optimize_api_usage(
+                df, target_apis=target_apis
+            )
+            
+            logger.info(f"Otimização aplicada: {optimization_report.get('cost_analysis', {}).get('cost_reduction_percentage', 0):.1f}% economia")
+            
+            return optimized_df, optimization_report
+            
+        except Exception as e:
+            logger.error(f"Erro na otimização de performance: {e}")
+            return df, {"optimization_applied": False, "error": str(e)}
+    
+    # Adicionar métodos à classe
+    UnifiedAnthropicPipeline._stage_04b_statistical_analysis_pre = _stage_04b_statistical_analysis_pre
+    UnifiedAnthropicPipeline._stage_06b_statistical_analysis_post = _stage_06b_statistical_analysis_post
+    UnifiedAnthropicPipeline._apply_performance_optimization = _apply_performance_optimization
+
+
+# Chamar função para adicionar métodos aprimorados
+add_enhanced_methods_to_pipeline()

@@ -8,6 +8,8 @@ import json
 import logging
 import re
 import unicodedata
+import chardet
+import csv
 from typing import Dict, Any, List, Optional, Tuple, Set
 from datetime import datetime
 from pathlib import Path
@@ -567,3 +569,285 @@ REGRAS:
                 recommendations.extend([f"{column}: {action}" for action in recommended_actions])
         
         return recommendations
+    
+    def detect_encoding_with_chardet(self, file_path: str) -> Dict[str, Any]:
+        """
+        Detecta encoding de arquivo usando chardet com múltiplas estratégias
+        
+        Args:
+            file_path: Caminho para o arquivo
+            
+        Returns:
+            Dicionário com informações de encoding detectado
+        """
+        logger.info(f"Detectando encoding para: {file_path}")
+        
+        detection_report = {
+            "file_path": file_path,
+            "file_size": 0,
+            "chardet_detection": None,
+            "manual_detection": None,
+            "recommended_encoding": None,
+            "confidence_score": 0.0,
+            "encoding_issues": []
+        }
+        
+        try:
+            # Obter tamanho do arquivo
+            file_path_obj = Path(file_path)
+            if file_path_obj.exists():
+                detection_report["file_size"] = file_path_obj.stat().st_size
+            
+            # Estratégia 1: Chardet detection
+            with open(file_path, 'rb') as f:
+                # Ler amostra maior para melhor detecção
+                sample_size = min(1024 * 1024, detection_report["file_size"])  # 1MB ou tamanho total
+                raw_data = f.read(sample_size)
+                
+                chardet_result = chardet.detect(raw_data)
+                detection_report["chardet_detection"] = chardet_result
+                
+                if chardet_result and chardet_result['confidence'] > 0.7:
+                    detection_report["recommended_encoding"] = chardet_result['encoding']
+                    detection_report["confidence_score"] = chardet_result['confidence']
+                
+            # Estratégia 2: Teste manual com encodings comuns
+            manual_results = self._test_common_encodings(file_path)
+            detection_report["manual_detection"] = manual_results
+            
+            # Estratégia 3: Fallback baseado em heurísticas
+            if detection_report["confidence_score"] < 0.8:
+                fallback_encoding = self._fallback_encoding_detection(file_path)
+                if fallback_encoding:
+                    detection_report["recommended_encoding"] = fallback_encoding
+                    detection_report["encoding_issues"].append("Low confidence - using fallback detection")
+            
+            logger.info(f"Encoding detectado: {detection_report['recommended_encoding']} (confiança: {detection_report['confidence_score']:.2f})")
+            
+        except Exception as e:
+            logger.error(f"Erro na detecção de encoding: {e}")
+            detection_report["encoding_issues"].append(f"Detection error: {str(e)}")
+            detection_report["recommended_encoding"] = "utf-8"  # Fallback seguro
+        
+        return detection_report
+    
+    def enhance_csv_loading_with_fallbacks(self, file_path: str) -> pd.DataFrame:
+        """
+        Carrega CSV com detecção automática de encoding e separadores
+        
+        Args:
+            file_path: Caminho para o arquivo CSV
+            
+        Returns:
+            DataFrame carregado com encoding correto
+        """
+        logger.info(f"Carregando CSV com fallbacks: {file_path}")
+        
+        # Detectar encoding primeiro
+        encoding_info = self.detect_encoding_with_chardet(file_path)
+        recommended_encoding = encoding_info["recommended_encoding"]
+        
+        # Configurações de fallback
+        encoding_fallbacks = [recommended_encoding, "utf-8", "latin-1", "iso-8859-1", "cp1252"]
+        separator_fallbacks = [",", ";", "\t", "|"]
+        
+        loading_report = {
+            "file_path": file_path,
+            "attempts": [],
+            "successful_config": None,
+            "df_shape": None,
+            "issues_found": []
+        }
+        
+        # Tentar diferentes combinações
+        for encoding in encoding_fallbacks:
+            if encoding is None:
+                continue
+                
+            for separator in separator_fallbacks:
+                try:
+                    # Configuração de carregamento robusta
+                    df = pd.read_csv(
+                        file_path,
+                        encoding=encoding,
+                        sep=separator,
+                        dtype=str,  # Preservar tudo como string inicialmente
+                        na_values=['', 'NA', 'null', 'NULL', 'None'],
+                        keep_default_na=True,
+                        on_bad_lines='skip',  # Pular linhas problemáticas
+                        quoting=csv.QUOTE_MINIMAL,
+                        engine='python'  # Mais robusto para CSVs malformados
+                    )
+                    
+                    # Validar se o carregamento faz sentido
+                    if self._validate_csv_loading(df):
+                        loading_report["successful_config"] = {
+                            "encoding": encoding,
+                            "separator": separator
+                        }
+                        loading_report["df_shape"] = df.shape
+                        
+                        logger.info(f"CSV carregado com sucesso: {encoding} + '{separator}' -> {df.shape}")
+                        
+                        # Aplicar limpeza básica pós-carregamento
+                        df = self._post_loading_cleanup(df)
+                        
+                        return df
+                    
+                except Exception as e:
+                    loading_report["attempts"].append({
+                        "encoding": encoding,
+                        "separator": separator,
+                        "error": str(e)
+                    })
+                    continue
+        
+        # Se chegou aqui, nenhuma configuração funcionou
+        logger.error(f"Falha ao carregar CSV com todas as configurações testadas")
+        raise ValueError(f"Não foi possível carregar o arquivo {file_path} com nenhuma configuração testada")
+    
+    def _test_common_encodings(self, file_path: str) -> Dict[str, Any]:
+        """Testa encodings comuns manualmente"""
+        
+        common_encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252', 'utf-16']
+        results = {}
+        
+        for encoding in common_encodings:
+            try:
+                with open(file_path, 'r', encoding=encoding) as f:
+                    sample = f.read(1000)  # Ler amostra
+                    
+                # Verificar qualidade do texto decodificado
+                quality_score = self._assess_text_quality(sample)
+                results[encoding] = {
+                    "readable": True,
+                    "quality_score": quality_score,
+                    "sample_preview": sample[:100]
+                }
+                
+            except (UnicodeDecodeError, UnicodeError):
+                results[encoding] = {
+                    "readable": False,
+                    "quality_score": 0.0,
+                    "error": "UnicodeDecodeError"
+                }
+        
+        return results
+    
+    def _fallback_encoding_detection(self, file_path: str) -> Optional[str]:
+        """Detecção de encoding baseada em heurísticas"""
+        
+        try:
+            with open(file_path, 'rb') as f:
+                raw_data = f.read(2048)
+            
+            # Heurística 1: Presença de BOM
+            if raw_data.startswith(b'\xff\xfe'):
+                return 'utf-16-le'
+            elif raw_data.startswith(b'\xfe\xff'):
+                return 'utf-16-be'
+            elif raw_data.startswith(b'\xef\xbb\xbf'):
+                return 'utf-8-sig'
+            
+            # Heurística 2: Caracteres típicos do português
+            try:
+                # Testar UTF-8
+                text = raw_data.decode('utf-8')
+                if self._contains_portuguese_chars(text):
+                    return 'utf-8'
+            except UnicodeDecodeError:
+                pass
+            
+            # Heurística 3: Fallback para latin-1 (sempre funciona)
+            return 'latin-1'
+            
+        except Exception:
+            return 'utf-8'  # Fallback final
+    
+    def _assess_text_quality(self, text: str) -> float:
+        """Avalia qualidade do texto decodificado (0-1)"""
+        
+        if not text:
+            return 0.0
+        
+        quality_score = 1.0
+        
+        # Penalizar caracteres de substituição
+        replacement_chars = text.count('�')
+        if replacement_chars > 0:
+            quality_score -= (replacement_chars / len(text)) * 2
+        
+        # Penalizar sequências suspeitas
+        suspicious_patterns = [
+            r'Ã[²³¹°]',  # Encoding artifacts
+            r'â€[œ™"]',  # Windows-1252 artifacts
+            r'[Â]{2,}',   # Repeated artifacts
+        ]
+        
+        for pattern in suspicious_patterns:
+            matches = len(re.findall(pattern, text))
+            if matches > 0:
+                quality_score -= (matches / len(text.split())) * 0.5
+        
+        # Bonus para caracteres portugueses
+        portuguese_chars = 'ãçáéíóúàèìòùâêîôûäëïöü'
+        portuguese_count = sum(1 for c in text.lower() if c in portuguese_chars)
+        if portuguese_count > 0:
+            quality_score += min(0.2, portuguese_count / len(text))
+        
+        return max(0.0, min(1.0, quality_score))
+    
+    def _contains_portuguese_chars(self, text: str) -> bool:
+        """Verifica se texto contém caracteres típicos do português"""
+        
+        portuguese_indicators = [
+            'ção', 'são', 'não', 'também', 'português', 'brasil',
+            'á', 'é', 'í', 'ó', 'ú', 'ã', 'õ', 'ç'
+        ]
+        
+        text_lower = text.lower()
+        return any(indicator in text_lower for indicator in portuguese_indicators)
+    
+    def _validate_csv_loading(self, df: pd.DataFrame) -> bool:
+        """Valida se o carregamento do CSV fez sentido"""
+        
+        # Verificações básicas
+        if df.empty:
+            return False
+        
+        # Deve ter pelo menos 2 colunas (dados estruturados)
+        if len(df.columns) < 2:
+            return False
+        
+        # Não deve ter linhas demais como NaN
+        nan_ratio = df.isnull().sum().sum() / (df.shape[0] * df.shape[1])
+        if nan_ratio > 0.8:
+            return False
+        
+        # Colunas não devem ser todas números (indica separador errado)
+        numeric_columns = 0
+        for col in df.columns:
+            if str(col).replace('.', '').replace(',', '').isdigit():
+                numeric_columns += 1
+        
+        if numeric_columns == len(df.columns):
+            return False
+        
+        return True
+    
+    def _post_loading_cleanup(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Limpeza básica pós-carregamento"""
+        
+        # Remover colunas completamente vazias
+        df = df.dropna(axis=1, how='all')
+        
+        # Remover linhas completamente vazias
+        df = df.dropna(axis=0, how='all')
+        
+        # Limpar nomes de colunas
+        df.columns = [str(col).strip() for col in df.columns]
+        
+        # Reset index
+        df = df.reset_index(drop=True)
+        
+        return df
