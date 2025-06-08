@@ -1,8 +1,9 @@
 """
-UNIFIED ANTHROPIC PIPELINE SYSTEM v4.6
+UNIFIED ANTHROPIC PIPELINE SYSTEM v4.8
 =======================================
-Consolida todas as 19 etapas do pipeline com integração Anthropic centralizada
-e integração completa com dashboard para análise em tempo real.
+Consolida todas as 20 etapas do pipeline com integração Anthropic centralizada,
+spaCy linguístico e integração completa com dashboard para análise em tempo real.
+Numeração renumerada sequencialmente (01-20) para consistência.
 """
 
 import os
@@ -68,28 +69,29 @@ logger = logging.getLogger(__name__)
 
 class UnifiedAnthropicPipeline(AnthropicBase):
     """
-    Pipeline unificado com integração Anthropic para todas as 19 etapas
+    Pipeline unificado com integração Anthropic para todas as 20 etapas
     
-    Etapas do Pipeline v4.6:
+    Etapas do Pipeline v4.8 (RENUMERADO SEQUENCIALMENTE):
     01. chunk_processing - Processamento robusto em chunks
     02. encoding_validation - Validação estrutural e encoding
     03. deduplication - Deduplicação inteligente
     04. feature_validation - Validação e enriquecimento de features básicas
     05. political_analysis - Análise política profunda via API
     06. text_cleaning - Limpeza inteligente de texto
-    07. sentiment_analysis - Análise de sentimento multidimensional
-    08. topic_modeling - Modelagem de tópicos com interpretação
-    09. tfidf_extraction - Extração TF-IDF semântica
-    10. clustering - Clustering com validação automática
-    11. hashtag_normalization - Normalização e categorização de hashtags
-    12. domain_analysis - Análise completa de domínios e credibilidade
-    13. temporal_analysis - Análise temporal inteligente
-    14. network_analysis - Análise de estrutura de rede e comunidades
-    15. qualitative_analysis - Análise qualitativa com taxonomias
-    16. pipeline_review - Revisão inteligente e reprodutibilidade
-    17. topic_interpretation - Interpretação contextualizada de tópicos
-    18. semantic_search - Busca semântica inteligente e indexação
-    19. pipeline_validation - Validação final completa do pipeline
+    07. linguistic_processing - Processamento linguístico avançado com spaCy 🔤
+    08. sentiment_analysis - Análise de sentimento multidimensional
+    09. topic_modeling - Modelagem de tópicos com interpretação 🚀
+    10. tfidf_extraction - Extração TF-IDF semântica 🚀
+    11. clustering - Clustering com validação automática 🚀
+    12. hashtag_normalization - Normalização e categorização de hashtags
+    13. domain_analysis - Análise completa de domínios e credibilidade
+    14. temporal_analysis - Análise temporal inteligente
+    15. network_analysis - Análise de estrutura de rede e comunidades
+    16. qualitative_analysis - Análise qualitativa com taxonomias
+    17. smart_pipeline_review - Revisão inteligente e reprodutibilidade
+    18. topic_interpretation - Interpretação contextualizada de tópicos
+    19. semantic_search - Busca semântica inteligente e indexação 🚀
+    20. pipeline_validation - Validação final completa do pipeline
     """
     
     def __init__(self, config: Dict[str, Any] = None, project_root: str = None):
@@ -204,6 +206,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("encoding_validator", lambda: EncodingValidator(self.config)),
             ("deduplication_validator", lambda: DeduplicationValidator(self.config)),
             ("text_cleaner", lambda: IntelligentTextCleaner(self.config)),
+            ("spacy_nlp_processor", lambda: SpacyNLPProcessor(self.config) if SPACY_PROCESSOR_AVAILABLE else None),
             ("sentiment_analyzer", lambda: AnthropicSentimentAnalyzer(self.config)),
             ("topic_interpreter", lambda: TopicInterpreter(self.config)),
             ("tfidf_analyzer", lambda: SemanticTfidfAnalyzer(self.config)),
@@ -408,7 +411,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
             
-            # Executar todas as 20 etapas sequencialmente (incluindo spaCy)
+            # Executar todas as 20 etapas sequencialmente (numeração renumerada v4.8)
             all_pipeline_stages = [
                 "01_chunk_processing",
                 "02_encoding_validation",
@@ -416,23 +419,23 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "04_feature_validation",
                 "05_political_analysis",
                 "06_text_cleaning",
-                "06b_linguistic_processing",  # 🔤 NOVA ETAPA SPACY
-                "07_sentiment_analysis",
-                "08_topic_modeling",
-                "09_tfidf_extraction",
-                "10_clustering",
-                "11_hashtag_normalization",
-                "12_domain_analysis",
-                "13_temporal_analysis",
-                "14_network_analysis",
-                "15_qualitative_analysis",
-                "16_smart_pipeline_review",
-                "17_topic_interpretation",
-                "18_semantic_search",
-                "19_pipeline_validation"
+                "07_linguistic_processing",  # 🔤 SPACY (renumerado de 06b)
+                "08_sentiment_analysis",
+                "09_topic_modeling",  # 🚀 VOYAGE.AI
+                "10_tfidf_extraction",  # 🚀 VOYAGE.AI
+                "11_clustering",  # 🚀 VOYAGE.AI
+                "12_hashtag_normalization",
+                "13_domain_analysis",
+                "14_temporal_analysis",
+                "15_network_analysis",
+                "16_qualitative_analysis",
+                "17_smart_pipeline_review",
+                "18_topic_interpretation",
+                "19_semantic_search",  # 🚀 VOYAGE.AI
+                "20_pipeline_validation"
             ]
             
-            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.6")
+            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.8 (numeração renumerada)")
             
             for stage_num, stage_name in enumerate(all_pipeline_stages, 1):
                 
@@ -797,7 +800,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         start_time = time.time()
         
         try:
-            # Mapear etapa para método correspondente - CORRIGIDO v4.7 (Numeração Atualizada)
+            # Mapear etapa para método correspondente - RENUMERADO v4.8 (Sequência 01-20)
             stage_methods = {
                 # FASE 1: Preparação e Validação de Dados (01-05)
                 "01_chunk_processing": self._stage_01_chunk_processing,
@@ -806,26 +809,26 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "04_feature_validation": self._stage_01b_feature_validation,
                 "05_political_analysis": self._stage_01c_political_analysis,
                 
-                # FASE 2: Processamento de Texto e Análise (06-09)
+                # FASE 2: Processamento de Texto e Análise (06-11)
                 "06_text_cleaning": self._stage_03_clean_text,
-                "06b_linguistic_processing": self._stage_06b_linguistic_processing,  # 🔤 SPACY
-                "07_sentiment_analysis": self._stage_04_sentiment_analysis,
-                "08_topic_modeling": self._stage_05_topic_modeling,  # 🚀 VOYAGE.AI
-                "09_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
+                "07_linguistic_processing": self._stage_06b_linguistic_processing,  # 🔤 SPACY
+                "08_sentiment_analysis": self._stage_04_sentiment_analysis,
+                "09_topic_modeling": self._stage_05_topic_modeling,  # 🚀 VOYAGE.AI
+                "10_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
+                "11_clustering": self._stage_07_clustering,  # 🚀 VOYAGE.AI
                 
-                # FASE 3: Análise Estrutural e de Rede (10-13)
-                "10_clustering": self._stage_07_clustering,  # 🚀 VOYAGE.AI
-                "11_hashtag_normalization": self._stage_08_hashtag_normalization,
-                "12_domain_analysis": self._stage_09_domain_extraction,
-                "13_temporal_analysis": self._stage_10_temporal_analysis,
+                # FASE 3: Análise Estrutural e de Rede (12-15)
+                "12_hashtag_normalization": self._stage_08_hashtag_normalization,
+                "13_domain_analysis": self._stage_09_domain_extraction,
+                "14_temporal_analysis": self._stage_10_temporal_analysis,
+                "15_network_analysis": self._stage_11_network_structure,
                 
-                # FASE 4: Análise Avançada e Finalização (14-19)
-                "14_network_analysis": self._stage_11_network_structure,
-                "15_qualitative_analysis": self._stage_12_qualitative_analysis,
-                "16_smart_pipeline_review": self._stage_13_review_reproducibility,
-                "17_topic_interpretation": self._stage_14_topic_interpretation,
-                "18_semantic_search": self._stage_14_semantic_search_intelligence,  # 🚀 VOYAGE.AI
-                "19_pipeline_validation": self._stage_16_pipeline_validation,
+                # FASE 4: Análise Avançada e Finalização (16-20)
+                "16_qualitative_analysis": self._stage_12_qualitative_analysis,
+                "17_smart_pipeline_review": self._stage_13_review_reproducibility,
+                "18_topic_interpretation": self._stage_14_topic_interpretation,
+                "19_semantic_search": self._stage_14_semantic_search_intelligence,  # 🚀 VOYAGE.AI
+                "20_pipeline_validation": self._stage_16_pipeline_validation,
                 
                 # Aliases para compatibilidade com numeração antiga
                 "01b_features_validation": self._stage_01b_feature_validation,
@@ -834,7 +837,21 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "02a_encoding_validation": self._stage_02a_encoding_validation,
                 "02b_deduplication": self._stage_02b_deduplication,
                 "03_text_cleaning": self._stage_03_clean_text,
-                "03_clean_text": self._stage_03_clean_text
+                "03_clean_text": self._stage_03_clean_text,
+                "06b_linguistic_processing": self._stage_06b_linguistic_processing,  # LEGACY
+                "07_sentiment_analysis": self._stage_04_sentiment_analysis,  # LEGACY
+                "08_topic_modeling": self._stage_05_topic_modeling,  # LEGACY
+                "09_tfidf_extraction": self._stage_06_tfidf_extraction,  # LEGACY
+                "10_clustering": self._stage_07_clustering,  # LEGACY
+                "11_hashtag_normalization": self._stage_08_hashtag_normalization,  # LEGACY
+                "12_domain_analysis": self._stage_09_domain_extraction,  # LEGACY
+                "13_temporal_analysis": self._stage_10_temporal_analysis,  # LEGACY
+                "14_network_analysis": self._stage_11_network_structure,  # LEGACY
+                "15_qualitative_analysis": self._stage_12_qualitative_analysis,  # LEGACY
+                "16_smart_pipeline_review": self._stage_13_review_reproducibility,  # LEGACY
+                "17_topic_interpretation": self._stage_14_topic_interpretation,  # LEGACY
+                "18_semantic_search": self._stage_14_semantic_search_intelligence,  # LEGACY
+                "19_pipeline_validation": self._stage_16_pipeline_validation  # LEGACY
             }
             
             if stage_name in stage_methods:
@@ -1336,9 +1353,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_06b_linguistic_processing(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 06b: Processamento linguístico avançado com spaCy"""
+        """Etapa 07: Processamento linguístico avançado com spaCy"""
         
-        logger.info("🔤 INICIANDO ETAPA 06b: PROCESSAMENTO LINGUÍSTICO COM SPACY")
+        logger.info("🔤 INICIANDO ETAPA 07: PROCESSAMENTO LINGUÍSTICO COM SPACY")
         results = {"linguistic_reports": {}}
         
         for dataset_path in dataset_paths:
@@ -1386,7 +1403,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     method_used = "basic_fallback"
                 
                 # Salvar dados com features linguísticas
-                output_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                output_path = self._get_stage_output_path("07_linguistically_processed", dataset_path)
                 self._save_processed_data(processed_df, output_path)
                 logger.info(f"✅ Dados linguisticamente processados salvos: {output_path}")
                 
@@ -1449,18 +1466,18 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         
         for dataset_path in dataset_paths:
             # Carregar dados linguisticamente processados (se disponível) ou limpos
-            if "06b_linguistically_processed" in dataset_path:
+            if "07_linguistically_processed" in dataset_path:
                 input_path = dataset_path
             elif "06_text_cleaned" in dataset_path:
                 # Tentar usar dados linguisticamente processados
                 try:
-                    input_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                    input_path = self._get_stage_output_path("07_linguistically_processed", dataset_path)
                 except:
                     input_path = dataset_path
             else:
                 # Priorizar dados linguisticamente processados
                 try:
-                    input_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                    input_path = self._get_stage_output_path("07_linguistically_processed", dataset_path)
                 except:
                     input_path = self._get_stage_output_path("06_text_cleaned", dataset_path)
             
@@ -1490,7 +1507,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
     def _stage_05_topic_modeling(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 08: Modelagem de tópicos com Voyage.ai"""
         
-        logger.info("🎯 INICIANDO ETAPA 08: TOPIC MODELING COM VOYAGE.AI")
+        logger.info("🎯 INICIANDO ETAPA 09: TOPIC MODELING COM VOYAGE.AI")
         results = {"topic_reports": {}}
         
         for dataset_path in dataset_paths:
@@ -1645,9 +1662,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_07_clustering(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 10: Clustering semântico com Voyage.ai (Método interno _stage_07)"""
+        """Etapa 11: Clustering semântico com Voyage.ai"""
         
-        logger.info("🎯 INICIANDO ETAPA 10: CLUSTERING SEMÂNTICO COM VOYAGE.AI")
+        logger.info("🎯 INICIANDO ETAPA 11: CLUSTERING SEMÂNTICO COM VOYAGE.AI")
         results = {"clustering_reports": {}}
         
         for dataset_path in dataset_paths:

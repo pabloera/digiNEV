@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.6
+MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.8
 ============================================
 
 Controlador principal do pipeline com checkpoints e recuperação automática.
 Integra com o sistema unificado de anthropic_integration.
+Pipeline renumerado sequencialmente: 20 etapas (01-20).
 """
 
 import os
@@ -38,27 +39,28 @@ class PipelineController:
         self.checkpoints_dir = self.base_path / "checkpoints"
         self.checkpoints_dir.mkdir(exist_ok=True)
         
-        # Pipeline stages configuration
+        # Pipeline stages configuration (v4.8 - 20 etapas renumeradas sequencialmente)
         self.stages = [
             {'id': '01_chunk_processing', 'name': 'Chunk Processing', 'critical': True},
             {'id': '02_encoding_validation', 'name': 'Encoding Validation', 'critical': True},
             {'id': '03_deduplication', 'name': 'Deduplication', 'critical': True},
-            {'id': '04_features_validation', 'name': 'Features Validation', 'critical': True},
+            {'id': '04_feature_validation', 'name': 'Feature Validation', 'critical': True},
             {'id': '05_political_analysis', 'name': 'Political Analysis', 'critical': False},
             {'id': '06_text_cleaning', 'name': 'Text Cleaning', 'critical': True},
-            {'id': '07_sentiment_analysis', 'name': 'Sentiment Analysis', 'critical': False},
-            {'id': '08_topic_modeling', 'name': 'Topic Modeling', 'critical': False},
-            {'id': '09_tfidf_extraction', 'name': 'TF-IDF Extraction', 'critical': False},
-            {'id': '10_clustering', 'name': 'Clustering', 'critical': False},
-            {'id': '11_hashtag_normalization', 'name': 'Hashtag Normalization', 'critical': False},
-            {'id': '12_domain_analysis', 'name': 'Domain Analysis', 'critical': False},
-            {'id': '13_temporal_analysis', 'name': 'Temporal Analysis', 'critical': False},
-            {'id': '14_network_analysis', 'name': 'Network Analysis', 'critical': False},
-            {'id': '15_qualitative_analysis', 'name': 'Qualitative Analysis', 'critical': False},
-            {'id': '16_smart_pipeline_review', 'name': 'Smart Pipeline Review', 'critical': False},
-            {'id': '17_topic_interpretation', 'name': 'Topic Interpretation', 'critical': False},
-            {'id': '18_semantic_search', 'name': 'Semantic Search', 'critical': False},
-            {'id': '19_pipeline_validation', 'name': 'Pipeline Validation', 'critical': True}
+            {'id': '07_linguistic_processing', 'name': 'Linguistic Processing (spaCy)', 'critical': False},
+            {'id': '08_sentiment_analysis', 'name': 'Sentiment Analysis', 'critical': False},
+            {'id': '09_topic_modeling', 'name': 'Topic Modeling (Voyage.ai)', 'critical': False},
+            {'id': '10_tfidf_extraction', 'name': 'TF-IDF Extraction (Voyage.ai)', 'critical': False},
+            {'id': '11_clustering', 'name': 'Clustering (Voyage.ai)', 'critical': False},
+            {'id': '12_hashtag_normalization', 'name': 'Hashtag Normalization', 'critical': False},
+            {'id': '13_domain_analysis', 'name': 'Domain Analysis', 'critical': False},
+            {'id': '14_temporal_analysis', 'name': 'Temporal Analysis', 'critical': False},
+            {'id': '15_network_analysis', 'name': 'Network Analysis', 'critical': False},
+            {'id': '16_qualitative_analysis', 'name': 'Qualitative Analysis', 'critical': False},
+            {'id': '17_smart_pipeline_review', 'name': 'Smart Pipeline Review', 'critical': False},
+            {'id': '18_topic_interpretation', 'name': 'Topic Interpretation', 'critical': False},
+            {'id': '19_semantic_search', 'name': 'Semantic Search (Voyage.ai)', 'critical': False},
+            {'id': '20_pipeline_validation', 'name': 'Pipeline Validation', 'critical': True}
         ]
         
     def save_checkpoint(self, stage_id: str, data: Dict[str, Any]) -> bool:

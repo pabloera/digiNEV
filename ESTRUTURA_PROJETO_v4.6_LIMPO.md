@@ -1,14 +1,14 @@
-# ESTRUTURA DO PROJETO BOLSONARISMO v4.6 - ESTADO LIMPO
+# ESTRUTURA DO PROJETO BOLSONARISMO v4.8 - RENUMERAÇÃO SEQUENCIAL
 
-**Data:** 08/06/2025 01:10  
-**Status:** Sistema limpo, cache removido, pronto para execução  
+**Data:** 08/06/2025 05:35  
+**Status:** Sistema renumerado 01-20, Voyage.ai + spaCy integrados, pronto para execução  
 **Tamanho total:** 854MB
 
 ## 📋 RESUMO DO ESTADO ATUAL
 
-### ✅ IMPLEMENTAÇÕES CONFIRMADAS (v4.6)
+### ✅ IMPLEMENTAÇÕES CONFIRMADAS (v4.8)
 
-- ✅ **Pipeline Completo**: 19 etapas sequenciais implementadas
+- ✅ **Pipeline Completo**: 20 etapas sequenciais implementadas (01-20)
 - ✅ **JSON Parsing Robusto**: Sistema ultra-robusto para Claude API
 - ✅ **Dashboard Integrado**: Interface web com visualizações
 - ✅ **Sistema de Validação**: CompletePipelineValidator funcional
@@ -24,7 +24,7 @@
 
 ## 🔄 SEQUÊNCIA DE ESTÁGIOS DO PIPELINE
 
-O pipeline executa **19 etapas sequenciais** de processamento:
+O pipeline executa **20 etapas sequenciais** de processamento (renumeração v4.8):
 
 ### **FASE 1: Preparação e Validação de Dados**
 

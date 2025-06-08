@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v4.6 - EXECUÇÃO COMPLETA INTEGRADA
+PIPELINE BOLSONARISMO v4.8 - EXECUÇÃO COMPLETA INTEGRADA
 =========================================================
 
-Pipeline completo com todas as 16 etapas implementadas:
+Pipeline completo com todas as 20 etapas implementadas (renumeração sequencial):
 - Integração completa com Dashboard
-- Execução sequencial otimizada
+- Voyage.ai + spaCy totalmente implementados
+- Execução sequencial otimizada (01-20)
 - Monitoramento em tempo real
 - Validação científica automática
 """
@@ -204,7 +205,7 @@ def setup_dashboard_integration(config: Dict[str, Any]):
         return False
 
 def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any]) -> Dict[str, Any]:
-    """Execução completa do pipeline com todas as 16 etapas"""
+    """Execução completa do pipeline com todas as 20 etapas"""
     
     start_time = time.time()
     execution_results = {
@@ -402,7 +403,7 @@ def main():
         
         # 6. Executar pipeline completo com proteção
         print(f"\n🚀 Iniciando execução das etapas (a partir de {resume_point})...")
-        results = run_complete_pipeline_execution(datasets, config, checkpoints, protection_checklist)
+        results = run_complete_pipeline_execution(datasets, config)
         
         # 7. Integrar com dashboard
         if dashboard_ready:

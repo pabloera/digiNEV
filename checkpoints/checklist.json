@@ -1,7 +1,7 @@
 {
-  "pipeline_version": "4.6",
+  "pipeline_version": "4.8",
   "protection_mode": "enabled",
-  "last_updated": "2025-01-08T00:00:00Z",
+  "last_updated": "2025-06-08T05:35:00Z",
   "description": "Flags de proteção para impedir reescrita de etapas funcionais",
   "stage_flags": {
     "01_chunk_processing": {
@@ -37,7 +37,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "04_features_validation": {
+    "04_feature_validation": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -70,7 +70,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "07_sentiment_analysis": {
+    "07_linguistic_processing": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -81,7 +81,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "08_topic_modeling": {
+    "08_sentiment_analysis": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -92,7 +92,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "09_tfidf_extraction": {
+    "09_topic_modeling": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -103,7 +103,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "10_clustering": {
+    "10_tfidf_extraction": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -114,62 +114,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "11_hashtag_normalization": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "low",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "12_domain_analysis": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "low",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "13_temporal_analysis": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "low",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "14_network_analysis": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "low",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "15_qualitative_analysis": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "low",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "16_smart_pipeline_review": {
+    "11_clustering": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -180,18 +125,7 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "17_topic_interpretation": {
-      "completed": false,
-      "locked": false,
-      "verified": false,
-      "output_validated": false,
-      "last_successful_run": null,
-      "protection_level": "medium",
-      "can_overwrite": true,
-      "success_count": 0,
-      "validation_notes": ""
-    },
-    "18_semantic_search": {
+    "12_hashtag_normalization": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -202,7 +136,84 @@
       "success_count": 0,
       "validation_notes": ""
     },
-    "19_pipeline_validation": {
+    "13_domain_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "14_temporal_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "15_network_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "16_qualitative_analysis": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "17_smart_pipeline_review": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "18_topic_interpretation": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "medium",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "19_semantic_search": {
+      "completed": false,
+      "locked": false,
+      "verified": false,
+      "output_validated": false,
+      "last_successful_run": null,
+      "protection_level": "low",
+      "can_overwrite": true,
+      "success_count": 0,
+      "validation_notes": ""
+    },
+    "20_pipeline_validation": {
       "completed": false,
       "locked": false,
       "verified": false,
@@ -240,7 +251,7 @@
     "admin_unlock": "ADMIN_UNLOCK_ALL"
   },
   "statistics": {
-    "total_stages": 19,
+    "total_stages": 20,
     "completed_stages": 0,
     "locked_stages": 0,
     "protected_stages": 0,

@@ -1,19 +1,19 @@
-# CLAUDE.md — Projeto Bolsonarismo v4.7 (JUNHO 2025)
+# CLAUDE.md — Projeto Bolsonarismo v4.8 (JUNHO 2025)
 
-## 🚨 **STATUS ATUAL: VOYAGE.AI + SPACY TOTALMENTE IMPLEMENTADO** ✅
+## 🚨 **STATUS ATUAL: RENUMERAÇÃO SEQUENCIAL 01-20 CONCLUÍDA** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 08/06/2025 - Implementação completa de Voyage.ai + spaCy NLP
+**ÚLTIMA ATUALIZAÇÃO:** 08/06/2025 - Renumeração sequencial completa + Voyage.ai + spaCy NLP
 
-### 🎯 **VOYAGE.AI + SPACY INTEGRATION - IMPLEMENTAÇÃO CONSOLIDADA**
+### 🎯 **PIPELINE v4.8 - RENUMERAÇÃO SEQUENCIAL CONSOLIDADA**
 
 **✅ ESTÁGIOS COM VOYAGE.AI ATIVO:**
-- **Stage 08**: Topic Modeling (`voyage_topic_modeler.py`) 
-- **Stage 09**: TF-IDF Extraction (`semantic_tfidf_analyzer.py`)
-- **Stage 10**: Clustering (`voyage_clustering_analyzer.py`)
-- **Stage 18**: Semantic Search (`semantic_search_engine.py`)
+- **Stage 09**: Topic Modeling (`voyage_topic_modeler.py`) 
+- **Stage 10**: TF-IDF Extraction (`semantic_tfidf_analyzer.py`)
+- **Stage 11**: Clustering (`voyage_clustering_analyzer.py`)
+- **Stage 19**: Semantic Search (`semantic_search_engine.py`)
 
 **✅ ESTÁGIO COM SPACY ATIVO:**
-- **Stage 06b**: Linguistic Processing (`spacy_nlp_processor.py`)
+- **Stage 07**: Linguistic Processing (`spacy_nlp_processor.py`)
 
 **✅ FEATURES IMPLEMENTADAS:**
 - **Voyage.ai**: Embedding generation com voyage-3.5-lite, 96% economia ativada
@@ -57,26 +57,32 @@ Este documento **substitui os seguintes arquivos anteriores**:
 
 **Fluxo completo:** `run_pipeline.py → src/main.py → unified_pipeline.py`
 
-## ✅ ETAPAS DO PIPELINE - STATUS VOYAGE.AI + SPACY IMPLEMENTADO
+## ✅ ETAPAS DO PIPELINE v4.8 - RENUMERAÇÃO SEQUENCIAL CONCLUÍDA
 
-As seguintes etapas já estão estruturadas em `unified_pipeline.py`. Voyage.ai implementado nos estágios marcados com 🚀, spaCy com 🔤.
+As 20 etapas estão estruturadas em `unified_pipeline.py` com numeração sequencial 01-20. Voyage.ai implementado nos estágios marcados com 🚀, spaCy com 🔤.
 
-| Etapa                  | Nome da Função                   | Status       | Tecnologia |
-| ---------------------- | -------------------------------- | ------------ | ---------- |
-| Carregamento           | `load_dataset()`                 | Concluído    | -          |
-| Validação              | `validate_dataset()`             | Concluído    | -          |
-| Limpeza textual        | `clean_text_columns()`           | Concluído    | -          |
-| Deduplicacão           | `deduplicate_rows()`             | Concluído    | -          |
-| Feature engineering    | `extract_features()`             | Concluído    | -          |
-| **Processamento NLP**  | `process_linguistic_features()`  | **NEW**      | 🔤         |
-| Encoding               | `encode_features()`              | Concluído    | -          |
-| TF-IDF                 | `apply_tfidf()`                  | **UPGRADED** | 🚀         |
-| Análise de sentimentos | `analyze_sentiment()`            | Concluído    | -          |
-| **Topic Modeling**     | `run_topic_modeling()`           | **UPGRADED** | 🚀         |
-| **Clustering**         | `run_clustering()`               | **UPGRADED** | 🚀         |
-| Análise política       | `classify_political_alignment()` | Concluído    | -          |
-| **Semantic Search**    | `generate_semantic_search()`     | **NEW**      | 🚀         |
-| Geração de dashboard   | `generate_dashboard()`           | Concluído    | -          |
+| Num | Etapa                     | Nome da Função                    | Status       | Tecnologia |
+| --- | ------------------------- | --------------------------------- | ------------ | ---------- |
+| 01  | Chunk Processing          | `chunk_processing()`              | Concluído    | -          |
+| 02  | Encoding Validation       | `encoding_validation()`           | Concluído    | -          |
+| 03  | Deduplication             | `deduplication()`                 | Concluído    | -          |
+| 04  | Feature Validation        | `feature_validation()`            | Concluído    | -          |
+| 05  | Political Analysis        | `political_analysis()`            | Concluído    | -          |
+| 06  | Text Cleaning             | `text_cleaning()`                 | Concluído    | -          |
+| 07  | **Linguistic Processing** | `linguistic_processing()`         | **NEW**      | 🔤         |
+| 08  | Sentiment Analysis        | `sentiment_analysis()`            | Concluído    | -          |
+| 09  | **Topic Modeling**        | `topic_modeling()`                | **UPGRADED** | 🚀         |
+| 10  | **TF-IDF Extraction**     | `tfidf_extraction()`              | **UPGRADED** | 🚀         |
+| 11  | **Clustering**            | `clustering()`                    | **UPGRADED** | 🚀         |
+| 12  | Hashtag Normalization     | `hashtag_normalization()`         | Concluído    | -          |
+| 13  | Domain Analysis           | `domain_analysis()`               | Concluído    | -          |
+| 14  | Temporal Analysis         | `temporal_analysis()`             | Concluído    | -          |
+| 15  | Network Analysis          | `network_analysis()`              | Concluído    | -          |
+| 16  | Qualitative Analysis      | `qualitative_analysis()`          | Concluído    | -          |
+| 17  | Smart Pipeline Review     | `smart_pipeline_review()`         | Concluído    | -          |
+| 18  | Topic Interpretation      | `topic_interpretation()`          | Concluído    | -          |
+| 19  | **Semantic Search**       | `semantic_search()`               | **NEW**      | 🚀         |
+| 20  | Pipeline Validation       | `pipeline_validation()`           | Concluído    | -          |
 
 ## ⚖️ REGRAS PARA CLAUDE E OUTRAS IAs
 
@@ -188,7 +194,7 @@ Sempre que fizer uma alteração, indique:
 ✅ Pipeline pronto para execução completa (20 estágios)
 ```
 
-## 🔧 PRóximas Tarefas (Manutenção Planejada)
+## 🔧 Tarefas Concluídas v4.8
 
 1. ✅ ~~Finalizar `run_topic_modeling()` com modelo otimizado~~ **CONCLUÍDO**
 2. ✅ ~~Implementar clustering semântico avançado~~ **CONCLUÍDO**  
@@ -196,11 +202,19 @@ Sempre que fizer uma alteração, indique:
 4. ✅ ~~Otimizar semantic search~~ **CONCLUÍDO**
 5. ✅ ~~Implementar spaCy com pt_core_news_lg~~ **CONCLUÍDO**
 6. ✅ ~~Integrar processamento linguístico avançado~~ **CONCLUÍDO**
-7. Adicionar `test_pipeline.py` com testes de regressão específicos para Voyage.ai + spaCy
+7. ✅ ~~Renumeração sequencial das etapas 01-20~~ **CONCLUÍDO**
+8. ✅ ~~Resolver compatibilidade NumPy/SciPy~~ **CONCLUÍDO**
+9. ✅ ~~Atualizar scripts e documentação~~ **CONCLUÍDO**
+
+## 🚀 Próximas Melhorias (Opcional)
+
+1. Adicionar `test_pipeline.py` com testes de regressão específicos para Voyage.ai + spaCy
+2. Implementar métricas avançadas de performance por etapa
+3. Adicionar dashboard de monitoramento em tempo real
 
 ## 🌐 Versão do projeto
 
-**v4.8.0 - Junho 2025 - VOYAGE.AI + SPACY EDITION**
+**v4.8.0 - Junho 2025 - RENUMERAÇÃO SEQUENCIAL + VOYAGE.AI + SPACY EDITION**
 
 **Responsável:** Pablo Emanuel Romero Almada, Ph.D.
 

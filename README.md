@@ -1,10 +1,10 @@
-# Pipeline Bolsonarismo 2025 - Sistema Completamente Otimizado 🚀
+# Pipeline Bolsonarismo 2025 - Sistema Renumerado e Otimizado 🚀
 
 > **Análise de Discurso Político Brasileiro com Inteligência Artificial**
 > 
 > Pipeline unificado ultra-robusto para análise de mensagens do Telegram (2019-2023) focado em bolsonarismo, negacionismo e autoritarismo digital.
 > 
-> **v4.5 - Junho 2025**: Sistema completamente otimizado com CSV parsing robusto, deduplicação inteligente e economia de 90%+ nos custos de API.
+> **v4.8 - Junho 2025**: Sistema com renumeração sequencial (20 etapas), Voyage.ai + spaCy completamente integrados e economia de 96%+ nos custos de API.
 
 ## 🚨 **COMECE AQUI - LEIA PRIMEIRO!**
 
@@ -14,7 +14,7 @@
 2. **`CLAUDE.md`** - Instruções para Claude Code e configurações
 3. **`GUIDELINES.md`** - Diretrizes detalhadas de desenvolvimento
 
-### 🚀 **Início Rápido (Sistema Limpo v4.5)**
+### 🚀 **Início Rápido (Sistema v4.8)**
 ```bash
 # 1. Configurar API Anthropic
 echo "ANTHROPIC_API_KEY=sk-ant-api03-xxxxx" > .env
@@ -26,9 +26,12 @@ python run_pipeline.py
 cd src/dashboard && python start_dashboard.py
 ```
 
-### ✨ **Melhorias v4.5 - Junho 2025**
+### ✨ **Melhorias v4.8 - Junho 2025**
+- 🔢 **Renumeração Sequencial**: 20 etapas numeradas 01-20 de forma consistente
+- 🚀 **Voyage.ai Integrado**: 4 estágios com embeddings semânticos otimizados
+- 🔤 **spaCy NLP**: Processamento linguístico avançado com pt_core_news_lg
 - 🔧 **CSV Parsing Ultra-Robusto**: 10 configurações + detecção automática
-- 🎯 **Deduplicação Perfeita**: Fluxo sequencial entre todas as 13 etapas
+- 🎯 **Deduplicação Perfeita**: Fluxo sequencial entre todas as 20 etapas
 - 💰 **90%+ Economia**: Custos API drasticamente reduzidos
 - 🧹 **Sistema Pristino**: Logs, checkpoints e cache zerados
 - 📊 **Dashboard Integrado**: Parser unificado pipeline + interface web
@@ -45,13 +48,13 @@ for chunk in processor.process_file('data/DATASETS_FULL/arquivo.csv'):
     # Processar chunk
 ```
 
-## 🎯 **Características Principais v4.5**
+## 🎯 **Características Principais v4.8**
 
 ### ✅ **Sistema Ultra-Robusto**
 - **Um único comando**: `python run_pipeline.py`
-- **13 etapas otimizadas** com fluxo sequencial perfeito
+- **20 etapas otimizadas** com fluxo sequencial perfeito
 - **CSV parsing infalível** com 10 configurações automáticas
-- **Deduplicação inteligente** com economia de 90%+ de custos
+- **Deduplicação inteligente** com economia de 96%+ de custos
 - **Sistema limpo** sem conflitos de logs/cache
 
 ### 🤖 **Inteligência Artificial Avançada**
