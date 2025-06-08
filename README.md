@@ -17,7 +17,7 @@
 ### 🚀 **Início Rápido (Sistema v4.9)**
 ```bash
 # 1. Configurar API Anthropic
-echo "ANTHROPIC_API_KEY=sk-ant-api03-xxxxx" > .env
+echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
 
 # 2. Executar pipeline otimizado
 python run_pipeline.py
@@ -99,7 +99,7 @@ source activate.sh
 pip install -r requirements.txt
 
 # Configurar Anthropic API
-echo "ANTHROPIC_API_KEY=sk-ant-api03-your-key-here" > .env
+echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
 ```
 
 ### 2. **Verificar Configuração**
@@ -266,7 +266,7 @@ qualitative:
 
 ```bash
 # Obrigatório
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]
 
 # Opcional
 ANTHROPIC_MODEL=claude-3-haiku-20240307
