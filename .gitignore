@@ -1,4 +1,4 @@
-echo ".venv/
+.venv/
 __pycache__/
 *.py[cod]
 *.so
@@ -16,4 +16,26 @@ pyproject.toml
 *.egg-info/
 build/
 dist/
-.casv/" > .gitignore
+.csv/
+
+# Sensitive files
+*.key
+*.pem
+secrets/
+
+# Data files
+data/DATASETS_FULL/
+data/uploads/*.csv
+data/interim/
+logs/
+checkpoints/
+
+# Dashboard temp files
+src/dashboard/data/uploads/
+src/dashboard/temp/
+
+# IDE files
+.idea/
+*.sublime-*
+.DS_Store
+Thumbs.db
