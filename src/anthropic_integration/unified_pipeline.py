@@ -52,6 +52,14 @@ from .dataset_statistics_generator import DatasetStatisticsGenerator
 from .feature_validator import FeatureValidator
 from .political_analyzer import PoliticalAnalyzer
 
+# Importar processador linguístico spaCy
+try:
+    from .spacy_nlp_processor import SpacyNLPProcessor
+    SPACY_PROCESSOR_AVAILABLE = True
+except ImportError:
+    SPACY_PROCESSOR_AVAILABLE = False
+    SpacyNLPProcessor = None
+
 # Importar processadores de dados
 from src.data.processors.chunk_processor import ChunkProcessor
 
@@ -338,6 +346,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         self.encoding_validator = EncodingValidator(self.config)
         self.deduplication_validator = DeduplicationValidator(self.config)
         self.text_cleaner = IntelligentTextCleaner(self.config)
+        
+        # Inicializar processador linguístico spaCy
+        if SPACY_PROCESSOR_AVAILABLE:
+            try:
+                self.spacy_nlp_processor = SpacyNLPProcessor(self.config)
+                logger.info("✅ SpacyNLPProcessor inicializado com sucesso")
+            except Exception as e:
+                logger.warning(f"⚠️ Falha ao inicializar SpacyNLPProcessor: {e}")
+                self.spacy_nlp_processor = None
+        else:
+            self.spacy_nlp_processor = None
+            logger.info("❌ SpacyNLPProcessor não disponível")
+        
         self.sentiment_analyzer = AnthropicSentimentAnalyzer(self.config)
         self.topic_interpreter = TopicInterpreter(self.config)
         self.tfidf_analyzer = SemanticTfidfAnalyzer(self.config)
@@ -387,7 +408,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
             
-            # Executar todas as 19 etapas sequencialmente
+            # Executar todas as 20 etapas sequencialmente (incluindo spaCy)
             all_pipeline_stages = [
                 "01_chunk_processing",
                 "02_encoding_validation",
@@ -395,6 +416,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "04_feature_validation",
                 "05_political_analysis",
                 "06_text_cleaning",
+                "06b_linguistic_processing",  # 🔤 NOVA ETAPA SPACY
                 "07_sentiment_analysis",
                 "08_topic_modeling",
                 "09_tfidf_extraction",
@@ -786,6 +808,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 
                 # FASE 2: Processamento de Texto e Análise (06-09)
                 "06_text_cleaning": self._stage_03_clean_text,
+                "06b_linguistic_processing": self._stage_06b_linguistic_processing,  # 🔤 SPACY
                 "07_sentiment_analysis": self._stage_04_sentiment_analysis,
                 "08_topic_modeling": self._stage_05_topic_modeling,  # 🚀 VOYAGE.AI
                 "09_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
@@ -1312,18 +1335,134 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         results["datasets_processed"] = len([r for r in results["cleaning_reports"].values() if r.get("output_path")])
         return results
     
+    def _stage_06b_linguistic_processing(self, dataset_paths: List[str]) -> Dict[str, Any]:
+        """Etapa 06b: Processamento linguístico avançado com spaCy"""
+        
+        logger.info("🔤 INICIANDO ETAPA 06b: PROCESSAMENTO LINGUÍSTICO COM SPACY")
+        results = {"linguistic_reports": {}}
+        
+        for dataset_path in dataset_paths:
+            logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
+            
+            try:
+                # Determinar arquivo de entrada (dados limpos)
+                if "06_text_cleaned" in dataset_path:
+                    input_path = dataset_path
+                else:
+                    input_path = self._get_stage_output_path("06_text_cleaned", dataset_path)
+                
+                # Carregar dados limpos
+                df = self._load_processed_data(input_path)
+                logger.info(f"📊 Dataset carregado: {len(df)} registros")
+                
+                # Verificar se spaCy está disponível
+                if self.spacy_nlp_processor is not None:
+                    logger.info("🚀 Usando spaCy para processamento linguístico avançado")
+                    
+                    # Detectar coluna de texto adequada
+                    text_column = self._get_best_text_column(df, prefer_cleaned=True)
+                    logger.info(f"📝 Usando coluna de texto: {text_column}")
+                    
+                    # Processar features linguísticas
+                    linguistic_result = self.spacy_nlp_processor.process_linguistic_features(df, text_column)
+                    
+                    if linguistic_result['success']:
+                        processed_df = linguistic_result['enhanced_dataframe']
+                        stats = linguistic_result['linguistics_statistics']
+                        method_used = "spacy_advanced"
+                        logger.info(f"✅ Processamento spaCy concluído: {linguistic_result['features_extracted']} features extraídas")
+                    else:
+                        # Fallback em caso de erro
+                        processed_df = self._add_basic_linguistic_features(df, text_column)
+                        stats = {}
+                        method_used = "spacy_fallback"
+                        logger.warning("⚠️ Fallback para features básicas devido a erro no spaCy")
+                
+                else:
+                    logger.warning("❌ spaCy não disponível. Usando processamento linguístico básico")
+                    text_column = self._get_best_text_column(df, prefer_cleaned=True)
+                    processed_df = self._add_basic_linguistic_features(df, text_column)
+                    stats = {}
+                    method_used = "basic_fallback"
+                
+                # Salvar dados com features linguísticas
+                output_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                self._save_processed_data(processed_df, output_path)
+                logger.info(f"✅ Dados linguisticamente processados salvos: {output_path}")
+                
+                results["linguistic_reports"][dataset_path] = {
+                    "output_path": output_path,
+                    "method_used": method_used,
+                    "statistics": stats,
+                    "features_added": len([col for col in processed_df.columns if col.startswith('spacy_')]),
+                    "success": True
+                }
+                
+            except Exception as e:
+                logger.error(f"❌ Erro no processamento linguístico para {Path(dataset_path).name}: {e}")
+                results["linguistic_reports"][dataset_path] = {
+                    "error": str(e),
+                    "output_path": None,
+                    "method_used": "failed",
+                    "success": False
+                }
+        
+        results["datasets_processed"] = len([r for r in results["linguistic_reports"].values() if r.get("success")])
+        logger.info(f"📊 Processamento linguístico concluído: {results['datasets_processed']} datasets processados")
+        
+        return results
+    
+    def _add_basic_linguistic_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Adiciona features linguísticas básicas quando spaCy não está disponível"""
+        enhanced_df = df.copy()
+        
+        # Features básicas computáveis sem spaCy
+        texts = enhanced_df[text_column].fillna('').astype(str)
+        
+        # Contagem básica de tokens
+        enhanced_df['spacy_tokens_count'] = texts.str.split().str.len()
+        
+        # Features vazias/zero para compatibilidade
+        enhanced_df['spacy_lemmas'] = ''
+        enhanced_df['spacy_pos_tags'] = '[]'
+        enhanced_df['spacy_named_entities'] = '[]'
+        enhanced_df['spacy_political_entities_found'] = '[]'
+        enhanced_df['political_entity_density'] = 0.0
+        enhanced_df['spacy_linguistic_complexity'] = 0.0
+        enhanced_df['spacy_lexical_diversity'] = 0.0
+        enhanced_df['spacy_hashtag_segments'] = '[]'
+        
+        # Categorias básicas baseadas em comprimento
+        enhanced_df['tokens_category'] = enhanced_df['spacy_tokens_count'].apply(
+            lambda x: 'short' if x < 10 else 'medium' if x < 50 else 'long'
+        )
+        enhanced_df['complexity_category'] = 'unknown'
+        enhanced_df['lexical_richness'] = 'unknown'
+        
+        logger.info("📝 Features linguísticas básicas adicionadas (fallback)")
+        return enhanced_df
+    
     def _stage_04_sentiment_analysis(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 04: Análise de sentimento"""
         
         results = {"sentiment_reports": {}}
         
         for dataset_path in dataset_paths:
-            # Carregar dados limpos
-            # Se dataset_path já aponta para arquivo limpo, usar diretamente
-            if "03_text_cleaned" in dataset_path:
+            # Carregar dados linguisticamente processados (se disponível) ou limpos
+            if "06b_linguistically_processed" in dataset_path:
                 input_path = dataset_path
+            elif "06_text_cleaned" in dataset_path:
+                # Tentar usar dados linguisticamente processados
+                try:
+                    input_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                except:
+                    input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("03_text_cleaned", dataset_path)
+                # Priorizar dados linguisticamente processados
+                try:
+                    input_path = self._get_stage_output_path("06b_linguistically_processed", dataset_path)
+                except:
+                    input_path = self._get_stage_output_path("06_text_cleaned", dataset_path)
             
             df = self._load_processed_data(input_path)
             

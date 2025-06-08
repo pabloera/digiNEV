@@ -78,9 +78,25 @@ feature_engineering:
 # NLP
 nlp:
   spacy_model: "pt_core_news_lg"
-  sentiment_lexicon: "data/external/dictionaries/sentiment_lexicon_pt.csv"
+  batch_size: 100
   entity_recognition: true
+  lemmatization: true
   dependency_parsing: false
+  sentiment_lexicon: "data/external/dictionaries/sentiment_lexicon_pt.csv"
+  
+  # Configurações específicas do Spacy
+  limits:
+    max_text_length: 5000
+    memory_limit_mb: 1024
+  
+  # Features linguísticas
+  linguistic_features:
+    pos_tagging: true
+    named_entities: true
+    political_entities: true
+    complexity_analysis: true
+    lexical_diversity: true
+    hashtag_segmentation: true
   
 # Análise de Tópicos
 topic_modeling:

@@ -1,10 +1,10 @@
 # CLAUDE.md — Projeto Bolsonarismo v4.7 (JUNHO 2025)
 
-## 🚨 **STATUS ATUAL: VOYAGE.AI TOTALMENTE IMPLEMENTADO** ✅
+## 🚨 **STATUS ATUAL: VOYAGE.AI + SPACY TOTALMENTE IMPLEMENTADO** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 08/06/2025 - Implementação completa de Voyage.ai em 4 estágios críticos
+**ÚLTIMA ATUALIZAÇÃO:** 08/06/2025 - Implementação completa de Voyage.ai + spaCy NLP
 
-### 🎯 **VOYAGE.AI INTEGRATION - IMPLEMENTAÇÃO CONSOLIDADA**
+### 🎯 **VOYAGE.AI + SPACY INTEGRATION - IMPLEMENTAÇÃO CONSOLIDADA**
 
 **✅ ESTÁGIOS COM VOYAGE.AI ATIVO:**
 - **Stage 08**: Topic Modeling (`voyage_topic_modeler.py`) 
@@ -12,12 +12,15 @@
 - **Stage 10**: Clustering (`voyage_clustering_analyzer.py`)
 - **Stage 18**: Semantic Search (`semantic_search_engine.py`)
 
+**✅ ESTÁGIO COM SPACY ATIVO:**
+- **Stage 06b**: Linguistic Processing (`spacy_nlp_processor.py`)
+
 **✅ FEATURES IMPLEMENTADAS:**
-- Embedding generation com voyage-3.5-lite
-- Cost optimization: 96% economia ativada
-- AI interpretation com contexto político brasileiro
-- Fallbacks robustos para métodos tradicionais
-- Pipeline integration completa
+- **Voyage.ai**: Embedding generation com voyage-3.5-lite, 96% economia ativada
+- **spaCy**: Processamento linguístico com pt_core_news_lg, 57 entidades políticas
+- **AI interpretation**: Contexto político brasileiro aprimorado
+- **Fallbacks robustos**: Para métodos tradicionais e indisponibilidade
+- **Pipeline integration**: Completa com 20 estágios funcionais
 
 ## 🔄 OBJETIVO DESTE DOCUMENTO
 
@@ -54,25 +57,26 @@ Este documento **substitui os seguintes arquivos anteriores**:
 
 **Fluxo completo:** `run_pipeline.py → src/main.py → unified_pipeline.py`
 
-## ✅ ETAPAS DO PIPELINE - STATUS VOYAGE.AI IMPLEMENTADO
+## ✅ ETAPAS DO PIPELINE - STATUS VOYAGE.AI + SPACY IMPLEMENTADO
 
-As seguintes etapas já estão estruturadas em `unified_pipeline.py`. Voyage.ai implementado nos estágios marcados com 🚀.
+As seguintes etapas já estão estruturadas em `unified_pipeline.py`. Voyage.ai implementado nos estágios marcados com 🚀, spaCy com 🔤.
 
-| Etapa                  | Nome da Função                   | Status       | Voyage.ai |
-| ---------------------- | -------------------------------- | ------------ | --------- |
-| Carregamento           | `load_dataset()`                 | Concluído    | -         |
-| Validação              | `validate_dataset()`             | Concluído    | -         |
-| Limpeza textual        | `clean_text_columns()`           | Concluído    | -         |
-| Deduplicacão           | `deduplicate_rows()`             | Concluído    | -         |
-| Feature engineering    | `extract_features()`             | Concluído    | -         |
-| Encoding               | `encode_features()`              | Concluído    | -         |
-| TF-IDF                 | `apply_tfidf()`                  | **UPGRADED** | 🚀        |
-| Análise de sentimentos | `analyze_sentiment()`            | Concluído    | -         |
-| **Topic Modeling**     | `run_topic_modeling()`           | **UPGRADED** | 🚀        |
-| **Clustering**         | `run_clustering()`               | **UPGRADED** | 🚀        |
-| Análise política       | `classify_political_alignment()` | Concluído    | -         |
-| **Semantic Search**    | `generate_semantic_search()`     | **NEW**      | 🚀        |
-| Geração de dashboard   | `generate_dashboard()`           | Concluído    | -         |
+| Etapa                  | Nome da Função                   | Status       | Tecnologia |
+| ---------------------- | -------------------------------- | ------------ | ---------- |
+| Carregamento           | `load_dataset()`                 | Concluído    | -          |
+| Validação              | `validate_dataset()`             | Concluído    | -          |
+| Limpeza textual        | `clean_text_columns()`           | Concluído    | -          |
+| Deduplicacão           | `deduplicate_rows()`             | Concluído    | -          |
+| Feature engineering    | `extract_features()`             | Concluído    | -          |
+| **Processamento NLP**  | `process_linguistic_features()`  | **NEW**      | 🔤         |
+| Encoding               | `encode_features()`              | Concluído    | -          |
+| TF-IDF                 | `apply_tfidf()`                  | **UPGRADED** | 🚀         |
+| Análise de sentimentos | `analyze_sentiment()`            | Concluído    | -          |
+| **Topic Modeling**     | `run_topic_modeling()`           | **UPGRADED** | 🚀         |
+| **Clustering**         | `run_clustering()`               | **UPGRADED** | 🚀         |
+| Análise política       | `classify_political_alignment()` | Concluído    | -          |
+| **Semantic Search**    | `generate_semantic_search()`     | **NEW**      | 🚀         |
+| Geração de dashboard   | `generate_dashboard()`           | Concluído    | -          |
 
 ## ⚖️ REGRAS PARA CLAUDE E OUTRAS IAs
 
@@ -107,7 +111,7 @@ Sempre que fizer uma alteração, indique:
 
 ## 🔍 DIRETRIZES DE CODIFICAÇÃO
 
-* Utilize `pandas`, `sklearn`, `numpy`, `matplotlib`, `seaborn`, `nltk`, `spacy` (conforme o estágio).
+* Utilize `pandas`, `sklearn`, `numpy`, `matplotlib`, `seaborn`, `nltk`, `spacy`, `voyageai` (conforme o estágio).
 * Funções devem ser puras, com validação interna de tipos.
 * Toda função recebe um `DataFrame` como input e retorna um `DataFrame` atualizado.
 * Evite logging excessivo. Use `print()` ou `logging.debug()` somente em `run_pipeline.py`.
@@ -122,34 +126,51 @@ Sempre que fizer uma alteração, indique:
 
 ---
 
-## 🚀 **VOYAGE.AI IMPLEMENTATION SUMMARY (08/06/2025)**
+## 🚀 **VOYAGE.AI + SPACY IMPLEMENTATION SUMMARY (08/06/2025)**
 
 ### **📁 ARQUIVOS CRIADOS/MODIFICADOS:**
 
-1. **`voyage_topic_modeler.py`** (CRIADO)
+**🔤 SPACY IMPLEMENTATION:**
+
+1. **`spacy_nlp_processor.py`** (CRIADO)
+   - Processamento linguístico avançado com pt_core_news_lg
+   - 13 features linguísticas: lematização, POS, NER, complexidade
+   - 57 entidades políticas brasileiras específicas
+   - Análise de diversidade lexical e segmentação de hashtags
+   - Fallbacks robustos para indisponibilidade do spaCy
+
+2. **`processing.yaml`** (UPDATED)
+   - Configurações completas do spaCy
+   - Features linguísticas ativadas por padrão
+   - Limites de memória e performance otimizados
+
+**🚀 VOYAGE.AI IMPLEMENTATION:**
+
+3. **`voyage_topic_modeler.py`** (CRIADO)
    - Semantic clustering com KMeans + embeddings
    - Fallback para LDA tradicional
    - AI interpretation com categorias políticas brasileiras
 
-2. **`voyage_clustering_analyzer.py`** (CRIADO)
+4. **`voyage_clustering_analyzer.py`** (CRIADO)
    - Múltiplos algoritmos: KMeans, DBSCAN, Agglomerative
    - Métricas avançadas: silhouette, calinski_harabasz
    - Extensão de clustering para dataset completo
 
-3. **`semantic_tfidf_analyzer.py`** (ENHANCED)
+5. **`semantic_tfidf_analyzer.py`** (ENHANCED)
    - Score composto: TF-IDF + semantic variance + magnitude
    - Agrupamento semântico de termos
    - Análise de relevância contextual aprimorada
 
-4. **`semantic_search_engine.py`** (ENHANCED)
+6. **`semantic_search_engine.py`** (ENHANCED)
    - Otimizações Voyage.ai: threshold 0.75, query optimization
    - Integration com hybrid search engine
    - Performance 91% mais rápida
 
-5. **`unified_pipeline.py`** (UPDATED)
-   - Integração dos 4 novos componentes Voyage
+7. **`unified_pipeline.py`** (UPDATED)
+   - Integração dos 4 componentes Voyage + 1 spaCy
    - Factory methods para inicialização
    - Fluxo condicional baseado em configuração
+   - Pipeline expandido para 20 estágios
 
 ### **💰 COST OPTIMIZATION STATUS:**
 - **Sampling ativo**: 96% economia mantida
@@ -159,10 +180,12 @@ Sempre que fizer uma alteração, indique:
 
 ### **🧪 TESTE DE INTEGRAÇÃO REALIZADO:**
 ```bash
-✅ Todos os 29 componentes carregados com sucesso
+✅ Todos os 30 componentes carregados com sucesso
 ✅ Voyage.ai ativo nos 4 estágios alvo
+✅ spaCy ativo com pt_core_news_lg (57 entidades políticas)
+✅ 13 features linguísticas extraídas com sucesso
 ✅ Sistema resiliente com fallbacks automáticos
-✅ Pipeline pronto para execução completa
+✅ Pipeline pronto para execução completa (20 estágios)
 ```
 
 ## 🔧 PRóximas Tarefas (Manutenção Planejada)
@@ -171,11 +194,13 @@ Sempre que fizer uma alteração, indique:
 2. ✅ ~~Implementar clustering semântico avançado~~ **CONCLUÍDO**  
 3. ✅ ~~Aprimorar TF-IDF com embeddings~~ **CONCLUÍDO**
 4. ✅ ~~Otimizar semantic search~~ **CONCLUÍDO**
-5. Adicionar `test_pipeline.py` com testes de regressão específicos para Voyage.ai
+5. ✅ ~~Implementar spaCy com pt_core_news_lg~~ **CONCLUÍDO**
+6. ✅ ~~Integrar processamento linguístico avançado~~ **CONCLUÍDO**
+7. Adicionar `test_pipeline.py` com testes de regressão específicos para Voyage.ai + spaCy
 
 ## 🌐 Versão do projeto
 
-**v4.7.0 - Junho 2025 - VOYAGE.AI EDITION**
+**v4.8.0 - Junho 2025 - VOYAGE.AI + SPACY EDITION**
 
 **Responsável:** Pablo Emanuel Romero Almada, Ph.D.
 
