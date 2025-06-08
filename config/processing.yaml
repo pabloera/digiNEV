@@ -1,0 +1,97 @@
+# Configurações Específicas de Processamento
+
+# Configurações de Dados
+data:
+  delimiter: ";"
+  encoding: "utf-8"
+  na_values: ["NA", "N/A", "", "null", "None"]
+  date_format: "%Y-%m-%d %H:%M:%S"
+  timezone: "America/Sao_Paulo"
+  float_precision: 4
+  low_memory: true
+  
+# Processamento de Texto
+text_processing:
+  remove_urls: true
+  remove_mentions: false
+  min_text_length: 10
+  normalize_terms: true
+  preserve_political_slang: true
+  detect_irony: true
+  normalize_case: true
+  languages: ["pt", "pt-br"]
+  
+  stopwords:
+    enabled: true
+    custom_file: "data/external/dictionaries/custom_stopwords_pt.txt"
+    
+  normalization:
+    lemmatize: true
+    stemming: false
+    remove_accents: false
+    
+  special_tokens:
+    hashtags: true
+    emojis: true
+    dates: true
+    
+# Processamento em Batch
+batch_processing:
+  chunk_size: 10000
+  parallelism: true
+  max_workers: 4
+  checkpoint_interval: 5
+  
+# Dataset Statistics
+dataset_statistics:
+  enabled: true  # Generate comprehensive statistics after feature extraction
+  export_format: "json"  # json, html, csv
+  top_n_items: 20  # Number of top items to show in rankings
+  calculate_advanced_metrics: true
+  
+# Controle de Qualidade
+quality_control:
+  min_rows: 100
+  max_missing_pct: 0.30
+  max_duplicates_pct: 0.20
+  schema_validation: true
+  
+# Features
+feature_engineering:
+  count_vectorizer:
+    max_features: 5000
+    min_df: 5
+    max_df: 0.9
+    ngram_range: [1, 2]
+    
+  tfidf:
+    max_features: 10000
+    min_df: 3
+    max_df: 0.85
+    
+  embedding:
+    method: "word2vec"
+    vector_size: 300
+    window: 5
+    min_count: 2
+    
+# NLP
+nlp:
+  spacy_model: "pt_core_news_lg"
+  sentiment_lexicon: "data/external/dictionaries/sentiment_lexicon_pt.csv"
+  entity_recognition: true
+  dependency_parsing: false
+  
+# Análise de Tópicos
+topic_modeling:
+  n_topics: 15
+  iterations: 1000
+  coherence_threshold: 0.4
+  use_anthropic_interpretation: true
+  
+# Clustering
+clustering:
+  method: "kmeans"
+  n_clusters: 10
+  use_anthropic_validation: true
+  min_coherence_score: 0.7

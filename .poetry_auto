@@ -1,0 +1,35 @@
+#!/bin/zsh
+
+# Auto-ativação do Poetry para projeto dataanalysis-bolsonarismo
+# Este arquivo é carregado automaticamente quando você entra na pasta do projeto
+
+PROJECT_DIR="$HOME/development/project/dataanalysis-bolsonarismo"
+
+# Função para detectar se estamos no projeto
+in_project_dir() {
+    [[ "$PWD" == "$PROJECT_DIR" || "$PWD" == "$PROJECT_DIR"/* ]]
+}
+
+# Função para ativar Poetry
+activate_poetry_env() {
+    if in_project_dir && [[ -f "$PROJECT_DIR/pyproject.toml" ]]; then
+        if [[ "$VIRTUAL_ENV" != "$PROJECT_DIR/.venv" ]]; then
+            echo "🎯 Ativando Poetry para dataanalysis-bolsonarismo..."
+            source "$PROJECT_DIR/.venv/bin/activate"
+            echo "✅ Ambiente ativo: $(python --version)"
+            echo "📦 Localização: $VIRTUAL_ENV"
+        fi
+    fi
+}
+
+# Hook que executa quando o diretório muda
+chpwd_poetry() {
+    activate_poetry_env
+}
+
+# Adicionar o hook
+autoload -U add-zsh-hook
+add-zsh-hook chpwd chpwd_poetry
+
+# Ativar na entrada inicial se já estiver na pasta
+activate_poetry_env
