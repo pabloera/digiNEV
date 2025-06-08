@@ -775,38 +775,43 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         start_time = time.time()
         
         try:
-            # Mapear etapa para método correspondente - CORRIGIDO v4.7
+            # Mapear etapa para método correspondente - CORRIGIDO v4.7 (Numeração Atualizada)
             stage_methods = {
-                # Etapas de processamento básico
+                # FASE 1: Preparação e Validação de Dados (01-05)
                 "01_chunk_processing": self._stage_01_chunk_processing,
+                "02_encoding_validation": self._stage_02a_encoding_validation,
+                "03_deduplication": self._stage_02b_deduplication,
+                "04_feature_validation": self._stage_01b_feature_validation,
+                "05_political_analysis": self._stage_01c_political_analysis,
+                
+                # FASE 2: Processamento de Texto e Análise (06-09)
+                "06_text_cleaning": self._stage_03_clean_text,
+                "07_sentiment_analysis": self._stage_04_sentiment_analysis,
+                "08_topic_modeling": self._stage_05_topic_modeling,  # 🚀 VOYAGE.AI
+                "09_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
+                
+                # FASE 3: Análise Estrutural e de Rede (10-13)
+                "10_clustering": self._stage_07_clustering,  # 🚀 VOYAGE.AI
+                "11_hashtag_normalization": self._stage_08_hashtag_normalization,
+                "12_domain_analysis": self._stage_09_domain_extraction,
+                "13_temporal_analysis": self._stage_10_temporal_analysis,
+                
+                # FASE 4: Análise Avançada e Finalização (14-19)
+                "14_network_analysis": self._stage_11_network_structure,
+                "15_qualitative_analysis": self._stage_12_qualitative_analysis,
+                "16_smart_pipeline_review": self._stage_13_review_reproducibility,
+                "17_topic_interpretation": self._stage_14_topic_interpretation,
+                "18_semantic_search": self._stage_14_semantic_search_intelligence,  # 🚀 VOYAGE.AI
+                "19_pipeline_validation": self._stage_16_pipeline_validation,
+                
+                # Aliases para compatibilidade com numeração antiga
+                "01b_features_validation": self._stage_01b_feature_validation,
+                "01b_feature_validation": self._stage_01b_feature_validation,
+                "01c_political_analysis": self._stage_01c_political_analysis,
                 "02a_encoding_validation": self._stage_02a_encoding_validation,
                 "02b_deduplication": self._stage_02b_deduplication,
-                
-                # Etapas de análise de features e política
-                "01b_features_validation": self._stage_01b_feature_validation,
-                "01b_feature_validation": self._stage_01b_feature_validation,  # Alias
-                "01c_political_analysis": self._stage_01c_political_analysis,
-                
-                # Etapas de processamento de texto
                 "03_text_cleaning": self._stage_03_clean_text,
-                "03_clean_text": self._stage_03_clean_text,  # Alias
-                "04_sentiment_analysis": self._stage_04_sentiment_analysis,
-                "05_topic_modeling": self._stage_05_topic_modeling,
-                "06_tfidf_extraction": self._stage_06_tfidf_extraction,
-                "07_clustering": self._stage_07_clustering,
-                
-                # Etapas de análise estrutural
-                "08_hashtag_normalization": self._stage_08_hashtag_normalization,
-                "09_domain_analysis": self._stage_09_domain_extraction,
-                "10_temporal_analysis": self._stage_10_temporal_analysis,
-                "11_network_analysis": self._stage_11_network_structure,
-                
-                # Etapas de análise avançada
-                "12_qualitative_analysis": self._stage_12_qualitative_analysis,
-                "13_smart_pipeline_review": self._stage_13_review_reproducibility,
-                "14_topic_interpretation": self._stage_14_topic_interpretation,
-                "15_semantic_search": self._stage_14_semantic_search_intelligence,
-                "16_pipeline_validation": self._stage_16_pipeline_validation
+                "03_clean_text": self._stage_03_clean_text
             }
             
             if stage_name in stage_methods:
@@ -1501,7 +1506,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
     
     def _stage_07_clustering(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 10: Clustering semântico com Voyage.ai"""
+        """Etapa 10: Clustering semântico com Voyage.ai (Método interno _stage_07)"""
         
         logger.info("🎯 INICIANDO ETAPA 10: CLUSTERING SEMÂNTICO COM VOYAGE.AI")
         results = {"clustering_reports": {}}
