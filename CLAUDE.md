@@ -70,6 +70,99 @@ Este é o **documento mestre e centralizador** de todo o projeto de análise de 
 Este documento **substitui os seguintes arquivos anteriores**:
 `RESUMO_EXECUTIVO_IMPLEMENTACAO.md`, `DETALHES_TECNICOS_IMPLEMENTACAO.md`, `GUIA_RAPIDO_USO.md`, `FUNCIONALIDADES_IMPLEMENTADAS_2025.md`, `NOVO_FLUXO_FEATURE_EXTRACTION.md`, `PROJECT_RULES.md`, `VOYAGE_OPTIMIZATION_SUMMARY.md`, `CONSOLIDACAO_DOCS_2025.md`.
 
+## 🎯 **POETRY CONFIGURATION - GERENCIAMENTO DE DEPENDÊNCIAS**
+
+**✅ POETRY TOTALMENTE CONFIGURADO E ATIVO**
+
+Este projeto utiliza **Poetry** como gerenciador oficial de dependências e ambientes virtuais. Todas as dependências, scripts e configurações estão consolidadas no `pyproject.toml`.
+
+### **📦 DEPENDÊNCIAS CONSOLIDADAS:**
+
+**Principais (85+ pacotes):**
+- **Análise de Dados**: pandas, numpy, scipy, matplotlib, seaborn
+- **ML/NLP**: scikit-learn, nltk, spacy>=3.8.7, gensim, faiss-cpu
+- **APIs Inteligentes**: voyageai>=0.3.2, anthropic>=0.40.0
+- **Dashboard**: dash, plotly, dash-bootstrap-components
+- **Utilitários**: chardet, ftfy, tqdm, pyyaml, python-dotenv
+
+**Grupos Opcionais:**
+- **`dev`**: pytest, black, isort, flake8, mypy (ferramentas desenvolvimento)
+- **`jupyter`**: ipykernel, jupyter, jupyterlab (análise interativa)
+- **`deep-learning`**: tensorflow, torch, transformers (opcional, ML avançado)
+
+### **🚀 SCRIPTS AUTOMÁTICOS POETRY:**
+
+```bash
+# Scripts pré-configurados
+poetry run pipeline          # Executa run_pipeline.py
+poetry run dashboard         # Inicia dashboard automaticamente
+
+# Comandos essenciais
+poetry install               # Instala todas dependências
+poetry install --with dev    # + ferramentas desenvolvimento
+poetry install --with jupyter # + Jupyter Lab
+poetry shell                 # Ativa ambiente virtual
+
+# Gerenciamento
+poetry add package_name      # Adiciona nova dependência
+poetry show --tree          # Mostra árvore de dependências
+poetry update                # Atualiza todas dependências
+```
+
+### **🤖 CONFIGURAÇÃO AUTOMÁTICA PARA CLAUDE:**
+
+**✅ ATIVAÇÃO AUTOMÁTICA IMPLEMENTADA**
+
+O Poetry é configurado automaticamente quando Claude inicia através de:
+
+1. **`activate_poetry.sh`** - Script inteligente de verificação e ativação
+2. **`.env.template`** - Template de variáveis de ambiente
+3. **`.vscode/settings.json`** - Integração com VS Code
+4. **Ambiente isolado** - `.venv` local com Python 3.12
+
+### **🔧 COMANDOS OBRIGATÓRIOS PARA CLAUDE:**
+
+```bash
+# ✅ CORRETO - SEMPRE usar poetry run
+poetry run python run_pipeline.py
+poetry run python src/main.py  
+poetry run python -m pytest
+
+# ❌ ERRADO - nunca usar diretamente
+python run_pipeline.py  # Pode falhar com dependências
+pip install package     # Quebra isolamento Poetry
+```
+
+### **📋 VERIFICAÇÃO DE STATUS:**
+
+```bash
+# Verificar configuração Poetry
+poetry check                 # Valida pyproject.toml
+poetry env info             # Info ambiente virtual
+poetry show --outdated     # Dependências desatualizadas
+
+# Testar execução
+poetry run python --version # Deve mostrar Python 3.12.x
+poetry run python -c "import pandas, numpy, spacy, voyageai, anthropic"
+```
+
+### **🚨 REGRAS CRÍTICAS PARA CLAUDE:**
+
+1. **SEMPRE** prefixar comandos Python com `poetry run`
+2. **NUNCA** usar `pip install` diretamente (usar `poetry add`)
+3. **VERIFICAR** ambiente com `poetry env info` antes de executar
+4. **USAR** scripts pré-configurados quando disponíveis
+5. **CONSULTAR** `poetry show` para verificar dependências instaladas
+
+### **⚡ AMBIENTE PRONTO E OTIMIZADO:**
+
+- ✅ **Python 3.12** (compatível com todas dependências)
+- ✅ **85+ pacotes** científicos pré-instalados
+- ✅ **Isolation completo** via ambiente virtual
+- ✅ **Scripts automáticos** para pipeline e dashboard
+- ✅ **Ferramentas dev** (linting, testes, formatação)
+- ✅ **Integração VS Code** configurada
+
 ---
 
 ## 📚 ARQUITETURA DO PROJETO
@@ -124,7 +217,23 @@ As 22 etapas estão estruturadas em `unified_pipeline.py` com numeração sequen
 
 ## ⚖️ REGRAS PARA CLAUDE E OUTRAS IAs
 
-### 1. Não criar novos arquivos fora da estrutura
+### 1. SEMPRE usar Poetry para executar código Python
+
+**✅ OBRIGATÓRIO:**
+```bash
+poetry run python run_pipeline.py    # ✅ Correto
+poetry run python src/main.py        # ✅ Correto
+poetry run pipeline                   # ✅ Script automático
+```
+
+**❌ NUNCA:**
+```bash
+python run_pipeline.py               # ❌ Sem isolamento
+pip install package                  # ❌ Quebra Poetry
+./run_pipeline.py                    # ❌ Sem ambiente
+```
+
+### 2. Não criar novos arquivos fora da estrutura
 
 Apenas modifique os seguintes arquivos existentes:
 
@@ -133,25 +242,31 @@ Apenas modifique os seguintes arquivos existentes:
 * `src/main.py` (se explicitamente autorizado)
 * `dashboard/visualizer.py`
 
-### 2. Nunca recriar etapas já implementadas
+### 3. Nunca recriar etapas já implementadas
 
 Verifique se a função existe em `unified_pipeline.py`. Se existir, **modifique-a**, não crie uma nova versão.
 
-### 3. Executar sempre via `run_pipeline.py`
+### 4. Verificar ambiente Poetry antes de executar
 
-Todos os testes, exceções e logs devem partir desse script. Evite usar diretamente `main.py` ou `unified_pipeline.py` como entrada.
+**Sempre execute primeiro:**
+```bash
+poetry env info                      # Verificar ambiente
+poetry show | head -10               # Verificar dependências
+./activate_poetry.sh                 # Se necessário
+```
 
-### 4. Usar apenas `test_dataset.csv` como entrada de teste
+### 5. Usar apenas `test_dataset.csv` como entrada de teste
 
 Nunca gere dados simulados, fallback, ou valores "mock". Apenas use dados reais.
 
-### 5. Reporte as alterações com clareza
+### 6. Reporte as alterações com clareza
 
 Sempre que fizer uma alteração, indique:
 
 * Arquivo modificado
 * Nome(s) da(s) função(ões)
 * Se foram criados novos artefatos
+* Se Poetry foi usado corretamente
 
 ## 🔍 DIRETRIZES DE CODIFICAÇÃO
 

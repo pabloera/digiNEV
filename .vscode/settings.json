@@ -1,0 +1,28 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "python.defaultInterpreterPath": "poetry",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.poetryPath": "poetry",
+    "python.terminal.executeInFileDir": true,
+    "terminal.integrated.defaultProfile.osx": "bash",
+    "terminal.integrated.profiles.osx": {
+        "poetry": {
+            "path": "poetry",
+            "args": ["shell"],
+            "icon": "poetry"
+        }
+    },
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.isort.args": ["--profile", "black"],
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "files.associations": {
+        "*.toml": "toml",
+        "pyproject.toml": "toml"
+    }
+}

@@ -5,11 +5,18 @@ __pycache__/
 .mypy_cache/
 .env
 .envrc
-*.json
-poetry.lock
-poetry.toml
-pyproject.toml
-.vscode/
+
+# Poetry files - TRACKED IN REPO
+# poetry.lock    ✅ dependency versions
+# poetry.toml    ✅ Poetry settings  
+# pyproject.toml ✅ project configuration
+# .vscode/settings.json ✅ IDE integration
+
+# Temporary files only
+logs/*.json
+checkpoints/*.json
+data/**/*.json
+**/temp_*.json
 *.log
 *.tmp
 *.swp
