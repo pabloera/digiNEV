@@ -8,6 +8,7 @@ import json
 import logging
 import re
 import hashlib
+import unicodedata
 from typing import Dict, Any, List, Optional, Tuple, Set
 from datetime import datetime
 from pathlib import Path

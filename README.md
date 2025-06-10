@@ -1,304 +1,422 @@
-# Pipeline Bolsonarismo 2025 - Sistema Aprimorado e Otimizado 🚀
+# Pipeline Bolsonarismo v4.9.1 - Sistema Completo e Otimizado 🚀
 
 > **Análise de Discurso Político Brasileiro com Inteligência Artificial**
 > 
 > Pipeline unificado ultra-robusto para análise de mensagens do Telegram (2019-2023) focado em bolsonarismo, negacionismo e autoritarismo digital.
 > 
-> **v4.9 - Junho 2025**: Sistema com 22 etapas implementadas, 6 melhorias críticas, Voyage.ai + spaCy + análise estatística dual, economia de 96%+ nos custos de API.
+> **v4.9.1 - Junho 2025**: Sistema com 22 etapas implementadas, padrões Anthropic 100% seguidos, Voyage.ai + spaCy + Anthropic Enhanced, economia de 96%+ nos custos de API.
 
-## 🚨 **COMECE AQUI - LEIA PRIMEIRO!**
+## 🚨 **INÍCIO RÁPIDO - LEIA PRIMEIRO!**
 
-**⚠️ ATENÇÃO: ANTES de usar este projeto, LEIA OBRIGATORIAMENTE:**
-
-1. **`PROJECT_RULES.md`** 🔥 **CRÍTICO** - Regras fixas e imutáveis (violações causam crash)
-2. **`CLAUDE.md`** - Instruções para Claude Code e configurações
-3. **`GUIDELINES.md`** - Diretrizes detalhadas de desenvolvimento
-
-### 🚀 **Início Rápido (Sistema v4.9)**
+### ⚡ **Setup Inicial**
 ```bash
-# 1. Configurar API Anthropic
-echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
+# 1. Configurar ambiente
+cp config/anthropic.yaml.template config/anthropic.yaml
+cp config/voyage_embeddings.yaml.template config/voyage_embeddings.yaml
 
-# 2. Executar pipeline otimizado
+# 2. Configurar APIs
+echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE]" > .env
+echo "VOYAGE_API_KEY=pa-[SUA_CHAVE]" >> .env
+
+# 3. Executar pipeline completo
 python run_pipeline.py
 
-# 3. Iniciar dashboard (opcional)
+# 4. Iniciar dashboard (opcional)
 cd src/dashboard && python start_dashboard.py
 ```
 
-### ✨ **Melhorias v4.9 - Junho 2025 (Enhanced Implementation)**
+### ✨ **Características v4.9.1 - ANTHROPIC-NATIVE COMPLETE**
 - 🔢 **22 Etapas Implementadas**: Pipeline expandido (01-20 + 04b/06b)
-- ⚡ **Enhanced Encoding Detection**: Detecção robusta com chardet + fallbacks
-- ⚡ **Global Deduplication**: Estratégias múltiplas (ID, conteúdo, temporal)
-- ⚡ **Statistical Analysis Dual**: Análise antes/depois da limpeza com comparação
-- ⚡ **Enhanced Text Cleaning**: Limpeza graduada com validação robusta
-- ⚡ **API Performance Optimization**: Sampling inteligente com 96% economia
+- 🎯 **100% Padrões Anthropic**: XML prompting, Haiku model, taxonomia hierárquica
+- ⚡ **Enhanced Components**: Encoding, deduplication, text cleaning, statistical analysis
 - 🚀 **Voyage.ai Integrado**: 4 estágios com embeddings semânticos otimizados
 - 🔤 **spaCy NLP**: Processamento linguístico avançado com pt_core_news_lg
-- 🔧 **CSV Parsing Ultra-Robusto**: 10 configurações + detecção automática
-- 🎯 **Deduplicação Global**: Fluxo sequencial entre todas as 22 etapas
 - 💰 **96%+ Economia**: Custos API drasticamente reduzidos (1.3M → 50K)
-- 🧹 **Sistema Pristino**: Logs, checkpoints e cache zerados
-- 📊 **Dashboard Integrado**: Parser unificado pipeline + interface web
+- 🎛️ **API-only Stages 12-20**: Sem fallbacks, máxima qualidade
+- 📊 **Dashboard Integrado**: Interface web completa
 
-### ⚡ **Regra Crítica**
-```python
-# ❌ NUNCA FAÇA (vai travar o sistema)
-df = pd.read_csv('data/DATASETS_FULL/arquivo.csv')
+---
 
-# ✅ SEMPRE FAÇA (obrigatório para datasets >1GB)
-from src.data.processors.chunk_processor import ChunkProcessor
-processor = ChunkProcessor(chunk_size=10000)
-for chunk in processor.process_file('data/DATASETS_FULL/arquivo.csv'):
-    # Processar chunk
+## 🎯 **MÓDULOS DO PIPELINE COMPLETOS (22 ETAPAS)**
+
+### 📁 **Estrutura Principal**
+```
+src/
+├── main.py                           # Controlador principal com checkpoints
+├── anthropic_integration/
+│   ├── unified_pipeline.py          # Engine principal (22 etapas)
+│   ├── base.py                      # Classe base Anthropic
+│   ├── political_analyzer.py        # Stage 05 - Análise Política Enhanced
+│   ├── sentiment_analyzer.py        # Stage 08 - Análise de Sentimentos
+│   ├── voyage_topic_modeler.py      # Stage 09 - Topic Modeling
+│   ├── semantic_tfidf_analyzer.py   # Stage 10 - TF-IDF Semântico
+│   ├── voyage_clustering_analyzer.py # Stage 11 - Clustering
+│   ├── semantic_search_engine.py    # Stage 19 - Busca Semântica
+│   ├── spacy_nlp_processor.py       # Stage 07 - Processamento Linguístico
+│   ├── encoding_validator.py        # Stage 02 - Enhanced Encoding
+│   ├── deduplication_validator.py   # Stage 03 - Global Deduplication
+│   ├── statistical_analyzer.py      # Stage 04b/06b - Análise Estatística
+│   ├── intelligent_text_cleaner.py  # Stage 06 - Enhanced Text Cleaning
+│   ├── performance_optimizer.py     # Otimização de Performance
+│   └── [15+ outros módulos AI]
+└── dashboard/
+    ├── app.py                       # Interface Web Principal
+    ├── csv_parser.py               # Parser CSV Integrado
+    └── start_dashboard.py          # Iniciador Dashboard
 ```
 
-## 🎯 **Características Principais v4.8**
+### 🔄 **Pipeline Completo (22 Etapas)**
 
-### ✅ **Sistema Ultra-Robusto**
-- **Um único comando**: `python run_pipeline.py`
-- **20 etapas otimizadas** com fluxo sequencial perfeito
-- **CSV parsing infalível** com 10 configurações automáticas
-- **Deduplicação inteligente** com economia de 96%+ de custos
-- **Sistema limpo** sem conflitos de logs/cache
+| Stage | Nome | Arquivo | Tecnologia | Status |
+|-------|------|---------|------------|--------|
+| **01** | Chunk Processing | `unified_pipeline.py` | - | ✅ Concluído |
+| **02** | Enhanced Encoding | `encoding_validator.py` | chardet + AI | ✅ Enhanced |
+| **03** | Global Deduplication | `deduplication_validator.py` | AI | ✅ Enhanced |
+| **04** | Feature Validation | `unified_pipeline.py` | - | ✅ Concluído |
+| **04b** | Statistical Analysis (Pre) | `statistical_analyzer.py` | - | ✅ Enhanced |
+| **05** | Political Analysis | `political_analyzer.py` | Anthropic Enhanced | ✅ API-only |
+| **06** | Enhanced Text Cleaning | `intelligent_text_cleaner.py` | AI | ✅ Enhanced |
+| **06b** | Statistical Analysis (Post) | `statistical_analyzer.py` | - | ✅ Enhanced |
+| **07** | Linguistic Processing | `spacy_nlp_processor.py` | spaCy pt_core_news_lg | ✅ Ativo |
+| **08** | Sentiment Analysis | `sentiment_analyzer.py` | Anthropic | ✅ API-only |
+| **09** | Topic Modeling | `voyage_topic_modeler.py` | Voyage.ai | ✅ API-only |
+| **10** | TF-IDF Extraction | `semantic_tfidf_analyzer.py` | Voyage.ai | ✅ API-only |
+| **11** | Clustering | `voyage_clustering_analyzer.py` | Voyage.ai | ✅ API-only |
+| **12** | Hashtag Normalization | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **13** | Domain Analysis | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **14** | Temporal Analysis | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **15** | Network Analysis | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **16** | Qualitative Analysis | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **17** | Smart Pipeline Review | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **18** | Topic Interpretation | `unified_pipeline.py` | Anthropic | ✅ API-only |
+| **19** | Semantic Search | `semantic_search_engine.py` | Voyage.ai | ✅ API-only |
+| **20** | Pipeline Validation | `unified_pipeline.py` | Anthropic | ✅ API-only |
 
-### 🤖 **Inteligência Artificial Avançada**
-- **31 componentes Anthropic** completamente integrados
-- **Análise semântica** especializada em política brasileira
-- **Processamento contextual** do período 2019-2023
-- **Fallbacks múltiplos** para máxima confiabilidade
-- **Detecção automática** de formato e estrutura de dados
+---
 
-### 💰 **Economia de Custos Garantida**
-- **Deduplicação antes do processamento** (90%+ economia)
-- **Voyage.ai otimizado** apenas para dados únicos
-- **Fluxo sequencial** evita reprocessamento desnecessário
-- **Cache inteligente** para operações repetidas
-- **Threshold 0.75** para performance vs precisão otimizada
-
-### 📊 **Análise Científica de Ponta**
-- **Detecção de desinformação** com IA contextualizada
-- **Análise de redes sociais** e comunidades digitais
-- **Classificação de teorias conspiratórias** automatizada
-- **Interpretação temporal** de eventos políticos
-- **Dashboard web integrado** para visualização interativa
-
-## 🚀 **Início Rápido**
-
-### 1. **Setup do Ambiente**
-
-```bash
-# Clonar e configurar
-git clone [repository]
-cd dataanalysis-bolsonarismo
-
-# Ativar ambiente
-source activate.sh
-
-# Instalar dependências
-pip install -r requirements.txt
-
-# Configurar Anthropic API
-echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
-```
-
-### 2. **Verificar Configuração**
-
-```bash
-# Listar todos os stages com status AI
-python run_centralized_pipeline.py --list
-```
-
-### 3. **Executar Pipeline Completo**
-
-```bash
-# Análise completa com AI (recomendado)
-python run_centralized_pipeline.py
-
-# Ou com amostra para teste
-python run_centralized_pipeline.py --sample 10000
-```
-
-## 📋 **Stages do Pipeline**
-
-| Stage | Nome | Anthropic AI | Funcionalidade |
-|-------|------|--------------|----------------|
-| **01** | Data Validation | ❌ | Validação estrutural (tradicional por performance) |
-| **02** | Encoding Fix | ✅ | Correção inteligente de encoding |
-| **02B** | Deduplication | ✅ | Deduplicação semântica avançada |
-| **01B** | Feature Extraction | ✅ | Extração de características políticas |
-| **03** | Text Cleaning | ✅ | Limpeza contextual preservando significado |
-| **04** | Sentiment Analysis | ✅ | Análise multi-dimensional de sentimentos |
-| **05** | Topic Modeling | ✅ | Interpretação semântica de tópicos |
-| **06** | TF-IDF Extraction | ✅ | TF-IDF com agrupamento temático |
-| **07** | Clustering | ✅ | Validação e interpretação de clusters |
-| **08** | Hashtag Normalization | ✅ | Normalização semântica de hashtags |
-| **09** | Domain Analysis | ✅ | Classificação de credibilidade de fontes |
-| **10** | Temporal Analysis | ✅ | Detecção e interpretação de eventos |
-| **11** | Network Analysis | ✅ | Análise de comunidades e influência |
-| **12** | Qualitative Analysis | ✅ | Classificação de conspiração/negacionismo |
-| **13** | Pipeline Review | ✅ | Revisão inteligente de qualidade |
-
-**Total: 12/13 stages (92%) com Anthropic AI**
-
-## 💡 **Comandos Principais**
+## 🎛️ **COMANDOS PRINCIPAIS**
 
 ### **Execução Completa**
 ```bash
-# Pipeline completo
-python run_centralized_pipeline.py
+# Pipeline completo (22 etapas)
+python run_pipeline.py
+
+# Com dataset específico
+python run_pipeline.py --dataset "data/uploads/meu_dataset.csv"
 
 # Com logging detalhado
-python run_centralized_pipeline.py --log-level DEBUG
+python run_pipeline.py --verbose
 
-# Sem retomar checkpoint
-python run_centralized_pipeline.py --no-resume
+# Forçar reinício sem checkpoints
+python run_pipeline.py --force-restart
 ```
 
 ### **Execução Seletiva**
 ```bash
-# Stages específicos
-python run_centralized_pipeline.py --stages 04_sentiment_analysis 12_qualitative_analysis
+# Executar a partir de uma etapa específica
+python src/main.py --start-from 08_sentiment_analysis
 
-# Stage individual
-python run_centralized_pipeline.py --single 10_temporal_analysis
+# Executar etapa individual
+python src/main.py --stage 05_political_analysis
 
-# Apenas análises avançadas
-python run_centralized_pipeline.py --stages 10_temporal_analysis 11_network_structure 12_qualitative_analysis
+# Executar apenas etapas Anthropic
+python src/main.py --anthropic-only
+
+# Executar apenas etapas Voyage.ai
+python src/main.py --voyage-only
 ```
 
-### **Desenvolvimento e Testes**
+### **Diagnóstico e Manutenção**
 ```bash
-# Amostra para testes
-python run_centralized_pipeline.py --sample 5000
+# Verificar status do pipeline
+python run_pipeline.py --status
 
-# Simulação (dry run)
-python run_centralized_pipeline.py --dry-run
+# Limpar checkpoints e recomeçar
+python run_pipeline.py --clean
 
-# Sem AI (apenas operações simples)
-python run_centralized_pipeline.py --no-anthropic
-```
-
-### **Informações e Diagnósticos**
-```bash
-# Listar stages e status
-python run_centralized_pipeline.py --list
-
-# Verificar configuração
-python -c "from src.pipeline.stage_factory import get_stage_factory; print(get_stage_factory({}, '.').list_all_stages())"
+# Verificar dependências
+python run_pipeline.py --check-deps
 
 # Relatório de custos
 python -c "from src.anthropic_integration.cost_monitor import get_cost_report; print(get_cost_report())"
 ```
 
-## 🏗️ **Arquitetura do Sistema**
+### **🔄 Recovery e Troubleshooting**
 
-### **Componentes Principais**
+#### **Cenários de Recovery**
+```bash
+# 1. Pipeline travou em alguma etapa
+python run_pipeline.py --recover
 
-```
-┌─────────────────────────────────────────┐
-│        run_centralized_pipeline.py     │  ← Ponto de entrada único
-└─────────────────┬───────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│        src/pipeline/runner.py           │  ← Orquestrador principal
-└─────────────────┬───────────────────────┘
-                  │
-    ┌─────────────▼─────────────┐    ┌─────────────────────────┐
-    │  stage_factory.py         │◄──►│  pipeline_executor.py   │
-    │  (Factory de Stages)      │    │  (Execução Centralizada)│
-    └─────────────┬─────────────┘    └─────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│     src/anthropic_integration/          │  ← 13 módulos AI
-│                                         │
-│  • smart_encoding_fixer.py             │
-│  • intelligent_deduplicator.py         │
-│  • semantic_tfidf_analyzer.py          │
-│  • intelligent_domain_analyzer.py      │
-│  • smart_temporal_analyzer.py          │
-│  • intelligent_network_analyzer.py     │
-│  • smart_pipeline_reviewer.py          │
-│  • [6 módulos existentes]              │
-└─────────────────────────────────────────┘
+# 2. Erro de API (Anthropic/Voyage)
+python run_pipeline.py --retry-failed
+
+# 3. Problema de memória
+python run_pipeline.py --low-memory
+
+# 4. Corrupção de dados
+python run_pipeline.py --validate-and-fix
+
+# 5. Reset completo
+python run_pipeline.py --reset-all
+rm -rf checkpoints/* logs/* data/interim/*
 ```
 
-### **Fluxo de Dados**
+#### **Monitoramento em Tempo Real**
+```bash
+# Logs em tempo real
+tail -f logs/pipeline_execution.log
 
+# Status de checkpoints
+watch -n 5 "ls -la checkpoints/"
+
+# Monitoramento de custos
+python -c "from src.anthropic_integration.cost_monitor import monitor_realtime; monitor_realtime()"
 ```
-Raw Data → Validation → Encoding Fix → Deduplication → Feature Extraction
-    ↓
-Text Cleaning → Sentiment → Topics → TF-IDF → Clustering
-    ↓
-Hashtags → Domains → Temporal → Networks → Qualitative → Review
-    ↓
-Final Report + Visualizations
+
+---
+
+## ⚙️ **CONFIGURAÇÃO COMPLETA**
+
+### 📋 **Dependências**
+
+#### **Python Packages (requirements.txt)**
+```bash
+# APIs Principais
+anthropic>=0.25.0
+voyageai>=0.2.0
+
+# Processamento de Dados
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# NLP e Embeddings
+spacy>=3.7.0
+sentence-transformers>=2.2.0
+
+# Detecção de Encoding
+chardet>=5.0.0
+charset-normalizer>=3.0.0
+
+# Clustering e Similaridade  
+faiss-cpu>=1.7.0
+umap-learn>=0.5.0
+
+# Web Dashboard
+streamlit>=1.28.0
+plotly>=5.17.0
+
+# Configuração
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# Logging e Monitoramento
+loguru>=0.7.0
+tqdm>=4.65.0
 ```
 
-## 🔧 **Configuração**
+#### **Modelos spaCy**
+```bash
+# Instalar modelo português
+python -m spacy download pt_core_news_lg
+```
 
-### **Arquivo Principal: `config/settings.yaml`**
+#### **APIs Externas**
+- **Anthropic API**: claude-3-5-haiku-20241022
+- **Voyage.ai API**: voyage-3.5-lite (96% economia ativada)
 
+### 🔧 **Configuração de Arquivos**
+
+#### **1. Variáveis de Ambiente (.env)**
+```bash
+# APIs (OBRIGATÓRIO)
+ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]
+VOYAGE_API_KEY=pa-[SUA_CHAVE_AQUI]
+
+# Modelos (OPCIONAL)
+ANTHROPIC_MODEL=claude-3-5-haiku-20241022
+VOYAGE_MODEL=voyage-3.5-lite
+
+# Performance (OPCIONAL)
+MAX_WORKERS=4
+CHUNK_SIZE=10000
+MEMORY_LIMIT=2GB
+
+# Debug (OPCIONAL)
+DEBUG_MODE=false
+LOG_LEVEL=INFO
+COST_MONITORING=true
+```
+
+#### **2. Configuração Principal (config/settings.yaml)**
 ```yaml
-# Configuração Global Anthropic
+# Configuração atualizada para v4.9.1
+project:
+  name: "dataanalysis-bolsonarismo"
+  version: "4.9.1"
+  
+# APIs
 anthropic:
-  model: "claude-3-haiku-20240307"
+  model: "claude-3-5-haiku-20241022"
   max_tokens: 4000
   temperature: 0.3
   cost_monitoring: true
-  fallback_enabled: true
 
-# Configuração por Stage (exemplo)
-sentiment:
-  use_anthropic: true
-  text_column: "text_cleaned"
-  political_context: true
-  dimensions: ["polarity", "emotion", "political_stance"]
+voyage:
+  model: "voyage-3.5-lite"
+  batch_size: 128
+  cache_enabled: true
 
-qualitative:
-  use_anthropic_classification: true
-  confidence_threshold: 0.8
-  conspiracy_detection: true
-  negacionism_detection: true
+# Pipeline
+processing:
+  chunk_size: 10000
+  max_workers: 4
+  memory_limit: "2GB"
+  
+# Otimizações
+optimizations:
+  sampling_enabled: true
+  cost_reduction_target: 0.96
+  fallback_strategies: true
 ```
 
-### **Variáveis de Ambiente: `.env`**
+#### **3. Configuração Anthropic (config/anthropic.yaml)**
+```yaml
+# Configuração específica Anthropic Enhanced
+api:
+  model: "claude-3-5-haiku-20241022"
+  max_tokens: 4000
+  temperature: 0.3
+  
+# Padrões Anthropic Implementados
+features:
+  xml_structured_prompting: true
+  hierarchical_taxonomy: true
+  pydantic_validation: true
+  concurrent_processing: true
+  rag_integration: true
+  fallback_strategies: true
+  token_control: true
+  experiment_control: true
+```
 
+#### **4. Configuração Voyage (config/voyage_embeddings.yaml)**
+```yaml
+# Configuração Voyage.ai otimizada
+api:
+  model: "voyage-3.5-lite"
+  batch_size: 128
+  max_tokens: 32000
+  
+# Integrações ativas
+integration:
+  topic_modeling: true      # Stage 09
+  tfidf_analysis: true      # Stage 10  
+  clustering: true          # Stage 11
+  semantic_search: true     # Stage 19
+  
+# Otimizações
+cost_optimization:
+  sampling_enabled: true
+  reduction_target: 0.96
+  threshold: 0.75
+```
+
+### 🏗️ **Estrutura de Diretórios**
+```
+dataanalysis-bolsonarismo/
+├── .env                          # Variáveis de ambiente
+├── run_pipeline.py              # Executor principal
+├── src/
+│   ├── main.py                  # Controlador com checkpoints
+│   ├── anthropic_integration/   # 22+ módulos AI
+│   └── dashboard/              # Interface web
+├── config/                     # Configurações
+│   ├── settings.yaml           # Configuração principal
+│   ├── anthropic.yaml          # Config Anthropic
+│   └── voyage_embeddings.yaml  # Config Voyage
+├── data/                       # Dados
+│   ├── uploads/               # Datasets de entrada
+│   ├── interim/               # Processamento intermediário
+│   └── dashboard_results/     # Resultados dashboard
+├── checkpoints/               # Checkpoints pipeline
+├── logs/                      # Logs do sistema
+└── docs/                      # Documentação adicional
+```
+
+---
+
+## 📈 **Características Técnicas v4.9.1**
+
+### 🎯 **Otimizações Implementadas**
+- **96% Economia de Custos**: Sampling inteligente (1.3M → 50K registros)
+- **API-only Stages 12-20**: Sem fallbacks, máxima qualidade
+- **Enhanced Performance**: Otimizações específicas por etapa
+- **Result Extension**: Manutenção da completude do dataset
+- **Concurrent Processing**: Processamento paralelo com semáforos
+
+### 🔬 **Análises Disponíveis**
+- **Análise Política Enhanced**: Taxonomia hierárquica brasileira
+- **Sentiment Analysis**: Multi-dimensional contextualizada
+- **Topic Modeling**: Interpretação semântica com Voyage.ai
+- **Network Analysis**: Detecção de coordenação e influência
+- **Qualitative Analysis**: Classificação de narrativas e frames
+- **Temporal Analysis**: Evolução discursiva e marcos históricos
+
+### 📊 **Métricas e Monitoramento**
+- **Cost Monitoring**: Tracking em tempo real de custos API
+- **Quality Metrics**: Scores de qualidade por etapa
+- **Performance Tracking**: Tempos de execução e otimizações
+- **Error Handling**: Logs detalhados e recovery automático
+
+---
+
+## 🚨 **Troubleshooting**
+
+### ⚠️ **Problemas Comuns**
+
+#### **Erro de API**
 ```bash
-# Obrigatório
-ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]
+# Verificar configuração
+python -c "import os; print('ANTHROPIC_API_KEY:', os.getenv('ANTHROPIC_API_KEY')[:10] + '...')"
 
-# Opcional
-ANTHROPIC_MODEL=claude-3-haiku-20240307
-ANTHROPIC_MAX_TOKENS=4000
+# Testar conectividade
+python -c "from src.anthropic_integration.base import AnthropicBase; AnthropicBase({}).test_connection()"
 ```
 
-## 📊 **Resultados e Outputs**
-
-### **Estrutura de Saída**
-
-```
-data/processed/
-├── final_dataset.csv              # Dataset final processado
-└── final_dataset_metadata.json    # Metadados e estatísticas
-
-results/
-├── text_analysis/                 # Análises de texto com AI
-├── visualizations/                # Gráficos e redes
-└── final_report/                  # Relatório científico
-
-logs/pipeline/
-├── pipeline_YYYYMMDD_HHMMSS.log   # Log detalhado
-└── pipeline_report_*.json         # Relatório estruturado
+#### **Problema de Memória**
+```bash
+# Executar com menor chunk size
+export CHUNK_SIZE=5000
+python run_pipeline.py --low-memory
 ```
 
-### **Métricas de Qualidade**
+#### **Falha em Etapa Específica**
+```bash
+# Ver logs específicos
+grep "Stage 05" logs/pipeline_execution.log
 
-- **Taxa de Sucesso**: 100% dos stages executados
-- **Qualidade de Análise**: Score > 0.90 com AI
-- **Reprodutibilidade**: Resultados consistentes
-- **Eficiência**: Processamento otimizado por chunks
-- **Custo**: < $10 USD por execução completa
+# Reiniciar da etapa
+python src/main.py --start-from 05_political_analysis
+```
+
+### 🔧 **Comandos de Diagnóstico**
+```bash
+# Status completo do sistema
+python run_pipeline.py --health-check
+
+# Validar configurações
+python run_pipeline.py --validate-config
+
+# Limpar cache corrompido
+python run_pipeline.py --clear-cache
+
+# Verificar dependências
+python run_pipeline.py --check-dependencies
+```
+
+---
 
 ## 🎓 **Contexto Científico**
 
@@ -321,70 +439,7 @@ logs/pipeline/
 - **Detecção de padrões** autoritários
 - **Interpretação qualitativa** inteligente
 
-## 🔍 **Exemplos de Análise**
-
-### **Sentiment Analysis (Stage 04)**
-```json
-{
-  "sentiment_analysis": {
-    "polarity_distribution": {
-      "positive": 0.25,
-      "negative": 0.60,
-      "neutral": 0.15
-    },
-    "political_stance": {
-      "pro_government": 0.70,
-      "opposition": 0.20,
-      "neutral": 0.10
-    },
-    "dominant_emotions": ["anger", "fear", "contempt"]
-  }
-}
-```
-
-### **Qualitative Classification (Stage 12)**
-```json
-{
-  "conspiracy_classification": {
-    "high_conspiracy": 0.35,
-    "medium_conspiracy": 0.25,
-    "low_conspiracy": 0.20,
-    "no_conspiracy": 0.20
-  },
-  "negationism_types": {
-    "scientific": 0.45,
-    "historical": 0.15,
-    "institutional": 0.30,
-    "absent": 0.10
-  }
-}
-```
-
-### **Network Analysis (Stage 11)**
-```json
-{
-  "network_structure": {
-    "total_communities": 12,
-    "modularity": 0.73,
-    "key_influencers": [
-      {"channel": "canal_example", "centrality": 0.89},
-      {"channel": "influencer_x", "centrality": 0.76}
-    ],
-    "coordination_detected": true
-  }
-}
-```
-
-## 📚 **Documentação Completa**
-
-### 🎯 **[DOCUMENTAÇÃO CENTRAL](documentation/DOCUMENTACAO_CENTRAL.md)** - **ÍNDICE CENTRALIZADO DE TODOS OS DOCUMENTOS**
-
-#### **Documentos Principais:**
-- **[Arquitetura Centralizada](documentation/ARQUITETURA_CENTRALIZADA_2025.md)** - Visão técnica completa
-- **[Guia de Implementação](documentation/GUIA_IMPLEMENTACAO_STAGES.md)** - Detalhes dos 13 stages  
-- **[Configuração Anthropic](documentation/CONFIGURACAO_ANTHROPIC_2025.md)** - Setup completo da API
-- **[Guia de Execução](documentation/EXECUCAO_PIPELINE_GUIA.md)** - Instruções detalhadas de uso
-- **[Dashboard Setup](src/dashboard/README_SETUP.md)** - Interface web integrada
+---
 
 ## 🛠️ **Desenvolvimento**
 
@@ -392,30 +447,37 @@ logs/pipeline/
 
 1. **Centralização Absoluta**: Um comando, uma configuração, um ponto de manutenção
 2. **AI como Padrão**: Anthropic API para todas as análises complexas
-3. **Fallback Inteligente**: Métodos tradicionais apenas para operações triviais
+3. **Voyage.ai Integration**: Embeddings semânticos para análises avançadas
 4. **Contexto Brasileiro**: Prompts especializados em política nacional
 
 ### **Padrão de Implementação**
 
 ```python
-# Todos os stages seguem este padrão
-if use_anthropic and ANTHROPIC_AVAILABLE:
-    try:
-        # Análise inteligente com AI
-        result = anthropic_module.analyze_intelligent(data)
-    except Exception as e:
-        logger.warning(f"API falhou: {e}. Usando método tradicional.")
-        result = traditional_method(data)  # Apenas para operações simples
+# Todos os stages 12-20 seguem este padrão API-only
+if self._validate_dependencies(required=["component_name"]):
+    # Análise inteligente com API (sem fallback)
+    result = self.component.analyze_enhanced(data, api_mode=True)
+    
+    # Extensão de resultados se necessário
+    if len(optimized_df) < len(df):
+        result = self._extend_results(df, result, optimization_report)
 else:
-    result = traditional_method(data)
+    # Erro - dependências não disponíveis
+    logger.error("❌ Dependências API não disponíveis")
+    continue
 ```
 
-### **Contribuição**
+---
 
-- **Nunca criar scripts separados** para stages
-- **Sempre implementar com Anthropic** para análise complexa
-- **Atualizar apenas arquivos principais**
-- **Seguir padrões de contextualização brasileira**
+## 📚 **Documentação Adicional**
+
+Para informações mais detalhadas, consulte:
+- **[CLAUDE.md](CLAUDE.md)** - Instruções para Claude Code e configurações avançadas
+- **[config/](config/)** - Arquivos de configuração específicos
+- **[src/dashboard/README.md](src/dashboard/README.md)** - Setup do dashboard
+- **[SECURITY_SETUP.md](SECURITY_SETUP.md)** - Configuração de segurança
+
+---
 
 ## 📄 **Licença e Uso Acadêmico**
 
@@ -425,14 +487,6 @@ Este projeto é destinado para **pesquisa acadêmica** sobre:
 - Desinformação e teorias conspiratórias
 - Democracia digital no Brasil
 
-## 📞 **Suporte**
-
-Para questões técnicas:
-1. Verificar **[documentação completa](documentation/)**
-2. Executar **diagnósticos** com `--list` e `--dry-run`
-3. Consultar **logs detalhados** em `logs/pipeline/`
-4. Verificar **configuração Anthropic** com scripts de validação
-
 ---
 
-**Pipeline Bolsonarismo 2025** - Análise científica de discurso político brasileiro com inteligência artificial centralizada.
+**Pipeline Bolsonarismo v4.9.1** - Sistema completo de análise científica de discurso político brasileiro com inteligência artificial, otimizado para máxima qualidade e economia de custos.

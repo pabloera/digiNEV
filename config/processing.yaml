@@ -212,3 +212,37 @@ enhanced_pipeline:
     deduplication_quality: 0.7
     cleaning_quality: 0.8
     overall_pipeline: 0.7
+
+# Pipeline Timeout Management (NEW) - Soluções para Stage 8
+pipeline_timeouts:
+  enabled: true
+  default_timeout: 300               # 5 minutos padrão
+  
+  # Timeouts específicos para stages problemáticos
+  stage_specific_timeouts:
+    "05_political_analysis": 900     # 15 min - API Anthropic intensivo
+    "07_linguistic_processing": 600  # 10 min - spaCy processamento
+    "08_sentiment_analysis": 1200    # 20 min - PROBLEMA PRINCIPAL ⚡
+    "09_topic_modeling": 800         # 13 min - Voyage.ai
+    "11_clustering": 600             # 10 min - Clustering semântico
+    
+  # Configuração de chunking adaptativo
+  adaptive_chunking:
+    enabled: true
+    sentiment_analysis_chunk_size: 3  # REDUZIDO: era 10, agora 3
+    political_analysis_chunk_size: 5  # REDUZIDO: era 10, agora 5
+    default_chunk_size: 10           # Mantém padrão para outros stages
+    
+  # Recovery automático
+  timeout_recovery:
+    max_retries: 3
+    progressive_timeout_increase: true
+    fallback_to_smaller_chunks: true
+    emergency_sampling: true
+    emergency_sample_size: 50        # Amostra de emergência muito pequena
+    
+  # Monitoramento
+  monitoring:
+    track_performance: true
+    log_timeouts: true
+    generate_reports: true

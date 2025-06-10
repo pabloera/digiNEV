@@ -1,7 +1,0 @@
-Você está trabalhando em um projeto Python estruturado em /src para análise de mensagens do Telegram. Seu objetivo agora é APENAS corrigir ou complementar uma etapa já iniciada, sem refatorar ou recriar etapas anteriores.
-
-- Siga a lógica do script principal em src/main.py.
-- Nunca recrie arquivos já existentes. Se precisar alterar, **diga qual arquivo está alterando**.
-- Só altere uma etapa por vez (ex: somente limpeza, ou somente análise de sentimentos).
-- Sempre indique se a função foi testada com dados reais (sem fallback/simulações).
-- Após cada alteração, gere uma célula para eu poder **testar a função modificada com um dataframe exemplo.**

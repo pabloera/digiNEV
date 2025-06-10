@@ -425,15 +425,15 @@ class PipelineController:
             # Create pipeline instance
             pipeline = UnifiedAnthropicPipeline(config, str(self.base_path))
             
-            # Execute specific stage
-            stage_method = getattr(pipeline, f"run_{stage_id}", None)
+            # Execute specific stage using internal method
+            stage_method = getattr(pipeline, "_execute_stage", None)
             if not stage_method:
-                logger.error(f"Stage method not found: run_{stage_id}")
-                return {'success': False, 'error': f"Method not found: run_{stage_id}"}
+                logger.error(f"Stage method '_execute_stage' not found in pipeline")
+                return {'success': False, 'error': f"Method '_execute_stage' not found"}
             
             # Execute stage
             start_time = time.time()
-            result = stage_method(datasets)
+            result = stage_method(stage_id, datasets)
             execution_time = time.time() - start_time
             
             # Enhance result with metadata

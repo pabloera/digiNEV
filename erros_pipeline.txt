@@ -1,0 +1,524 @@
+Last login: Sun Jun  8 06:21:44 on ttys008
+🔧 Aliases do Poetry carregados:
+  bolso     - Ir para projeto e ativar ambiente
+  pact      - Ativar Poetry no diretório atual
+  poetry    - Comando Poetry
+(base) 
+pabloalmada at MacBook-Pro-3 in ~ 
+$ ls
+Applications
+Databases
+Desktop
+Documents
+Downloads
+GitHub
+Google Drive
+Google Drive (pablo.almada@unesp.br)
+Koofr
+Koofr Network Drive
+Library
+MAXQDA
+MEGAsync
+Movies
+Music
+Pictures
+Public
+Sites
+Zotero
+Zotero\\storage\\zotero_paper_agent_file_upload_history.json
+anythingllm
+check_mcp_servers.sh
+clean_venvs
+create_project
+development
+financial data analysi model
+install_memory_mcp.sh
+knime-workspace
+mcp-ai-assistant
+mcp-dataset-analyzer
+nltk_data
+package-lock.json
+report1.html
+reset_memory_mcp.sh
+restart_claude_mcp.sh
+restart_memory_mcp.sh
+test_memory_mcp.js
+vosviewer_googleauth
+(base) 
+pabloalmada at MacBook-Pro-3 in ~ 
+$ bolso
+(base) 
+pabloalmada at MacBook-Pro-3 in ~/development/project/dataanalysis-bolsonarismo (main●●●) (.venv) 
+$ ls
+CLAUDE.md
+LICENSE.md
+README.md
+SECURITY_SETUP.md
+checkpoints
+config
+data
+dataanalysis-bolsonarismo.code-workspace
+logs
+poetry.lock
+poetry.toml
+pyproject.toml
+research_framework.md
+run_pipeline.py
+spacy_installation.md
+src
+(base) 
+pabloalmada at MacBook-Pro-3 in ~/development/project/dataanalysis-bolsonarismo (main●●●) (.venv) 
+$ python run_pipeline.py                        
+🎯 PIPELINE BOLSONARISMO v4.9 - EXECUÇÃO APRIMORADA COM CHECKPOINTS E PROTEÇÃO
+===========================================================================
+🔄 Carregando checkpoints...
+2025-06-09 05:24:20,570 - __main__ - INFO - No checkpoints found - starting fresh
+🛡️ Carregando proteção de etapas...
+2025-06-09 05:24:20,570 - __main__ - INFO - No protection checklist found
+🆕 Iniciando pipeline do zero
+📋 Carregando configuração...
+🖥️  Configurando integração com dashboard...
+2025-06-09 05:24:20,583 - __main__ - INFO - Dashboard integration configured: src/dashboard/data
+📊 Descobrindo datasets...
+📁 Datasets encontrados: 2
+   1. MERGED_telegram_datasets_with_ids_20250606_173225.csv
+   2. MERGED_telegram_datasets_with_ids_20250606_173225.csv
+
+🚀 Iniciando execução das etapas (a partir de 01_chunk_processing)...
+2025-06-09 05:24:25,223 - faiss.loader - INFO - Loading faiss.
+2025-06-09 05:24:25,290 - faiss.loader - INFO - Successfully loaded faiss.
+2025-06-09 05:24:25,300 - faiss - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
+2025-06-09 05:24:26,212 - src.anthropic_integration.system_validator - INFO - 🔍 Iniciando validação completa do sistema...
+2025-06-09 05:24:26,213 - src.anthropic_integration.system_validator - INFO - Validando dependências do sistema...
+2025-06-09 05:24:26,260 - src.anthropic_integration.system_validator - WARNING - ⚠️ Dependência opcional gensim não encontrada: cannot import name 'triu' from 'scipy.linalg' (/Users/pabloalmada/development/project/dataanalysis-bolsonarismo/.venv/lib/python3.12/site-packages/scipy/linalg/__init__.py)
+2025-06-09 05:24:26,304 - src.anthropic_integration.system_validator - INFO - Validando arquivos de configuração...
+2025-06-09 05:24:26,318 - src.anthropic_integration.system_validator - INFO - Validando estrutura de diretórios...
+2025-06-09 05:24:26,318 - src.anthropic_integration.system_validator - INFO - 📁 Diretório temp criado
+2025-06-09 05:24:26,318 - src.anthropic_integration.system_validator - INFO - Validando variáveis de ambiente...
+2025-06-09 05:24:26,318 - src.anthropic_integration.system_validator - INFO - ✅ Validação do sistema: SUCESSO
+2025-06-09 05:24:26,365 - UnifiedAnthropicPipeline - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,368 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,372 - FeatureExtractor - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,375 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,378 - EncodingValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,381 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,385 - DeduplicationValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,388 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,391 - IntelligentTextCleaner - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,394 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,398 - CompletePipelineValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,401 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,404 - FeatureExtractor - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,408 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,411 - EncodingValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,414 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,417 - DeduplicationValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,421 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,424 - IntelligentTextCleaner - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,427 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,427 - src.anthropic_integration.pipeline_integration - INFO - API Pipeline Integration inicializada
+2025-06-09 05:24:26,430 - FeatureExtractor - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,434 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,437 - PoliticalAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,440 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,440 - src.anthropic_integration.political_analyzer - INFO - ✅ PoliticalAnalyzer OTIMIZADO inicializado com claude-3-5-haiku-20241022
+2025-06-09 05:24:26,441 - src.anthropic_integration.political_analyzer - INFO - 📊 Configuração: batch_size=100, concurrent=5
+2025-06-09 05:24:26,444 - EncodingValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,447 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,450 - DeduplicationValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,454 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,457 - IntelligentTextCleaner - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,460 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,463 - SpacyNLPProcessor - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:26,464 - SpacyNLPProcessor - INFO - 🔤 Carregando modelo spaCy: pt_core_news_lg
+2025-06-09 05:24:27,126 - SpacyNLPProcessor - INFO - ✅ Adicionados 57 padrões políticos ao NER
+2025-06-09 05:24:27,126 - SpacyNLPProcessor - INFO - ✅ spaCy inicializado com sucesso: pt_core_news_lg
+2025-06-09 05:24:27,130 - AnthropicSentimentAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,133 - TopicInterpreter - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,137 - SemanticTfidfAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,141 - VoyageEmbeddingAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - Voyage.ai client initialized successfully
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - ✅ Model voyage-3.5-lite has 200M free tokens
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - 💡 Estimated cost per dataset: $0.0600 (likely FREE within quota)
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - 📊 Model: voyage-3.5-lite | Sampling: True | Batch: 128
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - VoyageEmbeddingAnalyzer initialized with model: voyage-3.5-lite
+2025-06-09 05:24:27,141 - src.anthropic_integration.voyage_embeddings - INFO - Cost optimization ENABLED - max 50000 messages per dataset
+2025-06-09 05:24:27,141 - SemanticTfidfAnalyzer - INFO - Voyage embeddings habilitado para TF-IDF análise
+2025-06-09 05:24:27,146 - ClusterValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,150 - SemanticHashtagAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,155 - IntelligentDomainAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,159 - SmartTemporalAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,163 - IntelligentNetworkAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,167 - QualitativeClassifier - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,170 - SmartPipelineReviewer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,174 - CompletePipelineValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,178 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,182 - FeatureExtractor - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,186 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,194 - EncodingValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,213 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,219 - DeduplicationValidator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,224 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,229 - IntelligentTextCleaner - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,235 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,239 - VoyageEmbeddingAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - Voyage.ai client initialized successfully
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - ✅ Model voyage-3.5-lite has 200M free tokens
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - 💡 Estimated cost per dataset: $0.0600 (likely FREE within quota)
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - 📊 Model: voyage-3.5-lite | Sampling: True | Batch: 128
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - VoyageEmbeddingAnalyzer initialized with model: voyage-3.5-lite
+2025-06-09 05:24:27,239 - src.anthropic_integration.voyage_embeddings - INFO - Cost optimization ENABLED - max 50000 messages per dataset
+2025-06-09 05:24:27,242 - VoyageTopicModeler - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,246 - VoyageEmbeddingAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - Voyage.ai client initialized successfully
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - ✅ Model voyage-3.5-lite has 200M free tokens
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - 💡 Estimated cost per dataset: $0.0600 (likely FREE within quota)
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - 📊 Model: voyage-3.5-lite | Sampling: True | Batch: 128
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - VoyageEmbeddingAnalyzer initialized with model: voyage-3.5-lite
+2025-06-09 05:24:27,246 - src.anthropic_integration.voyage_embeddings - INFO - Cost optimization ENABLED - max 50000 messages per dataset
+2025-06-09 05:24:27,246 - VoyageTopicModeler - INFO - ✅ Voyage embeddings habilitado para topic modeling
+2025-06-09 05:24:27,250 - VoyageClusteringAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,255 - VoyageEmbeddingAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - Voyage.ai client initialized successfully
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - ✅ Model voyage-3.5-lite has 200M free tokens
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - 💡 Estimated cost per dataset: $0.0600 (likely FREE within quota)
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - 📊 Model: voyage-3.5-lite | Sampling: True | Batch: 128
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - VoyageEmbeddingAnalyzer initialized with model: voyage-3.5-lite
+2025-06-09 05:24:27,255 - src.anthropic_integration.voyage_embeddings - INFO - Cost optimization ENABLED - max 50000 messages per dataset
+2025-06-09 05:24:27,255 - VoyageClusteringAnalyzer - INFO - ✅ Voyage embeddings habilitado para clustering
+2025-06-09 05:24:27,259 - HybridSearchEngine - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,259 - src.anthropic_integration.optimized_cache - INFO - OptimizedCache initialized: data/interim/hybrid_search_cache/embeddings, max_memory=256MB
+2025-06-09 05:24:27,260 - src.anthropic_integration.optimized_cache - INFO - OptimizedCache initialized: data/interim/hybrid_search_cache/search_results, max_memory=128MB
+2025-06-09 05:24:27,260 - src.anthropic_integration.hybrid_search_engine - INFO - HybridSearchEngine initialized successfully
+2025-06-09 05:24:27,264 - SemanticSearchEngine - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,268 - HybridSearchEngine - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,268 - src.anthropic_integration.optimized_cache - INFO - OptimizedCache initialized: data/interim/hybrid_search_cache/embeddings, max_memory=256MB
+2025-06-09 05:24:27,268 - src.anthropic_integration.optimized_cache - INFO - OptimizedCache initialized: data/interim/hybrid_search_cache/search_results, max_memory=128MB
+2025-06-09 05:24:27,268 - src.anthropic_integration.hybrid_search_engine - INFO - HybridSearchEngine initialized successfully
+2025-06-09 05:24:27,268 - src.anthropic_integration.semantic_search_engine - INFO - ✅ Semantic Search: Voyage.ai integration active
+2025-06-09 05:24:27,268 - src.anthropic_integration.optimized_cache - INFO - OptimizedCache initialized: data/interim/semantic_search_cache, max_memory=64MB
+2025-06-09 05:24:27,268 - src.anthropic_integration.semantic_search_engine - INFO - SemanticSearchEngine initialized successfully
+2025-06-09 05:24:27,272 - IntelligentQuerySystem - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,272 - src.anthropic_integration.intelligent_query_system - INFO - IntelligentQuerySystem initialized successfully
+2025-06-09 05:24:27,276 - ContentDiscoveryEngine - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,276 - src.anthropic_integration.content_discovery_engine - INFO - ContentDiscoveryEngine initialized successfully
+2025-06-09 05:24:27,280 - TemporalEvolutionTracker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,281 - src.anthropic_integration.temporal_evolution_tracker - INFO - TemporalEvolutionTracker initialized successfully
+2025-06-09 05:24:27,285 - AnalyticsDashboard - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,286 - src.anthropic_integration.analytics_dashboard - INFO - AnalyticsDashboard initialized successfully
+2025-06-09 05:24:27,290 - DatasetStatisticsGenerator - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,294 - StatisticalAnalyzer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,299 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,303 - PerformanceOptimizer - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,306 - APIQualityChecker - INFO - Cliente Anthropic inicializado com modelo: claude-3-5-haiku-latest
+2025-06-09 05:24:27,316 - AdaptiveChunkingManager - INFO - ✅ AdaptiveChunkingManager inicializado com sucesso
+2025-06-09 05:24:27,325 - ConcurrentProcessor - INFO - 🔒 Semáforo criado para api_only: 3 slots
+2025-06-09 05:24:27,325 - ConcurrentProcessor - INFO - 🔒 Semáforo criado para hybrid_processing: 5 slots
+2025-06-09 05:24:27,325 - ConcurrentProcessor - INFO - 🔒 Semáforo criado para local_processing: 8 slots
+2025-06-09 05:24:27,325 - ConcurrentProcessor - INFO - ✅ ConcurrentProcessor inicializado com sucesso
+2025-06-09 05:24:27,325 - ConcurrentProcessor - INFO - ⚙️ Max workers configurado: 4
+2025-06-09 05:24:27,328 - ProgressiveTimeoutManager - INFO - 📊 Inicializados 22 perfis de stage
+2025-06-09 05:24:27,328 - ProgressiveTimeoutManager - INFO - ✅ ProgressiveTimeoutManager inicializado com sucesso
+2025-06-09 05:24:27,328 - ProgressiveTimeoutManager - INFO - ⚙️ Estratégia global: adaptive
+2025-06-09 05:24:27,328 - ProgressiveTimeoutManager - INFO - 🔄 Escalação configurada: [300, 600, 1200, 1800]
+2025-06-09 05:24:27,328 - src.data.processors.chunk_processor - INFO - ChunkProcessor inicializado - chunk_size: 10000
+2025-06-09 05:24:27,328 - src.anthropic_integration.unified_pipeline - INFO - Inicialização de componentes: 35/35 (100.0%)
+2025-06-09 05:24:27,328 - src.anthropic_integration.unified_pipeline - INFO - Pipeline Unificado Anthropic inicializado com sucesso
+2025-06-09 05:24:27,328 - __main__ - INFO - Pipeline unificado inicializado
+2025-06-09 05:24:27,328 - __main__ - INFO - Executando 22 etapas do pipeline
+2025-06-09 05:24:27,328 - __main__ - INFO - Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:24:27,328 - src.anthropic_integration.unified_pipeline - INFO - Iniciando pipeline completo para 1 datasets
+2025-06-09 05:24:27,328 - src.anthropic_integration.pipeline_integration - INFO - Execução do pipeline inicializada com validações API
+2025-06-09 05:24:27,329 - src.anthropic_integration.unified_pipeline - INFO - Executando 22 etapas do pipeline v4.9 (aprimorado com análises estatísticas)
+2025-06-09 05:24:27,329 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 01_chunk_processing
+2025-06-09 05:24:27,329 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 01: CHUNK PROCESSING OTIMIZADO
+2025-06-09 05:24:27,329 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:24:27,350 - src.anthropic_integration.unified_pipeline - INFO - 📊 Encoding detectado: MacRoman
+2025-06-09 05:24:43,882 - src.anthropic_integration.unified_pipeline - INFO - ✅ Chunk processado salvo: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01_chunked.csv
+2025-06-09 05:24:43,882 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 01 concluído com sucesso
+2025-06-09 05:24:43,981 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 02_encoding_validation
+2025-06-09 05:24:43,981 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 02: ENCODING VALIDATION OTIMIZADA
+2025-06-09 05:24:43,981 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:24:43,981 - src.anthropic_integration.unified_pipeline - INFO - 🔍 Usando detecção de encoding aprimorada
+2025-06-09 05:24:43,981 - src.anthropic_integration.encoding_validator - INFO - Detectando encoding para: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01_chunked.csv
+2025-06-09 05:24:44,282 - src.anthropic_integration.encoding_validator - INFO - Encoding detectado: utf-8 (confiança: 0.99)
+2025-06-09 05:24:44,282 - src.anthropic_integration.encoding_validator - INFO - Carregando CSV com fallbacks: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01_chunked.csv
+2025-06-09 05:24:44,282 - src.anthropic_integration.encoding_validator - INFO - Detectando encoding para: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01_chunked.csv
+2025-06-09 05:24:44,580 - src.anthropic_integration.encoding_validator - INFO - Encoding detectado: utf-8 (confiança: 0.99)
+2025-06-09 05:24:53,706 - src.anthropic_integration.encoding_validator - INFO - CSV carregado com sucesso: utf-8 + ';' -> (1352446, 14)
+2025-06-09 05:24:54,751 - src.anthropic_integration.unified_pipeline - INFO - ✅ CSV carregado com encoding: utf-8
+2025-06-09 05:24:54,751 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:24:54,751 - src.anthropic_integration.encoding_validator - INFO - Iniciando validação de encoding para 1352446 registros
+2025-06-09 05:26:52,842 - src.anthropic_integration.encoding_validator - INFO - Validação concluída. Score de qualidade: 0.9999846194141704
+2025-06-09 05:26:59,741 - src.anthropic_integration.unified_pipeline - INFO - ✅ Qualidade satisfatória: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_02_encoding_validated.csv
+2025-06-09 05:26:59,741 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 02 concluído com sucesso
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 03_deduplication
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 03: DEDUPLICAÇÃO INTELIGENTE OTIMIZADA
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ','
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:26:59,902 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (580.2MB), usando processamento em chunks
+2025-06-09 05:27:05,705 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 14 colunas
+2025-06-09 05:27:05,766 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:27:05,766 - src.anthropic_integration.unified_pipeline - INFO - 📋 Colunas de texto disponíveis: body=True, body_cleaned=True
+2025-06-09 05:27:05,766 - src.anthropic_integration.unified_pipeline - INFO - 🤖 Usando deduplicação global aprimorada
+2025-06-09 05:27:05,766 - src.anthropic_integration.deduplication_validator - INFO - Iniciando deduplicação global aprimorada para 1352446 registros
+2025-06-09 05:27:12,497 - src.anthropic_integration.deduplication_validator - INFO - Backup criado: data/interim/deduplication_backup_20250609_052705.csv
+2025-06-09 05:27:12,911 - src.anthropic_integration.deduplication_validator - INFO - Deduplicação por ID 'message_id': removidas 0 duplicatas
+2025-06-09 05:27:13,214 - src.anthropic_integration.deduplication_validator - INFO - Coluna de texto detectada: body_cleaned (1102979/1352446 com conteúdo)
+2025-06-09 05:27:13,502 - src.anthropic_integration.unified_pipeline - WARNING - Fallback para deduplicação inteligente: name 'unicodedata' is not defined
+2025-06-09 05:27:13,502 - src.anthropic_integration.deduplication_validator - INFO - 🔄 INICIANDO DEDUPLICAÇÃO COMPLETA de 1352446 registros
+2025-06-09 05:27:13,502 - src.anthropic_integration.deduplication_validator - INFO - 📝 Usando coluna de texto: 'body'
+2025-06-09 05:27:13,502 - src.anthropic_integration.deduplication_validator - INFO - ✅ Usando 'body_cleaned' para deduplicação (texto já processado)
+2025-06-09 05:27:13,869 - src.anthropic_integration.deduplication_validator - INFO - 📊 Registros com conteúdo em 'body_cleaned': 1102979/1352446 (81.6%)
+2025-06-09 05:27:13,869 - src.anthropic_integration.deduplication_validator - INFO - 🔍 Preparando texto para deduplicação usando 'body_cleaned'...
+2025-06-09 05:27:19,291 - src.anthropic_integration.deduplication_validator - INFO - 📊 Calculando frequências de duplicatas...
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO - 📈 ESTATÍSTICAS DE DUPLICAÇÃO:
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO -    Total de registros: 1352446
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO -    Textos únicos: 798015
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO -    Duplicatas encontradas: 554431
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO -    Taxa de duplicação: 41.0%
+2025-06-09 05:27:19,766 - src.anthropic_integration.deduplication_validator - INFO - 🗑️  Removendo duplicatas (mantendo primeira ocorrência)...
+2025-06-09 05:27:20,254 - src.anthropic_integration.deduplication_validator - INFO - ✅ Taxa de duplicação normal: 41.0%
+2025-06-09 05:27:20,254 - src.anthropic_integration.deduplication_validator - INFO - 🎯 DEDUPLICAÇÃO CONCLUÍDA:
+2025-06-09 05:27:20,254 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Dataset original: 1352446 registros
+2025-06-09 05:27:20,254 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Dataset limpo: 798015 registros
+2025-06-09 05:27:20,255 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Duplicatas removidas: 554431 (41.0%)
+2025-06-09 05:27:20,255 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Maior frequência: 249467x
+2025-06-09 05:27:20,255 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Frequência média: 1.69x
+2025-06-09 05:27:20,255 - src.anthropic_integration.deduplication_validator - INFO -    ➤ Coluna adicionada: 'duplicate_frequency'
+2025-06-09 05:27:20,441 - src.anthropic_integration.deduplication_validator - INFO - Validando deduplicação: 1352446 -> 798015 registros
+2025-06-09 05:27:20,690 - src.anthropic_integration.deduplication_validator - INFO - Coluna de texto detectada: body_cleaned (1102979/1352446 com conteúdo)
+2025-06-09 05:27:20,703 - src.anthropic_integration.deduplication_validator - INFO - Detectando mensagens de mídia em 1000 registros
+2025-06-09 05:27:20,830 - src.anthropic_integration.deduplication_validator - INFO - Analisando 42 casos ambíguos via API
+2025-06-09 05:27:20,831 - src.anthropic_integration.api_error_handler - INFO - Tentativa 1/3 - 02b_deduplication_validation.media_detection_batch_1
+2025-06-09 05:27:36,625 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:27:36,635 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:27:36,636 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 02b_deduplication_validation, Tokens: 427→1434, Cost: $0.022791
+2025-06-09 05:27:36,636 - src.anthropic_integration.api_error_handler - INFO - Operação 02b_deduplication_validation.media_detection_batch_1 concluída com sucesso (tentativa 1)
+2025-06-09 05:27:36,640 - src.anthropic_integration.api_error_handler - INFO - Tentativa 1/3 - 02b_deduplication_validation.media_detection_batch_2
+2025-06-09 05:27:52,116 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:27:52,118 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:27:52,120 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 02b_deduplication_validation, Tokens: 415→1470, Cost: $0.023295
+2025-06-09 05:27:52,122 - DeduplicationValidator - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:27:52,122 - src.anthropic_integration.api_error_handler - INFO - Operação 02b_deduplication_validation.media_detection_batch_2 concluída com sucesso (tentativa 1)
+2025-06-09 05:27:52,128 - src.anthropic_integration.api_error_handler - INFO - Tentativa 1/3 - 02b_deduplication_validation.media_detection_batch_3
+2025-06-09 05:27:56,408 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:27:56,410 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:27:56,412 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 02b_deduplication_validation, Tokens: 301→253, Cost: $0.004698
+2025-06-09 05:27:56,413 - DeduplicationValidator - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:27:56,413 - src.anthropic_integration.api_error_handler - INFO - Operação 02b_deduplication_validation.media_detection_batch_3 concluída com sucesso (tentativa 1)
+2025-06-09 05:27:56,682 - src.anthropic_integration.api_error_handler - INFO - Tentativa 1/3 - 02b_deduplication_validation.quality_analysis
+2025-06-09 05:28:02,851 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:28:02,853 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:28:02,855 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 02b_deduplication_validation, Tokens: 1843→344, Cost: $0.010689
+2025-06-09 05:28:02,855 - DeduplicationValidator - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:28:02,855 - src.anthropic_integration.api_error_handler - INFO - Operação 02b_deduplication_validation.quality_analysis concluída com sucesso (tentativa 1)
+2025-06-09 05:28:02,856 - src.anthropic_integration.deduplication_validator - INFO - Validação concluída. Qualidade: 0.19999999999999996
+2025-06-09 05:28:02,856 - src.anthropic_integration.unified_pipeline - INFO - ✅ Deduplicação concluída: 1352446 → 798015 (41.0% redução)
+2025-06-09 05:28:07,418 - src.anthropic_integration.unified_pipeline - INFO - 💾 Dados deduplicados salvos: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_02b_deduplicated.csv
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 04_feature_validation
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - 🔧 INICIANDO ETAPA 01b: VALIDAÇÃO DE FEATURES
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ';'
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:28:07,605 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (409.6MB), usando processamento em chunks
+2025-06-09 05:28:11,407 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 798015 linhas, 15 colunas
+2025-06-09 05:28:11,442 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 798015 registros
+2025-06-09 05:28:11,442 - src.anthropic_integration.feature_validator - INFO - Iniciando validação e enriquecimento de features para 798015 registros
+2025-06-09 05:28:11,620 - src.anthropic_integration.feature_validator - INFO - Colunas de texto detectadas: ['body_cleaned', 'body', 'url', 'channel', 'mentions', 'sender']
+2025-06-09 05:28:11,794 - src.anthropic_integration.feature_validator - INFO - Features já existentes detectadas: ['media_type', 'hashtag', 'url', 'domain', 'mentions', 'is_fwrd', 'body_cleaned']
+2025-06-09 05:28:14,233 - src.anthropic_integration.feature_validator - INFO - Padrões estruturais já existem, pulando detecção
+2025-06-09 05:28:14,234 - src.anthropic_integration.feature_validator - INFO - Validação concluída. Features puladas: 4
+2025-06-09 05:28:19,357 - src.anthropic_integration.unified_pipeline - INFO - ✅ Features validadas e salvas em: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01b_features_validated.csv
+2025-06-09 05:28:19,466 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 04b_statistical_analysis_pre
+2025-06-09 05:28:19,466 - src.anthropic_integration.unified_pipeline - INFO - Iniciando análise estatística pré-limpeza
+2025-06-09 05:28:19,466 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ','
+2025-06-09 05:28:19,466 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:28:19,466 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (580.2MB), usando processamento em chunks
+2025-06-09 05:28:25,396 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 14 colunas
+2025-06-09 05:28:25,456 - src.anthropic_integration.statistical_analyzer - INFO - Iniciando análise estatística PRÉ-limpeza para 1352446 registros
+2025-06-09 05:29:09,597 - src.anthropic_integration.statistical_analyzer - INFO - Relatório salvo: data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225_04b_pre_cleaning_stats.json
+2025-06-09 05:29:09,597 - src.anthropic_integration.statistical_analyzer - INFO - Análise pré-limpeza concluída
+2025-06-09 05:29:09,597 - src.anthropic_integration.unified_pipeline - INFO - Análise pré-limpeza salva: data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225_04b_pre_cleaning_stats.json
+2025-06-09 05:29:09,724 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 05_political_analysis
+2025-06-09 05:29:09,724 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 05: ANÁLISE POLÍTICA OTIMIZADA
+2025-06-09 05:29:09,724 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:29:09,724 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ';'
+2025-06-09 05:29:09,724 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:29:09,725 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (631.2MB), usando processamento em chunks
+2025-06-09 05:29:16,418 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 14 colunas
+2025-06-09 05:29:16,482 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:29:18,471 - src.anthropic_integration.unified_pipeline - WARNING - Falha na otimização política, usando amostra simples: np.float64(2.0)
+2025-06-09 05:29:18,488 - src.anthropic_integration.unified_pipeline - INFO - 📊 Otimização aplicada: 1352446 → 1500 registros
+2025-06-09 05:29:18,488 - src.anthropic_integration.unified_pipeline - INFO - 🤖 Usando análise política Anthropic Enhanced v4.9.1
+2025-06-09 05:29:18,488 - src.anthropic_integration.political_analyzer - INFO - 🏛️ Iniciando análise política OTIMIZADA para 1500 registros
+2025-06-09 05:29:18,497 - src.anthropic_integration.political_analyzer - INFO - 💾 Backup criado: data/interim/political_analysis_backup_20250609_052918.csv
+2025-06-09 05:29:18,497 - src.anthropic_integration.unified_pipeline - WARNING - ⚠️ Falha na análise Anthropic: 'duplicate_frequency', usando fallback
+2025-06-09 05:29:47,406 - src.anthropic_integration.unified_pipeline - INFO - ✅ Análise política salva em: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_05_politically_analyzed.csv
+2025-06-09 05:29:47,406 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 05 concluído com sucesso
+2025-06-09 05:29:47,625 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 06_text_cleaning
+2025-06-09 05:29:47,625 - src.anthropic_integration.unified_pipeline - INFO - Carregando dados para limpeza: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01c_politically_analyzed.csv
+2025-06-09 05:29:47,625 - src.anthropic_integration.unified_pipeline - ERROR - Erro crítico na limpeza de data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225.csv: Arquivo não encontrado: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_01c_politically_analyzed.csv
+2025-06-09 05:29:47,632 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 06b_statistical_analysis_post
+2025-06-09 05:29:47,632 - src.anthropic_integration.unified_pipeline - INFO - Iniciando análise estatística pós-limpeza
+2025-06-09 05:29:47,633 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ','
+2025-06-09 05:29:47,633 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:29:47,633 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (580.2MB), usando processamento em chunks
+2025-06-09 05:29:53,516 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 14 colunas
+2025-06-09 05:29:53,576 - src.anthropic_integration.statistical_analyzer - INFO - Iniciando análise estatística PÓS-limpeza para 1352446 registros
+2025-06-09 05:30:38,950 - src.anthropic_integration.statistical_analyzer - INFO - Relatório salvo: data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225_06b_post_cleaning_stats.json
+2025-06-09 05:30:38,951 - src.anthropic_integration.statistical_analyzer - INFO - Análise pós-limpeza concluída
+2025-06-09 05:30:38,954 - src.anthropic_integration.statistical_analyzer - INFO - Gerando comparação antes/depois da limpeza
+2025-06-09 05:30:38,954 - src.anthropic_integration.unified_pipeline - WARNING - Erro na comparação para data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225.csv: ufunc 'subtract' did not contain a loop with signature matching types (dtype('<U9'), dtype('int64')) -> None
+2025-06-09 05:30:38,954 - src.anthropic_integration.unified_pipeline - INFO - Análise pós-limpeza salva: data/uploads/MERGED_telegram_datasets_with_ids_20250606_173225_06b_post_cleaning_stats.json
+2025-06-09 05:30:39,080 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 07_linguistic_processing
+2025-06-09 05:30:39,080 - src.anthropic_integration.unified_pipeline - INFO - 🔤 INICIANDO ETAPA 07: PROCESSAMENTO LINGUÍSTICO COM SPACY ✅ IMPLEMENTADO
+2025-06-09 05:30:39,080 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:30:39,080 - src.anthropic_integration.unified_pipeline - ERROR - ❌ Erro no processamento linguístico para MERGED_telegram_datasets_with_ids_20250606_173225.csv: Arquivo não encontrado: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_06_text_cleaned.csv
+2025-06-09 05:30:39,080 - src.anthropic_integration.unified_pipeline - INFO - 📊 Processamento linguístico concluído: 0 datasets processados
+2025-06-09 05:30:39,092 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 08_sentiment_analysis
+2025-06-09 05:30:39,092 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 08: SENTIMENT ANALYSIS
+2025-06-09 05:30:39,092 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:30:39,093 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ','
+2025-06-09 05:30:39,093 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:30:39,093 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (580.2MB), usando processamento em chunks
+2025-06-09 05:30:45,019 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 14 colunas
+2025-06-09 05:30:45,081 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:30:45,918 - src.anthropic_integration.unified_pipeline - WARNING - Falha na otimização de sentiment, usando amostra simples: np.float64(1.5385741346650594)
+2025-06-09 05:30:45,936 - src.anthropic_integration.unified_pipeline - INFO - 📊 Otimização aplicada: 1352446 → 1000 registros
+2025-06-09 05:30:45,936 - src.anthropic_integration.unified_pipeline - INFO - 📚 Usando análise tradicional para sentiment
+2025-06-09 05:30:58,763 - src.anthropic_integration.unified_pipeline - INFO - ✅ Sentiment analysis salvo em: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_08_sentiment_analyzed.csv
+2025-06-09 05:30:58,763 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 08 concluído com sucesso
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 09_topic_modeling
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 09: TOPIC MODELING COM VOYAGE.AI
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ';'
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:30:58,977 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (642.3MB), usando processamento em chunks
+2025-06-09 05:31:05,817 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 17 colunas
+2025-06-09 05:31:05,883 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:31:07,049 - src.anthropic_integration.unified_pipeline - INFO - 📊 Otimização aplicada: 1352446 → 500 registros
+2025-06-09 05:31:07,049 - src.anthropic_integration.unified_pipeline - INFO - 🚀 Usando Voyage.ai para topic modeling avançado
+2025-06-09 05:31:07,049 - VoyageTopicModeler - INFO - 🎯 Iniciando topic modeling para 500 mensagens
+2025-06-09 05:31:07,049 - VoyageTopicModeler - INFO - 📊 Método: Voyage embeddings + AI
+2025-06-09 05:31:07,050 - VoyageTopicModeler - INFO - 🚀 Usando Voyage embeddings para 15 tópicos
+2025-06-09 05:31:07,050 - src.anthropic_integration.voyage_embeddings - INFO - Aplicando amostragem inteligente - Original: 418 mensagens
+2025-06-09 05:31:07,050 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro de comprimento (>=50): 295 mensagens
+2025-06-09 05:31:07,061 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro político: 141 mensagens
+2025-06-09 05:31:07,061 - src.anthropic_integration.voyage_embeddings - INFO - Dataset final para Voyage: 141 mensagens
+2025-06-09 05:31:07,061 - VoyageTopicModeler - INFO - 📊 Amostragem aplicada: 141 de 418 textos
+2025-06-09 05:31:07,061 - src.anthropic_integration.voyage_embeddings - INFO - Generating embeddings for 141 texts with model voyage-3.5-lite
+2025-06-09 05:31:11,170 - src.anthropic_integration.voyage_embeddings - INFO - Embedding generation completed: 141/141 successful
+2025-06-09 05:31:17,645 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:17,655 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:17,657 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 536→287, Cost: $0.005913
+2025-06-09 05:31:17,657 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto, aqui...'
+2025-06-09 05:31:17,657 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:23,242 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:23,244 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:23,246 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 569→294, Cost: $0.006117
+2025-06-09 05:31:23,247 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto forne...'
+2025-06-09 05:31:23,247 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:29,247 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:29,249 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:29,250 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 531→281, Cost: $0.005808
+2025-06-09 05:31:29,250 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Baseado na análise dos textos e do contexto, aqui ...'
+2025-06-09 05:31:29,251 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:34,710 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:34,713 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:34,715 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 561→287, Cost: $0.005988
+2025-06-09 05:31:34,716 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:40,822 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:40,828 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:40,829 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 634→295, Cost: $0.006327
+2025-06-09 05:31:40,829 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Baseado na análise dos textos e no contexto fornec...'
+2025-06-09 05:31:40,829 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:46,282 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:46,285 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:46,288 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 610→271, Cost: $0.005895
+2025-06-09 05:31:46,288 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:52,323 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:52,324 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:52,326 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 487→272, Cost: $0.005541
+2025-06-09 05:31:52,327 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto, aqui...'
+2025-06-09 05:31:52,327 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:31:58,365 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:31:58,368 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:31:58,370 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 627→322, Cost: $0.006711
+2025-06-09 05:31:58,371 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:04,508 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:04,511 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:04,513 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 669→271, Cost: $0.006072
+2025-06-09 05:32:04,514 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Baseado na análise dos textos e do contexto, aqui ...'
+2025-06-09 05:32:04,514 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:11,267 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:11,268 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:11,269 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 506→319, Cost: $0.006303
+2025-06-09 05:32:11,270 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto, aqui...'
+2025-06-09 05:32:11,270 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:17,007 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:17,014 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:17,017 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 652→286, Cost: $0.006246
+2025-06-09 05:32:17,017 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto, aqui...'
+2025-06-09 05:32:17,017 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:23,995 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:23,997 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:24,000 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 433→320, Cost: $0.006099
+2025-06-09 05:32:24,001 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base no fragmento de texto e no contexto forne...'
+2025-06-09 05:32:24,001 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:30,417 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:30,418 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:30,421 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 488→316, Cost: $0.006204
+2025-06-09 05:32:30,421 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto forne...'
+2025-06-09 05:32:30,422 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:37,174 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:37,177 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:37,180 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 506→309, Cost: $0.006153
+2025-06-09 05:32:37,180 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:43,524 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2025-06-09 05:32:43,527 - src.anthropic_integration.cost_monitor - WARNING - Modelo claude-3-5-haiku-latest não encontrado, usando preços padrão
+2025-06-09 05:32:43,528 - src.anthropic_integration.cost_monitor - INFO - API Usage - Stage: 08_topic_modeling, Tokens: 533→310, Cost: $0.006249
+2025-06-09 05:32:43,529 - VoyageTopicModeler - INFO - 🔧 Removendo texto introdutório: 'Com base na análise dos textos e do contexto forne...'
+2025-06-09 05:32:43,529 - VoyageTopicModeler - INFO - ✅ JSON extraído com método balanceado
+2025-06-09 05:32:43,530 - VoyageTopicModeler - INFO - 📈 Estendendo assignments de 141 para 418 textos
+2025-06-09 05:32:44,095 - src.anthropic_integration.unified_pipeline - INFO - ✅ Voyage topic modeling concluído: 15 tópicos
+2025-06-09 05:32:52,393 - src.anthropic_integration.unified_pipeline - INFO - ✅ Topic modeling salvo em: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_09_topic_modeled.csv
+2025-06-09 05:32:52,393 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 09 concluído com sucesso
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 10_tfidf_extraction
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 10: TF-IDF EXTRACTION COM VOYAGE.AI
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ';'
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:32:52,614 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (683.5MB), usando processamento em chunks
+2025-06-09 05:33:00,457 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 20 colunas
+2025-06-09 05:33:00,527 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:33:00,527 - src.anthropic_integration.unified_pipeline - INFO - 🤖 Usando extração TF-IDF Anthropic
+2025-06-09 05:33:00,527 - SemanticTfidfAnalyzer - INFO - Iniciando análise TF-IDF semântica
+2025-06-09 05:33:00,527 - src.anthropic_integration.unified_pipeline - WARNING - ⚠️ Falha na extração Anthropic: Coluna text_cleaned não encontrada, usando fallback
+2025-06-09 05:33:12,235 - src.anthropic_integration.unified_pipeline - INFO - 🚀 Integrando análise de embeddings Voyage.ai otimizada
+2025-06-09 05:33:12,235 - src.anthropic_integration.voyage_embeddings - INFO - Enhancing semantic analysis for 1352446 records
+2025-06-09 05:33:12,235 - src.anthropic_integration.voyage_embeddings - INFO - Aplicando amostragem inteligente - Original: 1352446 mensagens
+2025-06-09 05:33:12,827 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro de comprimento (>=50): 776060 mensagens
+2025-06-09 05:33:39,115 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro político: 372471 mensagens
+2025-06-09 05:33:39,410 - src.anthropic_integration.unified_pipeline - WARNING - ⚠️ Falha na integração Voyage.ai: name 're' is not defined
+2025-06-09 05:33:49,132 - src.anthropic_integration.unified_pipeline - INFO - ✅ TF-IDF extraction salvo em: data/interim/MERGED_telegram_datasets_with_ids_20250606_173225_10_tfidf_extracted.csv
+2025-06-09 05:33:49,132 - src.anthropic_integration.unified_pipeline - INFO - ✅ Stage 10 concluído com sucesso
+2025-06-09 05:33:49,349 - src.anthropic_integration.unified_pipeline - INFO - Executando etapa: 11_clustering
+2025-06-09 05:33:49,349 - src.anthropic_integration.unified_pipeline - INFO - 🎯 INICIANDO ETAPA 11: CLUSTERING SEMÂNTICO OTIMIZADO COM VOYAGE.AI
+2025-06-09 05:33:49,349 - src.anthropic_integration.unified_pipeline - INFO - 📂 Processando dataset: MERGED_telegram_datasets_with_ids_20250606_173225.csv
+2025-06-09 05:33:49,350 - src.anthropic_integration.unified_pipeline - INFO - 📊 Separador detectado: ';'
+2025-06-09 05:33:49,350 - src.anthropic_integration.unified_pipeline - INFO - 📋 Configurações de parsing preparadas: 10 tentativas
+2025-06-09 05:33:49,350 - src.anthropic_integration.unified_pipeline - INFO - Arquivo grande detectado (791.3MB), usando processamento em chunks
+2025-06-09 05:33:58,060 - src.anthropic_integration.unified_pipeline - INFO - ✅ Parsing bem-sucedido em chunks (config 1): 1352446 linhas, 22 colunas
+2025-06-09 05:33:58,130 - src.anthropic_integration.unified_pipeline - INFO - 📊 Dataset carregado: 1352446 registros
+2025-06-09 05:33:58,130 - src.anthropic_integration.unified_pipeline - INFO - 🚀 Usando Voyage.ai para clustering semântico avançado
+2025-06-09 05:33:58,130 - VoyageClusteringAnalyzer - INFO - 🎯 Iniciando clustering semântico para 1352446 mensagens
+2025-06-09 05:33:58,130 - VoyageClusteringAnalyzer - INFO - 📊 Método: Voyage embeddings
+2025-06-09 05:33:58,909 - VoyageClusteringAnalyzer - INFO - 🚀 Executando clustering com Voyage embeddings
+2025-06-09 05:33:58,972 - src.anthropic_integration.voyage_embeddings - INFO - Aplicando amostragem inteligente - Original: 1102979 mensagens
+2025-06-09 05:33:59,166 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro de comprimento (>=50): 776060 mensagens
+2025-06-09 05:34:25,158 - src.anthropic_integration.voyage_embeddings - INFO - Após filtro político: 372471 mensagens
+2025-06-09 05:34:25,286 - VoyageClusteringAnalyzer - ERROR - ❌ Erro no clustering com Voyage: name 're' is not defined
+2025-06-09 05:34:25,286 - VoyageClusteringAnalyzer - INFO - 📚 Executando clustering tradicional com TF-IDF
+

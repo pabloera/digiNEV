@@ -1,72 +1,50 @@
-# 🔒 Configuração de Segurança - Chaves de API
+# 🔒 Configuração de Segurança - APIs
 
 ## ⚠️ IMPORTANTE: NUNCA COMMITE CHAVES DE API!
 
-Este projeto utiliza APIs externas que requerem autenticação. Siga estas instruções para configurar com segurança:
+## 🔧 Setup Rápido
 
-## 🔧 Configuração Inicial
-
-### 1. Copie o template de configuração:
+### 1. Configurar Variáveis de Ambiente
 ```bash
-cp .env.template .env
+# Criar arquivo .env (OBRIGATÓRIO)
+echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
+echo "VOYAGE_API_KEY=pa-[SUA_CHAVE_AQUI]" >> .env
+
+# Verificar configuração
+python -c "import os; print('✅ APIs configuradas') if os.getenv('ANTHROPIC_API_KEY') and os.getenv('VOYAGE_API_KEY') else print('❌ APIs não configuradas')"
 ```
 
-### 2. Configure suas chaves no arquivo `.env`:
+### 2. Copiar Templates de Configuração
+```bash
+# Templates necessários
+cp config/anthropic.yaml.template config/anthropic.yaml
+cp config/voyage_embeddings.yaml.template config/voyage_embeddings.yaml
+```
 
-#### Anthropic API (obrigatória)
-1. Acesse: https://console.anthropic.com/
-2. Crie uma conta ou faça login
-3. Gere uma API key
-4. Substitua `[SUA_CHAVE_ANTHROPIC_AQUI]` no arquivo `.env`
+## 🔑 APIs Necessárias
 
-#### Voyage.ai API (opcional - para análise semântica)
-1. Acesse: https://www.voyageai.com/
-2. Crie uma conta
-3. Gere uma API key
-4. Substitua `[SUA_CHAVE_VOYAGE_AQUI]` no arquivo `.env`
+### Anthropic API
+- **Modelo**: claude-3-5-haiku-20241022
+- **Uso**: Stages 05, 08, 12-18, 20 (API-only)
+- **Custo**: Otimizado com 96% economia
 
-#### Pinecone API (opcional - para armazenamento vetorial)
-1. Acesse: https://www.pinecone.io/
-2. Crie uma conta
-3. Gere uma API key
-4. Descomente e substitua `[SUA_CHAVE_PINECONE_AQUI]` no arquivo `.env`
+### Voyage.ai API  
+- **Modelo**: voyage-3.5-lite
+- **Uso**: Stages 09-11, 19 (embeddings semânticos)
+- **Custo**: Batch otimizado 128 vs 8
 
-## 🛡️ Medidas de Segurança Implementadas
+## 🛡️ Segurança
 
-- ✅ Arquivo `.env` incluído no `.gitignore`
-- ✅ Template `.env.template` sem chaves reais
-- ✅ Placeholders seguros em todos os arquivos
-- ✅ Avisos de segurança na documentação
+### Arquivos que NUNCA devem ser commitados:
+- `.env` (já no .gitignore)
+- `config/anthropic.yaml` (se contém chaves)
+- `config/voyage_embeddings.yaml` (se contém chaves)
 
-## ❌ O QUE NUNCA FAZER
-
-- ❌ Commitar o arquivo `.env` com chaves reais
-- ❌ Incluir chaves de API em código fonte
-- ❌ Compartilhar chaves em issues ou PRs
-- ❌ Usar chaves em arquivos de configuração commitados
-
-## ✅ BOAS PRÁTICAS
-
-- ✅ Use variáveis de ambiente
-- ✅ Mantenha chaves em arquivo `.env` local
-- ✅ Use diferentes chaves para dev/prod
-- ✅ Revogue chaves expostas imediatamente
-- ✅ Monitore uso das APIs regularmente
-
-## 🚨 SE CHAVES FORAM EXPOSTAS
-
-1. **Revogue imediatamente** nas respectivas plataformas
-2. **Gere novas chaves**
-3. **Atualize seu arquivo `.env` local**
-4. **Verifique logs** para uso indevido
-
-## 📞 Suporte
-
-Se tiver dúvidas sobre configuração de segurança, consulte:
-- Documentação oficial das APIs
-- Canal de suporte do projeto
-- Issues do GitHub (SEM incluir chaves!)
+### Verificação de Segurança:
+```bash
+# Verificar se .env está no .gitignore
+grep -q "\.env" .gitignore && echo "✅ .env protegido" || echo "❌ .env não protegido"
+```
 
 ---
-
-**🔒 Segurança em primeiro lugar! Proteja suas chaves de API como senhas.**
+**Referência**: Configuração completa documentada no [README.md](README.md#configuração-completa)
