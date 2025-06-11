@@ -1,10 +1,36 @@
-# CLAUDE.md — Projeto Bolsonarismo v4.9.7 (JUNHO 2025)
+# CLAUDE.md — Projeto Bolsonarismo v4.9.8 (JUNHO 2025)
 
-## 🚨 **STATUS ATUAL: PIPELINE COMPLETO 17-20 EXECUTADO COM SUCESSO** ✅
+## 🚨 **STATUS ATUAL: DASHBOARD APRIMORADO COM ANÁLISE COMPARATIVA ANTES/DEPOIS** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 11/06/2025 - Pipeline v4.9.7 com TODOS OS 20 STAGES concluídos + execução completa finalizada
+**ÚLTIMA ATUALIZAÇÃO:** 11/06/2025 - Dashboard v4.9.8 com análise comparativa completa antes/depois da limpeza de dados
 
-### 🏆 **CONSOLIDAÇÃO FINAL v4.9.7: PIPELINE COMPLETO 20 STAGES EXECUTADOS COM SUCESSO**
+### 🏆 **CONSOLIDAÇÃO FINAL v4.9.8: DASHBOARD APRIMORADO COM ANÁLISE COMPARATIVA**
+
+**✅ DASHBOARD APRIMORADO v4.9.8 - ANÁLISE COMPARATIVA ANTES/DEPOIS:**
+
+O dashboard foi completamente reorganizado para focar nos resultados das análises de dados (não monitoramento técnico) e agora inclui **análise comparativa completa antes/depois da limpeza**:
+
+**🎯 NOVA FUNCIONALIDADE PRINCIPAL - COMPARAÇÃO ANTES/DEPOIS:**
+- 📊 **Volume de mensagens**: Original (7.668) vs Deduplicated (300) - visualização da redução
+- 🏷️ **Top 10 hashtags**: Comparação side-by-side dos hashtags mais frequentes antes/depois
+- 👥 **Top 10 menções**: Análise das menções antes e depois do processamento  
+- 🌐 **Top 10 domínios**: Comparação dos domínios mais utilizados antes/depois
+- 🔄 **Resumo de transformações**: Estatísticas de todas as 20 etapas do pipeline
+
+**📊 ESTRUTURA DE DADOS UTILIZADA:**
+- **Dados originais**: `sample_dataset_v495_01_chunked.csv` (7.668 registros)
+- **Dados deduplicated**: `sample_dataset_v495_03_deduplicated.csv` (300 registros)
+- **Estatísticas pré-limpeza**: `04b_pre_cleaning_stats.json` (hashtags, menções, domínios originais)
+- **Estatísticas pós-limpeza**: `06b_post_cleaning_stats.json` (dados após limpeza)
+- **Dados finais**: `sample_dataset_v495_19_pipeline_validated.csv` (300 registros, 64 colunas)
+
+**📈 MÉTRICAS DE TRANSFORMAÇÃO IMPLEMENTADAS:**
+- Redução total de mensagens: 96,1% (7.668 → 300)
+- Redução de caracteres: ~4,3% após limpeza inteligente
+- Redução de palavras: ~1,2% preservando contexto
+- Aumento de colunas: +50 (14 → 64) com features enriquecidas
+
+### 🏆 **CONSOLIDAÇÃO ANTERIOR v4.9.7: PIPELINE COMPLETO 20 STAGES EXECUTADOS COM SUCESSO**
 
 **✅ PIPELINE ENHANCED v4.9.7 - EXECUÇÃO COMPLETA FINALIZADA:**
 - ✅ **Stages 01-16**: Execução completa validada com 7,668 → 784,632 registros processados
