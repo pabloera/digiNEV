@@ -6,57 +6,64 @@ spaCy linguístico e integração completa com dashboard para análise em tempo 
 Numeração renumerada sequencialmente (01-20) para consistência.
 """
 
-import os
 import json
 import logging
+import os
 import time
-import pandas as pd
-from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
+
+# ✅ NOVOS COMPONENTES PARA SOLUÇÕES DE TIMEOUT E PERFORMANCE
+from .adaptive_chunking_manager import (
+    AdaptiveChunkingManager,
+    get_adaptive_chunking_manager,
+)
+from .analytics_dashboard import AnalyticsDashboard
 
 # Importar componentes base
 from .base import AnthropicBase
-from .pipeline_integration import APIPipelineIntegration
-from .feature_extractor import FeatureExtractor
-from .encoding_validator import EncodingValidator
-from .deduplication_validator import DeduplicationValidator
-from .intelligent_text_cleaner import IntelligentTextCleaner
-from .sentiment_analyzer import AnthropicSentimentAnalyzer
-from .topic_interpreter import TopicInterpreter
-from .semantic_tfidf_analyzer import SemanticTfidfAnalyzer
 from .cluster_validator import ClusterValidator
-from .semantic_hashtag_analyzer import SemanticHashtagAnalyzer
-from .intelligent_domain_analyzer import IntelligentDomainAnalyzer
-
-# ✅ NOVOS COMPONENTES PARA SOLUÇÕES DE TIMEOUT E PERFORMANCE
-from .adaptive_chunking_manager import AdaptiveChunkingManager, get_adaptive_chunking_manager
 from .concurrent_processor import ConcurrentProcessor, get_concurrent_processor
-from .progressive_timeout_manager import ProgressiveTimeoutManager, get_progressive_timeout_manager
-from .smart_temporal_analyzer import SmartTemporalAnalyzer
+from .content_discovery_engine import ContentDiscoveryEngine
+from .dataset_statistics_generator import DatasetStatisticsGenerator
+from .deduplication_validator import DeduplicationValidator
+from .encoding_validator import EncodingValidator
+from .feature_extractor import FeatureExtractor
+
+# Importar novos componentes de validação e análise política
+from .feature_validator import FeatureValidator
+from .hybrid_search_engine import HybridSearchEngine
+from .intelligent_domain_analyzer import IntelligentDomainAnalyzer
 from .intelligent_network_analyzer import IntelligentNetworkAnalyzer
-from .qualitative_classifier import QualitativeClassifier
-from .smart_pipeline_reviewer import SmartPipelineReviewer
+from .intelligent_query_system import IntelligentQuerySystem
+from .intelligent_text_cleaner import IntelligentTextCleaner
+from .optimized_cache import EmbeddingCache, OptimizedCache
+from .pipeline_integration import APIPipelineIntegration
 from .pipeline_validator import CompletePipelineValidator
+from .political_analyzer import PoliticalAnalyzer
+from .progressive_timeout_manager import (
+    ProgressiveTimeoutManager,
+    get_progressive_timeout_manager,
+)
+from .qualitative_classifier import QualitativeClassifier
+from .semantic_hashtag_analyzer import SemanticHashtagAnalyzer
+
+# Importar novo sistema de busca semântica e inteligência
+from .semantic_search_engine import SemanticSearchEngine
+from .semantic_tfidf_analyzer import SemanticTfidfAnalyzer
+from .sentiment_analyzer import AnthropicSentimentAnalyzer
+from .smart_pipeline_reviewer import SmartPipelineReviewer
+from .smart_temporal_analyzer import SmartTemporalAnalyzer
+from .temporal_evolution_tracker import TemporalEvolutionTracker
+from .topic_interpreter import TopicInterpreter
+from .voyage_clustering_analyzer import VoyageClusteringAnalyzer
 from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
 # Importar novos componentes Voyage.ai aprimorados
 from .voyage_topic_modeler import VoyageTopicModeler
-from .voyage_clustering_analyzer import VoyageClusteringAnalyzer
-
-# Importar novo sistema de busca semântica e inteligência
-from .semantic_search_engine import SemanticSearchEngine
-from .hybrid_search_engine import HybridSearchEngine
-from .optimized_cache import OptimizedCache, EmbeddingCache
-from .intelligent_query_system import IntelligentQuerySystem
-from .content_discovery_engine import ContentDiscoveryEngine
-from .analytics_dashboard import AnalyticsDashboard
-from .temporal_evolution_tracker import TemporalEvolutionTracker
-from .dataset_statistics_generator import DatasetStatisticsGenerator
-
-# Importar novos componentes de validação e análise política
-from .feature_validator import FeatureValidator
-from .political_analyzer import PoliticalAnalyzer
 
 # Importar processador linguístico spaCy
 try:
@@ -66,12 +73,13 @@ except ImportError:
     SPACY_PROCESSOR_AVAILABLE = False
     SpacyNLPProcessor = None
 
-# Importar novos componentes aprimorados
-from .statistical_analyzer import StatisticalAnalyzer
-from .performance_optimizer import PerformanceOptimizer
-
 # Importar processadores de dados
 from src.data.processors.chunk_processor import ChunkProcessor
+
+from .performance_optimizer import PerformanceOptimizer
+
+# Importar novos componentes aprimorados
+from .statistical_analyzer import StatisticalAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +87,7 @@ logger = logging.getLogger(__name__)
 class UnifiedAnthropicPipeline(AnthropicBase):
     """
     Pipeline unificado com integração Anthropic para todas as 20 etapas
-    
+
     Etapas do Pipeline v4.8 (RENUMERADO SEQUENCIALMENTE):
     01. chunk_processing - Processamento robusto em chunks
     02. encoding_validation - Validação estrutural e encoding
@@ -102,11 +110,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
     19. semantic_search - Busca semântica inteligente e indexação 🚀
     20. pipeline_validation - Validação final completa do pipeline
     """
-    
+
     def __init__(self, config: Dict[str, Any] = None, project_root: str = None):
         """
         Inicializa pipeline unificado com tratamento robusto de erros
-        
+
         Args:
             config: Configuração do pipeline
             project_root: Diretório raiz do projeto
@@ -116,23 +124,23 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             from .system_validator import SystemValidator
             validator = SystemValidator(project_root)
             system_ok, validation_results = validator.run_full_validation()
-            
+
             if not system_ok and validation_results["overall_status"] == "error":
                 logger.error("Sistema não passou na validação crítica")
                 logger.error(validator.generate_report())
                 # Continuar mas marcar como modo degradado
-                
+
             # Inicializar classe base primeiro
             super().__init__(config)
             self.project_root = Path(project_root) if project_root else Path.cwd()
-            
+
             # Validar configuração
             if not config:
                 raise ValueError("Configuração é obrigatória para inicializar o pipeline")
-            
+
             # Configurações do pipeline com validação
             self.pipeline_config = self._validate_and_setup_config(config)
-            
+
             # Estado do pipeline
             self.pipeline_state = {
                 "start_time": None,
@@ -144,24 +152,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "data_versions": {},
                 "initialization_errors": []
             }
-            
+
             # Inicializar componentes especializados com tratamento de erro
             initialization_success = self._initialize_components_safely()
-            
+
             # Flag para habilitar geração de estatísticas
             self.generate_dataset_statistics = config.get('processing', {}).get('generate_statistics', True)
-            
+
             if initialization_success:
                 logger.info("Pipeline Unificado Anthropic inicializado com sucesso")
             else:
                 logger.warning("Pipeline inicializado com alguns erros - verifique logs")
-                
+
         except Exception as e:
             logger.error(f"Erro crítico na inicialização do pipeline: {e}")
             # Não re-raise, permitir que pipeline seja criado em modo degradado
             self.pipeline_state = {"initialization_error": str(e)}
             self.pipeline_config = {"error_mode": True}
-    
+
     def _validate_and_setup_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Valida e configura parâmetros do pipeline"""
         try:
@@ -173,21 +181,21 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "output_path": config.get("data", {}).get("interim_path", "data/interim"),
                 "enable_validation": True
             }
-            
+
             # Validar valores críticos
             if pipeline_config["chunk_size"] <= 0:
                 pipeline_config["chunk_size"] = 10000
                 logger.warning("chunk_size inválido, usando padrão: 10000")
-                
+
             # Verificar se diretórios existem, criar se necessário
             for path_key in ["data_path", "output_path"]:
                 path = Path(pipeline_config[path_key])
                 if not path.exists():
                     path.mkdir(parents=True, exist_ok=True)
                     logger.info(f"Diretório criado: {path}")
-                    
+
             return pipeline_config
-            
+
         except Exception as e:
             logger.error(f"Erro ao validar configuração: {e}")
             # Retornar configuração mínima para modo degradado
@@ -200,12 +208,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "enable_validation": False,
                 "error_mode": True
             }
-    
+
     def _initialize_components_safely(self) -> bool:
         """Inicializa componentes com tratamento individual de erros"""
         success_count = 0
         total_components = 0
-        
+
         # Lista de componentes para inicializar
         component_configs = [
             ("api_integration", lambda: APIPipelineIntegration(self.config, str(self.project_root))),
@@ -242,13 +250,13 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Novos componentes aprimorados do implementation guide
             ("statistical_analyzer", lambda: StatisticalAnalyzer(self.config)),
             ("performance_optimizer", lambda: PerformanceOptimizer(self.config)),
-            
+
             # ✅ NOVOS MANAGERS PARA SOLUÇÕES DE TIMEOUT E PERFORMANCE
             ("adaptive_chunking_manager", lambda: get_adaptive_chunking_manager()),
             ("concurrent_processor", lambda: get_concurrent_processor()),
             ("progressive_timeout_manager", lambda: get_progressive_timeout_manager())
         ]
-        
+
         for component_name, component_factory in component_configs:
             total_components += 1
             try:
@@ -280,7 +288,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     component = AnalyticsDashboard(self.config, search_engine, discovery_engine, query_system)
                 else:
                     component = component_factory()
-                
+
                 setattr(self, component_name, component)
                 success_count += 1
                 logger.debug(f"Componente {component_name} inicializado com sucesso")
@@ -292,7 +300,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 })
                 # Criar componente mock como fallback
                 setattr(self, component_name, None)
-        
+
         # Inicializar processador de chunks separadamente
         try:
             from src.data.processors.chunk_processor import ChunkConfig
@@ -311,12 +319,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "component": "chunk_processor",
                 "error": str(e)
             })
-        
+
         success_rate = success_count / total_components if total_components > 0 else 0
         logger.info(f"Inicialização de componentes: {success_count}/{total_components} ({success_rate:.1%})")
-        
+
         return success_rate >= 0.8  # Considerar sucesso se 80%+ dos componentes funcionam
-    
+
     def get_pipeline_health(self) -> Dict[str, Any]:
         """Retorna status de saúde do pipeline"""
         try:
@@ -328,37 +336,37 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "config_valid": not self.pipeline_config.get("error_mode", False),
                 "ready_for_execution": True
             }
-            
+
             # Verificar status de cada componente
             required_components = [
                 'api_integration', 'chunk_processor', 'encoding_validator',
                 'text_cleaner', 'sentiment_analyzer'
             ]
-            
+
             for component in required_components:
                 if hasattr(self, component) and getattr(self, component) is not None:
                     health_report["components_status"][component] = "ok"
                 else:
                     health_report["components_status"][component] = "failed"
                     health_report["overall_status"] = "degraded"
-            
+
             # Se muitos erros de inicialização, marcar como não saudável
             if health_report["initialization_errors"] > 3:
                 health_report["overall_status"] = "unhealthy"
                 health_report["ready_for_execution"] = False
-            
+
             return health_report
-            
+
         except Exception as e:
             return {
                 "overall_status": "error",
                 "error": str(e),
                 "ready_for_execution": False
             }
-    
+
     def _initialize_components(self):
         """Inicializa todos os componentes especializados (método legado)"""
-        
+
         self.api_integration = APIPipelineIntegration(self.config, str(self.project_root))
         self.feature_extractor = FeatureExtractor(self.config)
         self.feature_validator = FeatureValidator()
@@ -366,7 +374,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         self.encoding_validator = EncodingValidator(self.config)
         self.deduplication_validator = DeduplicationValidator(self.config)
         self.text_cleaner = IntelligentTextCleaner(self.config)
-        
+
         # Inicializar processador linguístico spaCy
         if SPACY_PROCESSOR_AVAILABLE:
             try:
@@ -378,7 +386,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         else:
             self.spacy_nlp_processor = None
             logger.info("❌ SpacyNLPProcessor não disponível")
-        
+
         self.sentiment_analyzer = AnthropicSentimentAnalyzer(self.config)
         self.topic_interpreter = TopicInterpreter(self.config)
         self.tfidf_analyzer = SemanticTfidfAnalyzer(self.config)
@@ -389,7 +397,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         self.network_analyzer = IntelligentNetworkAnalyzer(self.config)
         self.qualitative_classifier = QualitativeClassifier(self.config)
         self.pipeline_reviewer = SmartPipelineReviewer(self.config)
-        
+
         # Inicializar processador de chunks
         from src.data.processors.chunk_processor import ChunkConfig
         chunk_config = ChunkConfig(
@@ -398,24 +406,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             delimiter=';'
         )
         self.chunk_processor = ChunkProcessor(config=chunk_config)
-    
+
     def run_complete_pipeline(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """
         Executa pipeline completo em todos os datasets
-        
+
         Args:
             dataset_paths: Lista de caminhos para os datasets
-            
+
         Returns:
             Resultados completos do pipeline
         """
-        
+
         self.pipeline_state["start_time"] = datetime.now()
         logger.info(f"Iniciando pipeline completo para {len(dataset_paths)} datasets")
-        
+
         # Inicializar integração API
         api_init_result = self.api_integration.initialize_pipeline_run(self.pipeline_config)
-        
+
         pipeline_results = {
             "datasets_processed": [],
             "stage_results": {},
@@ -423,11 +431,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "overall_success": True,
             "errors": []
         }
-        
+
         try:
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
-            
+
             # Executar todas as 22 etapas sequencialmente (versão aprimorada v4.9)
             all_pipeline_stages = [
                 "01_chunk_processing",
@@ -453,21 +461,21 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "19_semantic_search",  # 🚀 VOYAGE.AI
                 "20_pipeline_validation"
             ]
-            
+
             logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.9 (aprimorado com análises estatísticas)")
-            
+
             for stage_num, stage_name in enumerate(all_pipeline_stages, 1):
-                
+
                 stage_result = self._execute_stage_with_recovery(stage_name, current_dataset_paths)
                 pipeline_results["stage_results"][stage_name] = stage_result
-                
+
                 if not stage_result.get("success", False):
                     pipeline_results["overall_success"] = False
                     pipeline_results["errors"].append({
                         "stage": stage_name,
                         "error": stage_result.get("error", "Unknown error")
                     })
-                    
+
                     # Decidir se continuar ou parar
                     if stage_result.get("critical_error", False):
                         logger.error(f"Erro crítico na etapa {stage_name}, parando pipeline")
@@ -478,15 +486,15 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     if updated_paths:
                         current_dataset_paths = updated_paths
                         logger.info(f"Caminhos atualizados após {stage_name}: {len(current_dataset_paths)} datasets")
-                
+
                 # Salvar checkpoint após cada etapa
                 self._save_pipeline_checkpoint(stage_name, stage_result)
-            
+
             # Executar validação final
             if pipeline_results["overall_success"]:
                 final_validation = self._execute_final_validation(pipeline_results)
                 pipeline_results["final_validation"] = final_validation
-            
+
         except Exception as e:
             logger.error(f"Erro na execução do pipeline: {e}")
             pipeline_results["overall_success"] = False
@@ -494,13 +502,13 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "stage": "pipeline_execution",
                 "error": str(e)
             })
-        
+
         # Finalizar pipeline
         self.pipeline_state["end_time"] = datetime.now()
         self.pipeline_state["total_duration"] = (
             self.pipeline_state["end_time"] - self.pipeline_state["start_time"]
         ).total_seconds()
-        
+
         pipeline_results["execution_summary"] = {
             "start_time": self.pipeline_state["start_time"].isoformat(),
             "end_time": self.pipeline_state["end_time"].isoformat(),
@@ -508,29 +516,29 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "completed_stages": len(self.pipeline_state["completed_stages"]),
             "failed_stages": len(self.pipeline_state["failed_stages"])
         }
-        
+
         # Adicionar relatório consolidado de otimização de custos
         if hasattr(self, 'voyage_embeddings') and self.voyage_embeddings:
             pipeline_results["voyage_cost_summary"] = self._generate_cost_optimization_summary(pipeline_results)
-        
+
         # Salvar resultado final
         self._save_final_results(pipeline_results)
-        
+
         return pipeline_results
-    
+
     def _generate_cost_optimization_summary(self, pipeline_results: Dict[str, Any]) -> Dict[str, Any]:
         """Gera relatório consolidado de otimização de custos Voyage"""
-        
+
         try:
             cost_info = self.voyage_embeddings._calculate_estimated_cost()
             quota_info = self.voyage_embeddings._estimate_quota_usage()
             model_info = self.voyage_embeddings.get_embedding_model_info()
-            
+
             # Calcular totais do pipeline
             total_datasets = len(pipeline_results.get("datasets_processed", []))
             total_cost = cost_info['estimated_cost_usd'] * total_datasets
             total_tokens = cost_info['estimated_tokens'] * total_datasets
-            
+
             summary = {
                 "pipeline_execution_summary": {
                     "model": self.voyage_embeddings.model_name,
@@ -554,84 +562,84 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 },
                 "recommendations": self._generate_cost_recommendations()
             }
-            
+
             return summary
-            
+
         except Exception as e:
             logger.error(f"Erro ao gerar relatório de custos: {e}")
             return {"error": str(e)}
-    
+
     def _generate_cost_recommendations(self) -> List[str]:
         """Gera recomendações de otimização de custos"""
-        
+
         recommendations = []
-        
+
         try:
             # Verificar configuração atual
             if not self.voyage_embeddings.enable_sampling:
                 recommendations.append("🔥 ATIVE a amostragem inteligente para reduzir custos em 97%")
-            
+
             if self.voyage_embeddings.model_name != 'voyage-3.5-lite':
                 recommendations.append("💰 MIGRE para voyage-3.5-lite (modelo mais econômico com 200M tokens gratuitos)")
-            
+
             if self.voyage_embeddings.batch_size < 128:
                 recommendations.append("⚡ AUMENTE batch_size para 128 para melhor throughput")
-            
+
             # Verificar uso eficiente
             quota_info = self.voyage_embeddings._estimate_quota_usage()
             if quota_info.get('estimated_usage_percent', 0) > 80:
                 recommendations.append("⚠️  USO ALTO da cota gratuita - considere aumentar limites de amostragem")
-            
+
             # Configuração ideal
-            if (self.voyage_embeddings.enable_sampling and 
-                self.voyage_embeddings.model_name == 'voyage-3.5-lite' and 
+            if (self.voyage_embeddings.enable_sampling and
+                self.voyage_embeddings.model_name == 'voyage-3.5-lite' and
                 self.voyage_embeddings.batch_size >= 128):
                 recommendations.append("✅ CONFIGURAÇÃO IDEAL - Sistema otimizado para máxima economia")
-            
+
             # Alertas de performance
             if self.voyage_embeddings.max_messages_per_dataset > 100000:
                 recommendations.append("📊 CONSIDERE reduzir max_messages_per_dataset para <50K para melhor performance")
-                
+
         except Exception as e:
             recommendations.append(f"❌ Erro ao gerar recomendações: {e}")
-        
+
         return recommendations
-    
+
     def _execute_stage_with_recovery(self, stage_name: str, dataset_paths: List[str], max_retries: int = 2) -> Dict[str, Any]:
         """Executa etapa com mecanismo de recuperação de erro"""
-        
+
         attempt = 0
         last_error = None
-        
+
         while attempt <= max_retries:
             try:
                 if attempt > 0:
                     logger.info(f"Tentativa {attempt + 1}/{max_retries + 1} para etapa {stage_name}")
-                
+
                 result = self._execute_stage(stage_name, dataset_paths)
-                
+
                 if result.get("success", False):
                     if attempt > 0:
                         logger.info(f"Etapa {stage_name} recuperada na tentativa {attempt + 1}")
                     return result
                 else:
                     last_error = result.get("error", "Erro desconhecido")
-                    
+
             except Exception as e:
                 last_error = str(e)
                 logger.warning(f"Tentativa {attempt + 1} falhou para {stage_name}: {e}")
-            
+
             attempt += 1
-            
+
             # Se não é a última tentativa, tentar recuperação
             if attempt <= max_retries:
                 logger.info(f"Tentando recuperar etapa {stage_name}...")
-                
+
                 # Estratégias de recuperação específicas
                 recovery_success = self._attempt_stage_recovery(stage_name, last_error)
                 if not recovery_success:
                     logger.warning(f"Recuperação automática falhou para {stage_name}")
-        
+
         # Se chegou até aqui, todas as tentativas falharam
         logger.error(f"Etapa {stage_name} falhou após {max_retries + 1} tentativas")
         return {
@@ -641,20 +649,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "attempts": max_retries + 1,
             "recovery_attempted": True
         }
-    
+
     def _attempt_stage_recovery(self, stage_name: str, error: str) -> bool:
         """Tenta recuperar de erros específicos"""
-        
+
         recovery_strategies = {
             "memory": self._recover_memory_error,
             "api": self._recover_api_error,
             "file": self._recover_file_error,
             "encoding": self._recover_encoding_error
         }
-        
+
         # Identificar tipo de erro
         error_lower = error.lower()
-        
+
         if "memory" in error_lower or "memoryerror" in error_lower:
             return recovery_strategies["memory"](stage_name)
         elif "api" in error_lower or "anthropic" in error_lower:
@@ -663,13 +671,13 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             return recovery_strategies["file"](stage_name)
         elif "encoding" in error_lower or "unicode" in error_lower:
             return recovery_strategies["encoding"](stage_name)
-        
+
         return False
-    
+
     def _recover_memory_error(self, stage_name: str) -> bool:
         """Recupera de erros de memória"""
         logger.info(f"Tentando recuperar erro de memória para {stage_name}")
-        
+
         # Reduzir chunk size
         if hasattr(self, 'chunk_processor') and self.chunk_processor:
             original_size = self.chunk_processor.config.chunk_size
@@ -677,25 +685,25 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             self.chunk_processor.config.chunk_size = new_size
             logger.info(f"Chunk size reduzido de {original_size} para {new_size}")
             return True
-        
+
         return False
-    
+
     def _recover_api_error(self, stage_name: str) -> bool:
         """Recupera de erros de API"""
         logger.info(f"Tentando recuperar erro de API para {stage_name}")
-        
+
         # Forçar modo tradicional
         if hasattr(self, 'pipeline_config'):
             self.pipeline_config["use_anthropic"] = False
             logger.info("Modo Anthropic desabilitado, usando processamento tradicional")
             return True
-        
+
         return False
-    
+
     def _recover_file_error(self, stage_name: str) -> bool:
         """Recupera de erros de arquivo"""
         logger.info(f"Tentando recuperar erro de arquivo para {stage_name}")
-        
+
         # Criar diretórios necessários
         try:
             output_dir = Path(self.pipeline_config.get("output_path", "data/interim"))
@@ -705,33 +713,33 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         except Exception as e:
             logger.error(f"Falha ao criar diretório: {e}")
             return False
-    
+
     def _recover_encoding_error(self, stage_name: str) -> bool:
         """Recupera de erros de encoding"""
         logger.info(f"Tentando recuperar erro de encoding para {stage_name}")
-        
+
         # Modificar configuração de encoding do chunk processor
         if hasattr(self, 'chunk_processor') and self.chunk_processor:
             self.chunk_processor.config.on_bad_lines = 'skip'
             self.chunk_processor.config.encoding = 'utf-8'
             logger.info("Configuração de encoding ajustada para modo tolerante")
             return True
-        
+
         return False
 
     def _update_dataset_paths_after_stage(self, stage_name: str, original_paths: List[str], stage_result: Dict[str, Any]) -> Optional[List[str]]:
         """
         Atualiza caminhos dos datasets após uma etapa que modifica os dados
-        
+
         Args:
             stage_name: Nome da etapa executada
             original_paths: Caminhos originais dos datasets
             stage_result: Resultado da etapa executada
-            
+
         Returns:
             Lista de novos caminhos ou None se não houve mudança
         """
-        
+
         try:
             # Etapas que geram novos arquivos e precisam atualizar os caminhos
             path_updating_stages = {
@@ -750,17 +758,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "12_qualitative_analysis": "qualitative_reports",
                 "13_review_reproducibility": "review_reports"
             }
-            
+
             if stage_name not in path_updating_stages:
                 return None
-                
+
             report_key = path_updating_stages[stage_name]
             reports = stage_result.get(report_key, {})
-            
+
             if not reports:
                 logger.warning(f"Nenhum relatório encontrado para {stage_name}")
                 return None
-            
+
             # Extrair novos caminhos dos relatórios
             new_paths = []
             for original_path in original_paths:
@@ -774,7 +782,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     # Se não encontrou novo caminho, manter o original
                     new_paths.append(original_path)
                     logger.warning(f"Caminho não atualizado para {original_path} na etapa {stage_name}")
-            
+
             # Verificar se os novos arquivos existem
             existing_paths = []
             for path in new_paths:
@@ -787,24 +795,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     original_idx = new_paths.index(path)
                     if original_idx < len(original_paths):
                         existing_paths.append(original_paths[original_idx])
-            
+
             if existing_paths:
                 logger.info(f"Caminhos atualizados com sucesso para {stage_name}: {len(existing_paths)} arquivos")
                 return existing_paths
             else:
                 logger.error(f"Nenhum arquivo válido após {stage_name}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"Erro ao atualizar caminhos após {stage_name}: {e}")
             return None
 
     def _execute_stage(self, stage_name: str, dataset_paths: List[str]) -> Dict[str, Any]:
         """Executa uma etapa específica do pipeline"""
-        
+
         self.pipeline_state["current_stage"] = stage_name
         logger.info(f"Executando etapa: {stage_name}")
-        
+
         stage_result = {
             "stage": stage_name,
             "timestamp": datetime.now().isoformat(),
@@ -815,9 +823,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "execution_time": 0,
             "memory_usage": "unknown"
         }
-        
+
         start_time = time.time()
-        
+
         try:
             # Mapear etapa para método correspondente - RENUMERADO v4.8 (Sequência 01-20)
             stage_methods = {
@@ -828,7 +836,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "04_feature_validation": self._stage_01b_feature_validation,
                 "04b_statistical_analysis_pre": self._stage_04b_statistical_analysis_pre,
                 "05_political_analysis": self._stage_01c_political_analysis,
-                
+
                 # FASE 2: Processamento de Texto e Análise (06-11)
                 "06_text_cleaning": self._stage_03_clean_text,
                 "06b_statistical_analysis_post": self._stage_06b_statistical_analysis_post,
@@ -837,20 +845,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "09_topic_modeling": self._stage_09_topic_modeling,  # 🚀 VOYAGE.AI
                 "10_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
                 "11_clustering": self._stage_07_clustering,  # 🚀 VOYAGE.AI
-                
+
                 # FASE 3: Análise Estrutural e de Rede (12-15)
                 "12_hashtag_normalization": self._stage_08_hashtag_normalization,
                 "13_domain_analysis": self._stage_09_domain_extraction,
                 "14_temporal_analysis": self._stage_10_temporal_analysis,
                 "15_network_analysis": self._stage_11_network_structure,
-                
+
                 # FASE 4: Análise Avançada e Finalização (16-20)
                 "16_qualitative_analysis": self._stage_12_qualitative_analysis,
                 "17_smart_pipeline_review": self._stage_13_review_reproducibility,
                 "18_topic_interpretation": self._stage_14_topic_interpretation,
                 "19_semantic_search": self._stage_14_semantic_search_intelligence,  # 🚀 VOYAGE.AI
                 "20_pipeline_validation": self._stage_16_pipeline_validation,
-                
+
                 # Aliases para compatibilidade com numeração antiga
                 "01b_features_validation": self._stage_01b_feature_validation,
                 "01b_feature_validation": self._stage_01b_feature_validation,
@@ -874,7 +882,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "18_semantic_search": self._stage_14_semantic_search_intelligence,  # LEGACY
                 "19_pipeline_validation": self._stage_16_pipeline_validation  # LEGACY
             }
-            
+
             if stage_name in stage_methods:
                 method_result = stage_methods[stage_name](dataset_paths)
                 stage_result.update(method_result)
@@ -882,17 +890,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 self.pipeline_state["completed_stages"].append(stage_name)
             else:
                 raise ValueError(f"Etapa desconhecida: {stage_name}")
-                
+
         except Exception as e:
             logger.error(f"Erro na etapa {stage_name}: {e}")
             stage_result["error"] = str(e)
             stage_result["error_type"] = type(e).__name__
             stage_result["critical_error"] = self._is_critical_error(stage_name, e)
             self.pipeline_state["failed_stages"].append(stage_name)
-        
+
         finally:
             stage_result["execution_time"] = time.time() - start_time
-            
+
             # Tentar capturar uso de memória
             try:
                 import psutil
@@ -902,51 +910,50 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 stage_result["memory_usage"] = "psutil not available"
             except Exception:
                 stage_result["memory_usage"] = "error getting memory info"
-        
+
         self.pipeline_state["stage_results"][stage_name] = stage_result
         return stage_result
-    
+
     def _stage_01_validate_data(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 01: Validação estrutural e detecção de encoding"""
-        
+
         results = {"validation_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar validação Anthropic
                 # Carregar dados primeiro para análise
-                df = self._load_processed_data(dataset_path) 
+                df = self._load_processed_data(dataset_path)
                 validation_result = self.encoding_validator.validate_encoding_quality(df)
                 results["anthropic_used"] = True
             else:
                 # Usar validação tradicional
                 validation_result = self._traditional_validate_data(dataset_path)
-            
+
             results["validation_reports"][dataset_path] = validation_result
             results["datasets_processed"] = len(results["validation_reports"])
-        
+
         return results
-    
-    
+
     def _stage_02b_deduplication(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 02b: Deduplicação inteligente - Remove duplicatas e adiciona coluna de frequência"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 03: DEDUPLICAÇÃO INTELIGENTE OTIMIZADA")
         results = {"deduplication_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-            
+
             try:
                 # Carregar dados originais
                 original_df = self._load_processed_data(dataset_path)
                 logger.info(f"📊 Dataset carregado: {len(original_df)} registros")
-                
+
                 # Verificar colunas disponíveis
                 has_body = 'body' in original_df.columns
                 has_body_cleaned = 'body_cleaned' in original_df.columns
                 logger.info(f"📋 Colunas de texto disponíveis: body={has_body}, body_cleaned={has_body_cleaned}")
-                
+
                 if not has_body and not has_body_cleaned:
                     logger.error(f"❌ Nenhuma coluna de texto encontrada em {dataset_path}")
                     # Usar deduplicação tradicional como fallback
@@ -961,7 +968,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     # Usar deduplicação aprimorada global
                     if self.pipeline_config.get("use_anthropic", True) and self.api_available:
                         logger.info("🤖 Usando deduplicação global aprimorada")
-                        
+
                         # Estratégia 1: Deduplicação global aprimorada (se disponível)
                         if hasattr(self.deduplication_validator, 'enhance_global_deduplication'):
                             try:
@@ -975,26 +982,26 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             # Fallback para método original
                             deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
                             deduplication_report = {"method": "intelligent_original"}
-                        
+
                         # Calcular estatísticas se não foi feito na deduplicação aprimorada
                         if "reduction_metrics" not in deduplication_report:
                             original_count = len(original_df)
                             final_count = len(deduplicated_df)
                             duplicates_removed = original_count - final_count
                             reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
-                            
+
                             deduplication_report.update({
                                 "original_count": original_count,
                                 "final_count": final_count,
                                 "duplicates_removed": duplicates_removed,
                                 "reduction_ratio": reduction_ratio
                             })
-                        
+
                         # Validar resultado da deduplicação
                         validation_report = self.deduplication_validator.validate_deduplication_process(
                             original_df, deduplicated_df, "duplicate_frequency"
                         )
-                        
+
                         deduplication_report.update({
                             "method": deduplication_report.get("method", "enhanced_global"),
                             "original_count": original_count,
@@ -1004,9 +1011,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "validation": validation_report,
                             "duplicate_frequency_added": "duplicate_frequency" in deduplicated_df.columns
                         })
-                        
+
                         logger.info(f"✅ Deduplicação concluída: {original_count} → {final_count} ({reduction_ratio:.1%} redução)")
-                        
+
                     else:
                         logger.info("🔧 Usando deduplicação tradicional (API não disponível)")
                         deduplicated_df = self._traditional_deduplication(original_df)
@@ -1016,38 +1023,38 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "deduplicated_count": len(deduplicated_df),
                             "reduction_ratio": (len(original_df) - len(deduplicated_df)) / len(original_df)
                         }
-                
+
                 # Salvar dados deduplicados
                 output_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
                 self._save_processed_data(deduplicated_df, output_path)
                 logger.info(f"💾 Dados deduplicados salvos: {output_path}")
-                
+
                 results["deduplication_reports"][dataset_path] = {
                     "report": deduplication_report,
                     "output_path": output_path
                 }
                 results["anthropic_used"] = True
-                
+
             except Exception as e:
                 logger.error(f"❌ Erro na deduplicação de {dataset_path}: {e}")
                 # Fallback: copiar dados originais
                 output_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
                 original_df['duplicate_frequency'] = 1  # Adicionar coluna mesmo no fallback
                 self._save_processed_data(original_df, output_path)
-                
+
                 results["deduplication_reports"][dataset_path] = {
                     "report": {"error": str(e), "method": "fallback_copy"},
                     "output_path": output_path
                 }
-        
+
         results["datasets_processed"] = len(results["deduplication_reports"])
-        
+
         return results
-    
+
     def _traditional_deduplication(self, df: pd.DataFrame) -> pd.DataFrame:
         """Deduplicação tradicional como fallback"""
         logger.info("🔧 Executando deduplicação tradicional")
-        
+
         # Usar método otimizado para detectar melhor coluna de texto
         try:
             text_col = self._get_best_text_column(df, prefer_cleaned=True)
@@ -1055,99 +1062,99 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             logger.warning("Nenhuma coluna de texto encontrada, retornando dados originais")
             df['duplicate_frequency'] = 1
             return df
-        
+
         # Deduplicação simples baseada no conteúdo
         original_count = len(df)
         df_normalized = df.copy()
         df_normalized['_temp_text'] = df_normalized[text_col].fillna('').astype(str).str.strip().str.lower()
-        
+
         # Contar frequências
         text_counts = df_normalized['_temp_text'].value_counts()
         df_normalized['duplicate_frequency'] = df_normalized['_temp_text'].map(text_counts)
-        
+
         # Remover duplicatas
         df_dedup = df_normalized.drop_duplicates(subset=['_temp_text'], keep='first')
         df_dedup = df_dedup.drop('_temp_text', axis=1)
-        
+
         final_count = len(df_dedup)
         logger.info(f"Deduplicação tradicional: {original_count} → {final_count} ({100*(original_count-final_count)/original_count:.1f}% redução)")
-        
+
         return df_dedup
-    
+
     def _stage_01b_feature_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 01b: Validação e enriquecimento de features básicas"""
-        
+
         logger.info("🔧 INICIANDO ETAPA 01b: VALIDAÇÃO DE FEATURES")
         results = {"feature_validation_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-            
+
             # Carregar dados deduplicados
             if "02b_deduplicated" in dataset_path:
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
             logger.info(f"📊 Dataset carregado: {len(df)} registros")
-            
+
             # Validar e enriquecer features
             enriched_df, validation_report = self.feature_validator.validate_and_enrich_features(df)
-            
+
             # Salvar dados enriquecidos
             output_path = self._get_stage_output_path("01b_features_validated", dataset_path)
             self._save_processed_data(enriched_df, output_path)
-            
+
             results["feature_validation_reports"][dataset_path] = {
                 "report": validation_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["feature_validation_reports"])
-            
+
             logger.info(f"✅ Features validadas e salvas em: {output_path}")
-        
+
         return results
-    
+
     def _stage_01c_political_analysis(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 05: Análise política otimizada com Anthropic Enhanced v4.9.1"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 05: ANÁLISE POLÍTICA OTIMIZADA")
         results = {"political_analysis_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["04_features_validated", "03_deduplicated", "02_encoding_validated"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Aplicar otimização de performance para análise política
                 optimized_df, optimization_report = self._apply_political_analysis_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
-                
+
                 # Validar dependências antes de processar
                 if self._validate_political_analysis_dependencies():
                     try:
                         logger.info("🤖 Usando análise política Anthropic Enhanced v4.9.1")
                         analyzed_df, political_report = self.political_analyzer.analyze_political_discourse(optimized_df)
-                        
+
                         # Estender resultados para dataset completo se necessário
                         if len(optimized_df) < len(df):
                             analyzed_df = self._extend_political_results(df, analyzed_df, optimization_report)
-                        
+
                         political_report.update(optimization_report)
                         results["anthropic_used"] = True
                         logger.info("✅ Análise política Anthropic concluída")
@@ -1159,11 +1166,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.info("📚 Usando análise política tradicional aprimorada")
                     analyzed_df, political_report = self._enhanced_traditional_political_analysis(df)
                     results["traditional_used"] = True
-                
+
                 # Salvar dados com análise política
                 output_path = self._get_stage_output_path("05_politically_analyzed", dataset_path)
                 self._save_processed_data(analyzed_df, output_path)
-                
+
                 results["political_analysis_reports"][dataset_path] = {
                     "report": political_report,
                     "output_path": output_path,
@@ -1171,28 +1178,28 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(analyzed_df)
                 }
                 logger.info(f"✅ Análise política salva em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["political_analysis_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 05 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 05 concluído com sucesso")
-        
+
         return results
-    
+
     def _traditional_political_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise política tradicional baseada em léxico"""
-        
+
         logger.info("Executando análise política tradicional baseada em léxico")
-        
+
         # Carregar léxico político
         try:
             lexicon_path = Path("config/brazilian_political_lexicon.yaml")
@@ -1206,17 +1213,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         except Exception as e:
             logger.warning(f"Erro ao carregar léxico: {e}, usando padrão")
             lexicon = self._get_default_political_lexicon()
-        
+
         # Detectar coluna de texto
         text_column = 'body_cleaned' if 'body_cleaned' in df.columns else ('body' if 'body' in df.columns else None)
-        
+
         if not text_column:
             logger.error("Nenhuma coluna de texto encontrada")
             return df, {"error": "Nenhuma coluna de texto encontrada"}
-        
+
         # Análise baseada em léxico
         enhanced_df = df.copy()
-        
+
         # Inicializar colunas
         enhanced_df['political_alignment'] = 'neutro'
         enhanced_df['alignment_confidence'] = 0.0
@@ -1225,7 +1232,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         enhanced_df['emotional_tone'] = 'neutro'
         enhanced_df['misinformation_risk'] = 'baixo'
         enhanced_df['brazilian_context_score'] = 0.0
-        
+
         # Aplicar análise por categoria
         for category, terms in lexicon.items():
             if isinstance(terms, list) and terms:
@@ -1233,7 +1240,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 matches = enhanced_df[text_column].fillna("").str.contains(
                     pattern, case=False, regex=True
                 )
-                
+
                 # Aplicar lógica baseada na categoria
                 if category == "governo_bolsonaro":
                     enhanced_df.loc[matches, 'political_alignment'] = 'bolsonarista'
@@ -1247,7 +1254,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 elif category == "saúde_negacionismo":
                     enhanced_df.loc[matches, 'negacionism_score'] = 0.8
                     enhanced_df.loc[matches, 'misinformation_risk'] = 'alto'
-        
+
         # Relatório
         report = {
             "method": "lexicon_based",
@@ -1256,9 +1263,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "political_alignment_distribution": enhanced_df['political_alignment'].value_counts().to_dict(),
             "high_risk_messages": (enhanced_df['misinformation_risk'] == 'alto').sum()
         }
-        
+
         return enhanced_df, report
-    
+
     def _get_default_political_lexicon(self) -> Dict[str, List[str]]:
         """Léxico político padrão"""
         return {
@@ -1268,12 +1275,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "teorias_conspiração": ["urna fraudada", "globalismo", "deep state"],
             "saúde_negacionismo": ["tratamento precoce", "ivermectina", "cloroquina"]
         }
-    
+
     def _stage_01b_feature_extraction(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 01b: Extração de features com IA (MÉTODO LEGADO - MANTIDO PARA COMPATIBILIDADE)"""
-        
+
         results = {"feature_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             # Carregar dados deduplicados
             # Se dataset_path já aponta para arquivo deduplicado, usar diretamente
@@ -1281,9 +1288,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
-            
+
             # Guardar referência ao DataFrame original (antes da deduplicação) se disponível
             original_dataset_path = dataset_path
             df_original = None
@@ -1291,7 +1298,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 df_original = self._load_processed_data(original_dataset_path)
             except:
                 df_original = df  # Se não conseguir carregar original, usar o deduplicado
-            
+
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar extração Anthropic
                 enhanced_df = self.feature_extractor.extract_comprehensive_features(df)
@@ -1300,59 +1307,59 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 # Usar extração tradicional
                 enhanced_df, feature_report = self._traditional_feature_extraction(df)
-            
+
             # GERAR ESTATÍSTICAS GERAIS DO DATASET
             if self.generate_dataset_statistics and hasattr(self, 'dataset_statistics_generator'):
                 try:
                     logger.info(f"Gerando estatísticas gerais para {dataset_path}")
-                    
+
                     # Obter relatório de deduplicação se disponível
                     dedup_report = self.pipeline_state.get("stage_results", {}).get("02b_deduplication", {}).get("deduplication_reports", {}).get(dataset_path, {}).get("report", None)
-                    
+
                     # Gerar estatísticas completas
                     dataset_statistics = self.dataset_statistics_generator.generate_comprehensive_statistics(
                         df_original=df_original,
                         df_processed=enhanced_df,
                         deduplication_report=dedup_report
                     )
-                    
+
                     # Adicionar ao relatório de features
                     feature_report["dataset_statistics"] = dataset_statistics
-                    
+
                     # Exportar estatísticas
                     stats_output_path = str(Path(self.pipeline_config["output_path"]) / "statistics")
                     Path(stats_output_path).mkdir(parents=True, exist_ok=True)
-                    
+
                     exported_file = self.dataset_statistics_generator.export_statistics(
                         dataset_statistics,
                         stats_output_path,
                         format="json"
                     )
-                    
+
                     feature_report["statistics_exported_to"] = exported_file
                     logger.info(f"Estatísticas exportadas para: {exported_file}")
-                    
+
                 except Exception as e:
                     logger.error(f"Erro ao gerar estatísticas do dataset: {e}")
                     feature_report["dataset_statistics"] = {"error": str(e)}
-            
+
             # Salvar dados com features
             output_path = self._get_stage_output_path("01b_features_extracted", dataset_path)
             self._save_processed_data(enhanced_df, output_path)
-            
+
             results["feature_reports"][dataset_path] = {
                 "report": feature_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["feature_reports"])
-        
+
         return results
-    
+
     def _stage_03_clean_text(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 03: Limpeza inteligente de texto com fallback robusto"""
-        
+
         results = {"cleaning_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             try:
                 # Carregar dados com análise política
@@ -1361,14 +1368,14 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     input_path = dataset_path
                 else:
                     input_path = self._get_stage_output_path("05_politically_analyzed", dataset_path)
-                
+
                 logger.info(f"Carregando dados para limpeza: {input_path}")
                 df = self._load_processed_data(input_path)
-                
+
                 cleaned_df = None
                 quality_report = {}
                 method_used = "unknown"
-                
+
                 # Tentativa 1: Limpeza aprimorada com validação (se disponível)
                 if self.pipeline_config["use_anthropic"] and self.api_available:
                     try:
@@ -1394,12 +1401,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                 quality_report = {"method": "anthropic", "success": True}
                             method_used = "anthropic"
                             logger.info("✅ Limpeza Anthropic bem-sucedida")
-                        
+
                         results["anthropic_used"] = True
                     except Exception as e:
                         logger.warning(f"Limpeza aprimorada falhou: {e}. Tentando fallback...")
                         cleaned_df = None
-                
+
                 # Tentativa 2: Limpeza simples (fallback)
                 if cleaned_df is None:
                     try:
@@ -1412,7 +1419,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         logger.info("✅ Limpeza simples bem-sucedida")
                     except Exception as e:
                         logger.error(f"Limpeza simples também falhou: {e}")
-                
+
                 # Tentativa 3: Fallback mínimo (sem limpeza)
                 if cleaned_df is None:
                     logger.warning("Usando fallback mínimo - cópia sem limpeza")
@@ -1420,18 +1427,18 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     cleaned_df["text_cleaned"] = cleaned_df.get("body_cleaned", "").fillna("")
                     quality_report = {"method": "minimal", "success": True, "no_cleaning": True}
                     method_used = "minimal"
-                
+
                 # Salvar dados limpos
                 output_path = self._get_stage_output_path("03_text_cleaned", dataset_path)
                 self._save_processed_data(cleaned_df, output_path)
                 logger.info(f"Dados limpos salvos: {output_path}")
-                
+
                 results["cleaning_reports"][dataset_path] = {
                     "quality_report": quality_report,
                     "output_path": output_path,
                     "method_used": method_used
                 }
-                
+
             except Exception as e:
                 logger.error(f"Erro crítico na limpeza de {dataset_path}: {e}")
                 # Criar relatório de erro mas continuar pipeline
@@ -1440,30 +1447,30 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "output_path": None,
                     "method_used": "failed"
                 }
-        
+
         results["datasets_processed"] = len([r for r in results["cleaning_reports"].values() if r.get("output_path")])
         return results
-    
+
     def _stage_06b_linguistic_processing(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """
         ✅ Etapa 07: Processamento Linguístico Avançado com spaCy - IMPLEMENTADO
         =====================================================================
-        
+
         STATUS: ✅ CONCLUÍDO E FUNCIONAL (2025-06-08)
         MODELO: pt_core_news_lg v3.8.0 ATIVO
         FEATURES: 13 características linguísticas implementadas
         ENTIDADES: 57 padrões políticos brasileiros carregados
         INTEGRAÇÃO: Stage 07 operacional no pipeline v4.9.1
-        
+
         VERIFIED: All tests passed, processing operational
         """
-        
+
         logger.info("🔤 INICIANDO ETAPA 07: PROCESSAMENTO LINGUÍSTICO COM SPACY ✅ IMPLEMENTADO")
         results = {"linguistic_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-            
+
             try:
                 # Determinar arquivo de entrada (dados limpos)
                 if "text_cleaned" in dataset_path:
@@ -1471,25 +1478,25 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 else:
                     # Tentar encontrar o arquivo mais recente disponível
                     input_path = self._resolve_input_path_safe(
-                        dataset_path, 
+                        dataset_path,
                         preferred_stages=["06_text_cleaned", "05_politically_analyzed", "04_feature_validation"]
                     )
-                
+
                 # Carregar dados limpos
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Verificar se spaCy está disponível
                 if self.spacy_nlp_processor is not None:
                     logger.info("🚀 Usando spaCy para processamento linguístico avançado")
-                    
+
                     # Detectar coluna de texto adequada
                     text_column = self._get_best_text_column(df, prefer_cleaned=True)
                     logger.info(f"📝 Usando coluna de texto: {text_column}")
-                    
+
                     # Processar features linguísticas
                     linguistic_result = self.spacy_nlp_processor.process_linguistic_features(df, text_column)
-                    
+
                     if linguistic_result['success']:
                         processed_df = linguistic_result['enhanced_dataframe']
                         stats = linguistic_result['linguistics_statistics']
@@ -1501,19 +1508,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         stats = {}
                         method_used = "spacy_fallback"
                         logger.warning("⚠️ Fallback para features básicas devido a erro no spaCy")
-                
+
                 else:
                     logger.warning("❌ spaCy não disponível. Usando processamento linguístico básico")
                     text_column = self._get_best_text_column(df, prefer_cleaned=True)
                     processed_df = self._add_basic_linguistic_features(df, text_column)
                     stats = {}
                     method_used = "basic_fallback"
-                
+
                 # Salvar dados com features linguísticas
                 output_path = self._get_stage_output_path("07_linguistically_processed", dataset_path)
                 self._save_processed_data(processed_df, output_path)
                 logger.info(f"✅ Dados linguisticamente processados salvos: {output_path}")
-                
+
                 results["linguistic_reports"][dataset_path] = {
                     "output_path": output_path,
                     "method_used": method_used,
@@ -1521,7 +1528,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "features_added": len([col for col in processed_df.columns if col.startswith('spacy_')]),
                     "success": True
                 }
-                
+
             except Exception as e:
                 logger.error(f"❌ Erro no processamento linguístico para {Path(dataset_path).name}: {e}")
                 results["linguistic_reports"][dataset_path] = {
@@ -1530,22 +1537,22 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "method_used": "failed",
                     "success": False
                 }
-        
+
         results["datasets_processed"] = len([r for r in results["linguistic_reports"].values() if r.get("success")])
         logger.info(f"📊 Processamento linguístico concluído: {results['datasets_processed']} datasets processados")
-        
+
         return results
-    
+
     def _add_basic_linguistic_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
         """Adiciona features linguísticas básicas quando spaCy não está disponível"""
         enhanced_df = df.copy()
-        
+
         # Features básicas computáveis sem spaCy
         texts = enhanced_df[text_column].fillna('').astype(str)
-        
+
         # Contagem básica de tokens
         enhanced_df['spacy_tokens_count'] = texts.str.split().str.len()
-        
+
         # Features vazias/zero para compatibilidade
         enhanced_df['spacy_lemmas'] = ''
         enhanced_df['spacy_pos_tags'] = '[]'
@@ -1555,57 +1562,57 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         enhanced_df['spacy_linguistic_complexity'] = 0.0
         enhanced_df['spacy_lexical_diversity'] = 0.0
         enhanced_df['spacy_hashtag_segments'] = '[]'
-        
+
         # Categorias básicas baseadas em comprimento
         enhanced_df['tokens_category'] = enhanced_df['spacy_tokens_count'].apply(
             lambda x: 'short' if x < 10 else 'medium' if x < 50 else 'long'
         )
         enhanced_df['complexity_category'] = 'unknown'
         enhanced_df['lexical_richness'] = 'unknown'
-        
+
         logger.info("📝 Features linguísticas básicas adicionadas (fallback)")
         return enhanced_df
-    
+
     def _stage_08_sentiment_analysis(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 08: Análise de sentimento avançada"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 08: SENTIMENT ANALYSIS")
         results = {"sentiment_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Estratégia simplificada de resolução de path
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["07_linguistically_processed", "06_text_cleaned"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Aplicar otimização de performance antes do processamento
                 optimized_df, optimization_report = self._apply_sentiment_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
-                
+
                 # Validar dependências antes de processar
                 if self._validate_sentiment_dependencies():
                     try:
                         logger.info("🚀 Usando análise Anthropic ULTRA-OTIMIZADA para sentiment")
                         # ✅ USAR NOVO MÉTODO ULTRA-OTIMIZADO COM TODAS AS OTIMIZAÇÕES
                         sentiment_df = self.sentiment_analyzer.analyze_sentiment_ultra_optimized(optimized_df)
-                        
+
                         # Estender resultados para dataset completo se necessário
                         if len(optimized_df) < len(df):
                             sentiment_df = self._extend_sentiment_results(df, sentiment_df, optimization_report)
-                        
+
                         sentiment_report = self.sentiment_analyzer.generate_sentiment_report(sentiment_df)
                         sentiment_report.update(optimization_report)
                         results["anthropic_used"] = True
@@ -1619,11 +1626,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.info("📚 Usando análise tradicional para sentiment")
                     sentiment_df, sentiment_report = self._enhanced_traditional_sentiment_analysis(df)
                     results["traditional_used"] = True
-                
+
                 # Salvar dados com sentimento
                 output_path = self._get_stage_output_path("08_sentiment_analyzed", dataset_path)
                 self._save_processed_data(sentiment_df, output_path)
-                
+
                 results["sentiment_reports"][dataset_path] = {
                     "report": sentiment_report,
                     "output_path": output_path,
@@ -1631,72 +1638,72 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(sentiment_df)
                 }
                 logger.info(f"✅ Sentiment analysis salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["sentiment_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 08 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 08 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_09_topic_modeling(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 09: Modelagem de tópicos avançada com Voyage.ai"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 09: TOPIC MODELING COM VOYAGE.AI")
         results = {"topic_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Estratégia simplificada de resolução de path
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["08_sentiment_analyzed", "07_linguistically_processed", "06_text_cleaned"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Aplicar otimização de performance específica para topic modeling
                 optimized_df, optimization_report = self._apply_topic_modeling_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
-                
+
                 # Validar recursos antes de processar
                 memory_check = self._validate_memory_requirements(len(optimized_df))
                 if not memory_check["sufficient"]:
                     logger.warning(f"⚠️ Memória insuficiente: {memory_check['message']}")
-                
+
                 # Verificar se Voyage.ai está disponível e funcional
                 voyage_validation = self._validate_voyage_dependencies()
-                
+
                 if voyage_validation["available"]:
                     try:
                         logger.info("🚀 Usando Voyage.ai para topic modeling avançado")
                         topic_result = self.voyage_topic_modeler.extract_semantic_topics(optimized_df)
-                        
+
                         if topic_result.get('success', False) and topic_result.get('topics'):
                             topic_df = topic_result.get('enhanced_dataframe', optimized_df.copy())
-                            
+
                             # Estender resultados para dataset completo se necessário
                             if len(optimized_df) < len(df):
                                 topic_df = self._extend_topic_results(df, topic_df, optimization_report)
-                            
+
                             topic_report = {
                                 'topics': topic_result.get('topics', []),
                                 'n_topics': topic_result.get('n_topics_extracted', 0),
@@ -1713,12 +1720,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             logger.info(f"✅ Voyage topic modeling concluído: {topic_result.get('n_topics_extracted', 0)} tópicos")
                         else:
                             raise ValueError("Voyage topic modeling retornou resultado inválido")
-                            
+
                     except Exception as voyage_error:
                         logger.warning(f"⚠️ Voyage topic modeling falhou ({voyage_error}), usando fallback")
                         topic_df, topic_report = self._enhanced_traditional_topic_modeling(df)
                         results["fallback_used"] = True
-                
+
                 elif self._validate_anthropic_dependencies():
                     try:
                         logger.info("🤖 Usando modelagem tradicional + interpretação Anthropic")
@@ -1734,11 +1741,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.info("📚 Usando modelagem tradicional")
                     topic_df, topic_report = self._enhanced_traditional_topic_modeling(df)
                     results["traditional_used"] = True
-                
+
                 # Salvar dados com tópicos
                 output_path = self._get_stage_output_path("09_topic_modeled", dataset_path)
                 self._save_processed_data(topic_df, output_path)
-                
+
                 results["topic_reports"][dataset_path] = {
                     "report": topic_report,
                     "output_path": output_path,
@@ -1747,48 +1754,48 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "topics_extracted": topic_report.get('n_topics', 0)
                 }
                 logger.info(f"✅ Topic modeling salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["topic_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 09 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 09 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_06_tfidf_extraction(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 10: Extração TF-IDF otimizada com Voyage.ai"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 10: TF-IDF EXTRACTION COM VOYAGE.AI")
         results = {"tfidf_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["09_topic_modeled", "08_sentiment_analyzed", "07_linguistically_processed"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-            
+
                 # Validar dependências antes de processar
                 if self.config.get("tfidf", {}).get("use_anthropic", True) and self.api_available:
                     try:
@@ -1806,33 +1813,33 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.info("📚 Usando extração TF-IDF tradicional")
                     tfidf_df, tfidf_report = self._enhanced_traditional_tfidf_extraction(df)
                     results["traditional_used"] = True
-                
+
                 # Integrar análise de embeddings Voyage.ai se disponível
                 voyage_validation = self._validate_voyage_dependencies()
                 if voyage_validation["available"]:
                     try:
                         logger.info("🚀 Integrando análise de embeddings Voyage.ai otimizada")
-                        
+
                         # Detectar coluna de texto automaticamente
                         text_column = self._get_best_text_column(df, prefer_cleaned=True)
-                        
+
                         # Aplicar análise semântica otimizada
                         enhanced_df = self.voyage_embeddings.enhance_semantic_analysis(df, text_column)
                         tfidf_df = enhanced_df
-                        
+
                         # Adicionar informações detalhadas ao relatório
                         embedding_info = self.voyage_embeddings.get_embedding_model_info()
                         if isinstance(tfidf_report, dict):
                             tfidf_report['voyage_embeddings'] = embedding_info
-                            
+
                             # Métricas de otimização de custos
                             cost_info = self.voyage_embeddings._calculate_estimated_cost()
                             quota_info = self.voyage_embeddings._estimate_quota_usage()
-                            
+
                             sample_ratio = getattr(enhanced_df, 'sample_ratio', 1.0)
                             if hasattr(enhanced_df, 'sample_ratio') and len(enhanced_df) > 0:
                                 sample_ratio = enhanced_df.get('sample_ratio', [1.0])[0] if isinstance(enhanced_df.get('sample_ratio', [1.0]), list) else enhanced_df.get('sample_ratio', 1.0)
-                            
+
                             tfidf_report['voyage_cost_optimization'] = {
                                 'model_used': self.voyage_embeddings.model_name,
                                 'sampling_enabled': self.voyage_embeddings.enable_sampling,
@@ -1849,20 +1856,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                     'executions_possible': quota_info.get('executions_possible', 0)
                                 }
                             }
-                        
+
                         results["voyage_used"] = True
                         logger.info("✅ Integração Voyage.ai concluída")
-                        
+
                     except Exception as voyage_error:
                         logger.warning(f"⚠️ Falha na integração Voyage.ai: {voyage_error}")
                         results["voyage_failed"] = True
                 else:
                     logger.info("📚 Voyage.ai não disponível, usando apenas análise tradicional")
-                
+
                 # Salvar dados com TF-IDF
                 output_path = self._get_stage_output_path("10_tfidf_extracted", dataset_path)
                 self._save_processed_data(tfidf_df, output_path)
-                
+
                 results["tfidf_reports"][dataset_path] = {
                     "report": tfidf_report,
                     "output_path": output_path,
@@ -1870,58 +1877,58 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(tfidf_df)
                 }
                 logger.info(f"✅ TF-IDF extraction salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["tfidf_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 10 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 10 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_07_clustering(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 11: Clustering semântico com Voyage.ai"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 11: CLUSTERING SEMÂNTICO OTIMIZADO COM VOYAGE.AI")
         results = {"clustering_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["10_tfidf_extracted", "09_topic_modeled", "08_sentiment_analyzed"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Verificar se Voyage.ai está disponível e habilitado
-                voyage_enabled = (hasattr(self, 'voyage_clustering_analyzer') and 
-                                hasattr(self, 'voyage_embeddings') and 
+                voyage_enabled = (hasattr(self, 'voyage_clustering_analyzer') and
+                                hasattr(self, 'voyage_embeddings') and
                                 getattr(self.voyage_embeddings, 'voyage_available', False))
-                
+
                 if voyage_enabled:
                     logger.info("🚀 Usando Voyage.ai para clustering semântico avançado")
                     # Usar novo analisador de clustering com Voyage.ai
                     clustering_result = self.voyage_clustering_analyzer.perform_semantic_clustering(df)
-                    
+
                     if clustering_result.get('success', False):
                         clustered_df = clustering_result.get('enhanced_dataframe', df)
                         cluster_report = {
@@ -1943,7 +1950,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         clustered_df = self.cluster_validator.validate_and_enhance_clusters(df)
                         cluster_report = self.cluster_validator.generate_clustering_report(clustered_df)
                         results["fallback_used"] = True
-                
+
                 elif self.pipeline_config["use_anthropic"] and self.api_available:
                     logger.info("🤖 Usando clustering tradicional + validação Anthropic")
                     # Usar clustering Anthropic tradicional
@@ -1955,11 +1962,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     # Usar clustering tradicional
                     clustered_df, cluster_report = self._traditional_clustering(df)
                     results["traditional_used"] = True
-                
+
                 # Salvar dados clusterizados
                 output_path = self._get_stage_output_path("11_clustered", dataset_path)
                 self._save_processed_data(clustered_df, output_path)
-                
+
                 results["clustering_reports"][dataset_path] = {
                     "report": cluster_report,
                     "output_path": output_path,
@@ -1967,28 +1974,28 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(clustered_df)
                 }
                 logger.info(f"✅ Clustering salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["clustering_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 11 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 11 concluído com sucesso")
-        
+
         return results
-    
+
     def _enhanced_traditional_topic_modeling(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Modelagem de tópicos tradicional aprimorada"""
         try:
             logger.info("📚 Executando topic modeling tradicional aprimorado")
-            
+
             # Use enhanced traditional method with better AI interpretation
             if self.api_available and hasattr(self, 'topic_interpreter'):
                 topic_df = self.topic_interpreter.extract_and_interpret_topics(df)
@@ -1997,52 +2004,52 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Pure traditional fallback
                 topic_df, topic_report = self._traditional_topic_modeling(df)
                 topic_report["enhanced"] = True
-            
+
             return topic_df, topic_report
-            
+
         except Exception as e:
             logger.error(f"Erro no topic modeling aprimorado: {e}")
             return self._traditional_topic_modeling(df)
-    
+
     def _stage_08_hashtag_normalization(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 12: Normalização de hashtags com Anthropic Enhanced"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 12: HASHTAG NORMALIZATION COM ANTHROPIC")
         results = {"hashtag_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["11_clustered", "10_tfidf_extracted", "09_topic_modeled"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Aplicar otimização de performance para hashtag analysis
                 optimized_df, optimization_report = self._apply_hashtag_analysis_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
-                
+
                 # Usar apenas análise Anthropic (API-only)
                 if self._validate_hashtag_dependencies():
                     logger.info("🤖 Usando análise de hashtags Anthropic Enhanced")
                     normalized_df = self.hashtag_analyzer.normalize_and_analyze_hashtags(optimized_df)
                     hashtag_report = self.hashtag_analyzer.generate_hashtag_report(normalized_df)
-                    
+
                     # Estender resultados para dataset completo se necessário
                     if len(optimized_df) < len(df):
                         normalized_df = self._extend_hashtag_results(df, normalized_df, optimization_report)
-                    
+
                     hashtag_report.update(optimization_report)
                     results["anthropic_used"] = True
                     logger.info("✅ Análise de hashtags Anthropic concluída")
@@ -2051,11 +2058,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 # Salvar dados com hashtags normalizadas
                 output_path = self._get_stage_output_path("12_hashtags_normalized", dataset_path)
                 self._save_processed_data(normalized_df, output_path)
-                
+
                 results["hashtag_reports"][dataset_path] = {
                     "report": hashtag_report,
                     "output_path": output_path,
@@ -2063,62 +2070,62 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(normalized_df)
                 }
                 logger.info(f"✅ Hashtag normalization salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["hashtag_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 12 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 12 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_09_domain_extraction(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 13: Análise de domínios com Anthropic Enhanced"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 13: DOMAIN ANALYSIS COM ANTHROPIC")
         results = {"domain_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["12_hashtags_normalized", "11_clustered", "10_tfidf_extracted"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                
+
                 # Aplicar otimização de performance para domain analysis
                 optimized_df, optimization_report = self._apply_domain_analysis_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
-                
+
                 # Usar apenas análise Anthropic (API-only)
                 if self._validate_domain_dependencies():
                     logger.info("🤖 Usando análise de domínios Anthropic Enhanced")
                     domain_df = self.domain_analyzer.analyze_domains_comprehensive(optimized_df)
                     domain_report = self.domain_analyzer.generate_domain_report(domain_df)
-                    
+
                     # Estender resultados para dataset completo se necessário
                     if len(optimized_df) < len(df):
                         domain_df = self._extend_domain_results(df, domain_df, optimization_report)
-                    
+
                     domain_report.update(optimization_report)
                     results["anthropic_used"] = True
                     logger.info("✅ Análise de domínios Anthropic concluída")
@@ -2127,11 +2134,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 # Salvar dados com domínios analisados
                 output_path = self._get_stage_output_path("13_domains_analyzed", dataset_path)
                 self._save_processed_data(domain_df, output_path)
-                
+
                 results["domain_reports"][dataset_path] = {
                     "report": domain_report,
                     "output_path": output_path,
@@ -2139,28 +2146,28 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(domain_df)
                 }
                 logger.info(f"✅ Domain analysis salvo em: {output_path}")
-                
+
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 continue
-        
+
         results["datasets_processed"] = len(results["domain_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 13 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 13 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_10_temporal_analysis(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 10: Análise temporal inteligente"""
-        
+
         results = {"temporal_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             # Carregar dados com domínios analisados
             # Se dataset_path já aponta para arquivo com domínios analisados, usar diretamente
@@ -2168,9 +2175,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("09_domains_analyzed", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
-            
+
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar análise Anthropic
                 temporal_df = self.temporal_analyzer.analyze_temporal_patterns_comprehensive(df)
@@ -2179,24 +2186,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 # Usar análise tradicional
                 temporal_df, temporal_report = self._traditional_temporal_analysis(df)
-            
+
             # Salvar dados com análise temporal
             output_path = self._get_stage_output_path("10_temporal_analyzed", dataset_path)
             self._save_processed_data(temporal_df, output_path)
-            
+
             results["temporal_reports"][dataset_path] = {
                 "report": temporal_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["temporal_reports"])
-        
+
         return results
-    
+
     def _stage_11_network_structure(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 11: Análise de estrutura de rede"""
-        
+
         results = {"network_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             # Carregar dados com análise temporal
             # Se dataset_path já aponta para arquivo com análise temporal, usar diretamente
@@ -2204,9 +2211,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("10_temporal_analyzed", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
-            
+
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar análise Anthropic
                 network_df = self.network_analyzer.analyze_network_structure_comprehensive(df)
@@ -2215,24 +2222,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 # Usar análise tradicional
                 network_df, network_report = self._traditional_network_analysis(df)
-            
+
             # Salvar dados com análise de rede
             output_path = self._get_stage_output_path("11_network_analyzed", dataset_path)
             self._save_processed_data(network_df, output_path)
-            
+
             results["network_reports"][dataset_path] = {
                 "report": network_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["network_reports"])
-        
+
         return results
-    
+
     def _stage_12_qualitative_analysis(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 12: Análise qualitativa"""
-        
+
         results = {"qualitative_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             # Carregar dados com análise de rede
             # Se dataset_path já aponta para arquivo com análise de rede, usar diretamente
@@ -2240,9 +2247,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("11_network_analyzed", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
-            
+
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar análise Anthropic
                 qualitative_df = self.qualitative_classifier.classify_content_comprehensive(df)
@@ -2251,24 +2258,24 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 # Usar análise tradicional
                 qualitative_df, qualitative_report = self._traditional_qualitative_analysis(df)
-            
+
             # Salvar dados com análise qualitativa
             output_path = self._get_stage_output_path("12_qualitative_analyzed", dataset_path)
             self._save_processed_data(qualitative_df, output_path)
-            
+
             results["qualitative_reports"][dataset_path] = {
                 "report": qualitative_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["qualitative_reports"])
-        
+
         return results
-    
+
     def _stage_13_review_reproducibility(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 13: Revisão e reprodutibilidade"""
-        
+
         results = {"review_reports": {}}
-        
+
         for dataset_path in dataset_paths:
             # Carregar dados finais
             # Se dataset_path já aponta para arquivo com análise qualitativa, usar diretamente
@@ -2276,9 +2283,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 input_path = dataset_path
             else:
                 input_path = self._get_stage_output_path("12_qualitative_analyzed", dataset_path)
-            
+
             df = self._load_processed_data(input_path)
-            
+
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar revisão Anthropic
                 review_report = self.pipeline_reviewer.comprehensive_pipeline_review(df, self.pipeline_state)
@@ -2286,31 +2293,31 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 # Usar revisão tradicional
                 review_report = self._traditional_review_reproducibility(df)
-            
+
             # Salvar dados finais
             output_path = self._get_stage_output_path("13_final_processed", dataset_path)
             self._save_processed_data(df, output_path)
-            
+
             results["review_reports"][dataset_path] = {
                 "report": review_report,
                 "output_path": output_path
             }
             results["datasets_processed"] = len(results["review_reports"])
-        
+
         return results
-    
+
     def _execute_final_validation(self, pipeline_results: Dict[str, Any]) -> Dict[str, Any]:
         """Executa validação final completa"""
-        
+
         logger.info("Executando validação final do pipeline")
-        
+
         validation_results = {
             "comprehensive_validation": {},
             "api_integration_validation": {},
             "overall_quality_score": 0.0,
             "validation_success": False
         }
-        
+
         # 1. Executar validação holística com CompletePipelineValidator
         if hasattr(self, 'pipeline_validator') and self.pipeline_validator:
             try:
@@ -2325,14 +2332,14 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             except Exception as e:
                 logger.error(f"Erro na validação holística: {e}")
                 validation_results["comprehensive_validation"] = {"error": str(e)}
-        
+
         # 2. Usar o integrador API para validação final (mantendo comportamento original)
         final_dataset_paths = []
         for dataset_path in pipeline_results.get("datasets_processed", []):
             final_path = self._get_stage_output_path("13_final_processed", dataset_path)
             if os.path.exists(final_path):
                 final_dataset_paths.append(final_path)
-        
+
         if final_dataset_paths:
             try:
                 api_validation = self.api_integration.execute_comprehensive_pipeline_validation(
@@ -2346,11 +2353,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 validation_results["api_integration_validation"] = {"error": str(e)}
         else:
             validation_results["api_integration_validation"] = {"error": "No final datasets found for validation"}
-        
+
         # 3. Calcular score final combinado
         comprehensive_score = validation_results["comprehensive_validation"].get("overall_quality_score", 0.0)
         api_score = validation_results["api_integration_validation"].get("quality_score", 0.0)
-        
+
         if comprehensive_score > 0 and api_score > 0:
             # Média ponderada: 70% holística, 30% API
             validation_results["overall_quality_score"] = (comprehensive_score * 0.7) + (api_score * 0.3)
@@ -2358,69 +2365,69 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             validation_results["overall_quality_score"] = comprehensive_score
         elif api_score > 0:
             validation_results["overall_quality_score"] = api_score
-        
+
         # 4. Determinar sucesso geral
         validation_results["validation_success"] = (
             validation_results["overall_quality_score"] >= 0.7 and
             not validation_results["comprehensive_validation"].get("error") and
             not validation_results["api_integration_validation"].get("error")
         )
-        
+
         logger.info(f"Validação final concluída - Score: {validation_results['overall_quality_score']:.3f}, Sucesso: {validation_results['validation_success']}")
-        
+
         return validation_results
-    
+
     # Métodos auxiliares
-    
+
     def _get_stage_output_path(self, stage_name: str, original_path: str) -> str:
         """Gera caminho de saída para uma etapa"""
-        
+
         base_name = Path(original_path).stem
-        
+
         # Usar data/dashboard_results como output_path padrão para consistência
         # (mesmo diretório usado pelo dashboard)
         output_path = self.pipeline_config.get("output_path", "data/dashboard_results")
-        
+
         # Se output_path for "data/interim" mas não existir, usar dashboard_results
         if output_path == "data/interim" and not os.path.exists("data/interim"):
             output_path = "data/dashboard_results"
-        
+
         output_dir = Path(output_path)
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         return str(output_dir / f"{base_name}_{stage_name}.csv")
-    
+
     def _save_processed_data(self, df: pd.DataFrame, output_path: str):
         """Salva dados processados com proteção contra separadores mistos"""
-        
+
         # Criar diretório se não existir
         output_dir = Path(output_path).parent
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Salvar com quoting adequado para evitar problemas de parsing
         df.to_csv(
-            output_path, 
+            output_path,
             sep=';',                    # Separador padrão do projeto
-            index=False, 
+            index=False,
             encoding='utf-8',
             quoting=1,                  # QUOTE_ALL - protege contra confusão de separadores
             quotechar='"',              # Aspas duplas padrão
             doublequote=True,           # Escapar aspas duplas duplicando
             lineterminator='\n'        # Terminador de linha Unix
         )
-        
+
         self.pipeline_state["data_versions"][output_path] = datetime.now().isoformat()
         logger.debug(f"Dados salvos: {output_path} ({len(df)} linhas, {len(df.columns)} colunas)")
-    
+
     def _load_processed_data(self, input_path: str) -> pd.DataFrame:
         """Carrega dados processados usando chunks se necessário"""
-        
+
         if not os.path.exists(input_path):
             raise FileNotFoundError(f"Arquivo não encontrado: {input_path}")
-        
+
         # Verificar tamanho do arquivo
         file_size = os.path.getsize(input_path)
-        
+
         # Função para tentar diferentes configurações de parsing
         def try_parse_csv(file_path, **kwargs):
             """Tenta parsear CSV com diferentes configurações e validação"""
@@ -2432,23 +2439,23 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         logger.error(f"❌ CSV mal parseado: header concatenado detectado")
                         logger.error(f"Header problemático: {df.columns[0][:100]}...")
                         return None  # Forçar nova tentativa
-                    
+
                     # Verificar se temos colunas esperadas
                     expected_cols = ['message_id', 'datetime', 'body', 'channel']
                     if not any(col in df.columns for col in expected_cols):
                         logger.warning(f"⚠️  Colunas esperadas não encontradas: {list(df.columns)[:5]}")
                         # Não é erro crítico, pode ser dataset processado diferentemente
-                    
+
                     logger.debug(f"✅ CSV parseado: {len(df.columns)} colunas, {len(df)} linhas")
                 return df
             except Exception as e:
                 logger.warning(f"Tentativa de parsing falhou: {e}")
                 return None
-        
+
         # Configurações de parsing para testar em ordem de preferência
         import csv
         csv.field_size_limit(500000)  # Aumentar limite para 500KB por campo
-        
+
         # CORREÇÃO CRÍTICA: Detectar separador automaticamente analisando primeira linha
         def detect_separator(file_path):
             """Detecta o separador do CSV analisando a primeira linha com validação robusta"""
@@ -2457,15 +2464,15 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     first_line = f.readline().strip()
                     comma_count = first_line.count(',')
                     semicolon_count = first_line.count(';')
-                    
+
                     logger.debug(f"Primeira linha: {first_line[:100]}...")
                     logger.debug(f"Vírgulas: {comma_count}, Ponto-e-vírgulas: {semicolon_count}")
-                    
+
                     # Se há apenas 1 coluna detectada, provavelmente separador errado
                     if comma_count == 0 and semicolon_count == 0:
                         logger.warning("Nenhum separador detectado na primeira linha")
                         return ';'  # Fallback padrão para datasets do projeto
-                    
+
                     # Priorizar ponto-e-vírgula se há mais ou igual quantidade
                     if semicolon_count >= comma_count and semicolon_count > 0:
                         return ';'
@@ -2476,19 +2483,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             except Exception as e:
                 logger.error(f"Erro na detecção de separador: {e}")
                 return ';'  # Default para ponto-e-vírgula (padrão do projeto)
-        
+
         detected_sep = detect_separator(input_path)
         logger.info(f"📊 Separador detectado: '{detected_sep}'")
-        
+
         # Preparar configurações com ambos separadores para garantir parsing correto
         separators_to_try = [detected_sep]
         if detected_sep == ';':
             separators_to_try.append(',')  # Tentar vírgula como fallback
         else:
             separators_to_try.append(';')  # Tentar ponto-e-vírgula como fallback
-        
+
         parse_configs = []
-        
+
         # Gerar configurações para cada separador
         for sep in separators_to_try:
             parse_configs.extend([
@@ -2540,12 +2547,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     'skipinitialspace': True
                 }
             ])
-        
+
         logger.info(f"📋 Configurações de parsing preparadas: {len(parse_configs)} tentativas")
-        
+
         if file_size > 200 * 1024 * 1024:  # >200MB, usar chunks
             logger.info(f"Arquivo grande detectado ({file_size/1024/1024:.1f}MB), usando processamento em chunks")
-            
+
             # Tentar parsing em chunks
             for i, config in enumerate(parse_configs):
                 try:
@@ -2562,20 +2569,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             chunks = []  # Limpar chunks inválidos
                             break
                         chunks.append(chunk)
-                    
+
                     if chunks:
                         df = pd.concat(chunks, ignore_index=True)
                         logger.info(f"✅ Parsing bem-sucedido em chunks (config {i+1}): {len(df)} linhas, {len(df.columns)} colunas")
                         return df
-                        
+
                 except Exception as e:
                     logger.warning(f"Configuração de chunk {i+1} falhou: {e}")
                     continue
-            
+
             raise ValueError("Todas as configurações de parsing em chunks falharam")
         else:
             logger.info(f"Arquivo pequeno ({file_size/1024:.1f}KB), carregando completo")
-            
+
             # Tentar parsing completo
             for i, config in enumerate(parse_configs):
                 df = try_parse_csv(input_path, **config)
@@ -2583,12 +2590,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.info(f"✅ Parsing bem-sucedido com configuração {i+1}: {len(df)} linhas, {len(df.columns)} colunas")
                     logger.debug(f"Colunas detectadas: {list(df.columns)[:10]}")
                     return df
-            
+
             # Se tudo falhar, tentar com chunk_processor como último recurso
             try:
                 def chunk_reader(chunk_df, chunk_idx):
                     return chunk_df
-                
+
                 if hasattr(self, 'chunk_processor') and self.chunk_processor:
                     results = self.chunk_processor.process_file(input_path, chunk_reader)
                     if results and len(results) > 0:
@@ -2597,12 +2604,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         return df
             except Exception as e:
                 logger.warning(f"Fallback com chunk_processor falhou: {e}")
-            
+
             raise ValueError("Todas as configurações de parsing falharam")
-        
+
     def _detect_text_columns(self, df: pd.DataFrame) -> Dict[str, str]:
         """Detecta automaticamente as colunas de texto principais com cache"""
-        
+
         # Cache para evitar redetecção desnecessária
         if hasattr(self, '_column_mapping_cache'):
             cached_columns = set(self._column_mapping_cache.keys())
@@ -2610,39 +2617,39 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if cached_columns.issubset(current_columns):
                 logger.debug("✅ Usando mapeamento de colunas do cache")
                 return self._column_mapping_cache
-        
+
         column_mapping = {}
-        
+
         # Mapeamentos conhecidos para diferentes formatos de dataset (PRIORIDADE: cleaned > original)
         text_candidates = ['body_cleaned', 'body', 'texto_cleaned', 'texto', 'text_cleaned', 'text', 'content_cleaned', 'content', 'message', 'mensagem']
         datetime_candidates = ['datetime', 'data_hora', 'timestamp', 'date', 'time']
         channel_candidates = ['channel', 'canal', 'channel_name', 'source']
-        
+
         # Detectar coluna de texto principal (PRIORIDADE: body_cleaned > body)
         for candidate in text_candidates:
             if candidate in df.columns:
                 column_mapping['text'] = candidate
                 break
-        
+
         # Detectar coluna de texto limpo (separadamente para análises específicas)
         cleaned_candidates = ['body_cleaned', 'texto_cleaned', 'text_cleaned', 'content_cleaned']
         for candidate in cleaned_candidates:
             if candidate in df.columns:
                 column_mapping['text_cleaned'] = candidate
                 break
-        
+
         # Detectar coluna de data/hora
         for candidate in datetime_candidates:
             if candidate in df.columns:
                 column_mapping['datetime'] = candidate
                 break
-                
+
         # Detectar coluna de canal
         for candidate in channel_candidates:
             if candidate in df.columns:
                 column_mapping['channel'] = candidate
                 break
-        
+
         # Se não encontrou texto principal, usar a primeira coluna de texto longo
         if 'text' not in column_mapping:
             for col in df.columns:
@@ -2651,29 +2658,29 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     if sample_length > 50:  # Texto com média > 50 caracteres
                         column_mapping['text'] = col
                         break
-        
+
         # Salvar no cache para reutilização
         self._column_mapping_cache = column_mapping.copy()
-        
+
         logger.debug(f"📋 Mapeamento de colunas detectado: {column_mapping}")
         if not column_mapping.get('text'):
             logger.warning(f"⚠️  Nenhuma coluna de texto principal detectada em: {list(df.columns)}")
-        
+
         return column_mapping
-    
+
     def _get_best_text_column(self, df: pd.DataFrame, prefer_cleaned: bool = True) -> str:
         """
         Obtém a melhor coluna de texto para processamento
-        
+
         Args:
             df: DataFrame com dados
             prefer_cleaned: Se deve priorizar colunas limpas (body_cleaned)
-            
+
         Returns:
             Nome da coluna de texto mais adequada
         """
         column_mapping = self._detect_text_columns(df)
-        
+
         if prefer_cleaned and column_mapping.get('text_cleaned'):
             return column_mapping['text_cleaned']
         elif column_mapping.get('text'):
@@ -2683,22 +2690,22 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             for col in df.columns:
                 if 'body' in col.lower() or 'text' in col.lower() or 'content' in col.lower():
                     return col
-            
+
             # Último fallback - primeira coluna object
             for col in df.columns:
                 if df[col].dtype == 'object':
                     return col
-                    
+
             raise ValueError(f"Nenhuma coluna de texto encontrada em: {list(df.columns)}")
-    
+
     def _preserve_deduplication_info(self, original_df: pd.DataFrame, processed_df: pd.DataFrame) -> pd.DataFrame:
         """
         Preserva informações de deduplicação quando processando dados
-        
+
         Args:
             original_df: DataFrame original com duplicate_frequency
             processed_df: DataFrame processado que pode ter perdido a coluna
-            
+
         Returns:
             DataFrame processado com duplicate_frequency preservada
         """
@@ -2710,173 +2717,161 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             else:
                 logger.warning(f"⚠️  Tamanhos diferentes: original={len(original_df)}, processado={len(processed_df)}. Usando frequência padrão.")
                 processed_df['duplicate_frequency'] = 1
-        
+
         return processed_df
-    
+
     def _save_pipeline_checkpoint(self, stage_name: str, stage_result: Dict[str, Any]):
         """Salva checkpoint da etapa"""
-        
+
         checkpoint_data = {
             "stage": stage_name,
             "stage_result": stage_result,
             "pipeline_state": self.pipeline_state,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         checkpoint_dir = self.project_root / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
-        
+
         checkpoint_file = checkpoint_dir / f"pipeline_{stage_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
+
         with open(checkpoint_file, 'w', encoding='utf-8') as f:
             json.dump(checkpoint_data, f, indent=2, ensure_ascii=False, default=str)
-        
+
         self.pipeline_state["checkpoints"][stage_name] = str(checkpoint_file)
-    
+
     def _save_final_results(self, pipeline_results: Dict[str, Any]):
         """Salva resultados finais do pipeline"""
-        
+
         results_dir = self.project_root / "logs" / "pipeline"
         results_dir.mkdir(parents=True, exist_ok=True)
-        
+
         results_file = results_dir / f"pipeline_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
+
         with open(results_file, 'w', encoding='utf-8') as f:
             json.dump(pipeline_results, f, indent=2, ensure_ascii=False, default=str)
-        
+
         # Salvar também como latest
         latest_file = results_dir / "latest_pipeline_results.json"
         with open(latest_file, 'w', encoding='utf-8') as f:
             json.dump(pipeline_results, f, indent=2, ensure_ascii=False, default=str)
-    
+
     def _is_critical_error(self, stage_name: str, error: Exception) -> bool:
         """Determina se um erro é crítico para o pipeline"""
-        
+
         critical_stages = ["01_validate_data", "02b_deduplication"]
         critical_errors = ["FileNotFoundError", "PermissionError", "APIKeyError"]
-        
+
         return stage_name in critical_stages or type(error).__name__ in critical_errors
-    
+
     # Métodos de fallback tradicional (implementação básica)
-    
+
     def _traditional_validate_data(self, dataset_path: str) -> Dict[str, Any]:
         """Validação tradicional sem API"""
         return {"method": "traditional", "encoding_issues": [], "structural_issues": []}
-    
-    
-    def _traditional_deduplication(self, dataset_path: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
-        """Deduplicação tradicional"""
-        df = pd.read_csv(dataset_path, sep=';', encoding='utf-8')
-        original_count = len(df)
-        df_deduplicated = df.drop_duplicates()
-        return df_deduplicated, {
-            "method": "traditional", 
-            "original_count": original_count,
-            "deduplicated_count": len(df_deduplicated)
-        }
-    
+
     def _traditional_feature_extraction(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Extração tradicional de features adaptada para estrutura existente"""
-        
+
         enhanced_df = df.copy()
-        
+
         # Usar método otimizado para detectar melhor coluna de texto
         text_column = self._get_best_text_column(df, prefer_cleaned=True)
-        
+
         # Métricas básicas de texto
         enhanced_df['text_length'] = enhanced_df[text_column].fillna('').str.len()
         enhanced_df['word_count'] = enhanced_df[text_column].fillna('').str.split().str.len()
-        
+
         # Análise de colunas existentes
         features_added = 2  # text_length, word_count
-        
+
         if 'mentions' in df.columns:
             enhanced_df['mention_count'] = enhanced_df['mentions'].fillna('').apply(
                 lambda x: len([m for m in str(x).split(',') if m.strip()]) if x else 0
             )
             enhanced_df['has_mentions'] = enhanced_df['mention_count'] > 0
             features_added += 2
-        
+
         if 'hashtag' in df.columns:
             enhanced_df['hashtag_count'] = enhanced_df['hashtag'].fillna('').apply(
                 lambda x: len([h for h in str(x).split(',') if h.strip()]) if x else 0
             )
             enhanced_df['has_hashtag'] = enhanced_df['hashtag_count'] > 0
             features_added += 2
-        
+
         if 'url' in df.columns:
             enhanced_df['url_count'] = enhanced_df['url'].fillna('').apply(
                 lambda x: len([u for u in str(x).split(',') if u.strip()]) if x else 0
             )
             enhanced_df['has_url'] = enhanced_df['url_count'] > 0
             features_added += 2
-        
+
         # Flags básicas (sem análise semântica)
         enhanced_df['political_alignment'] = 'neutro'
         enhanced_df['sentiment_category'] = 'neutro'
         enhanced_df['discourse_type'] = 'informativo'
         features_added += 3
-        
+
         report = {
-            "method": "traditional", 
+            "method": "traditional",
             "features_extracted": features_added,
             "semantic_analysis": False,
             "used_existing_columns": True
         }
-        
+
         return enhanced_df, report
-    
+
     def _traditional_clean_text(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Limpeza tradicional de texto"""
         return df, {"method": "traditional", "texts_cleaned": len(df)}
-    
+
     def _traditional_sentiment_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise tradicional de sentimento - DEPRECIADO: Use _enhanced_traditional_sentiment_analysis"""
         # Redirect to enhanced version
         return self._enhanced_traditional_sentiment_analysis(df)
-    
+
     def _traditional_topic_modeling(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Modelagem tradicional de tópicos - DEPRECIADO: Use _enhanced_traditional_topic_modeling"""
         # Redirect to enhanced version
         return self._enhanced_traditional_topic_modeling(df)
-    
+
     def _traditional_tfidf_extraction(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Extração tradicional TF-IDF"""
         return df, {"method": "traditional", "terms_extracted": 0}
-    
+
     def _traditional_clustering(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Clustering tradicional"""
         df['cluster'] = 0
         return df, {"method": "traditional", "clusters_found": 1}
-    
+
     def _traditional_hashtag_normalization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Normalização tradicional de hashtags"""
         return df, {"method": "traditional", "hashtags_normalized": 0}
-    
+
     def _traditional_domain_extraction(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Extração tradicional de domínios"""
         return df, {"method": "traditional", "domains_extracted": 0}
-    
+
     def _traditional_temporal_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise temporal tradicional"""
         return df, {"method": "traditional", "temporal_patterns_found": 0}
-    
+
     def _traditional_network_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise de rede tradicional"""
         return df, {"method": "traditional", "network_structures_found": 0}
-    
+
     def _traditional_qualitative_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise qualitativa tradicional"""
         return df, {"method": "traditional", "qualitative_classifications": 0}
-    
+
     def _traditional_review_reproducibility(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Revisão tradicional"""
         return {"method": "traditional", "reproducibility_score": 1.0, "review_complete": True}
-    
+
     def _stage_14_semantic_search_intelligence(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """
         Etapa 14: Sistema de Busca Semântica e Inteligência
-        
+
         Constrói índice de busca semântica e executa análises avançadas:
         - Criação de índice de embeddings semânticos
         - Descoberta automática de padrões e insights
@@ -2884,9 +2879,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         - Detecção de redes de influência e coordenação
         - Dashboard analítico abrangente
         """
-        
+
         logger.info("Iniciando etapa de busca semântica e inteligência")
-        
+
         results = {
             "search_indices_built": {},
             "content_discoveries": {},
@@ -2895,14 +2890,14 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "insights_generated": [],
             "anthropic_used": False
         }
-        
+
         try:
             for dataset_path in dataset_paths:
                 dataset_name = Path(dataset_path).stem
                 logger.info(f"Processando {dataset_name} para busca semântica")
-                
+
                 # Carregar dados processados - usar última versão disponível
-                # Se dataset_path contém stage name, usar diretamente  
+                # Se dataset_path contém stage name, usar diretamente
                 if any(stage in dataset_path for stage in ["_02b_deduplicated", "_01b_features_extracted", "_03_text_cleaned", "_04_sentiment_analyzed", "_05_topic_modeled", "_06_tfidf_extracted", "_07_clustered", "_08_hashtags_normalized", "_09_domains_analyzed", "_10_temporal_analyzed", "_11_network_analyzed", "_12_qualitative_analyzed", "_13_final_processed"]):
                     df = self._load_processed_data(dataset_path)
                 else:
@@ -2913,20 +2908,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     else:
                         # Fallback para dados originais
                         df = self._load_processed_data(dataset_path)
-                
+
                 if df is None or len(df) == 0:
                     logger.warning(f"Dataset vazio ou inválido: {dataset_path}")
                     continue
-                
+
                 # Verificar se componentes semânticos estão disponíveis
                 if not self.semantic_search_engine:
                     logger.warning("Semantic search engine não disponível, pulando etapa")
                     results["search_indices_built"][dataset_name] = {"error": "component_not_available"}
                     continue
-                
+
                 # 1. Construir índice de busca semântica
                 logger.info(f"Construindo índice de busca semântica para {dataset_name}")
-                
+
                 # Usar método otimizado para detectar melhor coluna de texto
                 try:
                     text_column = self._get_best_text_column(df, prefer_cleaned=True)
@@ -2940,38 +2935,38 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     else:
                         logger.error(f"Nenhuma coluna de texto encontrada no dataset {dataset_name}. Colunas disponíveis: {list(df.columns)}")
                         continue
-                
+
                 search_index_result = self.semantic_search_engine.build_search_index(df, text_column)
                 results["search_indices_built"][dataset_name] = search_index_result
-                
+
                 if not search_index_result.get('success'):
                     logger.error(f"Falha ao construir índice semântico para {dataset_name}")
                     continue
-                
+
                 # 2. Descoberta automática de conteúdo e padrões
                 if self.content_discovery_engine:
                     logger.info(f"Executando descoberta de conteúdo para {dataset_name}")
-                    
+
                     content_patterns = self.content_discovery_engine.discover_content_patterns()
                     coordination_patterns = self.content_discovery_engine.detect_coordination_patterns()
                     misinformation_campaigns = self.content_discovery_engine.detect_misinformation_campaigns()
                     influence_networks = self.content_discovery_engine.discover_influence_networks()
-                    
+
                     results["content_discoveries"][dataset_name] = {
                         "content_patterns": content_patterns,
-                        "coordination_patterns": coordination_patterns, 
+                        "coordination_patterns": coordination_patterns,
                         "misinformation_campaigns": misinformation_campaigns,
                         "influence_networks": influence_networks
                     }
-                
+
                 # 3. Análise de evolução temporal de conceitos-chave
                 if self.temporal_evolution_tracker:
                     logger.info(f"Analisando evolução temporal para {dataset_name}")
-                    
+
                     # Conceitos-chave para análise temporal
                     key_concepts = ['democracia', 'eleições', 'vacinas', 'stf', 'mídia']
                     temporal_analyses = {}
-                    
+
                     for concept in key_concepts:
                         try:
                             evolution_result = self.temporal_evolution_tracker.track_concept_evolution(concept)
@@ -2979,85 +2974,85 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                 temporal_analyses[concept] = evolution_result
                         except Exception as e:
                             logger.warning(f"Erro na análise temporal de '{concept}': {e}")
-                    
+
                     # Análise de mudanças de discurso
                     discourse_shifts = self.temporal_evolution_tracker.detect_discourse_shifts()
-                    
+
                     results["temporal_evolutions"][dataset_name] = {
                         "concept_evolutions": temporal_analyses,
                         "discourse_shifts": discourse_shifts
                     }
-                
+
                 # 4. Gerar dashboard analítico abrangente
                 if self.analytics_dashboard:
                     logger.info(f"Gerando dashboard analítico para {dataset_name}")
-                    
+
                     dashboard_data = self.analytics_dashboard.generate_comprehensive_dashboard(
                         time_period_days=30
                     )
-                    
+
                     # Gerar relatórios especializados
                     trend_report = self.analytics_dashboard.generate_trend_analysis_report()
                     influence_report = self.analytics_dashboard.generate_influence_analysis_report()
                     quality_report = self.analytics_dashboard.generate_content_quality_report()
-                    
+
                     results["analytics_dashboards"][dataset_name] = {
                         "comprehensive_dashboard": dashboard_data,
                         "trend_analysis": trend_report,
                         "influence_analysis": influence_report,
                         "content_quality": quality_report
                     }
-                    
+
                     # Exportar dashboard em múltiplos formatos
                     try:
                         dashboard_export_path = self.analytics_dashboard.export_dashboard_data(
-                            dashboard_data, 
+                            dashboard_data,
                             format_type='json',
                             output_path=f"data/interim/dashboard_{dataset_name}_{datetime.now().strftime('%Y%m%d')}.json"
                         )
                         results["analytics_dashboards"][dataset_name]["export_path"] = dashboard_export_path
                     except Exception as e:
                         logger.warning(f"Erro ao exportar dashboard: {e}")
-                
+
                 # 5. Gerar insights automáticos usando IA
                 if self.api_available and self.semantic_search_engine:
                     logger.info(f"Gerando insights automáticos com IA para {dataset_name}")
-                    
+
                     automated_insights = self.semantic_search_engine.generate_automated_insights([
                         'political_discourse', 'conspiracy_theories', 'institutional_trust',
                         'pandemic_response', 'election_integrity', 'media_criticism'
                     ])
-                    
+
                     results["insights_generated"].append({
                         "dataset": dataset_name,
                         "insights": automated_insights,
                         "generated_at": datetime.now().isoformat()
                     })
-                    
+
                     results["anthropic_used"] = True
-                
+
                 logger.info(f"Processamento semântico completo para {dataset_name}")
-            
+
             results["datasets_processed"] = len([d for d in results["search_indices_built"].values() if d.get('success')])
-            
+
             # Gerar insights consolidados entre datasets
             if results["datasets_processed"] > 1:
                 logger.info("Gerando insights consolidados entre datasets")
                 consolidated_insights = self._generate_consolidated_semantic_insights(results)
                 results["consolidated_insights"] = consolidated_insights
-            
+
             logger.info(f"Etapa semântica concluída com sucesso para {results['datasets_processed']} datasets")
-            
+
         except Exception as e:
             logger.error(f"Erro na etapa de busca semântica: {e}")
             results["error"] = str(e)
             results["success"] = False
-        
+
         return results
-    
+
     def _generate_consolidated_semantic_insights(self, semantic_results: Dict[str, Any]) -> Dict[str, Any]:
         """Gera insights consolidados entre múltiplos datasets"""
-        
+
         consolidated = {
             "cross_dataset_patterns": [],
             "common_themes": [],
@@ -3065,7 +3060,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "network_overlaps": [],
             "methodology": "cross_dataset_semantic_analysis"
         }
-        
+
         try:
             # Consolidar padrões de descoberta entre datasets
             all_patterns = []
@@ -3075,20 +3070,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     for pattern in patterns:
                         pattern["source_dataset"] = dataset_name
                         all_patterns.append(pattern)
-            
+
             # Identificar temas comuns
             if all_patterns:
                 all_themes = []
                 for pattern in all_patterns:
                     all_themes.extend(pattern.get("key_themes", []))
-                
+
                 from collections import Counter
                 theme_counts = Counter(all_themes)
                 consolidated["common_themes"] = [
                     {"theme": theme, "frequency": count, "datasets": len(set(p["source_dataset"] for p in all_patterns if theme in p.get("key_themes", [])))}
                     for theme, count in theme_counts.most_common(10)
                 ]
-            
+
             # Consolidar tendências de evolução temporal
             evolution_data = semantic_results.get("temporal_evolutions", {})
             if evolution_data:
@@ -3102,53 +3097,53 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "dataset": dataset_name,
                             "evolution_data": evolution.get("insights", {})
                         })
-                
+
                 consolidated["evolution_trends"] = concept_evolution_summary
-            
+
             logger.info("Insights consolidados gerados com sucesso")
-            
+
         except Exception as e:
             logger.error(f"Erro ao gerar insights consolidados: {e}")
             consolidated["error"] = str(e)
-        
+
         return consolidated
 
     # =================== MÉTODOS DE ETAPAS FALTANTES v4.7 ===================
-    
+
     def _stage_01_chunk_processing(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 01: Processamento em chunks otimizado - Carregamento e validação inicial"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 01: CHUNK PROCESSING OTIMIZADO")
         results = {"chunks_processed": {}, "validation_reports": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Validar se arquivo existe
                 if not os.path.exists(dataset_path):
                     error_msg = f"❌ Arquivo não encontrado: {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 # Detectar encoding de forma robusta
                 detected_encoding = self._detect_file_encoding_safe(dataset_path)
                 logger.info(f"📊 Encoding detectado: {detected_encoding}")
-                
+
                 # Carregamento inteligente com múltiplos fallbacks
                 df, load_info = self._load_csv_robust(dataset_path, detected_encoding)
-                
+
                 if df is not None and not df.empty:
                     # Validação abrangente da estrutura
                     validation_result = self._validate_chunk_structure(df, dataset_path)
-                    
+
                     # Aplicar otimização de memória se necessário
                     if len(df) > 10000:  # Para datasets grandes
                         df_optimized, optimization_info = self._optimize_chunk_memory(df)
                         validation_result.update(optimization_info)
                         df = df_optimized
-                    
+
                     results["chunks_processed"][dataset_path] = {
                         "records": len(df),
                         "success": True,
@@ -3156,12 +3151,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         "encoding_used": load_info.get("encoding", detected_encoding)
                     }
                     results["validation_reports"][dataset_path] = validation_result
-                    
+
                     # Salvar dados processados
                     output_path = self._get_stage_output_path("01_chunked", dataset_path)
                     self._save_processed_data(df, output_path)
                     logger.info(f"✅ Chunk processado salvo: {output_path}")
-                    
+
                 else:
                     error_msg = f"❌ Dataset vazio ou ilegível: {dataset_path}"
                     logger.warning(error_msg)
@@ -3171,7 +3166,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         "success": False,
                         "error": "Dataset vazio ou ilegível"
                     }
-                    
+
             except Exception as e:
                 error_msg = f"❌ Erro no processamento de chunk para {dataset_path}: {str(e)}"
                 logger.error(error_msg)
@@ -3181,50 +3176,50 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "success": False,
                     "error": str(e)
                 }
-        
+
         results["datasets_processed"] = len(results["chunks_processed"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 01 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 01 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_02a_encoding_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 02: Validação de encoding otimizada com detecção robusta"""
-        
+
         logger.info("🎯 INICIANDO ETAPA 02: ENCODING VALIDATION OTIMIZADA")
         results = {"encoding_reports": {}, "corrections_applied": {}, "enhanced_detection": {}, "errors": []}
-        
+
         for dataset_path in dataset_paths:
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
-                
+
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
-                    dataset_path, 
+                    dataset_path,
                     preferred_stages=["01_chunked"]
                 )
-                
+
                 if not input_path or not os.path.exists(input_path):
                     error_msg = f"❌ Input path não encontrado para {dataset_path}"
                     logger.error(error_msg)
                     results["errors"].append(error_msg)
                     continue
-                
+
                 # Detecção robusta de encoding
                 if self._validate_encoding_dependencies():
                     try:
                         logger.info("🔍 Usando detecção de encoding aprimorada")
                         encoding_detection = self.encoding_validator.detect_encoding_with_chardet(input_path)
                         results["enhanced_detection"][dataset_path] = encoding_detection
-                        
+
                         # Carregamento otimizado
                         df = self.encoding_validator.enhance_csv_loading_with_fallbacks(input_path)
                         logger.info(f"✅ CSV carregado com encoding: {encoding_detection.get('recommended_encoding', 'utf-8')}")
-                        
+
                     except Exception as encoding_error:
                         logger.warning(f"⚠️ Falha na detecção avançada ({encoding_error}), usando fallback")
                         df, load_info = self._load_csv_robust(input_path, 'utf-8')
@@ -3232,34 +3227,34 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 else:
                     logger.info("📚 Usando carregamento tradicional")
                     df, load_info = self._load_csv_robust(input_path, 'utf-8')
-                
+
                 if df is not None and not df.empty:
                     logger.info(f"📊 Dataset carregado: {len(df)} registros")
-                    
+
                     # Validação de qualidade aprimorada
                     if hasattr(self.encoding_validator, 'validate_encoding_quality'):
                         validation_result = self.encoding_validator.validate_encoding_quality(df)
                     else:
                         validation_result = self._basic_encoding_validation(df)
-                    
+
                     results["encoding_reports"][dataset_path] = validation_result
-                    
+
                     # Aplicar correções baseado na qualidade
                     quality_score = validation_result.get("overall_quality_score", 1.0)
                     if quality_score < 0.8:
                         logger.info(f"🔧 Aplicando correções de encoding (qualidade: {quality_score:.2f})")
-                        
+
                         if hasattr(self.encoding_validator, 'detect_and_fix_encoding_issues'):
                             corrected_df, correction_report = self.encoding_validator.detect_and_fix_encoding_issues(
                                 df, fix_mode="conservative"
                             )
                         else:
                             corrected_df, correction_report = self._basic_encoding_correction(df)
-                        
+
                         if corrected_df is not None:
                             output_path = self._get_stage_output_path("02_encoding_validated", dataset_path)
                             self._save_processed_data(corrected_df, output_path)
-                            
+
                             results["corrections_applied"][dataset_path] = {
                                 "corrections": len(correction_report.get("corrections_applied", [])),
                                 "output_path": output_path,
@@ -3288,39 +3283,39 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "records_processed": len(df)
                         }
                         logger.info(f"✅ Qualidade satisfatória: {output_path}")
-                        
+
                 else:
                     error_msg = f"❌ Dataset vazio para validação de encoding: {dataset_path}"
                     logger.warning(error_msg)
                     results["errors"].append(error_msg)
                     results["encoding_reports"][dataset_path] = {"error": "Dataset vazio"}
-                    
+
             except Exception as e:
                 error_msg = f"❌ Erro na validação de encoding para {dataset_path}: {str(e)}"
                 logger.error(error_msg)
                 results["errors"].append(error_msg)
                 results["encoding_reports"][dataset_path] = {"error": str(e)}
-        
+
         results["datasets_processed"] = len(results["encoding_reports"])
         results["has_errors"] = len(results["errors"]) > 0
-        
+
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 02 concluído com {len(results['errors'])} erros")
         else:
             logger.info("✅ Stage 02 concluído com sucesso")
-        
+
         return results
-    
+
     def _stage_14_topic_interpretation(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 14: Interpretação de tópicos - Análise semântica avançada de tópicos identificados"""
-        
+
         logger.info("Iniciando interpretação de tópicos")
         results = {"topic_interpretations": {}, "semantic_analysis": {}}
-        
+
         for dataset_path in dataset_paths:
             try:
                 df = self._load_processed_data(dataset_path)
-                
+
                 if df is not None and not df.empty:
                     if self.pipeline_config["use_anthropic"] and self.api_available:
                         # Usar TopicInterpreter para análise avançada
@@ -3329,95 +3324,95 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     else:
                         # Análise tradicional de tópicos
                         interpretation_result = self._traditional_topic_interpretation(df)
-                    
+
                     results["topic_interpretations"][dataset_path] = interpretation_result
-                    
+
                     # Salvar resultados interpretados
                     if interpretation_result.get("success", False):
                         output_path = dataset_path.replace('.csv', '_14_topic_interpreted.csv')
-                        
+
                         # Adicionar colunas de interpretação se necessário
                         enhanced_df = self._enhance_dataframe_with_topic_interpretation(df, interpretation_result)
                         enhanced_df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
-                        
+
                         logger.info(f"Interpretação de tópicos salva: {output_path}")
-                        
+
                 else:
                     logger.warning(f"Dataset vazio para interpretação de tópicos: {dataset_path}")
                     results["topic_interpretations"][dataset_path] = {"error": "Dataset vazio"}
-                    
+
             except Exception as e:
                 logger.error(f"Erro na interpretação de tópicos para {dataset_path}: {e}")
                 results["topic_interpretations"][dataset_path] = {"error": str(e)}
-        
+
         results["datasets_processed"] = len(results["topic_interpretations"])
         return results
-    
+
     def _stage_16_pipeline_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 16: Validação final do pipeline - Verificação de qualidade e completude"""
-        
+
         logger.info("Iniciando validação final do pipeline")
         results = {"validation_reports": {}, "pipeline_quality_score": 0.0}
-        
+
         for dataset_path in dataset_paths:
             try:
                 df = self._load_processed_data(dataset_path)
-                
+
                 if df is not None and not df.empty:
                     # Usar CompletePipelineValidator
                     validation_result = self.pipeline_validator.validate_complete_pipeline(
-                        {"stage_results": df}, 
+                        {"stage_results": df},
                         dataset_path,
                         None  # original_dataset_path
                     )
-                    
+
                     results["validation_reports"][dataset_path] = validation_result
-                    
+
                     # Atualizar score de qualidade
                     dataset_score = validation_result.get("overall_score", 0.0)
                     if results["pipeline_quality_score"] == 0.0:
                         results["pipeline_quality_score"] = dataset_score
                     else:
                         # Média dos scores
-                        current_count = len([r for r in results["validation_reports"].values() 
+                        current_count = len([r for r in results["validation_reports"].values()
                                            if "overall_score" in r])
                         results["pipeline_quality_score"] = (
                             (results["pipeline_quality_score"] * (current_count - 1) + dataset_score) / current_count
                         )
-                    
+
                     # Salvar relatório final
                     output_path = dataset_path.replace('.csv', '_16_pipeline_validated.csv')
                     df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
-                    
+
                     # Gerar relatório JSON detalhado
                     report_path = output_path.replace('.csv', '_validation_report.json')
                     with open(report_path, 'w', encoding='utf-8') as f:
                         json.dump(validation_result, f, indent=2, ensure_ascii=False)
-                    
+
                     logger.info(f"Validação final concluída: {output_path}")
                     logger.info(f"Relatório detalhado: {report_path}")
-                    
+
                 else:
                     logger.warning(f"Dataset vazio para validação final: {dataset_path}")
                     results["validation_reports"][dataset_path] = {"error": "Dataset vazio"}
-                    
+
             except Exception as e:
                 logger.error(f"Erro na validação final para {dataset_path}: {e}")
                 results["validation_reports"][dataset_path] = {"error": str(e)}
-        
+
         results["datasets_processed"] = len(results["validation_reports"])
-        
+
         # Determinar se pipeline foi bem-sucedido
         success_threshold = 0.7
         results["pipeline_success"] = results["pipeline_quality_score"] >= success_threshold
-        
+
         if results["pipeline_success"]:
             logger.info(f"✅ Pipeline validado com sucesso! Score: {results['pipeline_quality_score']:.2f}")
         else:
             logger.warning(f"⚠️ Pipeline com qualidade baixa. Score: {results['pipeline_quality_score']:.2f}")
-        
+
         return results
-    
+
     def _traditional_topic_interpretation(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Interpretação tradicional de tópicos sem API"""
         return {
@@ -3427,19 +3422,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "success": True,
             "note": "Análise tradicional aplicada"
         }
-    
+
     def _enhance_dataframe_with_topic_interpretation(self, df: pd.DataFrame, interpretation_result: Dict[str, Any]) -> pd.DataFrame:
         """Adiciona colunas de interpretação de tópicos ao DataFrame"""
         enhanced_df = df.copy()
-        
+
         # Adicionar colunas de interpretação se disponíveis
         if "interpretations" in interpretation_result:
             enhanced_df["topic_interpretation"] = "interpretação_disponível"
         else:
             enhanced_df["topic_interpretation"] = "interpretação_tradicional"
-            
+
         return enhanced_df
-    
+
     def _get_expected_final_columns(self) -> List[str]:
         """Retorna colunas esperadas no dataset final"""
         return [
@@ -3454,177 +3449,178 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 def create_unified_pipeline(config: Dict[str, Any] = None, project_root: str = None) -> UnifiedAnthropicPipeline:
     """
     Função de conveniência para criar pipeline unificado
-    
+
     Args:
         config: Configuração do pipeline
         project_root: Diretório raiz do projeto
-        
+
     Returns:
         Instância do pipeline unificado
     """
-    
+
     return UnifiedAnthropicPipeline(config, project_root)
 
 
 # Métodos de extensão para melhorias do implementation guide
 def add_enhanced_methods_to_pipeline():
     """Adiciona métodos aprimorados ao pipeline"""
-    
+
     def _stage_04b_statistical_analysis_pre(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 04b: Análise estatística antes da limpeza"""
-        
+
         logger.info("Iniciando análise estatística pré-limpeza")
         results = {"pre_cleaning_analysis": {}}
-        
+
         if not hasattr(self, 'statistical_analyzer') or self.statistical_analyzer is None:
             logger.warning("StatisticalAnalyzer não disponível, pulando análise")
             return results
-        
+
         for dataset_path in dataset_paths:
             try:
                 # Carregar dados antes da limpeza
                 df = self._load_processed_data(dataset_path)
-                
+
                 if df is not None and not df.empty:
                     # Gerar análise pré-limpeza
                     output_file = dataset_path.replace('.csv', '_04b_pre_cleaning_stats.json')
                     pre_analysis = self.statistical_analyzer.analyze_pre_cleaning_statistics(
                         df, output_file=output_file
                     )
-                    
+
                     results["pre_cleaning_analysis"][dataset_path] = {
                         "analysis": pre_analysis,
                         "output_file": output_file,
                         "success": True
                     }
-                    
+
                     logger.info(f"Análise pré-limpeza salva: {output_file}")
                 else:
                     results["pre_cleaning_analysis"][dataset_path] = {
                         "error": "Dataset vazio ou inválido",
                         "success": False
                     }
-                    
+
             except Exception as e:
                 logger.error(f"Erro na análise pré-limpeza para {dataset_path}: {e}")
                 results["pre_cleaning_analysis"][dataset_path] = {
                     "error": str(e),
                     "success": False
                 }
-        
+
         return results
-    
+
     def _stage_06b_statistical_analysis_post(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 06b: Análise estatística após a limpeza com comparação"""
-        
+
         logger.info("Iniciando análise estatística pós-limpeza")
         results = {"post_cleaning_analysis": {}, "comparison_reports": {}}
-        
+
         if not hasattr(self, 'statistical_analyzer') or self.statistical_analyzer is None:
             logger.warning("StatisticalAnalyzer não disponível, pulando análise")
             return results
-        
+
         for dataset_path in dataset_paths:
             try:
                 # Carregar dados após limpeza
                 df = self._load_processed_data(dataset_path)
-                
+
                 if df is not None and not df.empty:
                     # Gerar análise pós-limpeza
                     output_file = dataset_path.replace('.csv', '_06b_post_cleaning_stats.json')
                     post_analysis = self.statistical_analyzer.analyze_post_cleaning_statistics(
                         df, output_file=output_file
                     )
-                    
+
                     results["post_cleaning_analysis"][dataset_path] = {
                         "analysis": post_analysis,
                         "output_file": output_file,
                         "success": True
                     }
-                    
+
                     # Tentar carregar análise pré-limpeza para comparação
                     pre_analysis_file = dataset_path.replace('.csv', '_04b_pre_cleaning_stats.json')
                     if Path(pre_analysis_file).exists():
                         try:
                             with open(pre_analysis_file, 'r', encoding='utf-8') as f:
                                 pre_analysis = json.load(f)
-                            
+
                             # Gerar comparação
                             comparison_file = dataset_path.replace('.csv', '_06b_cleaning_comparison.json')
                             comparison = self.statistical_analyzer.compare_before_after_cleaning(
                                 pre_analysis, post_analysis, output_file=comparison_file
                             )
-                            
+
                             results["comparison_reports"][dataset_path] = {
                                 "comparison": comparison,
                                 "comparison_file": comparison_file,
                                 "success": True
                             }
-                            
+
                             logger.info(f"Comparação antes/depois salva: {comparison_file}")
-                            
+
                         except Exception as e:
                             logger.warning(f"Erro na comparação para {dataset_path}: {e}")
                             results["comparison_reports"][dataset_path] = {
                                 "error": str(e),
                                 "success": False
                             }
-                    
+
                     logger.info(f"Análise pós-limpeza salva: {output_file}")
                 else:
                     results["post_cleaning_analysis"][dataset_path] = {
                         "error": "Dataset vazio ou inválido",
                         "success": False
                     }
-                    
+
             except Exception as e:
                 logger.error(f"Erro na análise pós-limpeza para {dataset_path}: {e}")
                 results["post_cleaning_analysis"][dataset_path] = {
                     "error": str(e),
                     "success": False
                 }
-        
+
         return results
-    
+
     def _apply_performance_optimization(self, df: pd.DataFrame, target_apis: List[str]) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização de performance com amostragem inteligente"""
-        
+
         if not hasattr(self, 'performance_optimizer') or self.performance_optimizer is None:
             logger.warning("PerformanceOptimizer não disponível, usando dataset completo")
             return df, {"optimization_applied": False}
-        
+
         try:
             logger.info("Aplicando otimização de performance com amostragem inteligente")
-            
+
             # Aplicar otimização
             optimized_df, optimization_report = self.performance_optimizer.optimize_api_usage(
                 df, target_apis=target_apis
             )
-            
+
             logger.info(f"Otimização aplicada: {optimization_report.get('cost_analysis', {}).get('cost_reduction_percentage', 0):.1f}% economia")
-            
+
             return optimized_df, optimization_report
-            
+
         except Exception as e:
             logger.error(f"Erro na otimização de performance: {e}")
             return df, {"optimization_applied": False, "error": str(e)}
-    
+
     # Adicionar métodos à classe
     UnifiedAnthropicPipeline._stage_04b_statistical_analysis_pre = _stage_04b_statistical_analysis_pre
     UnifiedAnthropicPipeline._stage_06b_statistical_analysis_post = _stage_06b_statistical_analysis_post
     UnifiedAnthropicPipeline._apply_performance_optimization = _apply_performance_optimization
 
+
 def add_validation_methods_to_pipeline():
     """Adiciona métodos de validação e path resolution seguros"""
-    
+
     def _resolve_input_path_safe(self, dataset_path: str, preferred_stages: List[str]) -> Optional[str]:
         """
         Resolve input path com estratégia simplificada e segura
-        
+
         Args:
             dataset_path: Path do dataset atual
             preferred_stages: Lista de stages preferidos em ordem de prioridade
-            
+
         Returns:
             Path válido ou None se não encontrado
         """
@@ -3632,7 +3628,7 @@ def add_validation_methods_to_pipeline():
         for stage in preferred_stages:
             if stage in dataset_path and os.path.exists(dataset_path):
                 return dataset_path
-        
+
         # Tenta encontrar arquivos dos stages preferidos
         for stage in preferred_stages:
             try:
@@ -3642,13 +3638,13 @@ def add_validation_methods_to_pipeline():
             except Exception as e:
                 logger.debug(f"Falha ao resolver path para stage {stage}: {e}")
                 continue
-        
+
         # Fallback: usar o path original se existe
         if os.path.exists(dataset_path):
             return dataset_path
-            
+
         return None
-    
+
     def _validate_sentiment_dependencies(self) -> bool:
         """Valida se dependências do sentiment analysis estão disponíveis"""
         try:
@@ -3661,19 +3657,19 @@ def add_validation_methods_to_pipeline():
             )
         except Exception:
             return False
-    
+
     def _validate_voyage_dependencies(self) -> Dict[str, Any]:
         """Valida se dependências do Voyage.ai estão disponíveis e funcionais"""
         try:
             voyage_available = (
-                hasattr(self, 'voyage_topic_modeler') and 
+                hasattr(self, 'voyage_topic_modeler') and
                 self.voyage_topic_modeler is not None and
-                hasattr(self, 'voyage_embeddings') and 
+                hasattr(self, 'voyage_embeddings') and
                 self.voyage_embeddings is not None and
                 getattr(self.voyage_embeddings, 'voyage_available', False) and
                 hasattr(self.voyage_topic_modeler, 'extract_semantic_topics')
             )
-            
+
             return {
                 "available": voyage_available,
                 "has_modeler": hasattr(self, 'voyage_topic_modeler'),
@@ -3685,7 +3681,7 @@ def add_validation_methods_to_pipeline():
                 "available": False,
                 "error": str(e)
             }
-    
+
     def _validate_anthropic_dependencies(self) -> bool:
         """Valida se dependências do Anthropic estão disponíveis"""
         try:
@@ -3698,19 +3694,19 @@ def add_validation_methods_to_pipeline():
             )
         except Exception:
             return False
-    
+
     def _validate_memory_requirements(self, dataset_size: int) -> Dict[str, Any]:
         """Valida se há memória suficiente para processar o dataset"""
         try:
             import psutil
-            
+
             # Estimar uso de memória (aproximadamente 1KB por registro para embeddings)
             estimated_memory_mb = (dataset_size * 1024) / (1024 * 1024)  # Convert to MB
             available_memory_mb = psutil.virtual_memory().available / (1024 * 1024)
-            
+
             # Considerar seguro usar até 50% da memória disponível
             safe_memory_threshold = available_memory_mb * 0.5
-            
+
             return {
                 "sufficient": estimated_memory_mb <= safe_memory_threshold,
                 "estimated_usage_mb": round(estimated_memory_mb, 2),
@@ -3729,61 +3725,61 @@ def add_validation_methods_to_pipeline():
                 "sufficient": True,
                 "message": f"Erro na validação de memória: {e}"
             }
-    
+
     def _enhanced_traditional_sentiment_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise de sentimento tradicional aprimorada"""
         enhanced_df = df.copy()
-        
+
         # Adicionar colunas básicas de sentimento
         enhanced_df['sentiment'] = 'neutral'
         enhanced_df['sentiment_score'] = 0.0
         enhanced_df['confidence'] = 0.5
-        
+
         # Análise básica baseada em palavras-chave
         text_column = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_column in df.columns:
             text_series = enhanced_df[text_column].fillna('').astype(str).str.lower()
-            
+
             # Palavras positivas/negativas básicas
             positive_words = ['bom', 'ótimo', 'excelente', 'sucesso', 'vitória']
             negative_words = ['ruim', 'péssimo', 'terrível', 'fracasso', 'derrota']
-            
+
             for idx, text in text_series.items():
                 pos_count = sum(1 for word in positive_words if word in text)
                 neg_count = sum(1 for word in negative_words if word in text)
-                
+
                 if pos_count > neg_count:
                     enhanced_df.loc[idx, 'sentiment'] = 'positive'
                     enhanced_df.loc[idx, 'sentiment_score'] = 0.3
                 elif neg_count > pos_count:
                     enhanced_df.loc[idx, 'sentiment'] = 'negative'
                     enhanced_df.loc[idx, 'sentiment_score'] = -0.3
-        
+
         return enhanced_df, {
-            "method": "enhanced_traditional", 
+            "method": "enhanced_traditional",
             "sentiments_analyzed": len(enhanced_df),
             "features_added": ["sentiment", "sentiment_score", "confidence"]
         }
-    
+
     def _enhanced_traditional_topic_modeling(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Modelagem de tópicos tradicional aprimorada"""
         enhanced_df = df.copy()
-        
+
         # Adicionar colunas básicas de tópicos
         enhanced_df['topic_id'] = 0
         enhanced_df['topic_name'] = 'Geral'
         enhanced_df['topic_probability'] = 0.5
-        
+
         # Análise básica baseada em palavras-chave
         text_column = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_column in df.columns:
             text_series = enhanced_df[text_column].fillna('').astype(str).str.lower()
-            
+
             # Categorias básicas
             political_keywords = ['bolsonaro', 'lula', 'política', 'governo', 'eleição']
             health_keywords = ['covid', 'vacina', 'saúde', 'pandemia', 'vírus']
             economy_keywords = ['economia', 'dinheiro', 'trabalho', 'emprego', 'salário']
-            
+
             for idx, text in text_series.items():
                 if any(word in text for word in political_keywords):
                     enhanced_df.loc[idx, 'topic_id'] = 1
@@ -3797,51 +3793,51 @@ def add_validation_methods_to_pipeline():
                     enhanced_df.loc[idx, 'topic_id'] = 3
                     enhanced_df.loc[idx, 'topic_name'] = 'Economia'
                     enhanced_df.loc[idx, 'topic_probability'] = 0.6
-        
+
         return enhanced_df, {
-            "method": "enhanced_traditional", 
+            "method": "enhanced_traditional",
             "topics_found": 4,
             "n_topics": 4,
             "features_added": ["topic_id", "topic_name", "topic_probability"]
         }
-    
+
     def _apply_sentiment_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para sentiment analysis"""
         # Limite para sentiment analysis via API (mais leve que topic modeling)
         max_records_sentiment = 1000
-        
+
         if len(df) <= max_records_sentiment:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Estratégia de amostragem inteligente para sentiment
         # Priorizar mensagens com maior engajamento/relevância
         try:
             # Criar score de importância
             importance_score = pd.Series(0.0, index=df.index)
-            
+
             # Priorizar mensagens com hashtags (indicam posicionamento)
             if 'hashtag' in df.columns:
                 has_hashtag = df['hashtag'].fillna('').astype(str).str.len() > 0
                 importance_score[has_hashtag] += 2.0
-            
+
             # Priorizar mensagens com URLs (compartilhamento de conteúdo)
             if 'url' in df.columns:
                 has_url = df['url'].fillna('').astype(str).str.len() > 0
                 importance_score[has_url] += 1.5
-            
+
             # Priorizar mensagens mais longas (maior conteúdo semântico)
             text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
             if text_col in df.columns:
                 text_length = df[text_col].fillna('').astype(str).str.len()
                 importance_score += (text_length / text_length.max()) * 1.0
-            
+
             # Amostragem estratificada: 70% importantes + 30% aleatório
             n_important = int(max_records_sentiment * 0.7)
             n_random = max_records_sentiment - n_important
-            
+
             # Top importantes
             top_important = df.nlargest(n_important, importance_score.values)
-            
+
             # Amostra aleatória do restante
             remaining_df = df.drop(top_important.index)
             if len(remaining_df) > 0:
@@ -3849,7 +3845,7 @@ def add_validation_methods_to_pipeline():
                 optimized_df = pd.concat([top_important, random_sample]).sample(frac=1, random_state=42)
             else:
                 optimized_df = top_important
-            
+
             return optimized_df, {
                 "optimization_applied": True,
                 "method": "stratified_sampling",
@@ -3858,7 +3854,7 @@ def add_validation_methods_to_pipeline():
                 "reduction_percentage": (1 - len(optimized_df)/len(df)) * 100,
                 "strategy": "70% important + 30% random"
             }
-            
+
         except Exception as e:
             logger.warning(f"Falha na otimização de sentiment, usando amostra simples: {e}")
             # Fallback para amostra simples
@@ -3870,52 +3866,52 @@ def add_validation_methods_to_pipeline():
                 "optimized_size": len(sample_df),
                 "reduction_percentage": (1 - len(sample_df)/len(df)) * 100
             }
-    
+
     def _apply_topic_modeling_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para topic modeling (mais agressiva)"""
         # Limite menor para topic modeling (mais custoso)
         max_records_topics = 500
-        
+
         if len(df) <= max_records_topics:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         try:
             # Para topic modeling, usar estratégia mais agressiva
             # Priorizar diversidade de conteúdo
             text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
-            
+
             if text_col in df.columns:
                 # Criar clusters simples baseados em length + hashtags para diversidade
                 df_temp = df.copy()
-                
+
                 # Score baseado em comprimento (conteúdo substantivo)
                 text_length = df_temp[text_col].fillna('').astype(str).str.len()
                 length_score = (text_length / text_length.max()) if text_length.max() > 0 else pd.Series(0, index=df.index)
-                
+
                 # Score baseado em diversidade de hashtags
                 hashtag_diversity = 0
                 if 'hashtag' in df_temp.columns:
                     hashtag_count = df_temp['hashtag'].fillna('').astype(str).str.count('#')
                     hashtag_diversity = (hashtag_count / hashtag_count.max()) if hashtag_count.max() > 0 else pd.Series(0, index=df.index)
-                
+
                 # Score composto
                 diversity_score = length_score * 0.7 + hashtag_diversity * 0.3
-                
+
                 # Amostragem estratificada por quartis de diversidade
                 quartiles = pd.qcut(diversity_score, q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'], duplicates='drop')
-                
+
                 samples_per_quartile = max_records_topics // 4
                 sampled_dfs = []
-                
+
                 for quartile in ['Q4', 'Q3', 'Q2', 'Q1']:  # Priorizar quartis superiores
                     quartile_data = df_temp[quartiles == quartile]
                     if len(quartile_data) > 0:
                         n_sample = min(samples_per_quartile, len(quartile_data))
                         sample = quartile_data.sample(n=n_sample, random_state=42)
                         sampled_dfs.append(sample)
-                
+
                 optimized_df = pd.concat(sampled_dfs) if sampled_dfs else df.sample(n=max_records_topics, random_state=42)
-                
+
                 return optimized_df, {
                     "optimization_applied": True,
                     "method": "diversity_stratified",
@@ -3934,7 +3930,7 @@ def add_validation_methods_to_pipeline():
                     "optimized_size": len(sample_df),
                     "reduction_percentage": (1 - len(sample_df)/len(df)) * 100
                 }
-                
+
         except Exception as e:
             logger.warning(f"Falha na otimização de topic modeling, usando amostra simples: {e}")
             sample_df = df.sample(n=max_records_topics, random_state=42)
@@ -3945,23 +3941,23 @@ def add_validation_methods_to_pipeline():
                 "optimized_size": len(sample_df),
                 "reduction_percentage": (1 - len(sample_df)/len(df)) * 100
             }
-    
-    def _extend_sentiment_results(self, original_df: pd.DataFrame, processed_df: pd.DataFrame, 
+
+    def _extend_sentiment_results(self, original_df: pd.DataFrame, processed_df: pd.DataFrame,
                                  optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de sentiment para dataset completo"""
         extended_df = original_df.copy()
-        
+
         # Colunas de sentiment para extender
-        sentiment_columns = ['sentiment_category', 'sentiment_confidence', 'emotions_detected', 
-                           'has_irony', 'sentiment_target', 'discourse_intensity', 
+        sentiment_columns = ['sentiment_category', 'sentiment_confidence', 'emotions_detected',
+                           'has_irony', 'sentiment_target', 'discourse_intensity',
                            'radicalization_level', 'dominant_tone']
-        
+
         # Mapear resultados processados de volta
         processed_indices = processed_df.index.intersection(extended_df.index)
         for col in sentiment_columns:
             if col in processed_df.columns:
                 extended_df.loc[processed_indices, col] = processed_df.loc[processed_indices, col]
-        
+
         # Preencher registros não processados com valores padrão
         unprocessed_mask = ~extended_df.index.isin(processed_indices)
         if unprocessed_mask.any():
@@ -3973,30 +3969,30 @@ def add_validation_methods_to_pipeline():
             extended_df.loc[unprocessed_mask, 'discourse_intensity'] = 'baixa'
             extended_df.loc[unprocessed_mask, 'radicalization_level'] = 'nenhum'
             extended_df.loc[unprocessed_mask, 'dominant_tone'] = 'neutro'
-        
+
         return extended_df
-    
+
     def _extend_topic_results(self, original_df: pd.DataFrame, processed_df: pd.DataFrame,
                              optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de topic modeling para dataset completo"""
         extended_df = original_df.copy()
-        
+
         # Colunas de tópicos para extender
         topic_columns = ['topic_id', 'topic_name', 'topic_probability']
-        
+
         # Mapear resultados processados de volta
         processed_indices = processed_df.index.intersection(extended_df.index)
         for col in topic_columns:
             if col in processed_df.columns:
                 extended_df.loc[processed_indices, col] = processed_df.loc[processed_indices, col]
-        
+
         # Preencher registros não processados com tópico padrão
         unprocessed_mask = ~extended_df.index.isin(processed_indices)
         if unprocessed_mask.any():
             extended_df.loc[unprocessed_mask, 'topic_id'] = 0
             extended_df.loc[unprocessed_mask, 'topic_name'] = 'Não Classificado'
             extended_df.loc[unprocessed_mask, 'topic_probability'] = 0.1
-        
+
         return extended_df
 
     def _detect_file_encoding_safe(self, file_path: str) -> str:
@@ -4009,12 +4005,12 @@ def add_validation_methods_to_pipeline():
                 return result.get('encoding', 'utf-8')
         except Exception:
             return 'utf-8'
-    
+
     def _load_csv_robust(self, file_path: str, encoding: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Carrega CSV com múltiplos fallbacks"""
         separators = [';', ',', '\t']
         encodings = [encoding, 'utf-8', 'latin-1', 'cp1252']
-        
+
         for enc in encodings:
             for sep in separators:
                 try:
@@ -4023,14 +4019,14 @@ def add_validation_methods_to_pipeline():
                         return df, {"method": "robust", "encoding": enc, "separator": sep}
                 except Exception:
                     continue
-        
+
         # Fallback final
         try:
             df = pd.read_csv(file_path, sep=';', encoding='utf-8', on_bad_lines='skip')
             return df, {"method": "fallback", "encoding": "utf-8", "separator": ";"}
         except Exception:
             return None, {"error": "Failed to load CSV"}
-    
+
     def _validate_chunk_structure(self, df: pd.DataFrame, dataset_path: str) -> Dict[str, Any]:
         """Valida estrutura do chunk carregado"""
         return {
@@ -4041,27 +4037,27 @@ def add_validation_methods_to_pipeline():
             "chunk_processed": True,
             "validation_timestamp": datetime.now().isoformat()
         }
-    
+
     def _optimize_chunk_memory(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Otimiza uso de memória do chunk"""
         original_memory = df.memory_usage(deep=True).sum()
         optimized_df = df.copy()
-        
+
         # Otimizar tipos de dados
         for col in optimized_df.select_dtypes(include=['object']).columns:
             if optimized_df[col].nunique() / len(optimized_df) < 0.5:  # Alta repetição
                 optimized_df[col] = optimized_df[col].astype('category')
-        
+
         final_memory = optimized_df.memory_usage(deep=True).sum()
         reduction = (original_memory - final_memory) / original_memory * 100
-        
+
         return optimized_df, {
             "memory_optimization_applied": True,
             "original_memory_mb": round(original_memory / 1024 / 1024, 2),
             "optimized_memory_mb": round(final_memory / 1024 / 1024, 2),
             "reduction_percentage": round(reduction, 1)
         }
-    
+
     def _validate_encoding_dependencies(self) -> bool:
         """Valida se dependências de encoding estão disponíveis"""
         try:
@@ -4072,44 +4068,44 @@ def add_validation_methods_to_pipeline():
             )
         except Exception:
             return False
-    
+
     def _basic_encoding_validation(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Validação básica de encoding quando componente avançado não está disponível"""
         text_columns = df.select_dtypes(include=['object']).columns
         issues_found = 0
-        
+
         for col in text_columns:
             text_series = df[col].fillna('').astype(str)
             # Procurar por caracteres problemáticos
             problematic = text_series.str.contains('�|\\\\x[0-9a-fA-F]{2}', regex=True, na=False)
             issues_found += problematic.sum()
-        
+
         quality_score = max(0.0, 1.0 - (issues_found / len(df)))
-        
+
         return {
             "overall_quality_score": quality_score,
             "issues_found": issues_found,
             "method": "basic_validation",
             "text_columns_checked": list(text_columns)
         }
-    
+
     def _basic_encoding_correction(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Correção básica de encoding"""
         corrected_df = df.copy()
         corrections_applied = []
-        
+
         text_columns = df.select_dtypes(include=['object']).columns
         for col in text_columns:
             # Remover caracteres problemáticos básicos
             corrected_df[col] = corrected_df[col].astype(str).str.replace('�', '', regex=False)
             corrected_df[col] = corrected_df[col].str.replace(r'\\x[0-9a-fA-F]{2}', '', regex=True)
             corrections_applied.append(f"Cleaned column {col}")
-        
+
         return corrected_df, {
             "corrections_applied": corrections_applied,
             "method": "basic_correction"
         }
-    
+
     def _validate_political_analysis_dependencies(self) -> bool:
         """Valida se dependências de análise política estão disponíveis"""
         try:
@@ -4122,41 +4118,41 @@ def add_validation_methods_to_pipeline():
             )
         except Exception:
             return False
-    
+
     def _apply_political_analysis_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise política"""
         # Limite para análise política (similar ao sentiment mas um pouco mais)
         max_records_political = 1500
-        
+
         if len(df) <= max_records_political:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         try:
             # Estratégia: priorizar mensagens com conteúdo político relevante
             importance_score = pd.Series(0.0, index=df.index)
-            
+
             # Priorizar mensagens com palavras-chave políticas
             text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
             if text_col in df.columns:
                 political_keywords = ['bolsonaro', 'lula', 'política', 'governo', 'eleição', 'democracia', 'brasil']
                 text_series = df[text_col].fillna('').astype(str).str.lower()
-                
+
                 for keyword in political_keywords:
                     has_keyword = text_series.str.contains(keyword, regex=False, na=False)
                     importance_score[has_keyword] += 1.0
-            
+
             # Priorizar mensagens com hashtags políticas
             if 'hashtag' in df.columns:
                 has_hashtag = df['hashtag'].fillna('').astype(str).str.len() > 0
                 importance_score[has_hashtag] += 0.5
-            
+
             # Amostragem estratificada: 80% importantes + 20% aleatório
             n_important = int(max_records_political * 0.8)
             n_random = max_records_political - n_important
-            
+
             # Top importantes
             top_important = df.nlargest(n_important, importance_score.values)
-            
+
             # Amostra aleatória do restante
             remaining_df = df.drop(top_important.index)
             if len(remaining_df) > 0:
@@ -4164,7 +4160,7 @@ def add_validation_methods_to_pipeline():
                 optimized_df = pd.concat([top_important, random_sample]).sample(frac=1, random_state=42)
             else:
                 optimized_df = top_important
-            
+
             return optimized_df, {
                 "optimization_applied": True,
                 "method": "political_importance_sampling",
@@ -4173,7 +4169,7 @@ def add_validation_methods_to_pipeline():
                 "reduction_percentage": (1 - len(optimized_df)/len(df)) * 100,
                 "strategy": "80% political important + 20% random"
             }
-            
+
         except Exception as e:
             logger.warning(f"Falha na otimização política, usando amostra simples: {e}")
             sample_df = df.sample(n=max_records_political, random_state=42)
@@ -4184,22 +4180,22 @@ def add_validation_methods_to_pipeline():
                 "optimized_size": len(sample_df),
                 "reduction_percentage": (1 - len(sample_df)/len(df)) * 100
             }
-    
+
     def _extend_political_results(self, original_df: pd.DataFrame, processed_df: pd.DataFrame,
                                  optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de análise política para dataset completo"""
         extended_df = original_df.copy()
-        
+
         # Colunas políticas para extender
-        political_columns = ['political_alignment', 'discourse_type', 'radicalization_level', 
+        political_columns = ['political_alignment', 'discourse_type', 'radicalization_level',
                            'political_category', 'sentiment_political']
-        
+
         # Mapear resultados processados de volta
         processed_indices = processed_df.index.intersection(extended_df.index)
         for col in political_columns:
             if col in processed_df.columns:
                 extended_df.loc[processed_indices, col] = processed_df.loc[processed_indices, col]
-        
+
         # Preencher registros não processados com valores padrão
         unprocessed_mask = ~extended_df.index.isin(processed_indices)
         if unprocessed_mask.any():
@@ -4208,29 +4204,29 @@ def add_validation_methods_to_pipeline():
             extended_df.loc[unprocessed_mask, 'radicalization_level'] = 'baixo'
             extended_df.loc[unprocessed_mask, 'political_category'] = 'geral'
             extended_df.loc[unprocessed_mask, 'sentiment_political'] = 'neutro'
-        
+
         return extended_df
-    
+
     def _enhanced_traditional_political_analysis(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Análise política tradicional aprimorada"""
         enhanced_df = df.copy()
-        
+
         # Adicionar colunas básicas de análise política
         enhanced_df['political_alignment'] = 'neutro'
         enhanced_df['discourse_type'] = 'informativo'
         enhanced_df['radicalization_level'] = 'baixo'
         enhanced_df['political_category'] = 'geral'
         enhanced_df['sentiment_political'] = 'neutro'
-        
+
         # Análise básica baseada em palavras-chave
         text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_col in df.columns:
             text_series = enhanced_df[text_col].fillna('').astype(str).str.lower()
-            
+
             # Categorização política básica
             bolsonaro_keywords = ['bolsonaro', 'mito', 'capitão', 'presidente']
             lula_keywords = ['lula', 'pt', 'esquerda', 'workers']
-            
+
             for idx, text in text_series.items():
                 if any(word in text for word in bolsonaro_keywords):
                     enhanced_df.loc[idx, 'political_alignment'] = 'direita'
@@ -4238,15 +4234,15 @@ def add_validation_methods_to_pipeline():
                 elif any(word in text for word in lula_keywords):
                     enhanced_df.loc[idx, 'political_alignment'] = 'esquerda'
                     enhanced_df.loc[idx, 'political_category'] = 'petista'
-                
+
                 # Análise de radicalização básica
                 radical_words = ['golpe', 'ditadura', 'comunista', 'fascista']
                 if any(word in text for word in radical_words):
                     enhanced_df.loc[idx, 'radicalization_level'] = 'alto'
                     enhanced_df.loc[idx, 'discourse_type'] = 'agressivo'
-        
+
         return enhanced_df, {
-            "method": "enhanced_traditional_political", 
+            "method": "enhanced_traditional_political",
             "records_analyzed": len(enhanced_df),
             "features_added": ["political_alignment", "discourse_type", "radicalization_level", "political_category", "sentiment_political"]
         }
@@ -4263,15 +4259,15 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._apply_topic_modeling_optimization = _apply_topic_modeling_optimization
     UnifiedAnthropicPipeline._extend_sentiment_results = _extend_sentiment_results
     UnifiedAnthropicPipeline._extend_topic_results = _extend_topic_results
-    
+
     # Métodos de extensão para stages 12-20
     def _extend_hashtag_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de normalização de hashtags"""
         result_df = full_df.copy()
-        
+
         # Mapeamento de hashtags básico para registros não processados
         processed_hashtags = processed_df.get('normalized_hashtags', pd.Series(dtype=str))
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Aplicar normalização básica usando padrões dos processados
@@ -4285,13 +4281,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['normalized_hashtags', 'hashtag_category', 'hashtag_importance']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_domain_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de análise de domínio"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Análise de domínio básica
@@ -4304,13 +4300,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['domain_category', 'domain_credibility', 'domain_type', 'authority_score']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_temporal_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de análise temporal"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Análise temporal básica
@@ -4323,13 +4319,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['temporal_pattern', 'peak_period', 'temporal_category', 'time_influence_score']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_network_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de análise de redes"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Análise de rede básica
@@ -4342,13 +4338,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['network_cluster', 'influence_level', 'coordination_score', 'network_centrality']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_qualitative_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de análise qualitativa"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Análise qualitativa básica
@@ -4361,13 +4357,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['narrative_frame', 'rhetorical_strategy', 'discourse_quality', 'symbolic_universe']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_review_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de revisão inteligente"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Revisão básica
@@ -4380,13 +4376,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['quality_score', 'consistency_flag', 'anomaly_detected', 'review_status']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_topic_interpretation_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de interpretação de tópicos"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Interpretação básica
@@ -4399,13 +4395,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['topic_interpretation', 'conceptual_evolution', 'narrative_emergence', 'semantic_depth']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_semantic_search_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de busca semântica"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Indexação básica
@@ -4418,13 +4414,13 @@ def add_validation_methods_to_pipeline():
                 for col in ['semantic_index', 'search_relevance', 'similarity_cluster', 'semantic_weight']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _extend_validation_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
         """Estende resultados de validação final"""
         result_df = full_df.copy()
-        
+
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Validação básica
@@ -4437,32 +4433,32 @@ def add_validation_methods_to_pipeline():
                 for col in ['validation_status', 'integrity_check', 'final_quality_score', 'reproducibility_flag']:
                     if col in processed_df.columns:
                         result_df.loc[idx, col] = processed_df.loc[idx, col]
-        
+
         return result_df
-    
+
     def _enhanced_traditional_tfidf_extraction(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Extração TF-IDF tradicional aprimorada"""
         enhanced_df = df.copy()
-        
+
         # Adicionar colunas básicas de TF-IDF
         text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_col in df.columns:
             from sklearn.feature_extraction.text import TfidfVectorizer
-            
+
             try:
                 # TF-IDF básico
                 texts = enhanced_df[text_col].fillna('').astype(str)
                 vectorizer = TfidfVectorizer(max_features=100, stop_words=None)
                 tfidf_matrix = vectorizer.fit_transform(texts)
-                
+
                 # Adicionar scores dos top termos
                 feature_names = vectorizer.get_feature_names_out()
                 scores = tfidf_matrix.sum(axis=0).A1
                 top_terms = sorted(zip(feature_names, scores), key=lambda x: x[1], reverse=True)[:10]
-                
+
                 enhanced_df['tfidf_score'] = tfidf_matrix.sum(axis=1).A1
                 enhanced_df['top_terms'] = str([term for term, score in top_terms])
-                
+
                 return enhanced_df, {
                     "method": "enhanced_traditional_tfidf",
                     "terms_extracted": len(feature_names),
@@ -4478,7 +4474,7 @@ def add_validation_methods_to_pipeline():
             enhanced_df['tfidf_score'] = 0.0
             enhanced_df['top_terms'] = '[]'
             return enhanced_df, {"method": "no_text_column", "terms_extracted": 0}
-    
+
     def _get_best_text_column(self, df: pd.DataFrame, prefer_cleaned: bool = True) -> str:
         """Detecta a melhor coluna de texto disponível"""
         if prefer_cleaned and 'body_cleaned' in df.columns:
@@ -4504,7 +4500,7 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._extend_topic_interpretation_results = _extend_topic_interpretation_results
     UnifiedAnthropicPipeline._extend_semantic_search_results = _extend_semantic_search_results
     UnifiedAnthropicPipeline._extend_validation_results = _extend_validation_results
-    
+
     # Métodos de geração de relatórios para stages 12-20
     def _generate_hashtag_analysis_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de análise de hashtags"""
@@ -4515,7 +4511,7 @@ def add_validation_methods_to_pipeline():
             "high_importance_hashtags": (df.get('hashtag_importance', pd.Series(dtype=float)) > 0.7).sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_domain_analysis_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de análise de domínio"""
         return {
@@ -4525,7 +4521,7 @@ def add_validation_methods_to_pipeline():
             "high_authority_domains": (df.get('authority_score', pd.Series(dtype=float)) > 0.7).sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_temporal_analysis_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de análise temporal"""
         return {
@@ -4535,7 +4531,7 @@ def add_validation_methods_to_pipeline():
             "predictions": ["trend_analysis_available"],
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_network_analysis_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de análise de redes"""
         return {
@@ -4545,7 +4541,7 @@ def add_validation_methods_to_pipeline():
             "high_influence_nodes": (df.get('influence_level', pd.Series()) == 'high').sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_qualitative_analysis_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de análise qualitativa"""
         return {
@@ -4555,20 +4551,20 @@ def add_validation_methods_to_pipeline():
             "high_quality_discourse": (df.get('discourse_quality', pd.Series()) == 'high').sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_pipeline_review_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de revisão do pipeline"""
         return {
             "consistency_score": df.get('quality_score', pd.Series(dtype=float)).mean(),
             "quality_metrics": {
                 "avg_quality": df.get('quality_score', pd.Series(dtype=float)).mean(),
-                "consistency_rate": (df.get('consistency_flag', pd.Series(dtype=bool)) == True).sum() / len(df) if len(df) > 0 else 0
+                "consistency_rate": df.get('consistency_flag', pd.Series(dtype=bool)).sum() / len(df) if len(df) > 0 else 0
             },
-            "anomalies_count": (df.get('anomaly_detected', pd.Series(dtype=bool)) == True).sum(),
+            "anomalies_count": df.get('anomaly_detected', pd.Series(dtype=bool)).sum(),
             "review_completion_rate": (df.get('review_status', pd.Series()) != 'not_reviewed').sum() / len(df) if len(df) > 0 else 0,
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_topic_interpretation_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de interpretação de tópicos"""
         return {
@@ -4578,7 +4574,7 @@ def add_validation_methods_to_pipeline():
             "deep_analysis_count": (df.get('semantic_depth', pd.Series()) == 'deep').sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_semantic_search_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de busca semântica"""
         return {
@@ -4588,18 +4584,18 @@ def add_validation_methods_to_pipeline():
             "high_weight_items": (df.get('semantic_weight', pd.Series(dtype=float)) > 0.7).sum(),
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     def _generate_final_validation_report(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Gera relatório de validação final"""
         return {
             "integrity_score": df.get('final_quality_score', pd.Series(dtype=float)).mean(),
-            "consistency_passed": (df.get('integrity_check', pd.Series(dtype=bool)) == True).all(),
+            "consistency_passed": df.get('integrity_check', pd.Series(dtype=bool)).all(),
             "quality_certified": df.get('final_quality_score', pd.Series(dtype=float)).mean() > 0.8,
-            "reproducibility_score": (df.get('reproducibility_flag', pd.Series(dtype=bool)) == True).sum() / len(df) if len(df) > 0 else 0,
+            "reproducibility_score": df.get('reproducibility_flag', pd.Series(dtype=bool)).sum() / len(df) if len(df) > 0 else 0,
             "validation_completion": (df.get('validation_status', pd.Series()) != 'not_validated').sum() / len(df) if len(df) > 0 else 0,
             "analysis_timestamp": pd.Timestamp.now().isoformat()
         }
-    
+
     # Adicionar métodos de relatório à classe
     UnifiedAnthropicPipeline._generate_hashtag_analysis_report = _generate_hashtag_analysis_report
     UnifiedAnthropicPipeline._generate_domain_analysis_report = _generate_domain_analysis_report
@@ -4610,21 +4606,21 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._generate_topic_interpretation_report = _generate_topic_interpretation_report
     UnifiedAnthropicPipeline._generate_semantic_search_report = _generate_semantic_search_report
     UnifiedAnthropicPipeline._generate_final_validation_report = _generate_final_validation_report
-    
+
     # Métodos de otimização específicos para stages 12-20
     def _apply_hashtag_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise de hashtags"""
         max_records = 1800
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Priorizar registros com hashtags
         priority_df = df[df.get('hashtag', pd.Series()).notna() & (df.get('hashtag', pd.Series()) != '')]
-        
+
         if len(priority_df) >= max_records:
             return priority_df.sample(n=max_records, random_state=42), {
-                "optimization_applied": True, "method": "hashtag_priority", 
+                "optimization_applied": True, "method": "hashtag_priority",
                 "original_size": len(df), "optimized_size": max_records
             }
         else:
@@ -4633,19 +4629,19 @@ def add_validation_methods_to_pipeline():
             additional_needed = max_records - len(priority_df)
             additional_df = remaining_df.sample(n=min(additional_needed, len(remaining_df)), random_state=42)
             result_df = pd.concat([priority_df, additional_df]).sample(frac=1, random_state=42)
-            
+
             return result_df, {
                 "optimization_applied": True, "method": "hashtag_mixed",
                 "original_size": len(df), "optimized_size": len(result_df)
             }
-    
+
     def _apply_domain_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise de domínio"""
         max_records = 1600
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Priorizar registros com URLs/links
         text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_col in df.columns:
@@ -4653,7 +4649,7 @@ def add_validation_methods_to_pipeline():
             priority_df = df[has_url]
         else:
             priority_df = pd.DataFrame()
-        
+
         if len(priority_df) >= max_records:
             return priority_df.sample(n=max_records, random_state=42), {
                 "optimization_applied": True, "method": "domain_priority",
@@ -4664,19 +4660,19 @@ def add_validation_methods_to_pipeline():
             remaining_df = df.drop(priority_df.index) if len(priority_df) > 0 else df
             additional_df = remaining_df.sample(n=min(remaining_needed, len(remaining_df)), random_state=42)
             result_df = pd.concat([priority_df, additional_df]).sample(frac=1, random_state=42)
-            
+
             return result_df, {
                 "optimization_applied": True, "method": "domain_mixed",
                 "original_size": len(df), "optimized_size": len(result_df)
             }
-    
+
     def _apply_temporal_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise temporal"""
         max_records = 1200
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Amostragem temporal distribuída
         if 'date' in df.columns or 'timestamp' in df.columns:
             date_col = 'date' if 'date' in df.columns else 'timestamp'
@@ -4686,37 +4682,37 @@ def add_validation_methods_to_pipeline():
                 import numpy as np
                 indices = np.linspace(0, len(df_sorted)-1, max_records, dtype=int)
                 result_df = df_sorted.iloc[indices]
-                
+
                 return result_df, {
                     "optimization_applied": True, "method": "temporal_distributed",
                     "original_size": len(df), "optimized_size": len(result_df)
                 }
             except:
                 pass
-        
+
         # Fallback para amostragem aleatória
         return df.sample(n=max_records, random_state=42), {
             "optimization_applied": True, "method": "temporal_random",
             "original_size": len(df), "optimized_size": max_records
         }
-    
+
     def _apply_network_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise de redes"""
         max_records = 1500
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Priorizar registros com informações de canal/usuário
         priority_cols = ['channel', 'user', 'author', 'sender']
         priority_df = pd.DataFrame()
-        
+
         for col in priority_cols:
             if col in df.columns:
                 has_info = df[col].notna() & (df[col] != '')
                 priority_df = df[has_info]
                 break
-        
+
         if len(priority_df) >= max_records:
             return priority_df.sample(n=max_records, random_state=42), {
                 "optimization_applied": True, "method": "network_priority",
@@ -4727,19 +4723,19 @@ def add_validation_methods_to_pipeline():
             remaining_df = df.drop(priority_df.index) if len(priority_df) > 0 else df
             additional_df = remaining_df.sample(n=min(remaining_needed, len(remaining_df)), random_state=42)
             result_df = pd.concat([priority_df, additional_df]).sample(frac=1, random_state=42)
-            
+
             return result_df, {
                 "optimization_applied": True, "method": "network_mixed",
                 "original_size": len(df), "optimized_size": len(result_df)
             }
-    
+
     def _apply_qualitative_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise qualitativa"""
         max_records = 800
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Priorizar mensagens mais longas e ricas em conteúdo
         text_col = 'body_cleaned' if 'body_cleaned' in df.columns else 'body'
         if text_col in df.columns:
@@ -4748,48 +4744,48 @@ def add_validation_methods_to_pipeline():
             df_with_length = df.copy()
             df_with_length['text_length'] = text_lengths
             priority_df = df_with_length.nlargest(max_records, 'text_length').drop('text_length', axis=1)
-            
+
             return priority_df, {
                 "optimization_applied": True, "method": "qualitative_text_length",
                 "original_size": len(df), "optimized_size": len(priority_df)
             }
-        
+
         # Fallback para amostragem aleatória
         return df.sample(n=max_records, random_state=42), {
             "optimization_applied": True, "method": "qualitative_random",
             "original_size": len(df), "optimized_size": max_records
         }
-    
+
     def _apply_review_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para revisão do pipeline"""
         max_records = 1000
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Amostragem representativa para revisão
         return df.sample(n=max_records, random_state=42), {
             "optimization_applied": True, "method": "review_representative",
             "original_size": len(df), "optimized_size": max_records
         }
-    
+
     def _apply_topic_interpretation_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para interpretação de tópicos"""
         max_records = 1000
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Priorizar registros com tópicos já identificados
         topic_cols = ['topic_id', 'topic_name', 'cluster', 'category']
         priority_df = pd.DataFrame()
-        
+
         for col in topic_cols:
             if col in df.columns:
                 has_topic = df[col].notna() & (df[col] != '')
                 priority_df = df[has_topic]
                 break
-        
+
         if len(priority_df) >= max_records:
             return priority_df.sample(n=max_records, random_state=42), {
                 "optimization_applied": True, "method": "topic_priority",
@@ -4800,38 +4796,38 @@ def add_validation_methods_to_pipeline():
             remaining_df = df.drop(priority_df.index) if len(priority_df) > 0 else df
             additional_df = remaining_df.sample(n=min(remaining_needed, len(remaining_df)), random_state=42)
             result_df = pd.concat([priority_df, additional_df]).sample(frac=1, random_state=42)
-            
+
             return result_df, {
                 "optimization_applied": True, "method": "topic_mixed",
                 "original_size": len(df), "optimized_size": len(result_df)
             }
-    
+
     def _apply_semantic_search_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para busca semântica"""
         max_records = 2000  # Maior para busca semântica
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Amostragem diversificada para índice semântico
         return df.sample(n=max_records, random_state=42), {
             "optimization_applied": True, "method": "semantic_diversified",
             "original_size": len(df), "optimized_size": max_records
         }
-    
+
     def _apply_validation_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para validação final"""
         max_records = 1500
-        
+
         if len(df) <= max_records:
             return df, {"optimization_applied": False, "reason": "dataset_small_enough"}
-        
+
         # Amostragem representativa para validação
         return df.sample(n=max_records, random_state=42), {
             "optimization_applied": True, "method": "validation_representative",
             "original_size": len(df), "optimized_size": max_records
         }
-    
+
     # Adicionar métodos de otimização à classe
     UnifiedAnthropicPipeline._apply_hashtag_optimization = _apply_hashtag_optimization
     UnifiedAnthropicPipeline._apply_domain_optimization = _apply_domain_optimization
@@ -4842,7 +4838,7 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._apply_topic_interpretation_optimization = _apply_topic_interpretation_optimization
     UnifiedAnthropicPipeline._apply_semantic_search_optimization = _apply_semantic_search_optimization
     UnifiedAnthropicPipeline._apply_validation_optimization = _apply_validation_optimization
-    
+
     # Métodos para stages 01-07
     UnifiedAnthropicPipeline._detect_file_encoding_safe = _detect_file_encoding_safe
     UnifiedAnthropicPipeline._load_csv_robust = _load_csv_robust
@@ -4855,7 +4851,7 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._apply_political_analysis_optimization = _apply_political_analysis_optimization
     UnifiedAnthropicPipeline._extend_political_results = _extend_political_results
     UnifiedAnthropicPipeline._enhanced_traditional_political_analysis = _enhanced_traditional_political_analysis
-    
+
     # Métodos para stages 10-11
     UnifiedAnthropicPipeline._enhanced_traditional_tfidf_extraction = _enhanced_traditional_tfidf_extraction
     UnifiedAnthropicPipeline._get_best_text_column = _get_best_text_column

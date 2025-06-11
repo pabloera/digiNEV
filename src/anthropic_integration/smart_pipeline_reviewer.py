@@ -5,14 +5,16 @@ Módulo avançado para revisão e validação de reprodutibilidade do pipeline.
 Gera relatórios inteligentes e avalia qualidade da análise.
 """
 
-import logging
-import pandas as pd
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
 import json
+import logging
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+
 from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 class SmartPipelineReviewer(AnthropicBase):
     """
     Revisor inteligente de pipeline usando API Anthropic
-    
+
     Funcionalidades:
     - Avaliação automática da qualidade do pipeline
     - Validação de reprodutibilidade
@@ -29,62 +31,62 @@ class SmartPipelineReviewer(AnthropicBase):
     - Identificação de vieses e limitações
     - Recomendações para melhorias
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.logger = logging.getLogger(self.__class__.__name__)
-        
+
         # Configurações específicas
         review_config = config.get('pipeline_review', {})
         self.quality_threshold = review_config.get('quality_threshold', 0.8)
         self.report_detail_level = review_config.get('detail_level', 'comprehensive')
-        
+
     def review_pipeline_comprehensive(self, pipeline_results: Dict[str, Any],
                                     config: Dict[str, Any],
                                     base_dir: str) -> Dict[str, Any]:
         """
         Revisão abrangente do pipeline com análise AI
-        
+
         Args:
             pipeline_results: Resultados de todas as etapas
             config: Configuração do pipeline
             base_dir: Diretório base do projeto
-            
+
         Returns:
             Relatório abrangente de revisão
         """
         self.logger.info("Iniciando revisão inteligente do pipeline")
-        
+
         # Coleta de dados de todas as etapas
         pipeline_data = self._collect_pipeline_data(pipeline_results, base_dir)
-        
+
         # Avaliação de qualidade por etapa
         stage_quality_assessment = self._assess_stage_quality(pipeline_data)
-        
+
         # Avaliação de reprodutibilidade
         reproducibility_assessment = self._assess_reproducibility(pipeline_data, config)
-        
+
         # Análise de vieses e limitações
         bias_analysis = self._analyze_biases_and_limitations(pipeline_data)
-        
+
         # Avaliação de custos (API e computacional)
         cost_analysis = self._analyze_costs(pipeline_data)
-        
+
         # Validação científica
         scientific_validation = self._validate_scientific_rigor(pipeline_data, config)
-        
+
         # Recomendações inteligentes
         intelligent_recommendations = self._generate_intelligent_recommendations(
             stage_quality_assessment, reproducibility_assessment, bias_analysis,
             cost_analysis, scientific_validation
         )
-        
+
         # Relatório executivo
         executive_summary = self._generate_executive_summary(
-            stage_quality_assessment, reproducibility_assessment, 
+            stage_quality_assessment, reproducibility_assessment,
             intelligent_recommendations, pipeline_data
         )
-        
+
         return {
             'pipeline_data': pipeline_data,
             'stage_quality_assessment': stage_quality_assessment,
@@ -96,23 +98,23 @@ class SmartPipelineReviewer(AnthropicBase):
             'executive_summary': executive_summary,
             'review_metadata': self._generate_review_metadata()
         }
-    
+
     def _collect_pipeline_data(self, pipeline_results: Dict[str, Any], base_dir: str) -> Dict[str, Any]:
         """
         Coleta dados de todas as etapas do pipeline
-        
+
         Args:
             pipeline_results: Resultados das etapas
             base_dir: Diretório base
-            
+
         Returns:
             Dados consolidados do pipeline
         """
         self.logger.info("Coletando dados das etapas do pipeline")
-        
+
         # Coletar informações das etapas executadas
         stages_executed = pipeline_results.get('stages_executed', [])
-        
+
         pipeline_data = {
             'total_stages_executed': len(stages_executed),
             'successful_stages': sum(1 for s in stages_executed if s.get('status') == 'completed'),
@@ -120,11 +122,11 @@ class SmartPipelineReviewer(AnthropicBase):
             'total_duration': sum(s.get('duration', 0) for s in stages_executed),
             'stages_summary': {}
         }
-        
+
         # Processar cada etapa
         for stage_data in stages_executed:
             stage_name = stage_data.get('stage', 'unknown')
-            
+
             pipeline_data['stages_summary'][stage_name] = {
                 'status': stage_data.get('status', 'unknown'),
                 'duration': stage_data.get('duration', 0),
@@ -132,32 +134,32 @@ class SmartPipelineReviewer(AnthropicBase):
                 'output_path': stage_data.get('output_path'),
                 'errors': stage_data.get('errors', [])
             }
-        
+
         # Informações do ambiente
         pipeline_data['environment'] = {
             'anthropic_integration_enabled': pipeline_results.get('anthropic_integration', {}).get('enabled', False),
             'config_summary': self._summarize_config(pipeline_results.get('config', {}))
         }
-        
+
         return pipeline_data
-    
+
     def _assess_stage_quality(self, pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Avalia qualidade de cada etapa usando AI
-        
+
         Args:
             pipeline_data: Dados consolidados do pipeline
-            
+
         Returns:
             Avaliação de qualidade por etapa
         """
         self.logger.info("Avaliando qualidade das etapas")
-        
+
         stages = pipeline_data.get('stages_summary', {})
-        
+
         if not stages:
             return {'assessment': 'no_stages_to_assess'}
-        
+
         # Preparar dados para análise AI
         stage_summaries = []
         for stage_name, stage_info in stages.items():
@@ -168,7 +170,7 @@ class SmartPipelineReviewer(AnthropicBase):
                 'has_errors': len(stage_info.get('errors', [])) > 0,
                 'has_metrics': bool(stage_info.get('metrics'))
             })
-        
+
         prompt = f"""
 Avalie a qualidade da execução de cada etapa do pipeline de análise do Telegram brasileiro:
 
@@ -208,22 +210,22 @@ Responda em JSON:
     "quality_bottlenecks": ["etapa_problemática_1"]
 }}
 """
-        
+
         try:
             response = self.create_message(
                 prompt=prompt,
                 stage='13_quality_assessment',
                 operation='assess_stage_quality'
             )
-            
+
             assessment = self.parse_claude_response_safe(response, ["stage_assessments", "overall_pipeline_quality", "critical_issues", "quality_bottlenecks"])
-            
+
             return {
                 'ai_assessment': assessment,
                 'stages_analyzed': len(stage_summaries),
                 'assessment_timestamp': datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"Erro na avaliação de qualidade: {e}")
             return {
@@ -231,20 +233,20 @@ Responda em JSON:
                 'fallback_assessment': 'basic_completion_check',
                 'stages_analyzed': len(stage_summaries)
             }
-    
+
     def _assess_reproducibility(self, pipeline_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Avalia reprodutibilidade do pipeline
-        
+
         Args:
             pipeline_data: Dados do pipeline
             config: Configuração utilizada
-            
+
         Returns:
             Avaliação de reprodutibilidade
         """
         self.logger.info("Avaliando reprodutibilidade")
-        
+
         reproducibility_factors = {
             'configuration_documented': bool(config),
             'random_seeds_set': 'random_state' in str(config),
@@ -252,12 +254,12 @@ Responda em JSON:
             'data_lineage_clear': pipeline_data.get('total_stages_executed', 0) > 10,
             'api_dependencies_documented': pipeline_data.get('environment', {}).get('anthropic_integration_enabled', False)
         }
-        
+
         # Calcular score de reprodutibilidade
         total_factors = len(reproducibility_factors)
         positive_factors = sum(reproducibility_factors.values())
         reproducibility_score = positive_factors / total_factors
-        
+
         prompt = f"""
 Avalie a reprodutibilidade deste pipeline de análise científica:
 
@@ -299,19 +301,19 @@ Responda em JSON:
     ]
 }}
 """
-        
+
         try:
             response = self.create_message(
                 prompt=prompt,
                 stage='13_reproducibility_assessment',
                 operation='assess_reproducibility'
             )
-            
+
             assessment = self.parse_claude_response_safe(response, ["reproducibility_assessment", "scientific_rigor", "recommendations"])
             assessment['calculated_score'] = reproducibility_score
-            
+
             return assessment
-            
+
         except Exception as e:
             self.logger.error(f"Erro na avaliação de reprodutibilidade: {e}")
             return {
@@ -319,19 +321,19 @@ Responda em JSON:
                 'calculated_score': reproducibility_score,
                 'factors_assessed': reproducibility_factors
             }
-    
+
     def _analyze_biases_and_limitations(self, pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analisa vieses e limitações do pipeline
-        
+
         Args:
             pipeline_data: Dados do pipeline
-            
+
         Returns:
             Análise de vieses e limitações
         """
         self.logger.info("Analisando vieses e limitações")
-        
+
         # Informações para análise de viés
         analysis_context = {
             'ai_integration_used': pipeline_data.get('environment', {}).get('anthropic_integration_enabled', False),
@@ -339,7 +341,7 @@ Responda em JSON:
             'success_rate': pipeline_data.get('successful_stages', 0) / max(pipeline_data.get('total_stages_executed', 1), 1),
             'processing_duration': pipeline_data.get('total_duration', 0)
         }
-        
+
         prompt = f"""
 Identifique vieses, limitações e riscos metodológicos neste pipeline de análise de discurso político:
 
@@ -396,18 +398,18 @@ Responda em JSON:
     ]
 }}
 """
-        
+
         try:
             response = self.create_message(
                 prompt=prompt,
                 stage='13_bias_analysis',
                 operation='analyze_biases'
             )
-            
+
             analysis = self.parse_claude_response_safe(response, ["bias_analysis", "risk_assessment", "transparency_recommendations"])
-            
+
             return analysis
-            
+
         except Exception as e:
             self.logger.error(f"Erro na análise de vieses: {e}")
             return {
@@ -418,30 +420,30 @@ Responda em JSON:
                     'Temporal analysis limited to 2019-2023 period'
                 ]
             }
-    
+
     def _analyze_costs(self, pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analisa custos do pipeline (API e computacional)
-        
+
         Args:
             pipeline_data: Dados do pipeline
-            
+
         Returns:
             Análise de custos
         """
         self.logger.info("Analisando custos do pipeline")
-        
+
         # Cálculos básicos de custo
         total_duration = pipeline_data.get('total_duration', 0)
         ai_enabled = pipeline_data.get('environment', {}).get('anthropic_integration_enabled', False)
-        
+
         cost_analysis = {
             'computational_time': total_duration,
             'ai_integration_used': ai_enabled,
             'estimated_api_calls': pipeline_data.get('total_stages_executed', 0) * 10 if ai_enabled else 0,  # Estimativa
             'efficiency_score': self._calculate_efficiency_score(pipeline_data)
         }
-        
+
         return {
             'cost_breakdown': cost_analysis,
             'efficiency_recommendations': [
@@ -451,15 +453,15 @@ Responda em JSON:
             ],
             'cost_optimization_potential': 'medium'
         }
-    
+
     def _validate_scientific_rigor(self, pipeline_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Valida rigor científico da análise
-        
+
         Args:
             pipeline_data: Dados do pipeline
             config: Configuração
-            
+
         Returns:
             Validação de rigor científico
         """
@@ -471,9 +473,9 @@ Responda em JSON:
             'reproducible_process': bool(config),
             'comprehensive_analysis': pipeline_data.get('successful_stages', 0) >= 8
         }
-        
+
         rigor_score = sum(rigor_indicators.values()) / len(rigor_indicators)
-        
+
         return {
             'scientific_rigor_score': rigor_score,
             'rigor_indicators': rigor_indicators,
@@ -488,20 +490,20 @@ Responda em JSON:
                 'Expand validation datasets'
             ]
         }
-    
+
     def _generate_intelligent_recommendations(self, stage_quality: Dict, reproducibility: Dict,
                                             bias_analysis: Dict, cost_analysis: Dict,
                                             scientific_validation: Dict) -> Dict[str, Any]:
         """
         Gera recomendações inteligentes baseadas em todas as análises
-        
+
         Args:
             stage_quality: Avaliação de qualidade
             reproducibility: Avaliação de reprodutibilidade
             bias_analysis: Análise de vieses
             cost_analysis: Análise de custos
             scientific_validation: Validação científica
-            
+
         Returns:
             Recomendações inteligentes
         """
@@ -509,7 +511,7 @@ Responda em JSON:
         quality_score = stage_quality.get('ai_assessment', {}).get('overall_pipeline_quality', 0.8)
         reproducibility_score = reproducibility.get('calculated_score', 0.8)
         rigor_score = scientific_validation.get('scientific_rigor_score', 0.8)
-        
+
         prompt = f"""
 Gere recomendações inteligentes para melhorar este pipeline de análise científica:
 
@@ -554,18 +556,18 @@ Responda em JSON:
     }}
 }}
 """
-        
+
         try:
             response = self.create_message(
                 prompt=prompt,
                 stage='13_intelligent_recommendations',
                 operation='generate_recommendations'
             )
-            
+
             recommendations = self.parse_claude_response_safe(response, ["priority_recommendations", "quick_wins", "long_term_improvements", "resource_requirements"])
-            
+
             return recommendations
-            
+
         except Exception as e:
             self.logger.error(f"Erro na geração de recomendações: {e}")
             return {
@@ -577,25 +579,25 @@ Responda em JSON:
                     'Optimize chunk processing for better performance'
                 ]
             }
-    
+
     def _generate_executive_summary(self, stage_quality: Dict, reproducibility: Dict,
                                   recommendations: Dict, pipeline_data: Dict) -> Dict[str, Any]:
         """
         Gera resumo executivo da revisão
-        
+
         Args:
             stage_quality: Avaliação de qualidade
             reproducibility: Avaliação de reprodutibilidade
             recommendations: Recomendações
             pipeline_data: Dados do pipeline
-            
+
         Returns:
             Resumo executivo
         """
         quality_score = stage_quality.get('ai_assessment', {}).get('overall_pipeline_quality', 0.8)
         reproducibility_score = reproducibility.get('calculated_score', 0.8)
         success_rate = pipeline_data.get('successful_stages', 0) / max(pipeline_data.get('total_stages_executed', 1), 1)
-        
+
         return {
             'overall_assessment': {
                 'pipeline_status': 'excellent' if quality_score > 0.9 else 'good' if quality_score > 0.7 else 'needs_improvement',
@@ -613,7 +615,7 @@ Responda em JSON:
             'next_steps': recommendations.get('long_term_improvements', [])[:3],
             'confidence_level': 'high' if quality_score > 0.8 else 'medium'
         }
-    
+
     def _generate_review_metadata(self) -> Dict[str, Any]:
         """
         Gera metadados da revisão
@@ -625,7 +627,7 @@ Responda em JSON:
             'review_scope': 'comprehensive',
             'methodology': 'multi_dimensional_assessment_with_ai'
         }
-    
+
     def _summarize_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Sumariza configuração para análise
@@ -635,23 +637,23 @@ Responda em JSON:
             'total_config_keys': len(config),
             'key_configurations': list(config.keys())[:10]  # Primeiras 10 chaves
         }
-    
+
     def _calculate_efficiency_score(self, pipeline_data: Dict[str, Any]) -> float:
         """
         Calcula score de eficiência do pipeline
         """
         total_duration = pipeline_data.get('total_duration', 0)
         successful_stages = pipeline_data.get('successful_stages', 0)
-        
+
         if total_duration == 0 or successful_stages == 0:
             return 0.0
-        
+
         # Score baseado em tempo por stage bem-sucedido
         avg_time_per_stage = total_duration / successful_stages
-        
+
         # Normalizar (assumindo que < 60s por stage é eficiente)
         efficiency = max(0, min(1, (120 - avg_time_per_stage) / 120))
-        
+
         return efficiency
 
 

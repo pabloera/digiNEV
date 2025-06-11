@@ -6,17 +6,18 @@ Advanced topic modeling using Voyage.ai embeddings combined with traditional LDA
 and Anthropic AI interpretation for Brazilian political content.
 """
 
-import logging
-import pandas as pd
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
 import json
+import logging
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy.spatial.distance import pdist, squareform
+from sklearn.metrics.pairwise import cosine_similarity
 
 from .base import AnthropicBase
 
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 class VoyageTopicModeler(AnthropicBase):
     """
     Advanced topic modeling combining Voyage.ai embeddings with AI interpretation
-    
+
     Features:
     - Semantic clustering using dense embeddings
     - Traditional LDA fallback
@@ -49,25 +50,25 @@ class VoyageTopicModeler(AnthropicBase):
     - Brazilian political context awareness
     - Cost optimization for large datasets
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.logger = logging.getLogger(self.__class__.__name__)
-        
+
         # Configuration
         topic_config = config.get('topic_modeling', {})
         self.n_topics = topic_config.get('n_topics', 10)
         self.min_topic_size = topic_config.get('min_topic_size', 10)
         self.coherence_threshold = topic_config.get('coherence_threshold', 0.4)
-        
+
         # Initialize Voyage embeddings if enabled
         self.voyage_analyzer = None
         self.use_voyage_embeddings = False
-        
+
         # Check if Voyage is enabled for topic modeling
         embeddings_config = config.get('embeddings', {})
         integration_config = embeddings_config.get('integration', {})
-        
+
         if VOYAGE_AVAILABLE and integration_config.get('topic_modeling', False):
             try:
                 self.voyage_analyzer = VoyageEmbeddingAnalyzer(config)
@@ -78,11 +79,11 @@ class VoyageTopicModeler(AnthropicBase):
                 self.use_voyage_embeddings = False
         else:
             self.logger.info("❌ Voyage embeddings desabilitado para topic modeling")
-        
+
         # Brazilian political categories for enhanced interpretation
         self.political_categories = [
             'autoritarismo_golpismo',
-            'negacionismo_cientifico', 
+            'negacionismo_cientifico',
             'negacionismo_pandemico',
             'conspiracionismo_global',
             'nacionalismo_conservador',
@@ -94,64 +95,64 @@ class VoyageTopicModeler(AnthropicBase):
             'polarizacao_eleitoral',
             'desinformacao_fake_news'
         ]
-    
+
     def extract_semantic_topics(self, df: pd.DataFrame, text_column: str = 'body_cleaned',
                               n_topics: Optional[int] = None) -> Dict[str, Any]:
         """
         Extract topics using advanced semantic analysis
-        
+
         Args:
             df: DataFrame with text data
             text_column: Column containing text for analysis
             n_topics: Number of topics to extract (default: self.n_topics)
-            
+
         Returns:
             Complete topic analysis results
         """
         if n_topics is None:
             n_topics = self.n_topics
-            
+
         self.logger.info(f"🎯 Iniciando topic modeling para {len(df)} mensagens")
         self.logger.info(f"📊 Método: {'Voyage embeddings + AI' if self.use_voyage_embeddings else 'Traditional LDA + AI'}")
-        
+
         # Filter valid texts
         valid_texts = df[text_column].fillna('').astype(str)
         valid_mask = valid_texts.str.strip() != ''
         filtered_df = df[valid_mask].copy()
         texts = valid_texts[valid_mask].tolist()
-        
+
         if len(texts) < self.min_topic_size:
             self.logger.warning(f"⚠️ Textos insuficientes ({len(texts)}) para topic modeling")
             return self._create_empty_topic_result()
-        
+
         # Adjust n_topics based on data size
         adjusted_n_topics = min(n_topics, len(texts) // self.min_topic_size)
-        
+
         if self.use_voyage_embeddings:
             # Enhanced semantic topic modeling with Voyage.ai
             topic_result = self._extract_topics_with_voyage(texts, adjusted_n_topics)
         else:
             # Traditional LDA + AI interpretation
             topic_result = self._extract_topics_traditional(texts, adjusted_n_topics)
-        
+
         # Add assignments to DataFrame
         if topic_result['success'] and 'topic_assignments' in topic_result:
             filtered_df['topic_id'] = topic_result['topic_assignments']
             filtered_df['topic_name'] = [
-                topic_result['topics'][tid]['name'] if tid < len(topic_result['topics']) 
-                else 'Não classificado' 
+                topic_result['topics'][tid]['name'] if tid < len(topic_result['topics'])
+                else 'Não classificado'
                 for tid in topic_result['topic_assignments']
             ]
             topic_result['enhanced_dataframe'] = filtered_df
-        
+
         return topic_result
-    
+
     def _extract_topics_with_voyage(self, texts: List[str], n_topics: int) -> Dict[str, Any]:
         """
         Extract topics using Voyage embeddings + AI interpretation
         """
         self.logger.info(f"🚀 Usando Voyage embeddings para {n_topics} tópicos")
-        
+
         try:
             # Apply cost optimization if enabled
             if hasattr(self.voyage_analyzer, 'enable_sampling') and self.voyage_analyzer.enable_sampling:
@@ -162,49 +163,49 @@ class VoyageTopicModeler(AnthropicBase):
                 self.logger.info(f"📊 Amostragem aplicada: {len(sampled_texts)} de {len(texts)} textos")
             else:
                 sampled_texts = texts
-            
+
             # Generate embeddings
             embedding_result = self.voyage_analyzer.generate_embeddings(
                 sampled_texts,
                 input_type="document"
             )
-            
+
             if not embedding_result['embeddings']:
                 raise ValueError("Nenhum embedding gerado")
-            
+
             embeddings_matrix = np.array(embedding_result['embeddings'])
-            
+
             # Semantic clustering
             kmeans = KMeans(n_clusters=n_topics, random_state=42, n_init=10)
             cluster_labels = kmeans.fit_predict(embeddings_matrix)
-            
+
             # Analyze topics
             topics = []
             topic_assignments = []
-            
+
             for topic_id in range(n_topics):
                 topic_mask = cluster_labels == topic_id
                 topic_texts = [sampled_texts[i] for i in range(len(sampled_texts)) if topic_mask[i]]
                 topic_embeddings = embeddings_matrix[topic_mask]
-                
+
                 if len(topic_texts) == 0:
                     topics.append(self._create_empty_topic(topic_id))
                     continue
-                
+
                 # Calculate topic coherence using embeddings
                 coherence_score = self._calculate_embedding_coherence(topic_embeddings)
-                
+
                 # Extract representative texts
                 centroid = np.mean(topic_embeddings, axis=0)
                 similarities = cosine_similarity(topic_embeddings, centroid.reshape(1, -1)).flatten()
                 top_indices = np.argsort(similarities)[-5:][::-1]
                 representative_texts = [topic_texts[i] for i in top_indices if i < len(topic_texts)]
-                
+
                 # AI interpretation
                 topic_interpretation = self._interpret_topic_with_ai(
                     representative_texts, topic_id, coherence_score
                 )
-                
+
                 topics.append({
                     'topic_id': topic_id,
                     'name': topic_interpretation.get('name', f'Tópico {topic_id}'),
@@ -217,7 +218,7 @@ class VoyageTopicModeler(AnthropicBase):
                     'radicalization_level': topic_interpretation.get('radicalization_level', 0),
                     'embedding_based': True
                 })
-            
+
             # Extend assignments to full dataset if sampling was used
             if len(sampled_texts) < len(texts):
                 full_assignments = self._extend_topic_assignments(
@@ -225,7 +226,7 @@ class VoyageTopicModeler(AnthropicBase):
                 )
             else:
                 full_assignments = cluster_labels.tolist()
-            
+
             return {
                 'success': True,
                 'topics': topics,
@@ -238,22 +239,22 @@ class VoyageTopicModeler(AnthropicBase):
                 'embedding_stats': embedding_result.get('processing_stats', {}),
                 'analysis_timestamp': datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro no topic modeling com Voyage: {e}")
             # Fallback to traditional method
             return self._extract_topics_traditional(texts, n_topics)
-    
+
     def _extract_topics_traditional(self, texts: List[str], n_topics: int) -> Dict[str, Any]:
         """
         Traditional LDA topic modeling + AI interpretation
         """
         self.logger.info(f"📚 Usando LDA tradicional para {n_topics} tópicos")
-        
+
         try:
             if not LDA_AVAILABLE:
                 raise ImportError("scikit-learn LDA não disponível")
-            
+
             # Vectorization
             vectorizer = TfidfVectorizer(
                 max_features=5000,
@@ -262,10 +263,10 @@ class VoyageTopicModeler(AnthropicBase):
                 max_df=0.95,
                 stop_words=self._get_portuguese_stopwords()
             )
-            
+
             doc_term_matrix = vectorizer.fit_transform(texts)
             feature_names = vectorizer.get_feature_names_out()
-            
+
             # LDA Model
             lda = LatentDirichletAllocation(
                 n_components=n_topics,
@@ -273,10 +274,10 @@ class VoyageTopicModeler(AnthropicBase):
                 max_iter=20,
                 learning_method='batch'
             )
-            
+
             lda.fit(doc_term_matrix)
             topic_assignments = lda.transform(doc_term_matrix).argmax(axis=1)
-            
+
             # Extract topics
             topics = []
             for topic_id in range(n_topics):
@@ -285,23 +286,23 @@ class VoyageTopicModeler(AnthropicBase):
                     (feature_names[i], lda.components_[topic_id][i])
                     for i in lda.components_[topic_id].argsort()[-20:][::-1]
                 ]
-                
+
                 # Find representative documents
                 topic_mask = topic_assignments == topic_id
                 topic_texts = [texts[i] for i in range(len(texts)) if topic_mask[i]]
-                
+
                 if len(topic_texts) == 0:
                     topics.append(self._create_empty_topic(topic_id))
                     continue
-                
+
                 # Calculate perplexity as coherence measure
                 coherence_score = float(np.exp(-lda.score(doc_term_matrix) / doc_term_matrix.shape[0]))
-                
+
                 # AI interpretation
                 topic_interpretation = self._interpret_topic_traditional(
                     topic_words, topic_texts[:5], topic_id
                 )
-                
+
                 topics.append({
                     'topic_id': topic_id,
                     'name': topic_interpretation.get('name', f'Tópico {topic_id}'),
@@ -315,7 +316,7 @@ class VoyageTopicModeler(AnthropicBase):
                     'radicalization_level': topic_interpretation.get('radicalization_level', 0),
                     'embedding_based': False
                 })
-            
+
             return {
                 'success': True,
                 'topics': topics,
@@ -328,45 +329,45 @@ class VoyageTopicModeler(AnthropicBase):
                 'lda_perplexity': float(lda.perplexity(doc_term_matrix)),
                 'analysis_timestamp': datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro no LDA tradicional: {e}")
             return self._create_empty_topic_result()
-    
+
     def _calculate_embedding_coherence(self, embeddings: np.ndarray) -> float:
         """
         Calculate topic coherence using embedding similarities
         """
         if len(embeddings) < 2:
             return 1.0
-        
+
         # Calculate pairwise similarities
         similarities = cosine_similarity(embeddings)
-        
+
         # Remove diagonal (self-similarities)
         np.fill_diagonal(similarities, 0)
-        
+
         # Average similarity as coherence measure
         coherence = np.mean(similarities)
         return max(0.0, min(1.0, float(coherence)))
-    
-    def _interpret_topic_with_ai(self, representative_texts: List[str], 
+
+    def _interpret_topic_with_ai(self, representative_texts: List[str],
                                 topic_id: int, coherence_score: float) -> Dict[str, Any]:
         """
         Interpret topic using Anthropic AI with political context
         """
         if not representative_texts:
             return self._get_default_topic_interpretation(topic_id)
-        
+
         try:
             # Prepare representative texts
             texts_sample = '\n'.join([
                 f"- {text[:150]}..." if len(text) > 150 else f"- {text}"
                 for text in representative_texts[:5]
             ])
-            
+
             political_categories_str = ', '.join(self.political_categories)
-            
+
             prompt = f"""
 Analise os seguintes textos representativos de um tópico identificado em mensagens do Telegram brasileiro (2019-2023):
 
@@ -391,16 +392,16 @@ Forneça uma análise JSON completa:
 
 Foque na identificação de padrões discursivos específicos do contexto político brasileiro.
 """
-            
+
             response = self.create_message(
                 prompt,
                 stage="08_topic_modeling",
                 operation=f"interpret_topic_{topic_id}",
                 temperature=0.3
             )
-            
+
             interpretation = self.parse_json_response(response)
-            
+
             # Validate and clean response
             return {
                 'name': str(interpretation.get('name', f'Tópico {topic_id}'))[:50],
@@ -411,12 +412,12 @@ Foque na identificação de padrões discursivos específicos do contexto polít
                 'discourse_characteristics': str(interpretation.get('discourse_characteristics', '')),
                 'potential_impact': str(interpretation.get('potential_impact', ''))
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro na interpretação AI do tópico {topic_id}: {e}")
             return self._get_default_topic_interpretation(topic_id)
-    
-    def _interpret_topic_traditional(self, topic_words: List[Tuple[str, float]], 
+
+    def _interpret_topic_traditional(self, topic_words: List[Tuple[str, float]],
                                    representative_texts: List[str], topic_id: int) -> Dict[str, Any]:
         """
         Interpret traditional LDA topic using AI
@@ -425,13 +426,13 @@ Foque na identificação de padrões discursivos específicos do contexto polít
             # Extract top words
             top_words = [word for word, _ in topic_words[:15]]
             words_str = ', '.join(top_words)
-            
+
             # Sample representative texts
             texts_sample = '\n'.join([
                 f"- {text[:100]}..." if len(text) > 100 else f"- {text}"
                 for text in representative_texts[:3]
             ])
-            
+
             prompt = f"""
 Analise este tópico LDA extraído de mensagens políticas brasileiras (2019-2023):
 
@@ -451,16 +452,16 @@ Forneça interpretação JSON:
     "radicalization_level": 0-10
 }}
 """
-            
+
             response = self.create_message(
                 prompt,
                 stage="08_topic_modeling",
                 operation=f"interpret_lda_topic_{topic_id}",
                 temperature=0.3
             )
-            
+
             interpretation = self.parse_json_response(response)
-            
+
             return {
                 'name': str(interpretation.get('name', f'Tópico {topic_id}'))[:50],
                 'description': str(interpretation.get('description', 'Descrição não disponível'))[:200],
@@ -468,27 +469,27 @@ Forneça interpretação JSON:
                 'keywords': interpretation.get('keywords', top_words[:5]),
                 'radicalization_level': max(0, min(10, int(interpretation.get('radicalization_level', 0))))
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro na interpretação LDA do tópico {topic_id}: {e}")
             return self._get_default_topic_interpretation(topic_id)
-    
-    def _extend_topic_assignments(self, full_texts: List[str], sampled_texts: List[str], 
+
+    def _extend_topic_assignments(self, full_texts: List[str], sampled_texts: List[str],
                                 sample_assignments: np.ndarray) -> List[int]:
         """
         Extend topic assignments from sample to full dataset
         """
         self.logger.info(f"📈 Estendendo assignments de {len(sampled_texts)} para {len(full_texts)} textos")
-        
+
         # Create mapping of sampled texts to assignments
         sample_to_assignment = {}
         for i, text in enumerate(sampled_texts):
             if i < len(sample_assignments):
                 sample_to_assignment[text] = sample_assignments[i]
-        
+
         # Assign topics to all texts
         full_assignments = []
-        
+
         for text in full_texts:
             if text in sample_to_assignment:
                 # Direct assignment for sampled texts
@@ -499,10 +500,10 @@ Forneça interpretação JSON:
                     text, sampled_texts, sample_assignments
                 )
                 full_assignments.append(best_assignment)
-        
+
         return full_assignments
-    
-    def _find_most_similar_assignment(self, target_text: str, sampled_texts: List[str], 
+
+    def _find_most_similar_assignment(self, target_text: str, sampled_texts: List[str],
                                     assignments: np.ndarray) -> int:
         """
         Find topic assignment for unsampled text using text similarity
@@ -510,22 +511,22 @@ Forneça interpretação JSON:
         target_words = set(target_text.lower().split())
         best_similarity = 0
         best_assignment = 0
-        
+
         for i, sample_text in enumerate(sampled_texts[:100]):  # Limit for performance
             sample_words = set(sample_text.lower().split())
-            
+
             if len(target_words) > 0 and len(sample_words) > 0:
                 intersection = len(target_words.intersection(sample_words))
                 union = len(target_words.union(sample_words))
                 similarity = intersection / union if union > 0 else 0
-                
+
                 if similarity > best_similarity:
                     best_similarity = similarity
                     if i < len(assignments):
                         best_assignment = int(assignments[i])
-        
+
         return best_assignment
-    
+
     def _create_empty_topic(self, topic_id: int) -> Dict[str, Any]:
         """Create empty topic structure"""
         return {
@@ -540,7 +541,7 @@ Forneça interpretação JSON:
             'radicalization_level': 0,
             'embedding_based': False
         }
-    
+
     def _create_empty_topic_result(self) -> Dict[str, Any]:
         """Create empty topic modeling result"""
         return {
@@ -552,7 +553,7 @@ Forneça interpretação JSON:
             'error': 'Insufficient data or processing error',
             'analysis_timestamp': datetime.now().isoformat()
         }
-    
+
     def _get_default_topic_interpretation(self, topic_id: int) -> Dict[str, Any]:
         """Default topic interpretation when AI fails"""
         return {
@@ -562,7 +563,7 @@ Forneça interpretação JSON:
             'keywords': [],
             'radicalization_level': 0
         }
-    
+
     def _get_portuguese_stopwords(self) -> List[str]:
         """Portuguese stopwords for text processing"""
         return [
@@ -578,10 +579,10 @@ Forneça interpretação JSON:
 def create_voyage_topic_modeler(config: Dict[str, Any]) -> VoyageTopicModeler:
     """
     Factory function to create VoyageTopicModeler instance
-    
+
     Args:
         config: Configuration dictionary
-        
+
     Returns:
         VoyageTopicModeler instance
     """

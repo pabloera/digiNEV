@@ -2,24 +2,25 @@
 Voyage-Enhanced Clustering Analyzer for Bolsonarismo Dataset
 ==========================================================
 
-Advanced clustering using Voyage.ai embeddings for semantic grouping of 
+Advanced clustering using Voyage.ai embeddings for semantic grouping of
 Brazilian political messages with AI-powered interpretation.
 """
 
-import logging
-import pandas as pd
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
 import json
+import logging
+from collections import Counter, defaultdict
 from datetime import datetime
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
-from sklearn.metrics import silhouette_score, calinski_harabasz_score
+from typing import Any, Dict, List, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
+from sklearn.decomposition import PCA
+from sklearn.metrics import calinski_harabasz_score, silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-import seaborn as sns
-from collections import Counter, defaultdict
 
 from .base import AnthropicBase
 
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 class VoyageClusteringAnalyzer(AnthropicBase):
     """
     Advanced clustering analyzer using Voyage.ai embeddings
-    
+
     Features:
     - Multiple clustering algorithms with semantic embeddings
     - Automatic optimal cluster number detection
@@ -46,26 +47,26 @@ class VoyageClusteringAnalyzer(AnthropicBase):
     - Cost optimization for large datasets
     - Cluster quality evaluation
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.logger = logging.getLogger(self.__class__.__name__)
-        
+
         # Configuration
         clustering_config = config.get('clustering', {})
         self.max_clusters = clustering_config.get('max_clusters', 15)
         self.min_cluster_size = clustering_config.get('min_cluster_size', 10)
         self.clustering_algorithms = clustering_config.get('algorithms', ['kmeans', 'dbscan'])
         self.quality_threshold = clustering_config.get('quality_threshold', 0.3)
-        
+
         # Initialize Voyage embeddings if enabled
         self.voyage_analyzer = None
         self.use_voyage_embeddings = False
-        
+
         # Check if Voyage is enabled for clustering
         embeddings_config = config.get('embeddings', {})
         integration_config = embeddings_config.get('integration', {})
-        
+
         if VOYAGE_AVAILABLE and integration_config.get('clustering', False):
             try:
                 self.voyage_analyzer = VoyageEmbeddingAnalyzer(config)
@@ -76,7 +77,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 self.use_voyage_embeddings = False
         else:
             self.logger.info("❌ Voyage embeddings desabilitado para clustering")
-        
+
         # Brazilian political clustering categories
         self.political_cluster_types = [
             'autoritario_antidemocratico',
@@ -92,49 +93,49 @@ class VoyageClusteringAnalyzer(AnthropicBase):
             'institucional_juridico',
             'neutro_informativo'
         ]
-    
+
     def perform_semantic_clustering(self, df: pd.DataFrame, text_column: str = 'body_cleaned',
                                   n_clusters: Optional[int] = None) -> Dict[str, Any]:
         """
         Perform advanced semantic clustering using Voyage embeddings
-        
+
         Args:
             df: DataFrame with text data
             text_column: Column containing text for clustering
             n_clusters: Number of clusters (auto-detected if None)
-            
+
         Returns:
             Complete clustering analysis results
         """
         self.logger.info(f"🎯 Iniciando clustering semântico para {len(df)} mensagens")
         self.logger.info(f"📊 Método: {'Voyage embeddings' if self.use_voyage_embeddings else 'Traditional features'}")
-        
+
         # Filter valid texts
         valid_texts = df[text_column].fillna('').astype(str)
         valid_mask = valid_texts.str.strip() != ''
         filtered_df = df[valid_mask].copy()
         texts = valid_texts[valid_mask].tolist()
-        
+
         if len(texts) < self.min_cluster_size:
             self.logger.warning(f"⚠️ Textos insuficientes ({len(texts)}) para clustering")
             return self._create_empty_clustering_result()
-        
+
         if self.use_voyage_embeddings:
             # Enhanced semantic clustering with Voyage.ai
             clustering_result = self._perform_voyage_clustering(texts, filtered_df, n_clusters)
         else:
             # Traditional feature-based clustering
             clustering_result = self._perform_traditional_clustering(texts, filtered_df, n_clusters)
-        
+
         return clustering_result
-    
-    def _perform_voyage_clustering(self, texts: List[str], df: pd.DataFrame, 
+
+    def _perform_voyage_clustering(self, texts: List[str], df: pd.DataFrame,
                                  n_clusters: Optional[int]) -> Dict[str, Any]:
         """
         Perform clustering using Voyage.ai embeddings
         """
         self.logger.info("🚀 Executando clustering com Voyage embeddings")
-        
+
         try:
             # Apply cost optimization if enabled
             if hasattr(self.voyage_analyzer, 'enable_sampling') and self.voyage_analyzer.enable_sampling:
@@ -147,41 +148,41 @@ class VoyageClusteringAnalyzer(AnthropicBase):
             else:
                 sampled_texts = texts
                 sampled_indices = list(range(len(texts)))
-            
+
             # Generate embeddings
             embedding_result = self.voyage_analyzer.generate_embeddings(
                 sampled_texts,
                 input_type="document",
                 cache_key=f"clustering_{len(sampled_texts)}"
             )
-            
+
             if not embedding_result['embeddings']:
                 raise ValueError("Nenhum embedding gerado")
-            
+
             embeddings_matrix = np.array(embedding_result['embeddings'])
-            
+
             # Determine optimal number of clusters if not provided
             if n_clusters is None:
                 n_clusters = self._determine_optimal_clusters(embeddings_matrix)
-            
+
             # Apply multiple clustering algorithms
             clustering_results = self._apply_multiple_clustering_algorithms(
                 embeddings_matrix, n_clusters, sampled_texts
             )
-            
+
             # Select best clustering result
             best_result = self._select_best_clustering(clustering_results, embeddings_matrix)
-            
+
             # Interpret clusters with AI
             interpreted_clusters = self._interpret_clusters_with_ai(
                 best_result['labels'], sampled_texts, best_result['algorithm']
             )
-            
+
             # Calculate comprehensive cluster metrics
             cluster_metrics = self._calculate_cluster_metrics(
                 embeddings_matrix, best_result['labels'], sampled_texts
             )
-            
+
             # Extend clustering to full dataset if sampling was used
             if len(sampled_texts) < len(texts):
                 full_labels = self._extend_clustering_to_full_dataset(
@@ -189,16 +190,16 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 )
             else:
                 full_labels = best_result['labels']
-            
+
             # Add clustering results to DataFrame
             result_df = df.copy()
             result_df['cluster_id'] = full_labels
             result_df['cluster_name'] = [
-                interpreted_clusters[cid]['name'] if cid < len(interpreted_clusters) 
-                else 'Não classificado' 
+                interpreted_clusters[cid]['name'] if cid < len(interpreted_clusters)
+                else 'Não classificado'
                 for cid in full_labels
             ]
-            
+
             return {
                 'success': True,
                 'clusters': interpreted_clusters,
@@ -214,22 +215,22 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 'clustering_quality': best_result.get('quality_score', 0),
                 'analysis_timestamp': datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro no clustering com Voyage: {e}")
             # Fallback to traditional method
             return self._perform_traditional_clustering(texts, df, n_clusters)
-    
+
     def _perform_traditional_clustering(self, texts: List[str], df: pd.DataFrame,
                                       n_clusters: Optional[int]) -> Dict[str, Any]:
         """
         Traditional clustering using TF-IDF features
         """
         self.logger.info("📚 Executando clustering tradicional com TF-IDF")
-        
+
         try:
             from sklearn.feature_extraction.text import TfidfVectorizer
-            
+
             # Create TF-IDF features
             vectorizer = TfidfVectorizer(
                 max_features=5000,
@@ -238,39 +239,39 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 max_df=0.95,
                 stop_words=self._get_portuguese_stopwords()
             )
-            
+
             tfidf_matrix = vectorizer.fit_transform(texts)
-            
+
             # Determine optimal clusters if not provided
             if n_clusters is None:
                 n_clusters = min(10, len(texts) // self.min_cluster_size)
-            
+
             # Apply K-means clustering
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
             cluster_labels = kmeans.fit_predict(tfidf_matrix)
-            
+
             # Simple cluster interpretation using top TF-IDF terms
             feature_names = vectorizer.get_feature_names_out()
             interpreted_clusters = self._interpret_clusters_traditional(
                 cluster_labels, tfidf_matrix, feature_names, texts
             )
-            
+
             # Basic metrics
             cluster_metrics = {
                 'silhouette_score': float(silhouette_score(tfidf_matrix.toarray(), cluster_labels)),
                 'inertia': float(kmeans.inertia_),
                 'n_clusters': n_clusters
             }
-            
+
             # Add clustering results to DataFrame
             result_df = df.copy()
             result_df['cluster_id'] = cluster_labels
             result_df['cluster_name'] = [
-                interpreted_clusters[cid]['name'] if cid < len(interpreted_clusters) 
-                else 'Não classificado' 
+                interpreted_clusters[cid]['name'] if cid < len(interpreted_clusters)
+                else 'Não classificado'
                 for cid in cluster_labels
             ]
-            
+
             return {
                 'success': True,
                 'clusters': interpreted_clusters,
@@ -285,11 +286,11 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 'clustering_quality': cluster_metrics['silhouette_score'],
                 'analysis_timestamp': datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro no clustering tradicional: {e}")
             return self._create_empty_clustering_result()
-    
+
     def _determine_optimal_clusters(self, embeddings: np.ndarray) -> int:
         """
         Determine optimal number of clusters using multiple methods
@@ -297,54 +298,54 @@ class VoyageClusteringAnalyzer(AnthropicBase):
         max_k = min(self.max_clusters, len(embeddings) // self.min_cluster_size)
         if max_k < 2:
             return 2
-        
+
         # Test different numbers of clusters
         silhouette_scores = []
         inertias = []
-        
+
         for k in range(2, max_k + 1):
             kmeans = KMeans(n_clusters=k, random_state=42, n_init=5)
             labels = kmeans.fit_predict(embeddings)
-            
+
             # Calculate silhouette score
             sil_score = silhouette_score(embeddings, labels)
             silhouette_scores.append(sil_score)
             inertias.append(kmeans.inertia_)
-        
+
         # Find optimal k using silhouette score
         best_k_idx = np.argmax(silhouette_scores)
         optimal_k = best_k_idx + 2  # +2 because we start from k=2
-        
+
         self.logger.info(f"📈 Número ótimo de clusters determinado: {optimal_k} (silhouette: {silhouette_scores[best_k_idx]:.3f})")
-        
+
         return optimal_k
-    
-    def _apply_multiple_clustering_algorithms(self, embeddings: np.ndarray, 
+
+    def _apply_multiple_clustering_algorithms(self, embeddings: np.ndarray,
                                             n_clusters: int, texts: List[str]) -> List[Dict[str, Any]]:
         """
         Apply multiple clustering algorithms and compare results
         """
         results = []
-        
+
         # K-means clustering
         if 'kmeans' in self.clustering_algorithms:
             try:
                 kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
                 kmeans_labels = kmeans.fit_predict(embeddings)
                 kmeans_silhouette = silhouette_score(embeddings, kmeans_labels)
-                
+
                 results.append({
                     'algorithm': 'kmeans',
                     'labels': kmeans_labels,
                     'quality_score': kmeans_silhouette,
                     'model': kmeans
                 })
-                
+
                 self.logger.info(f"✅ K-means: silhouette = {kmeans_silhouette:.3f}")
-                
+
             except Exception as e:
                 self.logger.warning(f"⚠️ K-means falhou: {e}")
-        
+
         # DBSCAN clustering
         if 'dbscan' in self.clustering_algorithms:
             try:
@@ -353,13 +354,13 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 nbrs = NearestNeighbors(n_neighbors=min(10, len(embeddings)//5)).fit(embeddings)
                 distances, _ = nbrs.kneighbors(embeddings)
                 eps = np.mean(distances[:, -1]) * 1.5
-                
+
                 dbscan = DBSCAN(eps=eps, min_samples=self.min_cluster_size)
                 dbscan_labels = dbscan.fit_predict(embeddings)
-                
+
                 # Check if DBSCAN found reasonable clusters
                 n_clusters_dbscan = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
-                
+
                 if n_clusters_dbscan >= 2:
                     dbscan_silhouette = silhouette_score(embeddings, dbscan_labels)
                     results.append({
@@ -369,36 +370,36 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                         'model': dbscan,
                         'n_clusters_found': n_clusters_dbscan
                     })
-                    
+
                     self.logger.info(f"✅ DBSCAN: {n_clusters_dbscan} clusters, silhouette = {dbscan_silhouette:.3f}")
                 else:
                     self.logger.warning(f"⚠️ DBSCAN encontrou poucos clusters: {n_clusters_dbscan}")
-                    
+
             except Exception as e:
                 self.logger.warning(f"⚠️ DBSCAN falhou: {e}")
-        
+
         # Agglomerative clustering
         if 'agglomerative' in self.clustering_algorithms:
             try:
                 agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
                 agg_labels = agg.fit_predict(embeddings)
                 agg_silhouette = silhouette_score(embeddings, agg_labels)
-                
+
                 results.append({
                     'algorithm': 'agglomerative',
                     'labels': agg_labels,
                     'quality_score': agg_silhouette,
                     'model': agg
                 })
-                
+
                 self.logger.info(f"✅ Agglomerative: silhouette = {agg_silhouette:.3f}")
-                
+
             except Exception as e:
                 self.logger.warning(f"⚠️ Agglomerative falhou: {e}")
-        
+
         return results
-    
-    def _select_best_clustering(self, clustering_results: List[Dict[str, Any]], 
+
+    def _select_best_clustering(self, clustering_results: List[Dict[str, Any]],
                               embeddings: np.ndarray) -> Dict[str, Any]:
         """
         Select the best clustering result based on quality metrics
@@ -412,15 +413,15 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 'labels': labels,
                 'quality_score': 0.0
             }
-        
+
         # Select result with highest silhouette score
         best_result = max(clustering_results, key=lambda x: x['quality_score'])
-        
+
         self.logger.info(f"🏆 Melhor algoritmo: {best_result['algorithm']} (silhouette: {best_result['quality_score']:.3f})")
-        
+
         return best_result
-    
-    def _interpret_clusters_with_ai(self, labels: np.ndarray, texts: List[str], 
+
+    def _interpret_clusters_with_ai(self, labels: np.ndarray, texts: List[str],
                                   algorithm: str) -> List[Dict[str, Any]]:
         """
         Interpret clusters using Anthropic AI with political context
@@ -428,26 +429,26 @@ class VoyageClusteringAnalyzer(AnthropicBase):
         unique_labels = sorted(set(labels))
         if -1 in unique_labels:
             unique_labels.remove(-1)  # Remove noise cluster from DBSCAN
-        
+
         interpreted_clusters = []
-        
+
         for cluster_id in unique_labels:
             cluster_mask = labels == cluster_id
             cluster_texts = [texts[i] for i in range(len(texts)) if i < len(cluster_mask) and cluster_mask[i]]
-            
+
             if len(cluster_texts) == 0:
                 interpreted_clusters.append(self._create_empty_cluster(cluster_id))
                 continue
-            
+
             # Sample representative texts
             sample_size = min(5, len(cluster_texts))
             representative_texts = cluster_texts[:sample_size]
-            
+
             # AI interpretation
             cluster_interpretation = self._interpret_cluster_with_ai(
                 representative_texts, cluster_id, len(cluster_texts), algorithm
             )
-            
+
             interpreted_clusters.append({
                 'cluster_id': cluster_id,
                 'name': cluster_interpretation.get('name', f'Cluster {cluster_id}'),
@@ -460,7 +461,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 'dominant_themes': cluster_interpretation.get('dominant_themes', []),
                 'clustering_algorithm': algorithm
             })
-        
+
         # Handle noise cluster from DBSCAN if present
         if -1 in labels:
             noise_count = np.sum(labels == -1)
@@ -476,9 +477,9 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                 'dominant_themes': [],
                 'clustering_algorithm': algorithm
             })
-        
+
         return interpreted_clusters
-    
+
     def _interpret_cluster_with_ai(self, representative_texts: List[str], cluster_id: int,
                                  cluster_size: int, algorithm: str) -> Dict[str, Any]:
         """
@@ -486,16 +487,16 @@ class VoyageClusteringAnalyzer(AnthropicBase):
         """
         if not representative_texts:
             return self._get_default_cluster_interpretation(cluster_id)
-        
+
         try:
             # Prepare representative texts
             texts_sample = '\n'.join([
                 f"- {text[:150]}..." if len(text) > 150 else f"- {text}"
                 for text in representative_texts
             ])
-            
+
             political_categories_str = ', '.join(self.political_cluster_types)
-            
+
             prompt = f"""
 Analise o seguinte cluster de mensagens do Telegram brasileiro (2019-2023) identificado por {algorithm}:
 
@@ -522,16 +523,16 @@ Forneça uma análise JSON completa:
 
 Foque em identificar padrões discursivos, estratégias de comunicação e características específicas do contexto político brasileiro.
 """
-            
+
             response = self.create_message(
                 prompt,
                 stage="10_clustering",
                 operation=f"interpret_cluster_{cluster_id}",
                 temperature=0.3
             )
-            
+
             interpretation = self.parse_json_response(response)
-            
+
             # Validate and clean response
             return {
                 'name': str(interpretation.get('name', f'Cluster {cluster_id}'))[:50],
@@ -543,36 +544,36 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
                 'discourse_characteristics': str(interpretation.get('discourse_characteristics', '')),
                 'target_audience': str(interpretation.get('target_audience', ''))
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro na interpretação AI do cluster {cluster_id}: {e}")
             return self._get_default_cluster_interpretation(cluster_id)
-    
-    def _interpret_clusters_traditional(self, labels: np.ndarray, tfidf_matrix, 
+
+    def _interpret_clusters_traditional(self, labels: np.ndarray, tfidf_matrix,
                                       feature_names: np.ndarray, texts: List[str]) -> List[Dict[str, Any]]:
         """
         Interpret clusters using traditional TF-IDF analysis
         """
         unique_labels = sorted(set(labels))
         interpreted_clusters = []
-        
+
         for cluster_id in unique_labels:
             cluster_mask = labels == cluster_id
             cluster_texts = [texts[i] for i in range(len(texts)) if cluster_mask[i]]
-            
+
             if len(cluster_texts) == 0:
                 interpreted_clusters.append(self._create_empty_cluster(cluster_id))
                 continue
-            
+
             # Get top TF-IDF terms for this cluster
             cluster_tfidf = tfidf_matrix[cluster_mask]
             mean_tfidf = np.array(cluster_tfidf.mean(axis=0)).flatten()
             top_indices = mean_tfidf.argsort()[-10:][::-1]
             top_terms = [feature_names[idx] for idx in top_indices]
-            
+
             # Simple cluster naming based on top terms
             cluster_name = f"Cluster {cluster_id}: {', '.join(top_terms[:3])}"
-            
+
             interpreted_clusters.append({
                 'cluster_id': cluster_id,
                 'name': cluster_name,
@@ -585,10 +586,10 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
                 'dominant_themes': top_terms[:3],
                 'clustering_algorithm': 'traditional_tfidf'
             })
-        
+
         return interpreted_clusters
-    
-    def _calculate_cluster_metrics(self, embeddings: np.ndarray, labels: np.ndarray, 
+
+    def _calculate_cluster_metrics(self, embeddings: np.ndarray, labels: np.ndarray,
                                  texts: List[str]) -> Dict[str, Any]:
         """
         Calculate comprehensive cluster quality metrics
@@ -597,13 +598,13 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             # Basic metrics
             n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
             silhouette = float(silhouette_score(embeddings, labels))
-            
+
             # Calinski-Harabasz score (higher is better)
             ch_score = float(calinski_harabasz_score(embeddings, labels))
-            
+
             # Cluster size distribution
             cluster_sizes = [np.sum(labels == i) for i in set(labels) if i != -1]
-            
+
             # Intra-cluster cohesion (average within-cluster similarity)
             cohesion_scores = []
             for cluster_id in set(labels):
@@ -611,13 +612,13 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
                     continue
                 cluster_mask = labels == cluster_id
                 cluster_embeddings = embeddings[cluster_mask]
-                
+
                 if len(cluster_embeddings) > 1:
                     cluster_similarities = cosine_similarity(cluster_embeddings)
                     np.fill_diagonal(cluster_similarities, 0)
                     mean_cohesion = np.mean(cluster_similarities)
                     cohesion_scores.append(mean_cohesion)
-            
+
             return {
                 'n_clusters': n_clusters,
                 'silhouette_score': silhouette,
@@ -636,12 +637,12 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
                 'noise_ratio': float(np.sum(labels == -1) / len(labels)) if -1 in labels else 0.0,
                 'quality_assessment': self._assess_clustering_quality(silhouette, ch_score, cluster_sizes)
             }
-            
+
         except Exception as e:
             self.logger.error(f"Erro no cálculo de métricas: {e}")
             return {'error': str(e)}
-    
-    def _assess_clustering_quality(self, silhouette: float, ch_score: float, 
+
+    def _assess_clustering_quality(self, silhouette: float, ch_score: float,
                                  cluster_sizes: List[int]) -> str:
         """
         Assess overall clustering quality
@@ -655,23 +656,23 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             return 'fair'
         else:
             return 'poor'
-    
+
     def _extend_clustering_to_full_dataset(self, full_texts: List[str], sampled_texts: List[str],
                                          sampled_indices: List[int], sample_labels: np.ndarray) -> List[int]:
         """
         Extend clustering results from sample to full dataset
         """
         self.logger.info(f"📈 Estendendo clustering de {len(sampled_texts)} para {len(full_texts)} textos")
-        
+
         # Create mapping from sampled texts to labels
         sample_to_label = {}
         for i, text in enumerate(sampled_texts):
             if i < len(sample_labels):
                 sample_to_label[text] = int(sample_labels[i])
-        
+
         # Assign clusters to all texts
         full_labels = []
-        
+
         for text in full_texts:
             if text in sample_to_label:
                 # Direct assignment for sampled texts
@@ -682,10 +683,10 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
                     text, sampled_texts, sample_labels
                 )
                 full_labels.append(best_label)
-        
+
         return full_labels
-    
-    def _find_most_similar_cluster(self, target_text: str, sampled_texts: List[str], 
+
+    def _find_most_similar_cluster(self, target_text: str, sampled_texts: List[str],
                                  labels: np.ndarray) -> int:
         """
         Find cluster assignment for unsampled text using text similarity
@@ -693,22 +694,22 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
         target_words = set(target_text.lower().split())
         best_similarity = 0
         best_label = 0
-        
+
         for i, sample_text in enumerate(sampled_texts[:50]):  # Limit for performance
             sample_words = set(sample_text.lower().split())
-            
+
             if len(target_words) > 0 and len(sample_words) > 0:
                 intersection = len(target_words.intersection(sample_words))
                 union = len(target_words.union(sample_words))
                 similarity = intersection / union if union > 0 else 0
-                
+
                 if similarity > best_similarity:
                     best_similarity = similarity
                     if i < len(labels):
                         best_label = int(labels[i])
-        
+
         return best_label
-    
+
     def _create_empty_cluster(self, cluster_id: int) -> Dict[str, Any]:
         """Create empty cluster structure"""
         return {
@@ -722,7 +723,7 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             'radicalization_level': 0,
             'dominant_themes': []
         }
-    
+
     def _create_empty_clustering_result(self) -> Dict[str, Any]:
         """Create empty clustering result"""
         return {
@@ -734,7 +735,7 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             'error': 'Insufficient data or processing error',
             'analysis_timestamp': datetime.now().isoformat()
         }
-    
+
     def _get_default_cluster_interpretation(self, cluster_id: int) -> Dict[str, Any]:
         """Default cluster interpretation when AI fails"""
         return {
@@ -745,7 +746,7 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             'radicalization_level': 0,
             'dominant_themes': []
         }
-    
+
     def _get_portuguese_stopwords(self) -> List[str]:
         """Portuguese stopwords for text processing"""
         return [
@@ -759,10 +760,10 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
 def create_voyage_clustering_analyzer(config: Dict[str, Any]) -> VoyageClusteringAnalyzer:
     """
     Factory function to create VoyageClusteringAnalyzer instance
-    
+
     Args:
         config: Configuration dictionary
-        
+
     Returns:
         VoyageClusteringAnalyzer instance
     """

@@ -7,21 +7,23 @@ métricas de qualidade e alertas em tempo real.
 """
 
 import json
-import time
 import logging
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 import streamlit as st
+from plotly.subplots import make_subplots
 
 # Configuração de logging
 logger = logging.getLogger(__name__)
+
 
 class StageStatus(Enum):
     """Status possíveis de uma etapa"""
@@ -31,6 +33,7 @@ class StageStatus(Enum):
     FAILED = "failed"
     SKIPPED = "skipped"
     PROTECTED = "protected"
+
 
 @dataclass
 class StageMetrics:
@@ -52,10 +55,11 @@ class StageMetrics:
     api_calls_made: int = 0
     api_cost_usd: float = 0.0
     processing_rate: float = 0.0  # registros por segundo
-    
+
     def __post_init__(self):
         if self.error_messages is None:
             self.error_messages = []
+
 
 @dataclass
 class PipelineSession:
@@ -70,16 +74,17 @@ class PipelineSession:
     overall_success_rate: float = 0.0
     total_api_cost: float = 0.0
     dataset_info: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.stages_metrics is None:
             self.stages_metrics = {}
         if self.dataset_info is None:
             self.dataset_info = {}
 
+
 class PipelineMonitor:
     """Monitor principal do pipeline com todas as 22 etapas"""
-    
+
     # Definição das 22 etapas do pipeline v4.9.1
     PIPELINE_STAGES = {
         "01_chunk_processing": {
@@ -237,21 +242,21 @@ class PipelineMonitor:
             "description": "Validação final de qualidade e integridade"
         }
     }
-    
+
     def __init__(self, project_root: Path):
         """Inicializa o monitor do pipeline"""
         self.project_root = project_root
         self.checkpoints_dir = project_root / "checkpoints"
         self.logs_dir = project_root / "logs"
         self.dashboard_data_dir = project_root / "src" / "dashboard" / "data"
-        
+
         # Criar diretórios se não existirem
         for directory in [self.checkpoints_dir, self.logs_dir, self.dashboard_data_dir]:
             directory.mkdir(parents=True, exist_ok=True)
-        
+
         self.current_session: Optional[PipelineSession] = None
         self.sessions_history: List[PipelineSession] = []
-        
+
     def load_current_session(self) -> Optional[PipelineSession]:
         """Carrega a sessão atual do pipeline"""
         try:
@@ -260,34 +265,34 @@ class PipelineMonitor:
             if checkpoints_file.exists():
                 with open(checkpoints_file, 'r', encoding='utf-8') as f:
                     checkpoints_data = json.load(f)
-                
+
                 # Converter para sessão
                 session = self._convert_checkpoints_to_session(checkpoints_data)
                 self.current_session = session
                 return session
-                
+
         except Exception as e:
             logger.error(f"Erro carregando sessão atual: {e}")
-        
+
         return None
-    
+
     def _convert_checkpoints_to_session(self, checkpoints_data: Dict) -> PipelineSession:
         """Converte dados de checkpoints para objeto de sessão"""
         execution_summary = checkpoints_data.get('execution_summary', {})
-        
+
         session = PipelineSession(
             session_id=execution_summary.get('session_id', f"session_{int(time.time())}"),
             start_time=datetime.fromisoformat(execution_summary.get('start_time', datetime.now().isoformat())),
             total_records=execution_summary.get('total_records', 0),
             overall_success_rate=execution_summary.get('overall_progress', 0.0)
         )
-        
+
         # Converter etapas
         stages_data = checkpoints_data.get('stages', {})
         for stage_id, stage_data in stages_data.items():
             if stage_id in self.PIPELINE_STAGES:
                 stage_info = self.PIPELINE_STAGES[stage_id]
-                
+
                 # Determinar status
                 status = StageStatus.PENDING
                 if stage_data.get('status') == 'completed':
@@ -296,7 +301,7 @@ class PipelineMonitor:
                     status = StageStatus.RUNNING
                 elif stage_data.get('status') == 'failed':
                     status = StageStatus.FAILED
-                
+
                 # Criar métricas da etapa
                 metrics = StageMetrics(
                     stage_id=stage_id,
@@ -309,45 +314,45 @@ class PipelineMonitor:
                     success_rate=stage_data.get('success_rate', 0.0),
                     quality_score=stage_data.get('quality_score', 0.0)
                 )
-                
+
                 session.stages_metrics[stage_id] = metrics
-        
+
         return session
-    
+
     def get_pipeline_overview(self) -> Dict[str, Any]:
         """Retorna visão geral do pipeline"""
         if not self.current_session:
             self.load_current_session()
-        
+
         if not self.current_session:
             return self._get_empty_overview()
-        
+
         session = self.current_session
-        
+
         # Calcular estatísticas gerais
         total_stages = len(self.PIPELINE_STAGES)
-        completed_stages = sum(1 for metrics in session.stages_metrics.values() 
+        completed_stages = sum(1 for metrics in session.stages_metrics.values()
                              if metrics.status == StageStatus.COMPLETED)
-        running_stages = sum(1 for metrics in session.stages_metrics.values() 
+        running_stages = sum(1 for metrics in session.stages_metrics.values()
                            if metrics.status == StageStatus.RUNNING)
-        failed_stages = sum(1 for metrics in session.stages_metrics.values() 
+        failed_stages = sum(1 for metrics in session.stages_metrics.values()
                           if metrics.status == StageStatus.FAILED)
-        
+
         # Calcular tempo total estimado
         total_estimated_time = sum(stage['expected_duration'] for stage in self.PIPELINE_STAGES.values())
         elapsed_time = sum(metrics.duration or 0 for metrics in session.stages_metrics.values())
-        
+
         # Calcular progresso por categoria
         categories = {}
         for stage_id, stage_info in self.PIPELINE_STAGES.items():
             category = stage_info['category']
             if category not in categories:
                 categories[category] = {'total': 0, 'completed': 0}
-            
+
             categories[category]['total'] += 1
             if stage_id in session.stages_metrics and session.stages_metrics[stage_id].status == StageStatus.COMPLETED:
                 categories[category]['completed'] += 1
-        
+
         return {
             'session_id': session.session_id,
             'start_time': session.start_time,
@@ -365,7 +370,7 @@ class PipelineMonitor:
             'next_stage': self._get_next_stage(),
             'critical_stages_status': self._get_critical_stages_status()
         }
-    
+
     def _get_empty_overview(self) -> Dict[str, Any]:
         """Retorna overview vazio quando não há sessão ativa"""
         return {
@@ -385,33 +390,33 @@ class PipelineMonitor:
             'next_stage': list(self.PIPELINE_STAGES.keys())[0] if self.PIPELINE_STAGES else None,
             'critical_stages_status': {}
         }
-    
+
     def _get_current_stage(self) -> Optional[str]:
         """Identifica a etapa atualmente em execução"""
         if not self.current_session:
             return None
-        
+
         for stage_id, metrics in self.current_session.stages_metrics.items():
             if metrics.status == StageStatus.RUNNING:
                 return stage_id
         return None
-    
+
     def _get_next_stage(self) -> Optional[str]:
         """Identifica a próxima etapa a ser executada"""
         if not self.current_session:
             return list(self.PIPELINE_STAGES.keys())[0]
-        
+
         for stage_id in self.PIPELINE_STAGES.keys():
             if stage_id not in self.current_session.stages_metrics:
                 return stage_id
             if self.current_session.stages_metrics[stage_id].status == StageStatus.PENDING:
                 return stage_id
         return None
-    
+
     def _get_critical_stages_status(self) -> Dict[str, str]:
         """Status das etapas críticas"""
         critical_status = {}
-        
+
         for stage_id, stage_info in self.PIPELINE_STAGES.items():
             if stage_info.get('critical', False):
                 if self.current_session and stage_id in self.current_session.stages_metrics:
@@ -419,19 +424,19 @@ class PipelineMonitor:
                 else:
                     status = 'pending'
                 critical_status[stage_id] = status
-        
+
         return critical_status
-    
+
     def get_stage_details(self, stage_id: str) -> Dict[str, Any]:
         """Retorna detalhes específicos de uma etapa"""
         if stage_id not in self.PIPELINE_STAGES:
             return {}
-        
+
         stage_info = self.PIPELINE_STAGES[stage_id]
-        
+
         if self.current_session and stage_id in self.current_session.stages_metrics:
             metrics = self.current_session.stages_metrics[stage_id]
-            
+
             return {
                 'stage_id': stage_id,
                 'name': stage_info['name'],
@@ -471,23 +476,23 @@ class PipelineMonitor:
                 'records_processed': 0,
                 'efficiency': 0.0
             }
-    
+
     def _calculate_stage_efficiency(self, metrics: StageMetrics, stage_info: Dict) -> float:
         """Calcula eficiência da etapa (tempo real vs esperado)"""
         if not metrics.duration or metrics.duration == 0:
             return 0.0
-        
+
         expected_duration = stage_info['expected_duration']
         efficiency = expected_duration / metrics.duration
         return min(efficiency, 2.0)  # Cap at 200% efficiency
-    
+
     def get_timeline_data(self) -> List[Dict[str, Any]]:
         """Retorna dados para timeline do pipeline"""
         if not self.current_session:
             self.load_current_session()
-        
+
         timeline_data = []
-        
+
         for stage_id, stage_info in self.PIPELINE_STAGES.items():
             stage_data = {
                 'stage_id': stage_id,
@@ -496,7 +501,7 @@ class PipelineMonitor:
                 'expected_duration': stage_info['expected_duration'],
                 'critical': stage_info.get('critical', False)
             }
-            
+
             if self.current_session and stage_id in self.current_session.stages_metrics:
                 metrics = self.current_session.stages_metrics[stage_id]
                 stage_data.update({
@@ -516,7 +521,7 @@ class PipelineMonitor:
                     'success_rate': 0.0,
                     'quality_score': 0.0
                 })
-            
+
             timeline_data.append(stage_data)
-        
+
         return timeline_data

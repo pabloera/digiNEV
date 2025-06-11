@@ -8,21 +8,22 @@ usando a API Anthropic.
 
 import logging
 from typing import Dict, List, Optional
+
 from .base import AnthropicBase
 
 
 class ClusterValidator(AnthropicBase):
     """Classe para validação de clusters com API Anthropic"""
-    
+
     def __init__(self, config: dict):
         super().__init__(config)
-        
+
         self.min_coherence = config.get('clustering', {}).get('min_coherence_score', 0.7)
-    
-    def validate_cluster(self, cluster_id: int, samples: List[str], 
+
+    def validate_cluster(self, cluster_id: int, samples: List[str],
                         stats: Dict[str, any]) -> Dict[str, any]:
         """Valida e interpreta um cluster"""
-        
+
         prompt = f"""Analise este cluster de mensagens do Telegram sobre política brasileira:
 
 AMOSTRAS DO CLUSTER {cluster_id}:
@@ -53,12 +54,12 @@ Responda apenas com o JSON."""
             response = self._create_message(prompt)
             validation = self._parse_json_response(response)
             validation['cluster_id'] = cluster_id
-            
+
             logging.info(f"Cluster {cluster_id} validado: {validation.get('nome', 'Sem nome')} "
                        f"(coerência: {validation.get('coerencia', 0):.2f})")
-            
+
             return validation
-            
+
         except Exception as e:
             logging.error(f"Erro ao validar cluster {cluster_id}: {e}")
             return {
@@ -67,29 +68,29 @@ Responda apenas com o JSON."""
                 'coerencia': 0,
                 'erro': str(e)
             }
-    
+
     def validate_multiple_clusters(self, clusters_data: Dict[int, Dict]) -> Dict[int, Dict]:
         """Valida múltiplos clusters"""
         validations = {}
-        
+
         for cluster_id, data in clusters_data.items():
             if 'samples' in data and 'stats' in data:
                 validation = self.validate_cluster(
-                    cluster_id, 
-                    data['samples'], 
+                    cluster_id,
+                    data['samples'],
                     data['stats']
                 )
                 validations[cluster_id] = validation
-        
+
         return validations
-    
+
     def suggest_cluster_refinements(self, validations: Dict[int, Dict]) -> List[Dict]:
         """Sugere refinamentos baseados nas validações"""
         refinements = []
-        
+
         for cluster_id, validation in validations.items():
             coherence = validation.get('coerencia', 0)
-            
+
             if coherence < self.min_coherence:
                 refinements.append({
                     'cluster_id': cluster_id,
@@ -97,28 +98,29 @@ Responda apenas com o JSON."""
                     'suggestions': validation.get('sugestoes_refinamento', []),
                     'action': 'split' if coherence < 0.5 else 'refine'
                 })
-        
+
         return refinements
+
     def validate_and_enhance_clusters(self, df, n_clusters: int = 5):
         """
         Valida e melhora clusters usando API Anthropic
         """
         import pandas as pd
-        
+
         logger = self.logger
         logger.info(f"Validando e melhorando clusters para {len(df)} registros")
-        
+
         result_df = df.copy()
-        
+
         # Adicionar colunas de cluster
         result_df['cluster_id'] = 0
         result_df['cluster_label'] = 'general'
         result_df['cluster_confidence'] = 0.5
         result_df['cluster_topics'] = '[]'
-        
+
         logger.info("Validação e melhoria de clusters concluída")
         return result_df
-    
+
     def generate_clustering_report(self, df):
         """Gera relatório de clustering"""
         return {
