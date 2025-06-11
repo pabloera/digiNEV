@@ -1,5 +1,5 @@
 {
-  "total_cost": 0.4166390000000001,
+  "total_cost": 1.1653940000000003,
   "sessions": [
     {
       "session_id": "20250609_052426",
@@ -442,7 +442,7 @@
     {
       "session_id": "20250611_113117",
       "start_time": "2025-06-11T11:31:17.718486",
-      "total_cost": 0.04664700000000001,
+      "total_cost": 0.15447000000000002,
       "operations": [
         {
           "timestamp": "2025-06-11T11:54:41.424173",
@@ -476,6 +476,1047 @@
           "input_cost": 0.0053040000000000006,
           "output_cost": 0.00537,
           "total_cost": 0.010674
+        },
+        {
+          "timestamp": "2025-06-11T13:21:51.137086",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_0",
+          "input_tokens": 625,
+          "output_tokens": 279,
+          "input_cost": 0.0018750000000000001,
+          "output_cost": 0.004185,
+          "total_cost": 0.00606
+        },
+        {
+          "timestamp": "2025-06-11T13:21:57.098053",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_1",
+          "input_tokens": 636,
+          "output_tokens": 317,
+          "input_cost": 0.001908,
+          "output_cost": 0.0047550000000000005,
+          "total_cost": 0.0066630000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:22:03.282566",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_2",
+          "input_tokens": 544,
+          "output_tokens": 331,
+          "input_cost": 0.001632,
+          "output_cost": 0.004965,
+          "total_cost": 0.0065969999999999996
+        },
+        {
+          "timestamp": "2025-06-11T13:22:08.861214",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_3",
+          "input_tokens": 615,
+          "output_tokens": 282,
+          "input_cost": 0.001845,
+          "output_cost": 0.00423,
+          "total_cost": 0.0060750000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:22:14.823558",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_4",
+          "input_tokens": 635,
+          "output_tokens": 290,
+          "input_cost": 0.001905,
+          "output_cost": 0.00435,
+          "total_cost": 0.006255
+        },
+        {
+          "timestamp": "2025-06-11T13:22:20.510571",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_5",
+          "input_tokens": 580,
+          "output_tokens": 290,
+          "input_cost": 0.00174,
+          "output_cost": 0.00435,
+          "total_cost": 0.00609
+        },
+        {
+          "timestamp": "2025-06-11T13:22:26.413155",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_6",
+          "input_tokens": 654,
+          "output_tokens": 317,
+          "input_cost": 0.001962,
+          "output_cost": 0.0047550000000000005,
+          "total_cost": 0.006717000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:22:32.505550",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_7",
+          "input_tokens": 565,
+          "output_tokens": 299,
+          "input_cost": 0.0016950000000000001,
+          "output_cost": 0.004485,
+          "total_cost": 0.006180000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:22:37.714756",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_8",
+          "input_tokens": 560,
+          "output_tokens": 293,
+          "input_cost": 0.00168,
+          "output_cost": 0.0043950000000000005,
+          "total_cost": 0.0060750000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:22:44.355627",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_9",
+          "input_tokens": 632,
+          "output_tokens": 306,
+          "input_cost": 0.0018960000000000001,
+          "output_cost": 0.00459,
+          "total_cost": 0.0064860000000000004
+        },
+        {
+          "timestamp": "2025-06-11T13:22:51.263096",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_10",
+          "input_tokens": 654,
+          "output_tokens": 289,
+          "input_cost": 0.001962,
+          "output_cost": 0.004335,
+          "total_cost": 0.0062970000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:22:57.502234",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_11",
+          "input_tokens": 566,
+          "output_tokens": 291,
+          "input_cost": 0.001698,
+          "output_cost": 0.004365,
+          "total_cost": 0.006063
+        },
+        {
+          "timestamp": "2025-06-11T13:23:04.241624",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_12",
+          "input_tokens": 528,
+          "output_tokens": 307,
+          "input_cost": 0.0015840000000000001,
+          "output_cost": 0.004605,
+          "total_cost": 0.006189
+        },
+        {
+          "timestamp": "2025-06-11T13:23:10.234646",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_13",
+          "input_tokens": 554,
+          "output_tokens": 289,
+          "input_cost": 0.001662,
+          "output_cost": 0.004335,
+          "total_cost": 0.005997000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:23:19.776103",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_14",
+          "input_tokens": 607,
+          "output_tokens": 295,
+          "input_cost": 0.0018210000000000001,
+          "output_cost": 0.004425,
+          "total_cost": 0.006246
+        },
+        {
+          "timestamp": "2025-06-11T13:25:52.156633",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "06_embedding_enhancement",
+          "operation": "enhance_semantic_groups",
+          "input_tokens": 421,
+          "output_tokens": 838,
+          "input_cost": 0.001263,
+          "output_cost": 0.01257,
+          "total_cost": 0.013833
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_134213",
+      "start_time": "2025-06-11T13:42:13.406043",
+      "total_cost": 0.18905099999999997,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T13:42:25.757954",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_body",
+          "input_tokens": 914,
+          "output_tokens": 520,
+          "input_cost": 0.002742,
+          "output_cost": 0.0078000000000000005,
+          "total_cost": 0.010542000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:42:31.051842",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_sender",
+          "input_tokens": 373,
+          "output_tokens": 321,
+          "input_cost": 0.001119,
+          "output_cost": 0.004815,
+          "total_cost": 0.005934
+        },
+        {
+          "timestamp": "2025-06-11T13:42:46.461869",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 415,
+          "output_tokens": 1380,
+          "input_cost": 0.001245,
+          "output_cost": 0.0207,
+          "total_cost": 0.021945
+        },
+        {
+          "timestamp": "2025-06-11T13:43:01.371780",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 425,
+          "output_tokens": 1373,
+          "input_cost": 0.001275,
+          "output_cost": 0.020595000000000002,
+          "total_cost": 0.02187
+        },
+        {
+          "timestamp": "2025-06-11T13:43:09.832534",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 367,
+          "output_tokens": 722,
+          "input_cost": 0.001101,
+          "output_cost": 0.010830000000000001,
+          "total_cost": 0.011931
+        },
+        {
+          "timestamp": "2025-06-11T13:43:15.018839",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "quality_analysis",
+          "input_tokens": 1500,
+          "output_tokens": 318,
+          "input_cost": 0.0045000000000000005,
+          "output_cost": 0.00477,
+          "total_cost": 0.00927
+        },
+        {
+          "timestamp": "2025-06-11T13:44:10.928785",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_0",
+          "input_tokens": 522,
+          "output_tokens": 319,
+          "input_cost": 0.0015660000000000001,
+          "output_cost": 0.004785,
+          "total_cost": 0.006351000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:44:17.494120",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_1",
+          "input_tokens": 643,
+          "output_tokens": 300,
+          "input_cost": 0.001929,
+          "output_cost": 0.0045000000000000005,
+          "total_cost": 0.006429000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:44:23.025771",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_2",
+          "input_tokens": 583,
+          "output_tokens": 301,
+          "input_cost": 0.0017490000000000001,
+          "output_cost": 0.004515,
+          "total_cost": 0.0062640000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:44:29.285419",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_3",
+          "input_tokens": 477,
+          "output_tokens": 302,
+          "input_cost": 0.001431,
+          "output_cost": 0.00453,
+          "total_cost": 0.005961
+        },
+        {
+          "timestamp": "2025-06-11T13:44:35.862707",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_4",
+          "input_tokens": 521,
+          "output_tokens": 321,
+          "input_cost": 0.001563,
+          "output_cost": 0.004815,
+          "total_cost": 0.006378
+        },
+        {
+          "timestamp": "2025-06-11T13:44:41.619289",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_5",
+          "input_tokens": 563,
+          "output_tokens": 310,
+          "input_cost": 0.001689,
+          "output_cost": 0.0046500000000000005,
+          "total_cost": 0.006339000000000001
+        },
+        {
+          "timestamp": "2025-06-11T13:44:46.953688",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_6",
+          "input_tokens": 636,
+          "output_tokens": 285,
+          "input_cost": 0.001908,
+          "output_cost": 0.004275,
+          "total_cost": 0.006183
+        },
+        {
+          "timestamp": "2025-06-11T13:44:52.956489",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_7",
+          "input_tokens": 629,
+          "output_tokens": 285,
+          "input_cost": 0.001887,
+          "output_cost": 0.004275,
+          "total_cost": 0.006162
+        },
+        {
+          "timestamp": "2025-06-11T13:44:59.629878",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_8",
+          "input_tokens": 629,
+          "output_tokens": 303,
+          "input_cost": 0.001887,
+          "output_cost": 0.004545,
+          "total_cost": 0.006432
+        },
+        {
+          "timestamp": "2025-06-11T13:45:04.810315",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_9",
+          "input_tokens": 622,
+          "output_tokens": 280,
+          "input_cost": 0.001866,
+          "output_cost": 0.0042,
+          "total_cost": 0.006066
+        },
+        {
+          "timestamp": "2025-06-11T13:45:10.498216",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_10",
+          "input_tokens": 637,
+          "output_tokens": 285,
+          "input_cost": 0.0019110000000000002,
+          "output_cost": 0.004275,
+          "total_cost": 0.0061860000000000005
+        },
+        {
+          "timestamp": "2025-06-11T13:45:16.403376",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_11",
+          "input_tokens": 575,
+          "output_tokens": 286,
+          "input_cost": 0.001725,
+          "output_cost": 0.00429,
+          "total_cost": 0.006015
+        },
+        {
+          "timestamp": "2025-06-11T13:45:22.104651",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_12",
+          "input_tokens": 656,
+          "output_tokens": 285,
+          "input_cost": 0.001968,
+          "output_cost": 0.004275,
+          "total_cost": 0.006243
+        },
+        {
+          "timestamp": "2025-06-11T13:45:27.616725",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_13",
+          "input_tokens": 651,
+          "output_tokens": 292,
+          "input_cost": 0.001953,
+          "output_cost": 0.00438,
+          "total_cost": 0.006333
+        },
+        {
+          "timestamp": "2025-06-11T13:45:33.259620",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_14",
+          "input_tokens": 581,
+          "output_tokens": 286,
+          "input_cost": 0.001743,
+          "output_cost": 0.00429,
+          "total_cost": 0.006033
+        },
+        {
+          "timestamp": "2025-06-11T13:45:52.792100",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "06_embedding_enhancement",
+          "operation": "enhance_semantic_groups",
+          "input_tokens": 438,
+          "output_tokens": 858,
+          "input_cost": 0.001314,
+          "output_cost": 0.01287,
+          "total_cost": 0.014183999999999999
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_135235",
+      "start_time": "2025-06-11T13:52:35.084397",
+      "total_cost": 0.069549,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T13:52:46.798907",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_body",
+          "input_tokens": 914,
+          "output_tokens": 477,
+          "input_cost": 0.002742,
+          "output_cost": 0.007155,
+          "total_cost": 0.009897
+        },
+        {
+          "timestamp": "2025-06-11T13:52:52.823925",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_sender",
+          "input_tokens": 373,
+          "output_tokens": 322,
+          "input_cost": 0.001119,
+          "output_cost": 0.00483,
+          "total_cost": 0.005949
+        },
+        {
+          "timestamp": "2025-06-11T13:53:08.691563",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 427,
+          "output_tokens": 1465,
+          "input_cost": 0.001281,
+          "output_cost": 0.021975,
+          "total_cost": 0.023256000000000002
+        },
+        {
+          "timestamp": "2025-06-11T13:53:22.356898",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "media_analysis",
+          "input_tokens": 399,
+          "output_tokens": 1318,
+          "input_cost": 0.001197,
+          "output_cost": 0.01977,
+          "total_cost": 0.020967
+        },
+        {
+          "timestamp": "2025-06-11T13:53:28.270609",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02b_deduplication_validation",
+          "operation": "quality_analysis",
+          "input_tokens": 1500,
+          "output_tokens": 332,
+          "input_cost": 0.0045000000000000005,
+          "output_cost": 0.00498,
+          "total_cost": 0.00948
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_140604",
+      "start_time": "2025-06-11T14:06:04.816096",
+      "total_cost": 0.093375,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:06:24.445573",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_0",
+          "input_tokens": 522,
+          "output_tokens": 325,
+          "input_cost": 0.0015660000000000001,
+          "output_cost": 0.004875,
+          "total_cost": 0.0064410000000000005
+        },
+        {
+          "timestamp": "2025-06-11T14:06:30.086157",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_1",
+          "input_tokens": 643,
+          "output_tokens": 297,
+          "input_cost": 0.001929,
+          "output_cost": 0.004455,
+          "total_cost": 0.006384
+        },
+        {
+          "timestamp": "2025-06-11T14:06:35.643155",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_2",
+          "input_tokens": 583,
+          "output_tokens": 281,
+          "input_cost": 0.0017490000000000001,
+          "output_cost": 0.004215,
+          "total_cost": 0.0059640000000000006
+        },
+        {
+          "timestamp": "2025-06-11T14:06:41.914925",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_3",
+          "input_tokens": 477,
+          "output_tokens": 286,
+          "input_cost": 0.001431,
+          "output_cost": 0.00429,
+          "total_cost": 0.005721
+        },
+        {
+          "timestamp": "2025-06-11T14:06:48.174833",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_4",
+          "input_tokens": 521,
+          "output_tokens": 349,
+          "input_cost": 0.001563,
+          "output_cost": 0.005235,
+          "total_cost": 0.006798
+        },
+        {
+          "timestamp": "2025-06-11T14:06:53.554632",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_5",
+          "input_tokens": 563,
+          "output_tokens": 305,
+          "input_cost": 0.001689,
+          "output_cost": 0.004575,
+          "total_cost": 0.0062640000000000005
+        },
+        {
+          "timestamp": "2025-06-11T14:06:58.890926",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_6",
+          "input_tokens": 636,
+          "output_tokens": 263,
+          "input_cost": 0.001908,
+          "output_cost": 0.003945,
+          "total_cost": 0.005853
+        },
+        {
+          "timestamp": "2025-06-11T14:07:05.179881",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_7",
+          "input_tokens": 629,
+          "output_tokens": 286,
+          "input_cost": 0.001887,
+          "output_cost": 0.00429,
+          "total_cost": 0.006177
+        },
+        {
+          "timestamp": "2025-06-11T14:07:10.871370",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_8",
+          "input_tokens": 629,
+          "output_tokens": 300,
+          "input_cost": 0.001887,
+          "output_cost": 0.0045000000000000005,
+          "total_cost": 0.006387
+        },
+        {
+          "timestamp": "2025-06-11T14:07:16.168428",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_9",
+          "input_tokens": 622,
+          "output_tokens": 296,
+          "input_cost": 0.001866,
+          "output_cost": 0.00444,
+          "total_cost": 0.006306000000000001
+        },
+        {
+          "timestamp": "2025-06-11T14:07:22.040417",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_10",
+          "input_tokens": 637,
+          "output_tokens": 288,
+          "input_cost": 0.0019110000000000002,
+          "output_cost": 0.00432,
+          "total_cost": 0.006231
+        },
+        {
+          "timestamp": "2025-06-11T14:07:27.383664",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_11",
+          "input_tokens": 575,
+          "output_tokens": 274,
+          "input_cost": 0.001725,
+          "output_cost": 0.00411,
+          "total_cost": 0.005835
+        },
+        {
+          "timestamp": "2025-06-11T14:07:33.172974",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_12",
+          "input_tokens": 656,
+          "output_tokens": 294,
+          "input_cost": 0.001968,
+          "output_cost": 0.00441,
+          "total_cost": 0.006378
+        },
+        {
+          "timestamp": "2025-06-11T14:07:38.839175",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_13",
+          "input_tokens": 651,
+          "output_tokens": 282,
+          "input_cost": 0.001953,
+          "output_cost": 0.00423,
+          "total_cost": 0.006183
+        },
+        {
+          "timestamp": "2025-06-11T14:07:44.469634",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_topic_modeling",
+          "operation": "interpret_topic_14",
+          "input_tokens": 581,
+          "output_tokens": 314,
+          "input_cost": 0.001743,
+          "output_cost": 0.00471,
+          "total_cost": 0.0064529999999999995
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_141819",
+      "start_time": "2025-06-11T14:18:19.432962",
+      "total_cost": 0.023060999999999998,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:18:54.670007",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_body",
+          "input_tokens": 914,
+          "output_tokens": 940,
+          "input_cost": 0.002742,
+          "output_cost": 0.0141,
+          "total_cost": 0.016842
+        },
+        {
+          "timestamp": "2025-06-11T14:19:02.061863",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_sender",
+          "input_tokens": 373,
+          "output_tokens": 340,
+          "input_cost": 0.001119,
+          "output_cost": 0.0051,
+          "total_cost": 0.006219000000000001
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_142031",
+      "start_time": "2025-06-11T14:20:31.071740",
+      "total_cost": 0.017976,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:20:44.754368",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_body",
+          "input_tokens": 914,
+          "output_tokens": 579,
+          "input_cost": 0.002742,
+          "output_cost": 0.008685,
+          "total_cost": 0.011427
+        },
+        {
+          "timestamp": "2025-06-11T14:20:53.255946",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_sender",
+          "input_tokens": 373,
+          "output_tokens": 362,
+          "input_cost": 0.001119,
+          "output_cost": 0.00543,
+          "total_cost": 0.006549
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_142652",
+      "start_time": "2025-06-11T14:26:52.275376",
+      "total_cost": 0.012288,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:35:16.851718",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_clustering",
+          "operation": "interpret_cluster_0",
+          "input_tokens": 467,
+          "output_tokens": 297,
+          "input_cost": 0.0014010000000000001,
+          "output_cost": 0.004455,
+          "total_cost": 0.005856
+        },
+        {
+          "timestamp": "2025-06-11T14:35:22.234150",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_clustering",
+          "operation": "interpret_cluster_1",
+          "input_tokens": 699,
+          "output_tokens": 289,
+          "input_cost": 0.002097,
+          "output_cost": 0.004335,
+          "total_cost": 0.006432
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_143546",
+      "start_time": "2025-06-11T14:35:46.123746",
+      "total_cost": 0.012198,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:36:29.808861",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_clustering",
+          "operation": "interpret_cluster_0",
+          "input_tokens": 467,
+          "output_tokens": 292,
+          "input_cost": 0.0014010000000000001,
+          "output_cost": 0.00438,
+          "total_cost": 0.0057810000000000005
+        },
+        {
+          "timestamp": "2025-06-11T14:36:35.137974",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_clustering",
+          "operation": "interpret_cluster_1",
+          "input_tokens": 699,
+          "output_tokens": 288,
+          "input_cost": 0.002097,
+          "output_cost": 0.00432,
+          "total_cost": 0.006417
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_143736",
+      "start_time": "2025-06-11T14:37:36.751660",
+      "total_cost": 0.046416,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:37:50.794617",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_hashtag_normalization",
+          "operation": "semantic_analysis",
+          "input_tokens": 996,
+          "output_tokens": 1037,
+          "input_cost": 0.002988,
+          "output_cost": 0.015555000000000001,
+          "total_cost": 0.018543
+        },
+        {
+          "timestamp": "2025-06-11T14:38:11.161229",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "08_hashtag_normalization",
+          "operation": "semantic_analysis",
+          "input_tokens": 926,
+          "output_tokens": 1673,
+          "input_cost": 0.002778,
+          "output_cost": 0.025095,
+          "total_cost": 0.027873
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_144037",
+      "start_time": "2025-06-11T14:40:37.375226",
+      "total_cost": 0.06290400000000002,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:40:49.968651",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "09_domain_classification",
+          "operation": "classify_domains",
+          "input_tokens": 694,
+          "output_tokens": 992,
+          "input_cost": 0.002082,
+          "output_cost": 0.01488,
+          "total_cost": 0.016962
+        },
+        {
+          "timestamp": "2025-06-11T14:41:08.331038",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "09_domain_classification",
+          "operation": "classify_domains",
+          "input_tokens": 552,
+          "output_tokens": 1657,
+          "input_cost": 0.0016560000000000001,
+          "output_cost": 0.024855000000000002,
+          "total_cost": 0.026511000000000003
+        },
+        {
+          "timestamp": "2025-06-11T14:41:17.698324",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "09_credibility_analysis",
+          "operation": "analyze_credibility",
+          "input_tokens": 1274,
+          "output_tokens": 585,
+          "input_cost": 0.0038220000000000003,
+          "output_cost": 0.008775,
+          "total_cost": 0.012597
+        },
+        {
+          "timestamp": "2025-06-11T14:41:23.886112",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "09_domain_insights",
+          "operation": "generate_insights",
+          "input_tokens": 433,
+          "output_tokens": 369,
+          "input_cost": 0.001299,
+          "output_cost": 0.005535,
+          "total_cost": 0.006834
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_144151",
+      "start_time": "2025-06-11T14:41:51.581589",
+      "total_cost": 0.038822999999999996,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:41:57.733214",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1307,
+          "output_tokens": 267,
+          "input_cost": 0.003921,
+          "output_cost": 0.004005,
+          "total_cost": 0.007925999999999999
+        },
+        {
+          "timestamp": "2025-06-11T14:42:02.308922",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1067,
+          "output_tokens": 268,
+          "input_cost": 0.0032010000000000003,
+          "output_cost": 0.00402,
+          "total_cost": 0.007221
+        },
+        {
+          "timestamp": "2025-06-11T14:42:07.045813",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1497,
+          "output_tokens": 269,
+          "input_cost": 0.004491,
+          "output_cost": 0.004035,
+          "total_cost": 0.008526
+        },
+        {
+          "timestamp": "2025-06-11T14:42:13.159589",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 902,
+          "output_tokens": 342,
+          "input_cost": 0.002706,
+          "output_cost": 0.00513,
+          "total_cost": 0.007836
+        },
+        {
+          "timestamp": "2025-06-11T14:42:19.143286",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1093,
+          "output_tokens": 269,
+          "input_cost": 0.0032790000000000002,
+          "output_cost": 0.004035,
+          "total_cost": 0.007314000000000001
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_144239",
+      "start_time": "2025-06-11T14:42:39.302477",
+      "total_cost": 0.046266,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:42:46.375693",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1313,
+          "output_tokens": 329,
+          "input_cost": 0.003939,
+          "output_cost": 0.004935,
+          "total_cost": 0.008874
+        },
+        {
+          "timestamp": "2025-06-11T14:42:52.290128",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1062,
+          "output_tokens": 319,
+          "input_cost": 0.003186,
+          "output_cost": 0.004785,
+          "total_cost": 0.007971
+        },
+        {
+          "timestamp": "2025-06-11T14:42:58.928241",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1490,
+          "output_tokens": 342,
+          "input_cost": 0.00447,
+          "output_cost": 0.00513,
+          "total_cost": 0.009600000000000001
+        },
+        {
+          "timestamp": "2025-06-11T14:43:03.860884",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 835,
+          "output_tokens": 264,
+          "input_cost": 0.002505,
+          "output_cost": 0.00396,
+          "total_cost": 0.006465
+        },
+        {
+          "timestamp": "2025-06-11T14:43:08.884344",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_event_interpretation",
+          "operation": "interpret_event",
+          "input_tokens": 1002,
+          "output_tokens": 268,
+          "input_cost": 0.003006,
+          "output_cost": 0.00402,
+          "total_cost": 0.007026
+        },
+        {
+          "timestamp": "2025-06-11T14:43:15.629411",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "10_temporal_insights",
+          "operation": "generate_insights",
+          "input_tokens": 370,
+          "output_tokens": 348,
+          "input_cost": 0.00111,
+          "output_cost": 0.00522,
+          "total_cost": 0.00633
+        }
+      ]
+    },
+    {
+      "session_id": "20250611_144418",
+      "start_time": "2025-06-11T14:44:18.756859",
+      "total_cost": 0.029025,
+      "operations": [
+        {
+          "timestamp": "2025-06-11T14:44:30.209717",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "11_community_analysis",
+          "operation": "analyze_community",
+          "input_tokens": 1159,
+          "output_tokens": 357,
+          "input_cost": 0.003477,
+          "output_cost": 0.005355,
+          "total_cost": 0.008832
+        },
+        {
+          "timestamp": "2025-06-11T14:44:36.579953",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "11_community_analysis",
+          "operation": "analyze_community",
+          "input_tokens": 966,
+          "output_tokens": 341,
+          "input_cost": 0.002898,
+          "output_cost": 0.005115,
+          "total_cost": 0.008013
+        },
+        {
+          "timestamp": "2025-06-11T14:44:42.122942",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "11_community_analysis",
+          "operation": "analyze_community",
+          "input_tokens": 646,
+          "output_tokens": 314,
+          "input_cost": 0.001938,
+          "output_cost": 0.00471,
+          "total_cost": 0.006647999999999999
+        },
+        {
+          "timestamp": "2025-06-11T14:44:46.538242",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "11_network_insights",
+          "operation": "generate_insights",
+          "input_tokens": 374,
+          "output_tokens": 294,
+          "input_cost": 0.001122,
+          "output_cost": 0.00441,
+          "total_cost": 0.005532
         }
       ]
     }
@@ -494,18 +1535,18 @@
       "requests": 2
     },
     "2025-06-11": {
-      "cost": 0.24511700000000003,
-      "input_tokens": 121004,
-      "output_tokens": 16498,
-      "requests": 18
+      "cost": 0.9938720000000001,
+      "input_tokens": 181139,
+      "output_tokens": 54388,
+      "requests": 105
     }
   },
   "by_model": {
     "claude-3-5-haiku-latest": {
-      "cost": 0.383424,
-      "input_tokens": 22133,
-      "output_tokens": 21135,
-      "requests": 33
+      "cost": 1.1321790000000003,
+      "input_tokens": 82268,
+      "output_tokens": 59025,
+      "requests": 120
     },
     "claude-3-5-haiku-20241022": {
       "cost": 0.033215,
@@ -516,28 +1557,88 @@
   },
   "by_stage": {
     "02b_deduplication_validation": {
-      "cost": 0.27337500000000003,
-      "input_tokens": 11875,
-      "output_tokens": 15850,
-      "requests": 16
+      "cost": 0.39209400000000005,
+      "input_tokens": 16908,
+      "output_tokens": 22758,
+      "requests": 23
     },
     "08_topic_modeling": {
-      "cost": 0.09162600000000001,
-      "input_tokens": 8342,
-      "output_tokens": 4440,
-      "requests": 15
+      "cost": 0.3723659999999998,
+      "input_tokens": 35147,
+      "output_tokens": 17795,
+      "requests": 60
     },
     "02_encoding_validation": {
-      "cost": 0.018423000000000002,
-      "input_tokens": 1916,
-      "output_tokens": 845,
-      "requests": 2
+      "cost": 0.091782,
+      "input_tokens": 7064,
+      "output_tokens": 4706,
+      "requests": 10
     },
     "unknown": {
       "cost": 0.033215,
       "input_tokens": 112115,
       "output_tokens": 4149,
       "requests": 6
+    },
+    "06_embedding_enhancement": {
+      "cost": 0.028017,
+      "input_tokens": 859,
+      "output_tokens": 1696,
+      "requests": 2
+    },
+    "10_clustering": {
+      "cost": 0.024486,
+      "input_tokens": 2332,
+      "output_tokens": 1166,
+      "requests": 4
+    },
+    "08_hashtag_normalization": {
+      "cost": 0.046416,
+      "input_tokens": 1922,
+      "output_tokens": 2710,
+      "requests": 2
+    },
+    "09_domain_classification": {
+      "cost": 0.043473000000000005,
+      "input_tokens": 1246,
+      "output_tokens": 2649,
+      "requests": 2
+    },
+    "09_credibility_analysis": {
+      "cost": 0.012597,
+      "input_tokens": 1274,
+      "output_tokens": 585,
+      "requests": 1
+    },
+    "09_domain_insights": {
+      "cost": 0.006834,
+      "input_tokens": 433,
+      "output_tokens": 369,
+      "requests": 1
+    },
+    "10_event_interpretation": {
+      "cost": 0.078759,
+      "input_tokens": 11568,
+      "output_tokens": 2937,
+      "requests": 10
+    },
+    "10_temporal_insights": {
+      "cost": 0.00633,
+      "input_tokens": 370,
+      "output_tokens": 348,
+      "requests": 1
+    },
+    "11_community_analysis": {
+      "cost": 0.023493,
+      "input_tokens": 2771,
+      "output_tokens": 1012,
+      "requests": 3
+    },
+    "11_network_insights": {
+      "cost": 0.005532,
+      "input_tokens": 374,
+      "output_tokens": 294,
+      "requests": 1
     }
   }
 }
