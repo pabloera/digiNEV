@@ -29,11 +29,16 @@ Dashboard **completamente redesenhado** para focar exclusivamente na apresentaç
 - **Top 10 domínios**: Antes vs Depois da limpeza
 - **Resumo das transformações** aplicadas pelo pipeline
 
-### 2. 🏛️ **Análise Política**
-- Distribuição por **categorias políticas**
-- Análise de **alinhamentos políticos**
-- Níveis de **radicalização** identificados
-- Evolução temporal das **categorias políticas**
+### 2. 🏛️ **Análise Política Hierárquica (4 Níveis)**
+- **Nível 1**: Classificação política básica (político/não-político)
+- **Nível 2**: Alinhamento político (bolsonarista/antibolsonarista/neutro/indefinido)
+- **Nível 3**: Categorias temáticas (negacionismo/autoritarismo/deslegitimação/mobilização/conspiração/informativo)
+- **Nível 4**: Subcategorias detalhadas e agrupamentos semânticos
+- **Correlações hierárquicas** entre os 4 níveis
+- **Evolução temporal** das categorias políticas
+- **Análise multidimensional** com visualizações interativas (sunburst, heatmaps)
+- **Densidade de entidades políticas** por categoria
+- **Características textuais** por alinhamento político
 
 ### 3. 😊 **Análise de Sentimento**
 - Distribuição geral de **sentimentos**

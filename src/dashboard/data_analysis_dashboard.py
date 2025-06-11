@@ -614,78 +614,463 @@ class DataAnalysisDashboard:
             st.plotly_chart(fig_temporal, use_container_width=True)
     
     def _render_political_analysis_page(self):
-        """Análise política detalhada"""
-        st.header("🏛️ Análise Política Detalhada")
+        """🏛️ Análise Política Hierárquica Completa - 4 Níveis"""
+        st.header("🏛️ Análise Política Hierárquica - Taxonomia Brasileira (4 Níveis)")
         
-        if 'political_category' not in self.df.columns:
-            st.warning("Dados de análise política não disponíveis")
+        # Verificar disponibilidade de dados políticos
+        political_columns = ['political_category', 'political_alignment', 'discourse_type', 'radicalization_level']
+        available_columns = [col for col in political_columns if col in self.df.columns]
+        
+        if not available_columns:
+            st.warning("⚠️ Dados de análise política não disponíveis")
             return
         
-        # Distribuição por alinhamento político
-        col1, col2 = st.columns(2)
+        st.info(f"📊 **Dataset:** {len(self.df):,} mensagens analisadas com taxonomia política hierárquica")
+        
+        # ============================
+        # SEÇÃO 1: VISÃO GERAL HIERÁRQUICA
+        # ============================
+        st.subheader("📋 1. Visão Geral da Taxonomia Política Hierárquica")
+        
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.subheader("📊 Distribuição por Categoria Política")
-            political_counts = self.df['political_category'].value_counts()
-            
-            fig_political = px.bar(
-                x=political_counts.values,
-                y=political_counts.index,
-                orientation='h',
-                title="Mensagens por Categoria Política",
-                color=political_counts.values,
-                color_continuous_scale="Blues"
-            )
-            fig_political.update_layout(height=400)
-            st.plotly_chart(fig_political, use_container_width=True)
+            if 'political_alignment' in self.df.columns:
+                alignment_counts = self.df['political_alignment'].value_counts()
+                dominant_alignment = alignment_counts.index[0]
+                alignment_pct = (alignment_counts.iloc[0] / len(self.df)) * 100
+                st.metric(
+                    "🎯 Nível 2: Alinhamento Dominante", 
+                    dominant_alignment.title(), 
+                    f"{alignment_pct:.1f}%"
+                )
         
         with col2:
-            if 'political_alignment' in self.df.columns:
-                st.subheader("⚖️ Alinhamento Político")
+            if 'political_category' in self.df.columns:
+                category_counts = self.df['political_category'].value_counts()
+                dominant_category = category_counts.index[0]
+                category_pct = (category_counts.iloc[0] / len(self.df)) * 100
+                st.metric(
+                    "🏷️ Categoria Dominante", 
+                    dominant_category.title(), 
+                    f"{category_pct:.1f}%"
+                )
+        
+        with col3:
+            if 'discourse_type' in self.df.columns:
+                discourse_counts = self.df['discourse_type'].value_counts()
+                dominant_discourse = discourse_counts.index[0]
+                discourse_pct = (discourse_counts.iloc[0] / len(self.df)) * 100
+                st.metric(
+                    "💬 Tipo de Discurso Principal", 
+                    dominant_discourse.title(), 
+                    f"{discourse_pct:.1f}%"
+                )
+        
+        with col4:
+            if 'radicalization_level' in self.df.columns:
+                radical_counts = self.df['radicalization_level'].value_counts()
+                radical_high_pct = (radical_counts.get('alto', 0) / len(self.df)) * 100
+                st.metric(
+                    "🔥 Taxa de Radicalização Alta", 
+                    f"{radical_high_pct:.1f}%", 
+                    f"{radical_counts.get('alto', 0)} mensagens"
+                )
+        
+        # ============================
+        # SEÇÃO 2: DISTRIBUIÇÕES POR NÍVEL HIERÁRQUICO
+        # ============================
+        st.subheader("📊 2. Distribuições por Nível Hierárquico")
+        
+        # Nível 2: Alinhamento Político
+        if 'political_alignment' in self.df.columns:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.write("**🎯 Nível 2: Alinhamento Político**")
                 alignment_counts = self.df['political_alignment'].value_counts()
+                
+                # Mapear cores específicas para alinhamentos políticos
+                color_map_alignment = {
+                    'direita': '#FF6B6B',      # Vermelho suave
+                    'esquerda': '#4ECDC4',     # Verde azulado
+                    'neutro': '#95A5A6',       # Cinza
+                    'indefinido': '#F39C12'    # Laranja
+                }
+                
+                colors_alignment = [color_map_alignment.get(align, '#95A5A6') for align in alignment_counts.index]
                 
                 fig_alignment = px.pie(
                     values=alignment_counts.values,
                     names=alignment_counts.index,
-                    title="Distribuição por Alinhamento",
-                    color_discrete_sequence=px.colors.qualitative.Pastel
+                    title="Distribuição do Alinhamento Político",
+                    color_discrete_sequence=colors_alignment,
+                    hole=0.3
                 )
+                fig_alignment.update_traces(textinfo='percent+label', textfont_size=12)
                 st.plotly_chart(fig_alignment, use_container_width=True)
-        
-        # Análise por nível de radicalização
-        if 'radicalization_level' in self.df.columns:
-            st.subheader("🔥 Níveis de Radicalização")
             
-            radical_counts = self.df['radicalization_level'].value_counts()
+            with col2:
+                st.write("**🏷️ Categoria Política Específica**")
+                if 'political_category' in self.df.columns:
+                    category_counts = self.df['political_category'].value_counts()
+                    
+                    # Cores para categorias políticas
+                    color_map_category = {
+                        'bolsonarista': '#E74C3C',    # Vermelho forte
+                        'petista': '#E67E22',         # Laranja forte
+                        'geral': '#3498DB',           # Azul
+                        'neutro': '#95A5A6'           # Cinza
+                    }
+                    
+                    colors_category = [color_map_category.get(cat, '#95A5A6') for cat in category_counts.index]
+                    
+                    fig_category = px.bar(
+                        y=category_counts.index,
+                        x=category_counts.values,
+                        orientation='h',
+                        title="Mensagens por Categoria Política",
+                        color=category_counts.index,
+                        color_discrete_sequence=colors_category
+                    )
+                    fig_category.update_layout(height=400, showlegend=False)
+                    st.plotly_chart(fig_category, use_container_width=True)
+        
+        # Nível 3: Tipo de Discurso e Radicalização
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if 'discourse_type' in self.df.columns:
+                st.write("**💬 Nível 3: Tipo de Discurso**")
+                discourse_counts = self.df['discourse_type'].value_counts()
+                
+                color_map_discourse = {
+                    'informativo': '#2ECC71',     # Verde
+                    'agressivo': '#E74C3C',       # Vermelho
+                    'mobilizador': '#F39C12',     # Laranja
+                    'conspiratório': '#8E44AD'    # Roxo
+                }
+                
+                colors_discourse = [color_map_discourse.get(disc, '#95A5A6') for disc in discourse_counts.index]
+                
+                fig_discourse = px.pie(
+                    values=discourse_counts.values,
+                    names=discourse_counts.index,
+                    title="Tipos de Discurso Identificados",
+                    color_discrete_sequence=colors_discourse,
+                    hole=0.3
+                )
+                st.plotly_chart(fig_discourse, use_container_width=True)
+        
+        with col2:
+            if 'radicalization_level' in self.df.columns:
+                st.write("**🔥 Nível de Radicalização**")
+                radical_counts = self.df['radicalization_level'].value_counts()
+                
+                color_map_radical = {
+                    'baixo': '#2ECC71',      # Verde
+                    'médio': '#F39C12',      # Laranja
+                    'alto': '#E74C3C'        # Vermelho
+                }
+                
+                colors_radical = [color_map_radical.get(level, '#95A5A6') for level in radical_counts.index]
+                
+                fig_radical = px.bar(
+                    x=radical_counts.index,
+                    y=radical_counts.values,
+                    title="Distribuição de Níveis de Radicalização",
+                    color=radical_counts.index,
+                    color_discrete_sequence=colors_radical
+                )
+                fig_radical.update_layout(showlegend=False)
+                st.plotly_chart(fig_radical, use_container_width=True)
+        
+        # ============================
+        # SEÇÃO 3: CORRELAÇÕES ENTRE NÍVEIS HIERÁRQUICOS
+        # ============================
+        st.subheader("🔗 3. Correlações entre Níveis Hierárquicos")
+        
+        if 'political_alignment' in self.df.columns and 'discourse_type' in self.df.columns:
+            # Matriz de correlação política × discurso
+            correlation_table = pd.crosstab(
+                self.df['political_alignment'], 
+                self.df['discourse_type'],
+                normalize='index'
+            ) * 100
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.write("**📊 Correlação: Alinhamento × Tipo de Discurso (%)**")
+                
+                fig_correlation = px.imshow(
+                    correlation_table.values,
+                    x=correlation_table.columns,
+                    y=correlation_table.index,
+                    title="Heatmap: Alinhamento Político × Tipo de Discurso",
+                    color_continuous_scale="RdYlBu_r",
+                    aspect="auto"
+                )
+                fig_correlation.update_layout(height=400)
+                st.plotly_chart(fig_correlation, use_container_width=True)
+            
+            with col2:
+                # Tabela de correlação numérica
+                st.write("**📋 Tabela de Correlação (%)**")
+                st.dataframe(correlation_table.round(1), use_container_width=True)
+                
+                # Insights automáticos
+                st.write("**💡 Insights Automáticos:**")
+                for alignment in correlation_table.index:
+                    max_discourse = correlation_table.loc[alignment].idxmax()
+                    max_percentage = correlation_table.loc[alignment].max()
+                    st.write(f"• **{alignment.title()}**: {max_percentage:.1f}% → {max_discourse}")
+        
+        # ============================
+        # SEÇÃO 4: ANÁLISE TEMPORAL HIERÁRQUICA
+        # ============================
+        st.subheader("📅 4. Evolução Temporal das Categorias Políticas")
+        self._render_political_temporal_hierarchy()
+        
+        # ============================
+        # SEÇÃO 5: TÓPICOS E AGRUPAMENTOS ESPECÍFICOS (NÍVEL 4)
+        # ============================
+        self._render_level4_analysis()
+        
+        # ============================
+        # SEÇÃO 6: ANÁLISE COMPARATIVA AVANÇADA
+        # ============================
+        self._render_advanced_political_comparison()
+    
+    def _render_political_temporal_hierarchy(self):
+        """Análise temporal hierárquica das categorias políticas"""
+        
+        if 'datetime' not in self.df.columns:
+            st.warning("⚠️ Dados temporais não disponíveis para análise hierárquica")
+            return
+        
+        df_temp = self.df.copy()
+        df_temp['month'] = df_temp['datetime'].dt.to_period('M').astype(str)
+        df_temp['year'] = df_temp['datetime'].dt.year
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if 'political_alignment' in self.df.columns:
+                st.write("**📊 Evolução do Alinhamento Político**")
+                monthly_alignment = df_temp.groupby(['month', 'political_alignment']).size().unstack(fill_value=0)
+                
+                if not monthly_alignment.empty:
+                    fig_temporal_alignment = px.area(
+                        monthly_alignment,
+                        title="Evolução Temporal do Alinhamento Político",
+                        labels={'value': 'Mensagens', 'index': 'Período'},
+                        color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#95A5A6', '#F39C12']
+                    )
+                    st.plotly_chart(fig_temporal_alignment, use_container_width=True)
+        
+        with col2:
+            if 'discourse_type' in self.df.columns:
+                st.write("**💬 Evolução do Tipo de Discurso**")
+                monthly_discourse = df_temp.groupby(['month', 'discourse_type']).size().unstack(fill_value=0)
+                
+                if not monthly_discourse.empty:
+                    fig_temporal_discourse = px.line(
+                        monthly_discourse,
+                        title="Evolução Temporal do Tipo de Discurso",
+                        labels={'value': 'Mensagens', 'index': 'Período'},
+                        markers=True
+                    )
+                    st.plotly_chart(fig_temporal_discourse, use_container_width=True)
+        
+        # Análise anual
+        if len(df_temp['year'].unique()) > 1:
+            st.write("**📅 Distribuição Anual por Categoria**")
+            yearly_analysis = df_temp.groupby(['year', 'political_category']).size().unstack(fill_value=0, dropna=False)
+            
+            if not yearly_analysis.empty:
+                fig_yearly = px.bar(
+                    yearly_analysis,
+                    title="Distribuição Anual das Categorias Políticas",
+                    labels={'value': 'Número de Mensagens', 'index': 'Ano'},
+                    barmode='stack'
+                )
+                st.plotly_chart(fig_yearly, use_container_width=True)
+
+    def _render_level4_analysis(self):
+        """Análise do Nível 4: Tópicos e Agrupamentos Específicos"""
+        st.subheader("🎯 5. Análise de Nível 4: Tópicos e Agrupamentos Específicos")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Análise de topic_name (Nível 4)
+            if 'topic_name' in self.df.columns:
+                st.write("**🏷️ Tópicos Específicos Identificados**")
+                topic_counts = self.df['topic_name'].value_counts()
+                
+                # Filtrar apenas tópicos classificados (não "Não Classificado")
+                classified_topics = topic_counts[topic_counts.index != 'Não Classificado']
+                
+                if len(classified_topics) > 0:
+                    st.write(f"**📊 {len(classified_topics)} tópicos específicos identificados:**")
+                    
+                    fig_topics = px.bar(
+                        y=classified_topics.index,
+                        x=classified_topics.values,
+                        orientation='h',
+                        title="Tópicos Políticos Específicos",
+                        color=classified_topics.values,
+                        color_continuous_scale="Viridis"
+                    )
+                    fig_topics.update_layout(height=400, showlegend=False)
+                    st.plotly_chart(fig_topics, use_container_width=True)
+                    
+                    # Tabela detalhada
+                    st.write("**📋 Detalhamento dos Tópicos:**")
+                    topics_df = pd.DataFrame({
+                        'Tópico': classified_topics.index,
+                        'Mensagens': classified_topics.values,
+                        'Percentual': (classified_topics.values / len(self.df) * 100).round(1)
+                    })
+                    st.dataframe(topics_df, use_container_width=True)
+                else:
+                    st.info("ℹ️ Maioria das mensagens não foi classificada em tópicos específicos")
+            else:
+                st.info("ℹ️ Dados de tópicos específicos não disponíveis")
+        
+        with col2:
+            # Análise de cluster_name (Agrupamentos Semânticos)
+            if 'cluster_name' in self.df.columns:
+                st.write("**🔍 Agrupamentos Semânticos (Clusters)**")
+                cluster_counts = self.df['cluster_name'].value_counts()
+                
+                if len(cluster_counts) > 0:
+                    # Gráfico de pizza para clusters
+                    color_map_clusters = {
+                        'Cultura Bolsonarista Digital': '#3498DB',
+                        'Narrativa Bolsonarista Antipetista': '#E74C3C',
+                        'Mobilização Conservadora': '#F39C12',
+                        'Discurso Institucional': '#2ECC71'
+                    }
+                    
+                    colors_clusters = [color_map_clusters.get(cluster, '#95A5A6') for cluster in cluster_counts.index]
+                    
+                    fig_clusters = px.pie(
+                        values=cluster_counts.values,
+                        names=cluster_counts.index,
+                        title="Distribuição dos Agrupamentos Semânticos",
+                        color_discrete_sequence=colors_clusters,
+                        hole=0.3
+                    )
+                    fig_clusters.update_traces(textinfo='percent+label', textfont_size=10)
+                    st.plotly_chart(fig_clusters, use_container_width=True)
+                    
+                    # Tabela detalhada de clusters
+                    st.write("**📊 Análise dos Clusters:**")
+                    clusters_df = pd.DataFrame({
+                        'Cluster': cluster_counts.index,
+                        'Mensagens': cluster_counts.values,
+                        'Percentual': (cluster_counts.values / len(self.df) * 100).round(1)
+                    })
+                    st.dataframe(clusters_df, use_container_width=True)
+            else:
+                st.info("ℹ️ Dados de clustering semântico não disponíveis")
+        
+        # Análise de qualidade semântica
+        if 'semantic_quality' in self.df.columns:
+            st.write("**⭐ Qualidade Semântica dos Agrupamentos**")
             
             col1, col2, col3 = st.columns(3)
             
-            for i, (level, count) in enumerate(radical_counts.items()):
-                col = [col1, col2, col3][i % 3]
-                with col:
-                    percentage = (count / len(self.df)) * 100
-                    st.metric(f"Nível {level.title()}", f"{count:,}", f"{percentage:.1f}%")
+            quality_scores = pd.to_numeric(self.df['semantic_quality'], errors='coerce').dropna()
+            
+            if len(quality_scores) > 0:
+                with col1:
+                    avg_quality = quality_scores.mean()
+                    st.metric("Qualidade Média", f"{avg_quality:.3f}")
+                
+                with col2:
+                    high_quality_count = (quality_scores >= 0.7).sum()
+                    high_quality_pct = (high_quality_count / len(quality_scores)) * 100
+                    st.metric("Alta Qualidade (≥0.7)", f"{high_quality_pct:.1f}%")
+                
+                with col3:
+                    max_quality = quality_scores.max()
+                    st.metric("Qualidade Máxima", f"{max_quality:.3f}")
+
+    def _render_advanced_political_comparison(self):
+        """Análise Comparativa Avançada entre Dimensões Políticas"""
+        st.subheader("🔬 6. Análise Comparativa Avançada")
         
-        # Análise temporal da política
-        self._render_political_temporal_analysis()
+        # Análise multidimensional
+        if all(col in self.df.columns for col in ['political_alignment', 'political_category', 'discourse_type']):
+            st.write("**🎭 Análise Multidimensional: Alinhamento × Categoria × Discurso**")
+            
+            # Criar análise tridimensional
+            multi_analysis = self.df.groupby(['political_alignment', 'political_category', 'discourse_type']).size().reset_index(name='count')
+            
+            if not multi_analysis.empty:
+                # Sunburst chart para visualização hierárquica
+                fig_sunburst = px.sunburst(
+                    multi_analysis,
+                    path=['political_alignment', 'political_category', 'discourse_type'],
+                    values='count',
+                    title="Hierarquia Política: Alinhamento → Categoria → Discurso",
+                    color='count',
+                    color_continuous_scale="Viridis"
+                )
+                st.plotly_chart(fig_sunburst, use_container_width=True)
+        
+        # Comparação de características textuais por categoria política
+        if all(col in self.df.columns for col in ['political_category', 'text_length', 'word_count']):
+            st.write("**📏 Características Textuais por Categoria Política**")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Box plot de comprimento de texto por categoria
+                fig_length_box = px.box(
+                    self.df,
+                    x='political_category',
+                    y='text_length',
+                    title="Distribuição do Comprimento de Texto por Categoria",
+                    color='political_category',
+                    color_discrete_sequence=['#3498DB', '#E74C3C', '#F39C12']
+                )
+                st.plotly_chart(fig_length_box, use_container_width=True)
+            
+            with col2:
+                # Estatísticas descritivas
+                text_stats = self.df.groupby('political_category')[['text_length', 'word_count']].describe()
+                st.write("**📊 Estatísticas Descritivas:**")
+                st.dataframe(text_stats.round(1), use_container_width=True)
+        
+        # Análise de densidade de entidades políticas
+        if all(col in self.df.columns for col in ['political_category', 'political_entity_density']):
+            st.write("**🎯 Densidade de Entidades Políticas por Categoria**")
+            
+            entity_density = self.df.groupby('political_category')['political_entity_density'].agg(['mean', 'median', 'std']).round(4)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                fig_density = px.bar(
+                    x=entity_density.index,
+                    y=entity_density['mean'],
+                    title="Densidade Média de Entidades Políticas",
+                    color=entity_density['mean'],
+                    color_continuous_scale="Reds"
+                )
+                st.plotly_chart(fig_density, use_container_width=True)
+            
+            with col2:
+                st.write("**📋 Estatísticas de Densidade:**")
+                st.dataframe(entity_density, use_container_width=True)
     
     def _render_political_temporal_analysis(self):
-        """Análise temporal das categorias políticas"""
-        st.subheader("📅 Evolução Temporal das Categorias Políticas")
-        
-        if 'datetime' in self.df.columns and 'political_category' in self.df.columns:
-            # Criar pivot table mensal
-            df_temp = self.df.copy()
-            df_temp['month'] = df_temp['datetime'].dt.to_period('M').astype(str)
-            
-            monthly_political = df_temp.groupby(['month', 'political_category']).size().unstack(fill_value=0)
-            
-            fig_temporal_political = px.line(
-                monthly_political,
-                title="Evolução das Categorias Políticas ao Longo do Tempo",
-                labels={'value': 'Número de Mensagens', 'index': 'Período'}
-            )
-            st.plotly_chart(fig_temporal_political, use_container_width=True)
+        """Análise temporal das categorias políticas (compatibilidade)"""
+        self._render_political_temporal_hierarchy()
     
     def _render_sentiment_analysis_page(self):
         """Análise de sentimento detalhada"""
