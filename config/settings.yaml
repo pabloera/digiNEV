@@ -171,7 +171,7 @@ pipeline_review:
 # Voyage.ai Embeddings Integration
 embeddings:
   # Voyage.ai model for semantic analysis
-  model: "voyage-large-2"  # voyage-large-2, voyage-2, voyage-code-2
+  model: "voyage-3.5-lite"  # voyage-3.5-lite (recommended), voyage-3.5, voyage-large-2
   batch_size: 128
   max_tokens: 32000
   cache_embeddings: true
