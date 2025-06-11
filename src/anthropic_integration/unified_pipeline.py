@@ -741,10 +741,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         """
 
         try:
-            # Etapas que geram novos arquivos e precisam atualizar os caminhos (v4.9 - corrigido)
+            # Etapas que geram novos arquivos e precisam atualizar os caminhos (v4.9.2 - corrigido)
             path_updating_stages = {
                 "01_chunk_processing": "chunks_processed",
-                "02_encoding_validation": "validation_reports", 
+                "02_encoding_validation": "corrections_applied", 
                 "03_deduplication": "deduplication_reports",
                 "04_feature_validation": "feature_validation_reports",
                 "05_political_analysis": "political_analysis_reports",
@@ -942,7 +942,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return results
 
     def _stage_02b_deduplication(self, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Etapa 02b: Deduplicação inteligente - Remove duplicatas e adiciona coluna de frequência"""
+        """Etapa 03: Deduplicação inteligente - Remove duplicatas e adiciona coluna de frequência"""
 
         logger.info("🎯 INICIANDO ETAPA 03: DEDUPLICAÇÃO INTELIGENTE OTIMIZADA")
         results = {"deduplication_reports": {}, "errors": []}
@@ -951,8 +951,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
 
             try:
-                # Carregar dados originais
-                original_df = self._load_processed_data(dataset_path)
+                # Resolver input path de forma segura - usar output do Stage 02
+                input_path = self._resolve_input_path_safe(
+                    dataset_path,
+                    preferred_stages=["02_encoding_validated", "01_chunked"]
+                )
+
+                if not input_path or not os.path.exists(input_path):
+                    error_msg = f"❌ Input path não encontrado para {dataset_path}"
+                    logger.error(error_msg)
+                    results["errors"].append(error_msg)
+                    continue
+
+                # Carregar dados do stage anterior
+                original_df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(original_df)} registros")
 
                 # Verificar colunas disponíveis
@@ -1031,7 +1043,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         }
 
                 # Salvar dados deduplicados
-                output_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
+                output_path = self._get_stage_output_path("03_deduplicated", dataset_path)
                 self._save_processed_data(deduplicated_df, output_path)
                 logger.info(f"💾 Dados deduplicados salvos: {output_path}")
 
@@ -1044,7 +1056,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             except Exception as e:
                 logger.error(f"❌ Erro na deduplicação de {dataset_path}: {e}")
                 # Fallback: copiar dados originais
-                output_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
+                output_path = self._get_stage_output_path("03_deduplicated", dataset_path)
                 original_df['duplicate_frequency'] = 1  # Adicionar coluna mesmo no fallback
                 self._save_processed_data(original_df, output_path)
 
@@ -1096,11 +1108,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         for dataset_path in dataset_paths:
             logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
 
-            # Carregar dados deduplicados
-            if "02b_deduplicated" in dataset_path:
-                input_path = dataset_path
-            else:
-                input_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
+            # Resolver input path de forma segura - usar output do Stage 03
+            input_path = self._resolve_input_path_safe(
+                dataset_path,
+                preferred_stages=["03_deduplicated", "02_encoding_validated"]
+            )
+
+            if not input_path or not os.path.exists(input_path):
+                error_msg = f"❌ Input path não encontrado para {dataset_path}"
+                logger.error(error_msg)
+                results["feature_validation_reports"][dataset_path] = {"error": error_msg}
+                continue
 
             df = self._load_processed_data(input_path)
             logger.info(f"📊 Dataset carregado: {len(df)} registros")
@@ -1109,7 +1127,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             enriched_df, validation_report = self.feature_validator.validate_and_enrich_features(df)
 
             # Salvar dados enriquecidos
-            output_path = self._get_stage_output_path("01b_features_validated", dataset_path)
+            output_path = self._get_stage_output_path("04_feature_validated", dataset_path)
             self._save_processed_data(enriched_df, output_path)
 
             results["feature_validation_reports"][dataset_path] = {
@@ -1132,10 +1150,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             try:
                 logger.info(f"📂 Processando dataset: {Path(dataset_path).name}")
 
-                # Resolver input path de forma segura
+                # Resolver input path de forma segura - usar output do Stage 04
                 input_path = self._resolve_input_path_safe(
                     dataset_path,
-                    preferred_stages=["04_features_validated", "03_deduplicated", "02_encoding_validated"]
+                    preferred_stages=["04_feature_validated", "03_deduplicated", "02_encoding_validated"]
                 )
 
                 if not input_path or not os.path.exists(input_path):
@@ -1174,7 +1192,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     results["traditional_used"] = True
 
                 # Salvar dados com análise política
-                output_path = self._get_stage_output_path("05_politically_analyzed", dataset_path)
+                output_path = self._get_stage_output_path("05_political_analyzed", dataset_path)
                 self._save_processed_data(analyzed_df, output_path)
 
                 results["political_analysis_reports"][dataset_path] = {
@@ -1293,7 +1311,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if "02b_deduplicated" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("02b_deduplicated", dataset_path)
+                input_path = self._get_stage_output_path("03_deduplicated", dataset_path)
 
             df = self._load_processed_data(input_path)
 
@@ -1350,7 +1368,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     feature_report["dataset_statistics"] = {"error": str(e)}
 
             # Salvar dados com features
-            output_path = self._get_stage_output_path("01b_features_extracted", dataset_path)
+            output_path = self._get_stage_output_path("01b_feature_extracted", dataset_path)
             self._save_processed_data(enhanced_df, output_path)
 
             results["feature_reports"][dataset_path] = {
@@ -1368,12 +1386,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
         for dataset_path in dataset_paths:
             try:
-                # Carregar dados com análise política
-                # Se dataset_path já aponta para arquivo com análise política, usar diretamente
-                if "05_politically_analyzed" in dataset_path:
-                    input_path = dataset_path
-                else:
-                    input_path = self._get_stage_output_path("05_politically_analyzed", dataset_path)
+                # Resolver input path de forma segura - usar output do Stage 05
+                input_path = self._resolve_input_path_safe(
+                    dataset_path,
+                    preferred_stages=["05_political_analyzed", "04_feature_validated", "03_deduplicated"]
+                )
+
+                if not input_path or not os.path.exists(input_path):
+                    error_msg = f"❌ Input path não encontrado para {dataset_path}"
+                    logger.error(error_msg)
+                    results["cleaning_reports"][dataset_path] = {"error": error_msg}
+                    continue
 
                 logger.info(f"Carregando dados para limpeza: {input_path}")
                 df = self._load_processed_data(input_path)
@@ -1435,7 +1458,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     method_used = "minimal"
 
                 # Salvar dados limpos
-                output_path = self._get_stage_output_path("03_text_cleaned", dataset_path)
+                output_path = self._get_stage_output_path("06_text_cleaned", dataset_path)
                 self._save_processed_data(cleaned_df, output_path)
                 logger.info(f"Dados limpos salvos: {output_path}")
 
@@ -1485,7 +1508,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     # Tentar encontrar o arquivo mais recente disponível
                     input_path = self._resolve_input_path_safe(
                         dataset_path,
-                        preferred_stages=["06_text_cleaned", "05_politically_analyzed", "04_feature_validation"]
+                        preferred_stages=["06_text_cleaned", "05_political_analyzed", "04_feature_validated"]
                     )
 
                 # Carregar dados limpos
@@ -1523,7 +1546,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     method_used = "basic_fallback"
 
                 # Salvar dados com features linguísticas
-                output_path = self._get_stage_output_path("07_linguistically_processed", dataset_path)
+                output_path = self._get_stage_output_path("07_linguistic_processed", dataset_path)
                 self._save_processed_data(processed_df, output_path)
                 logger.info(f"✅ Dados linguisticamente processados salvos: {output_path}")
 
@@ -1674,7 +1697,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Estratégia simplificada de resolução de path
                 input_path = self._resolve_input_path_safe(
                     dataset_path,
-                    preferred_stages=["08_sentiment_analyzed", "07_linguistically_processed", "06_text_cleaned"]
+                    preferred_stages=["08_sentiment_analyzed", "07_linguistic_processed", "06_text_cleaned"]
                 )
 
                 if not input_path or not os.path.exists(input_path):
@@ -1790,7 +1813,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
                     dataset_path,
-                    preferred_stages=["09_topic_modeled", "08_sentiment_analyzed", "07_linguistically_processed"]
+                    preferred_stages=["09_topic_modeled", "08_sentiment_analyzed", "07_linguistic_processed"]
                 )
 
                 if not input_path or not os.path.exists(input_path):
@@ -2066,7 +2089,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     continue
 
                 # Salvar dados com hashtags normalizadas
-                output_path = self._get_stage_output_path("12_hashtags_normalized", dataset_path)
+                output_path = self._get_stage_output_path("12_hashtag_normalized", dataset_path)
                 self._save_processed_data(normalized_df, output_path)
 
                 results["hashtag_reports"][dataset_path] = {
@@ -2106,7 +2129,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Resolver input path de forma segura
                 input_path = self._resolve_input_path_safe(
                     dataset_path,
-                    preferred_stages=["12_hashtags_normalized", "11_clustered", "10_tfidf_extracted"]
+                    preferred_stages=["12_hashtag_normalized", "11_clustered", "10_tfidf_extracted"]
                 )
 
                 if not input_path or not os.path.exists(input_path):
@@ -2142,7 +2165,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     continue
 
                 # Salvar dados com domínios analisados
-                output_path = self._get_stage_output_path("13_domains_analyzed", dataset_path)
+                output_path = self._get_stage_output_path("13_domain_analyzed", dataset_path)
                 self._save_processed_data(domain_df, output_path)
 
                 results["domain_reports"][dataset_path] = {
@@ -2180,7 +2203,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if "09_domains_analyzed" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("09_domains_analyzed", dataset_path)
+                input_path = self._get_stage_output_path("13_domain_analyzed", dataset_path)
 
             df = self._load_processed_data(input_path)
 
@@ -2194,7 +2217,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 temporal_df, temporal_report = self._traditional_temporal_analysis(df)
 
             # Salvar dados com análise temporal
-            output_path = self._get_stage_output_path("10_temporal_analyzed", dataset_path)
+            output_path = self._get_stage_output_path("14_temporal_analyzed", dataset_path)
             self._save_processed_data(temporal_df, output_path)
 
             results["temporal_reports"][dataset_path] = {
@@ -2216,7 +2239,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if "10_temporal_analyzed" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("10_temporal_analyzed", dataset_path)
+                input_path = self._get_stage_output_path("14_temporal_analyzed", dataset_path)
 
             df = self._load_processed_data(input_path)
 
@@ -2230,7 +2253,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 network_df, network_report = self._traditional_network_analysis(df)
 
             # Salvar dados com análise de rede
-            output_path = self._get_stage_output_path("11_network_analyzed", dataset_path)
+            output_path = self._get_stage_output_path("15_network_analyzed", dataset_path)
             self._save_processed_data(network_df, output_path)
 
             results["network_reports"][dataset_path] = {
@@ -2252,7 +2275,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if "11_network_analyzed" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("11_network_analyzed", dataset_path)
+                input_path = self._get_stage_output_path("15_network_analyzed", dataset_path)
 
             df = self._load_processed_data(input_path)
 
@@ -2266,7 +2289,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 qualitative_df, qualitative_report = self._traditional_qualitative_analysis(df)
 
             # Salvar dados com análise qualitativa
-            output_path = self._get_stage_output_path("12_qualitative_analyzed", dataset_path)
+            output_path = self._get_stage_output_path("16_qualitative_analyzed", dataset_path)
             self._save_processed_data(qualitative_df, output_path)
 
             results["qualitative_reports"][dataset_path] = {
@@ -2288,7 +2311,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if "12_qualitative_analyzed" in dataset_path:
                 input_path = dataset_path
             else:
-                input_path = self._get_stage_output_path("12_qualitative_analyzed", dataset_path)
+                input_path = self._get_stage_output_path("16_qualitative_analyzed", dataset_path)
 
             df = self._load_processed_data(input_path)
 
@@ -3154,17 +3177,18 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         validation_result.update(optimization_info)
                         df = df_optimized
 
+                    # Salvar dados processados
+                    output_path = self._get_stage_output_path("01_chunked", dataset_path)
+                    self._save_processed_data(df, output_path)
+
                     results["chunks_processed"][dataset_path] = {
                         "records": len(df),
                         "success": True,
                         "load_method": load_info.get("method", "standard"),
-                        "encoding_used": load_info.get("encoding", detected_encoding)
+                        "encoding_used": load_info.get("encoding", detected_encoding),
+                        "output_path": output_path
                     }
                     results["validation_reports"][dataset_path] = validation_result
-
-                    # Salvar dados processados
-                    output_path = self._get_stage_output_path("01_chunked", dataset_path)
-                    self._save_processed_data(df, output_path)
                     logger.info(f"✅ Chunk processado salvo: {output_path}")
 
                 else:
