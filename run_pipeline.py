@@ -26,6 +26,14 @@ from typing import Any, Dict, List
 
 import yaml
 
+# Configure performance optimizations FIRST (before any imports)
+try:
+    from src.utils.performance_config import configure_all_performance
+    performance_results = configure_all_performance()
+except ImportError:
+    print("⚠️  Performance config não encontrado - continuando sem otimizações")
+    performance_results = {}
+
 # Add src to path
 src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
@@ -170,6 +178,7 @@ def load_configuration():
             "data": {
                 "path": "data/uploads",
                 "interim_path": "data/interim",
+                "output_path": "pipeline_outputs",
                 "dashboard_path": "src/dashboard/data"
             },
             "voyage_embeddings": {"enable_sampling": True, "max_messages": 50000}
@@ -178,14 +187,33 @@ def load_configuration():
     return config
 
 def discover_datasets(data_paths: List[str]) -> List[str]:
-    """Descobre todos os datasets disponíveis"""
+    """Descobre todos os datasets disponíveis com validação"""
     datasets = []
     
     for data_path in data_paths:
         if os.path.exists(data_path):
             import glob
             csv_files = glob.glob(os.path.join(data_path, '*.csv'))
-            datasets.extend(csv_files)
+            
+            # Validar se os arquivos CSV não estão vazios
+            valid_files = []
+            for csv_file in csv_files:
+                try:
+                    file_size = os.path.getsize(csv_file)
+                    if file_size > 100:  # Mínimo 100 bytes para ser considerado válido
+                        valid_files.append(csv_file)
+                        logger.info(f"Dataset válido encontrado: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
+                    else:
+                        logger.warning(f"Dataset muito pequeno ignorado: {Path(csv_file).name}")
+                except Exception as e:
+                    logger.error(f"Erro verificando dataset {csv_file}: {e}")
+            
+            datasets.extend(valid_files)
+        else:
+            logger.warning(f"Diretório de dados não encontrado: {data_path}")
+    
+    if not datasets:
+        logger.error("Nenhum dataset válido encontrado nos diretórios especificados")
     
     return sorted(datasets)
 

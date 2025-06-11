@@ -1,5 +1,5 @@
 {
-  "total_cost": 0.16267799999999996,
+  "total_cost": 0.17152199999999995,
   "sessions": [
     {
       "session_id": "20250609_052426",
@@ -234,6 +234,24 @@
           "total_cost": 0.009579
         }
       ]
+    },
+    {
+      "session_id": "20250610_234512",
+      "start_time": "2025-06-10T23:45:12.268002",
+      "total_cost": 0.008844000000000001,
+      "operations": [
+        {
+          "timestamp": "2025-06-10T23:48:57.156125",
+          "model": "claude-3-5-haiku-latest",
+          "stage": "02_encoding_validation",
+          "operation": "detailed_analysis_body",
+          "input_tokens": 958,
+          "output_tokens": 398,
+          "input_cost": 0.0028740000000000003,
+          "output_cost": 0.0059700000000000005,
+          "total_cost": 0.008844000000000001
+        }
+      ]
     }
   ],
   "daily_usage": {
@@ -244,18 +262,18 @@
       "requests": 19
     },
     "2025-06-10": {
-      "cost": 0.009579,
-      "input_tokens": 958,
-      "output_tokens": 447,
-      "requests": 1
+      "cost": 0.018423000000000002,
+      "input_tokens": 1916,
+      "output_tokens": 845,
+      "requests": 2
     }
   },
   "by_model": {
     "claude-3-5-haiku-latest": {
-      "cost": 0.16267799999999996,
-      "input_tokens": 12286,
-      "output_tokens": 8388,
-      "requests": 20
+      "cost": 0.17152199999999995,
+      "input_tokens": 13244,
+      "output_tokens": 8786,
+      "requests": 21
     }
   },
   "by_stage": {
@@ -272,10 +290,10 @@
       "requests": 15
     },
     "02_encoding_validation": {
-      "cost": 0.009579,
-      "input_tokens": 958,
-      "output_tokens": 447,
-      "requests": 1
+      "cost": 0.018423000000000002,
+      "input_tokens": 1916,
+      "output_tokens": 845,
+      "requests": 2
     }
   }
 }

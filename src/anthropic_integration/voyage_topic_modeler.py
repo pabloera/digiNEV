@@ -21,6 +21,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from .base import AnthropicBase
 
+logger = logging.getLogger(__name__)
+
 # Import Voyage embeddings
 try:
     from .voyage_embeddings import VoyageEmbeddingAnalyzer
@@ -29,14 +31,25 @@ except ImportError:
     VOYAGE_AVAILABLE = False
     VoyageEmbeddingAnalyzer = None
 
-# Traditional LDA fallback
+# Gensim with compatibility patch
 try:
-    from sklearn.decomposition import LatentDirichletAllocation
-    LDA_AVAILABLE = True
+    from ..utils.gensim_patch import get_lda_model_safe, safe_import_gensim
+    LDA_MODEL_CLASS, LDA_BACKEND = get_lda_model_safe()
+    LDA_AVAILABLE = LDA_MODEL_CLASS is not None
+    logger.info(f"✅ Topic modeling usando {LDA_BACKEND}: {LDA_MODEL_CLASS.__name__ if LDA_MODEL_CLASS else 'N/A'}")
 except ImportError:
-    LDA_AVAILABLE = False
-
-logger = logging.getLogger(__name__)
+    # Fallback tradicional
+    try:
+        from sklearn.decomposition import LatentDirichletAllocation
+        LDA_MODEL_CLASS = LatentDirichletAllocation
+        LDA_BACKEND = "sklearn"
+        LDA_AVAILABLE = True
+        logger.info("✅ Topic modeling fallback: scikit-learn LDA")
+    except ImportError:
+        LDA_MODEL_CLASS = None
+        LDA_BACKEND = "none"
+        LDA_AVAILABLE = False
+        logger.warning("⚠️  Nenhum backend LDA disponível")
 
 
 class VoyageTopicModeler(AnthropicBase):

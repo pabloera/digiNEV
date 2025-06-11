@@ -741,22 +741,28 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         """
 
         try:
-            # Etapas que geram novos arquivos e precisam atualizar os caminhos
+            # Etapas que geram novos arquivos e precisam atualizar os caminhos (v4.9 - corrigido)
             path_updating_stages = {
-                "02b_deduplication": "deduplication_reports",
-                "01b_feature_validation": "feature_validation_reports",
-                "01c_political_analysis": "political_analysis_reports",
-                "03_clean_text": "cleaning_reports",
-                "04_sentiment_analysis": "sentiment_reports",
-                "05_topic_modeling": "topic_reports",
-                "06_tfidf_extraction": "tfidf_reports",
-                "07_clustering": "clustering_reports",
-                "08_hashtag_normalization": "hashtag_reports",
-                "09_domain_extraction": "domain_reports",
-                "10_temporal_analysis": "temporal_reports",
-                "11_network_structure": "network_reports",
-                "12_qualitative_analysis": "qualitative_reports",
-                "13_review_reproducibility": "review_reports"
+                "01_chunk_processing": "chunks_processed",
+                "02_encoding_validation": "validation_reports", 
+                "03_deduplication": "deduplication_reports",
+                "04_feature_validation": "feature_validation_reports",
+                "05_political_analysis": "political_analysis_reports",
+                "06_text_cleaning": "cleaning_reports",
+                "07_linguistic_processing": "linguistic_reports",
+                "08_sentiment_analysis": "sentiment_reports",
+                "09_topic_modeling": "topic_reports",
+                "10_tfidf_extraction": "tfidf_reports",
+                "11_clustering": "clustering_reports",
+                "12_hashtag_normalization": "hashtag_reports",
+                "13_domain_analysis": "domain_reports",
+                "14_temporal_analysis": "temporal_reports",
+                "15_network_analysis": "network_reports",
+                "16_qualitative_analysis": "qualitative_reports",
+                "17_smart_pipeline_review": "review_reports",
+                "18_topic_interpretation": "interpretation_reports",
+                "19_semantic_search": "search_reports",
+                "20_pipeline_validation": "validation_reports"
             }
 
             if stage_name not in path_updating_stages:
@@ -2384,12 +2390,16 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
         base_name = Path(original_path).stem
 
-        # Usar data/dashboard_results como output_path padrão para consistência
-        # (mesmo diretório usado pelo dashboard)
-        output_path = self.pipeline_config.get("output_path", "data/dashboard_results")
-
-        # Se output_path for "data/interim" mas não existir, usar dashboard_results
-        if output_path == "data/interim" and not os.path.exists("data/interim"):
+        # Usar pipeline_outputs como output_path padrão, com fallbacks
+        output_path = self.pipeline_config.get("output_path", "pipeline_outputs")
+        
+        # Verificar se pipeline_outputs existe, senão usar data/interim ou data/dashboard_results
+        if output_path == "pipeline_outputs" and not os.path.exists("pipeline_outputs"):
+            if os.path.exists("data/interim"):
+                output_path = "data/interim"
+            else:
+                output_path = "data/dashboard_results"
+        elif output_path == "data/interim" and not os.path.exists("data/interim"):
             output_path = "data/dashboard_results"
 
         output_dir = Path(output_path)

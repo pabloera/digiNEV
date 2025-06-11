@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 try:
     import emoji
     EMOJI_AVAILABLE = True
+    logger.info(f"✅ Módulo emoji carregado com sucesso - v{emoji.__version__}")
 except ImportError:
     EMOJI_AVAILABLE = False
-    logger.warning("Módulo emoji não disponível. Contagem de emojis usará regex.")
+    logger.warning("⚠️  Módulo emoji não disponível. Contagem de emojis usará regex como fallback.")
 
 
 class FeatureValidator:

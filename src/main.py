@@ -533,7 +533,8 @@ class PipelineController:
                 'processing': {'chunk_size': 10000},
                 'data': {
                     'path': 'data/uploads',
-                    'interim_path': 'data/interim'
+                    'interim_path': 'data/interim',
+                    'output_path': 'pipeline_outputs'
                 }
             }
 
