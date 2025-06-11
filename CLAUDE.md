@@ -90,23 +90,27 @@ Este projeto utiliza **Poetry** como gerenciador oficial de dependências e ambi
 - **`jupyter`**: ipykernel, jupyter, jupyterlab (análise interativa)
 - **`deep-learning`**: tensorflow, torch, transformers (opcional, ML avançado)
 
-### **🚀 SCRIPTS AUTOMÁTICOS POETRY:**
+### **🚀 SCRIPTS E COMANDOS POETRY:**
 
 ```bash
-# Scripts pré-configurados
-poetry run pipeline          # Executa run_pipeline.py
-poetry run dashboard         # Inicia dashboard automaticamente
+# Execução do Pipeline
+poetry run python run_pipeline.py        # Pipeline completo
+poetry run pipeline                       # Shortcut para pipeline
+poetry run python src/main.py            # Execução com checkpoints
+
+# Dashboard
+poetry run python src/dashboard/start_dashboard.py   # Dashboard Streamlit
 
 # Comandos essenciais
-poetry install               # Instala todas dependências
-poetry install --with dev    # + ferramentas desenvolvimento
-poetry install --with jupyter # + Jupyter Lab
-poetry shell                 # Ativa ambiente virtual
+poetry install                          # Instala todas dependências
+poetry install --with dev               # + ferramentas desenvolvimento
+poetry install --with jupyter           # + Jupyter Lab
+poetry shell                            # Ativa ambiente virtual
 
 # Gerenciamento
-poetry add package_name      # Adiciona nova dependência
-poetry show --tree          # Mostra árvore de dependências
-poetry update                # Atualiza todas dependências
+poetry add package_name                  # Adiciona nova dependência
+poetry show --tree                      # Mostra árvore de dependências
+poetry update                           # Atualiza todas dependências
 ```
 
 ### **🤖 CONFIGURAÇÃO AUTOMÁTICA PARA CLAUDE:**
@@ -123,14 +127,24 @@ O Poetry é configurado automaticamente quando Claude inicia através de:
 ### **🔧 COMANDOS OBRIGATÓRIOS PARA CLAUDE:**
 
 ```bash
-# ✅ CORRETO - SEMPRE usar poetry run
-poetry run python run_pipeline.py
-poetry run python src/main.py  
-poetry run python -m pytest
+# ✅ EXECUÇÃO PIPELINE
+poetry run python run_pipeline.py              # Pipeline completo (22 estágios)
+poetry run pipeline                             # Shortcut Poetry
+poetry run python src/main.py                  # Com controle de checkpoints
 
-# ❌ ERRADO - nunca usar diretamente
-python run_pipeline.py  # Pode falhar com dependências
-pip install package     # Quebra isolamento Poetry
+# ✅ DASHBOARD E VISUALIZAÇÃO
+poetry run python src/dashboard/start_dashboard.py  # Dashboard Streamlit
+# Acesse http://localhost:8501 no navegador
+
+# ✅ TESTES E DESENVOLVIMENTO
+poetry run python -m pytest                    # Executar testes
+poetry run black src/                          # Formatação código
+poetry run flake8 src/                         # Linting
+
+# ❌ NUNCA USAR DIRETAMENTE
+python run_pipeline.py                         # Sem isolamento Poetry
+pip install package                            # Quebra gerenciamento Poetry
+./run_pipeline.py                              # Sem ambiente virtual
 ```
 
 ### **📋 VERIFICAÇÃO DE STATUS:**
@@ -156,12 +170,29 @@ poetry run python -c "import pandas, numpy, spacy, voyageai, anthropic"
 
 ### **⚡ AMBIENTE PRONTO E OTIMIZADO:**
 
-- ✅ **Python 3.12** (compatível com todas dependências)
-- ✅ **85+ pacotes** científicos pré-instalados
-- ✅ **Isolation completo** via ambiente virtual
-- ✅ **Scripts automáticos** para pipeline e dashboard
-- ✅ **Ferramentas dev** (linting, testes, formatação)
+- ✅ **Python 3.12.5** (compatível com todas dependências)
+- ✅ **110+ pacotes** científicos pré-instalados
+- ✅ **Streamlit 1.45.1** + **Dash 2.18.2** para dashboards
+- ✅ **Isolation completo** via ambiente virtual Poetry
+- ✅ **Scripts automáticos** funcionais e testados
+- ✅ **Ferramentas dev** (pytest, black, flake8, mypy)
 - ✅ **Integração VS Code** configurada
+
+### **🎯 COMANDOS FINAIS TESTADOS:**
+
+```bash
+# Pipeline (testado ✅)
+poetry run python run_pipeline.py        # Execução completa
+poetry run pipeline                       # Shortcut Poetry
+
+# Dashboard (testado ✅)  
+poetry run python src/dashboard/start_dashboard.py
+
+# Verificação (testado ✅)
+poetry run python --version              # Python 3.12.5
+poetry show streamlit                     # Streamlit 1.45.1 
+./activate_poetry.sh                     # Script verificação
+```
 
 ---
 
