@@ -886,16 +886,31 @@ class DataAnalysisDashboard:
         # Análise anual
         if len(df_temp['year'].unique()) > 1:
             st.write("**📅 Distribuição Anual por Categoria**")
-            yearly_analysis = df_temp.groupby(['year', 'political_category']).size().unstack(fill_value=0, dropna=False)
-            
-            if not yearly_analysis.empty:
-                fig_yearly = px.bar(
-                    yearly_analysis,
-                    title="Distribuição Anual das Categorias Políticas",
-                    labels={'value': 'Número de Mensagens', 'index': 'Ano'},
-                    barmode='stack'
-                )
-                st.plotly_chart(fig_yearly, use_container_width=True)
+            try:
+                yearly_analysis = df_temp.groupby(['year', 'political_category']).size().unstack(fill_value=0)
+                
+                if not yearly_analysis.empty:
+                    fig_yearly = px.bar(
+                        yearly_analysis,
+                        title="Distribuição Anual das Categorias Políticas",
+                        labels={'value': 'Número de Mensagens', 'index': 'Ano'},
+                        barmode='stack'
+                    )
+                    st.plotly_chart(fig_yearly, use_container_width=True)
+                else:
+                    st.info("ℹ️ Dados insuficientes para análise anual")
+            except Exception as e:
+                st.warning(f"⚠️ Erro na análise anual: {str(e)}")
+                # Fallback: mostrar apenas contagem por ano
+                yearly_simple = df_temp['year'].value_counts().sort_index()
+                if len(yearly_simple) > 0:
+                    fig_yearly_simple = px.bar(
+                        x=yearly_simple.index,
+                        y=yearly_simple.values,
+                        title="Distribuição Anual Total de Mensagens",
+                        labels={'x': 'Ano', 'y': 'Número de Mensagens'}
+                    )
+                    st.plotly_chart(fig_yearly_simple, use_container_width=True)
 
     def _render_level4_analysis(self):
         """Análise do Nível 4: Tópicos e Agrupamentos Específicos"""
