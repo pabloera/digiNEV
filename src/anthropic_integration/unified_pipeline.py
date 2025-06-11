@@ -3386,7 +3386,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                         # Adicionar colunas de interpretação se necessário
                         enhanced_df = self._enhance_dataframe_with_topic_interpretation(df, interpretation_result)
-                        enhanced_df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
+                        self._save_processed_data(enhanced_df, output_path)
 
                         logger.info(f"Interpretação de tópicos salva: {output_path}")
 
@@ -3435,7 +3435,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                     # Salvar relatório final
                     output_path = dataset_path.replace('.csv', '_16_pipeline_validated.csv')
-                    df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
+                    self._save_processed_data(df, output_path)
 
                     # Gerar relatório JSON detalhado
                     report_path = output_path.replace('.csv', '_validation_report.json')

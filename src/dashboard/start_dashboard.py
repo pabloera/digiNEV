@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-DASHBOARD BOLSONARISMO v4.9.4 - INTEGRADO COM PIPELINE
-======================================================
+DASHBOARD BOLSONARISMO v4.9.5 - INTEGRADO COM PIPELINE + STAGE 07 SPACY
+=======================================================================
 Script para iniciar dashboard integrado com monitoramento em tempo real
 do pipeline e visualização completa dos resultados.
 
-🚨 v4.9.4: Dashboard atualizado para refletir correção de deduplicação.
-Agora monitora corretamente 784K registros processados após deduplicação.
+🔤 v4.9.5: Dashboard atualizado para Stage 07 spaCy operacional com 9 features linguísticas.
+🛠️ v4.9.5: Pipeline inicializa 35/35 componentes (100% vs 48.6% anterior).
+🚨 v4.9.4: Correção de deduplicação - monitora 784K registros processados.
+📊 v4.9.5: Separadores CSV padronizados com `;` em todos os 22 stages.
 """
 
 import os

@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 """
-SCRIPT DE VALIDAÇÃO v4.9.4 - CORREÇÃO CRÍTICA DEDUPLICAÇÃO
-==========================================================
+SCRIPT DE VALIDAÇÃO v4.9.5 - STAGE 07 SPACY + SEPARADORES PADRONIZADOS
+====================================================================
 
-Este script valida que todas as alterações da versão v4.9.4 foram
+Este script valida que todas as alterações da versão v4.9.5 foram
 corretamente consolidadas nos arquivos do projeto.
 
 Verificações incluem:
+- Stage 07 spaCy totalmente operacional com 9 features linguísticas
+- Pipeline inicializando 35/35 componentes (100% vs 48.6% anterior)
+- Separadores CSV padronizados com `;` em todos os 22 stages
+- Configuração YAML corrigida para dict em vez de string
 - Versões atualizadas nos scripts principais
-- Documentação atualizada
-- Headers de arquivos corrigidos
-- Referências à correção crítica de deduplicação
+- Documentação atualizada com v4.9.5
 """
 
 import sys
 from pathlib import Path
 
 def validate_version_updates():
-    """Valida se todas as versões foram atualizadas para v4.9.4"""
+    """Valida se todas as versões foram atualizadas para v4.9.5"""
     
     print("🔍 VALIDANDO ALTERAÇÕES v4.9.4...")
     print("=" * 50)

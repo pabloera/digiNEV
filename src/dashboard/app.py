@@ -1,9 +1,14 @@
 """
-Dashboard Integrado do Pipeline Bolsonarismo v4.9.1
+Dashboard Integrado do Pipeline Bolsonarismo v4.9.5
 ===================================================
 
 Dashboard completo com monitoramento em tempo real das 22 etapas do pipeline,
 gráficos de controle de qualidade e visualizações específicas por etapa.
+
+🔤 v4.9.5: Dashboard atualizado para Stage 07 spaCy totalmente operacional.
+🛠️ v4.9.5: Pipeline inicializa 35/35 componentes (100% vs 48.6% anterior).
+📊 v4.9.5: Separadores CSV padronizados com `;` em todos os stages.
+🚨 v4.9.4: Correção crítica de deduplicação - monitora datasets reais.
 """
 
 import json
@@ -24,7 +29,7 @@ from plotly.subplots import make_subplots
 
 # Configuração da página
 st.set_page_config(
-    page_title="Pipeline Bolsonarismo v4.9.1",
+    page_title="Pipeline Bolsonarismo v4.9.5",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
