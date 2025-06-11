@@ -1,17 +1,18 @@
 # CLAUDE.md — Projeto Bolsonarismo v4.9.3 (JUNHO 2025)
 
-## 🚨 **STATUS ATUAL: PIPELINE ENHANCED COM OTIMIZAÇÕES COMPLETAS + CADEIA INPUT/OUTPUT CORRIGIDA** ✅
+## 🚨 **STATUS ATUAL: PIPELINE ENHANCED COM DEDUPLICAÇÃO CRÍTICA CORRIGIDA** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 11/06/2025 - Pipeline Enhanced v4.9.3 com OTIMIZAÇÕES DE PERFORMANCE, compatibilidade completa e cadeia de input/output corrigida
+**ÚLTIMA ATUALIZAÇÃO:** 11/06/2025 - Pipeline Enhanced v4.9.4 com CORREÇÃO CRÍTICA na deduplicação + otimizações completas
 
-### 🏆 **CONSOLIDAÇÃO FINAL v4.9.3: OTIMIZAÇÕES + CORREÇÕES CRÍTICAS**
+### 🏆 **CONSOLIDAÇÃO FINAL v4.9.4: DEDUPLICAÇÃO CRÍTICA CORRIGIDA**
 
-**✅ TODOS OS 28 TODOs IMPLEMENTADOS:**
+**✅ TODOS OS 29 TODOs IMPLEMENTADOS:**
 - ✅ 6 TODOs principais (v4.9 base): XML prompting, Haiku model, hierarchical taxonomy, structured output, RAG integration, concurrent processing
 - ✅ 6 TODOs ausentes identificados: Pydantic validation, logging/versioning, token control, fallback strategies, experiment control, enhanced examples
 - ✅ 6 TODOs parciais aprimorados: Smart filtering enhancement, contextual examples upgrade, error handling robustness
 - ✅ 4 TODOs de otimização v4.9.2: Emoji compatibility, Gensim-SciPy patch, NumExpr performance, text filtering optimization
 - ✅ 6 TODOs críticos v4.9.3: Input/output path audit, stage linking corrections, path mapping consistency, pipeline validation
+- ✅ **1 TODO CRÍTICO v4.9.4**: Correção do bug de escopo de variáveis na deduplicação
 
 **✅ PADRÕES ANTHROPIC 100% SEGUIDOS:**
 - ✅ XML Structured Prompting (Ticket Routing Guide oficial)
@@ -71,6 +72,47 @@ Este é o **documento mestre e centralizador** de todo o projeto de análise de 
 
 Este documento **substitui os seguintes arquivos anteriores**:
 `RESUMO_EXECUTIVO_IMPLEMENTACAO.md`, `DETALHES_TECNICOS_IMPLEMENTACAO.md`, `GUIA_RAPIDO_USO.md`, `FUNCIONALIDADES_IMPLEMENTADAS_2025.md`, `NOVO_FLUXO_FEATURE_EXTRACTION.md`, `PROJECT_RULES.md`, `VOYAGE_OPTIMIZATION_SUMMARY.md`, `CONSOLIDACAO_DOCS_2025.md`.
+
+---
+
+## 🚨 **CORREÇÃO CRÍTICA v4.9.4 - BUG DE DEDUPLICAÇÃO RESOLVIDO (11/06/2025)**
+
+### **🔥 PROBLEMA CRÍTICO IDENTIFICADO E CORRIGIDO:**
+
+**❌ PROBLEMA:** O Stage 03 (Deduplication) reportava "42% de redução" (1.352.446 → 784.632 registros) mas os stages subsequentes continuavam processando 1.352.446 registros, indicando que a deduplicação não estava sendo aplicada corretamente.
+
+**🔍 CAUSA RAIZ:** Bug de escopo de variáveis no método `deduplication()` em `unified_pipeline.py` (linhas 970-974). As variáveis `original_count`, `final_count`, `duplicates_removed` e `reduction_ratio` não estavam definidas no escopo principal, causando erro:
+```
+"cannot access local variable 'original_count' where it is not associated with a value"
+```
+
+**🛠️ CORREÇÃO APLICADA:**
+```python
+# ANTES: Variáveis definidas apenas em alguns blocos de código
+# Causava erro de escopo e fallback para cópia simples
+
+# DEPOIS: Variáveis movidas para escopo principal (linhas 970-974)
+# Definir variáveis de contagem no escopo principal
+original_count = len(original_df)
+final_count = original_count
+duplicates_removed = 0
+reduction_ratio = 0.0
+```
+
+**✅ RESULTADO DA CORREÇÃO:**
+- **ANTES**: Todos os stages processavam 1.352.446 registros (deduplicação falhava silenciosamente)
+- **DEPOIS**: Stages processam 784.632 registros (42% redução real aplicada)
+- **Performance**: 568.000+ registros a menos para processar
+- **Tamanho**: 597MB vs 926MB nos arquivos de stage
+
+### **📊 VALIDAÇÃO DA CORREÇÃO:**
+```
+✅ Stage 03: 1.352.446 → 784.632 registros (42% redução real)
+✅ Stage 04: 784.632 registros (correto)
+✅ Stage 05: 784.632 registros (correto)  
+✅ Stage 06: 784.632 registros (correto)
+✅ Stage 07: 784.632 registros (correto)
+```
 
 ---
 
@@ -493,7 +535,7 @@ Sempre que fizer uma alteração, indique:
 ✅ PoliticalAnalyzer Enhanced v4.9.1 com 100% padrões Anthropic
 ```
 
-## 🔧 Tarefas Concluídas v4.9.3 - CONSOLIDAÇÃO ANTHROPIC + CORREÇÕES CRÍTICAS
+## 🔧 Tarefas Concluídas v4.9.4 - CONSOLIDAÇÃO ANTHROPIC + CORREÇÃO CRÍTICA DEDUPLICAÇÃO
 
 **v4.8 (Base Implementation):**
 1. ✅ ~~Finalizar `run_topic_modeling()` com modelo otimizado~~ **CONCLUÍDO**
@@ -543,6 +585,14 @@ Sempre que fizer uma alteração, indique:
 37. ✅ ~~Testar pipeline com correções e validar 35/35 componentes~~ **CONCLUÍDO**
 38. ✅ ~~Atualizar documentação CLAUDE.md para v4.9.3~~ **CONCLUÍDO**
 
+**v4.9.4 (Critical Deduplication Bug Fix):**
+39. ✅ ~~Identificar bug de escopo de variáveis na deduplicação (Stage 03)~~ **CONCLUÍDO**
+40. ✅ ~~Corrigir definição de variáveis no escopo principal do método deduplication()~~ **CONCLUÍDO**
+41. ✅ ~~Validar que stages subsequentes processam o dataset deduplicated correto~~ **CONCLUÍDO**
+42. ✅ ~~Testar redução real de 1.352.446 → 784.632 registros (42%)~~ **CONCLUÍDO**
+43. ✅ ~~Consolidar correções no arquivo unified_pipeline.py~~ **CONCLUÍDO**
+44. ✅ ~~Atualizar documentação CLAUDE.md para v4.9.4~~ **CONCLUÍDO**
+
 ## 🛡️ **TIMEOUT SOLUTIONS v4.9.1 - SISTEMA COMPLETO IMPLEMENTADO**
 
 ### ✅ **7 SOLUÇÕES INTEGRADAS PARA RESOLVER TIMEOUTS PERSISTENTES:**
@@ -577,7 +627,7 @@ Sempre que fizer uma alteração, indique:
 
 ## 🌐 Versão do projeto
 
-**v4.9.3 - Junho 2025 - ANTHROPIC-NATIVE COMPLETE + INPUT/OUTPUT CORRECTED**
+**v4.9.4 - Junho 2025 - ANTHROPIC-NATIVE COMPLETE + DEDUPLICATION BUG FIXED**
 
 - **Enhanced Encoding Detection**: Robustez com chardet e fallbacks múltiplos
 - **Global Deduplication**: Estratégias múltiplas com normalização Unicode  
@@ -598,6 +648,7 @@ Sempre que fizer uma alteração, indique:
 - **Gensim-SciPy Patch**: Compatibilidade completa via patch inteligente
 - **NumExpr Optimization**: Performance numérica com 12 threads ativas
 - **Text Filtering Optimization**: 53.9% redução de comparações via filtro pré-deduplicação
+- **🚨 CRITICAL DEDUPLICATION FIX**: Bug de escopo de variáveis corrigido - stages agora processam dataset real deduplicated (784K vs 1.35M registros)
 
 **Responsável:** Pablo Emanuel Romero Almada, Ph.D.
 

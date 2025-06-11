@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v4.9 - EXECUÇÃO COMPLETA APRIMORADA
-=========================================================
+PIPELINE BOLSONARISMO v4.9.4 - CORREÇÃO CRÍTICA DEDUPLICAÇÃO
+============================================================
 
 Pipeline aprimorado com 22 etapas implementadas (01-20 + 04b/06b):
+- 🚨 CORREÇÃO CRÍTICA: Bug de deduplicação resolvido (stages agora processam 784K vs 1.35M registros)
 - Integração completa com Dashboard
 - Voyage.ai + spaCy totalmente implementados
 - Análise estatística dual (antes/depois da limpeza)
-- Enhanced encoding detection e global deduplication
+- Enhanced encoding detection e global deduplication FUNCIONAL
 - Enhanced text cleaning com validação graduada
 - API optimization com sampling inteligente (96% economia)
 - Execução sequencial otimizada com melhorias
@@ -257,7 +258,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
         logger.info("Pipeline unificado inicializado")
         
-        # Executar todas as etapas sequencialmente (v4.9 - Enhanced Pipeline)
+        # Executar todas as etapas sequencialmente (v4.9.4 - Deduplication Bug Fixed)
         all_stages = [
             '01_chunk_processing',
             '02_encoding_validation',  # Enhanced with chardet detection
@@ -361,7 +362,7 @@ def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
 def main():
     """Entry point principal para execução completa com checkpoints e proteção"""
     
-    print("🎯 PIPELINE BOLSONARISMO v4.9 - EXECUÇÃO APRIMORADA COM CHECKPOINTS E PROTEÇÃO")
+    print("🎯 PIPELINE BOLSONARISMO v4.9.4 - CORREÇÃO CRÍTICA DEDUPLICAÇÃO + CHECKPOINTS")
     print("=" * 75)
     
     start_time = time.time()

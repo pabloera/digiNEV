@@ -1,9 +1,12 @@
 """
-UNIFIED ANTHROPIC PIPELINE SYSTEM v4.8
-=======================================
-Consolida todas as 20 etapas do pipeline com integração Anthropic centralizada,
+UNIFIED ANTHROPIC PIPELINE SYSTEM v4.9.4
+========================================
+Consolida todas as 22 etapas do pipeline com integração Anthropic centralizada,
 spaCy linguístico e integração completa com dashboard para análise em tempo real.
-Numeração renumerada sequencialmente (01-20) para consistência.
+
+🚨 v4.9.4 CORREÇÃO CRÍTICA: Bug de escopo de variáveis na deduplicação corrigido.
+Pipeline agora processa corretamente 784K registros após deduplicação real.
+Numeração expandida (01-20 + 04b/06b) para análise estatística dual.
 """
 
 import json
@@ -436,7 +439,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             # Inicializar caminhos atuais dos datasets
             current_dataset_paths = dataset_paths.copy()
 
-            # Executar todas as 22 etapas sequencialmente (versão aprimorada v4.9)
+            # Executar todas as 22 etapas sequencialmente (versão corrigida v4.9.4)
             all_pipeline_stages = [
                 "01_chunk_processing",
                 "02_encoding_validation",  # ✨ ENHANCED: chardet + robust fallbacks
@@ -462,7 +465,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "20_pipeline_validation"
             ]
 
-            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.9 (aprimorado com análises estatísticas)")
+            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.9.4 (corrigido com deduplicação funcional + análises estatísticas)")
 
             for stage_num, stage_name in enumerate(all_pipeline_stages, 1):
 
@@ -967,6 +970,12 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 original_df = self._load_processed_data(input_path)
                 logger.info(f"📊 Dataset carregado: {len(original_df)} registros")
 
+                # Definir variáveis de contagem no escopo principal
+                original_count = len(original_df)
+                final_count = original_count
+                duplicates_removed = 0
+                reduction_ratio = 0.0
+
                 # Verificar colunas disponíveis
                 has_body = 'body' in original_df.columns
                 has_body_cleaned = 'body_cleaned' in original_df.columns
@@ -976,11 +985,14 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     logger.error(f"❌ Nenhuma coluna de texto encontrada em {dataset_path}")
                     # Usar deduplicação tradicional como fallback
                     deduplicated_df = self._traditional_deduplication(original_df)
+                    final_count = len(deduplicated_df)
+                    duplicates_removed = original_count - final_count
+                    reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
                     deduplication_report = {
                         "method": "traditional_fallback",
-                        "original_count": len(original_df),
-                        "deduplicated_count": len(deduplicated_df),
-                        "reduction_ratio": (len(original_df) - len(deduplicated_df)) / len(original_df)
+                        "original_count": original_count,
+                        "deduplicated_count": final_count,
+                        "reduction_ratio": reduction_ratio
                     }
                 else:
                     # Usar deduplicação aprimorada global
@@ -991,23 +1003,27 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         if hasattr(self.deduplication_validator, 'enhance_global_deduplication'):
                             try:
                                 deduplicated_df, deduplication_report = self.deduplication_validator.enhance_global_deduplication(original_df)
-                                logger.info(f"Deduplicação global aplicada: {deduplication_report.get('reduction_metrics', {}).get('reduction_percentage', 0):.1f}% redução")
+                                final_count = len(deduplicated_df)
+                                duplicates_removed = original_count - final_count
+                                reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
+                                logger.info(f"Deduplicação global aplicada: {reduction_ratio:.1%} redução")
                             except Exception as e:
                                 logger.warning(f"Fallback para deduplicação inteligente: {e}")
                                 deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
+                                final_count = len(deduplicated_df)
+                                duplicates_removed = original_count - final_count
+                                reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
                                 deduplication_report = {"method": "intelligent_fallback"}
                         else:
                             # Fallback para método original
                             deduplicated_df = self.deduplication_validator.intelligent_deduplication(original_df)
+                            final_count = len(deduplicated_df)
+                            duplicates_removed = original_count - final_count
+                            reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
                             deduplication_report = {"method": "intelligent_original"}
 
                         # Calcular estatísticas se não foi feito na deduplicação aprimorada
                         if "reduction_metrics" not in deduplication_report:
-                            original_count = len(original_df)
-                            final_count = len(deduplicated_df)
-                            duplicates_removed = original_count - final_count
-                            reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
-
                             deduplication_report.update({
                                 "original_count": original_count,
                                 "final_count": final_count,
@@ -1035,11 +1051,14 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     else:
                         logger.info("🔧 Usando deduplicação tradicional (API não disponível)")
                         deduplicated_df = self._traditional_deduplication(original_df)
+                        final_count = len(deduplicated_df)
+                        duplicates_removed = original_count - final_count
+                        reduction_ratio = duplicates_removed / original_count if original_count > 0 else 0
                         deduplication_report = {
                             "method": "traditional",
-                            "original_count": len(original_df),
-                            "deduplicated_count": len(deduplicated_df),
-                            "reduction_ratio": (len(original_df) - len(deduplicated_df)) / len(original_df)
+                            "original_count": original_count,
+                            "deduplicated_count": final_count,
+                            "reduction_ratio": reduction_ratio
                         }
 
                 # Salvar dados deduplicados

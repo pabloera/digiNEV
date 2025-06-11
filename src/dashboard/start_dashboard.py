@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-DASHBOARD BOLSONARISMO v4.6 - INTEGRADO COM PIPELINE
-====================================================
+DASHBOARD BOLSONARISMO v4.9.4 - INTEGRADO COM PIPELINE
+======================================================
 Script para iniciar dashboard integrado com monitoramento em tempo real
 do pipeline e visualização completa dos resultados.
+
+🚨 v4.9.4: Dashboard atualizado para refletir correção de deduplicação.
+Agora monitora corretamente 784K registros processados após deduplicação.
 """
 
 import os

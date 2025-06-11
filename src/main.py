@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.9
-============================================
+MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.9.4
+===============================================
 
 Controlador principal do pipeline com checkpoints e recuperação automática.
 Integra com o sistema unificado de anthropic_integration.
-Pipeline aprimorado: 22 etapas (01-20 + 04b/06b) com melhorias de implementação.
+Pipeline aprimorado: 22 etapas (01-20 + 04b/06b) com correção crítica de deduplicação.
+
+🚨 CORREÇÃO v4.9.4: Bug de escopo de variáveis na deduplicação resolvido.
+Stages agora processam corretamente 784K registros após deduplicação real.
 """
 
 import json
@@ -40,7 +43,7 @@ class PipelineController:
         self.checkpoints_dir = self.base_path / "checkpoints"
         self.checkpoints_dir.mkdir(exist_ok=True)
 
-        # Pipeline stages configuration (v4.9 - 22 etapas com melhorias)
+        # Pipeline stages configuration (v4.9.4 - 22 etapas com correção crítica deduplicação)
         self.stages = [
             {'id': '01_chunk_processing', 'name': 'Chunk Processing',
              'critical': True},
@@ -182,7 +185,7 @@ class PipelineController:
             }
 
         return {
-            'pipeline_version': '4.9',
+            'pipeline_version': '4.9.4',
             'last_updated': datetime.now().isoformat(),
             'current_dataset': '',
             'stages': stages_dict,
@@ -324,7 +327,7 @@ class PipelineController:
             }
 
         return {
-            'pipeline_version': '4.9',
+            'pipeline_version': '4.9.4',
             'protection_mode': 'enabled',
             'last_updated': datetime.now().isoformat(),
             'description': 'Flags de proteção para impedir reescrita de etapas funcionais',
@@ -642,7 +645,7 @@ class PipelineController:
 
 def main():
     """Entry point principal"""
-    print("🎯 PIPELINE CONTROLLER - BOLSONARISMO v4.9")
+    print("🎯 PIPELINE CONTROLLER - BOLSONARISMO v4.9.4")
     print("=" * 50)
 
     try:
