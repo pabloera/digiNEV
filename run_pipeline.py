@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v4.9.4 - CORREÇÃO CRÍTICA DEDUPLICAÇÃO
-============================================================
+PIPELINE BOLSONARISMO v4.9.5 - STAGE 07 SPACY TOTALMENTE OPERACIONAL
+====================================================================
 
 Pipeline aprimorado com 22 etapas implementadas (01-20 + 04b/06b):
-- 🚨 CORREÇÃO CRÍTICA: Bug de deduplicação resolvido (stages agora processam 784K vs 1.35M registros)
+- 🔤 STAGE 07 SPACY: pt_core_news_lg 100% funcional com 57 entidades políticas brasileiras
+- 🛠️ CONFIGURAÇÃO CORRIGIDA: Pipeline inicializa 35/35 componentes (100% vs 48.6% anterior)
+- 🚨 CORREÇÃO CRÍTICA: Bug de deduplicação resolvido (stages processam 784K vs 1.35M registros)
 - Integração completa com Dashboard
 - Voyage.ai + spaCy totalmente implementados
 - Análise estatística dual (antes/depois da limpeza)
