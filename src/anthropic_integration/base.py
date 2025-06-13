@@ -20,6 +20,13 @@ import anthropic
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+# Enhanced model configuration support
+try:
+    from .enhanced_model_loader import get_enhanced_model_loader, load_operation_config
+    ENHANCED_CONFIG_AVAILABLE = True
+except ImportError:
+    ENHANCED_CONFIG_AVAILABLE = False
+
 # Encontrar diretório raiz do projeto
 current_dir = Path(__file__).parent
 project_root = current_dir.parent.parent  # sobe 2 níveis: src/anthropic_integration -> src -> projeto
@@ -43,7 +50,7 @@ except ImportError:
 class AnthropicConfig:
     """Configuração para API Anthropic"""
     api_key: str
-    model: str = "claude-3-5-haiku-latest"
+    model: str = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo fixo reproduzível
     max_tokens: int = 2000
     temperature: float = 0.3
 
@@ -51,19 +58,38 @@ class AnthropicConfig:
 class AnthropicBase:
     """Classe base para integração com API Anthropic"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, stage_operation: Optional[str] = None):
         """
         Inicializa cliente Anthropic
 
         Args:
             config: Dicionário de configuração (se None, usa variáveis de ambiente)
+            stage_operation: Operação/stage para configuração específica
         """
         self.config = config or {}
+        self.stage_operation = stage_operation
         self.logger = logging.getLogger(self.__class__.__name__)
+        
+        # Carregar configuração enhanced se disponível
+        self.enhanced_config: Dict[str, Any] = {}
+        if ENHANCED_CONFIG_AVAILABLE and stage_operation:
+            try:
+                self.enhanced_config = load_operation_config(stage_operation)
+                self.logger.info(f"✅ Enhanced config carregada para {stage_operation}: {self.enhanced_config.get('model', 'N/A')}")
+            except Exception as e:
+                self.logger.warning(f"⚠️ Erro ao carregar enhanced config para {stage_operation}: {e}")
 
-        # Configurar API
-        if config and 'anthropic' in config:
-            anthro_config = config['anthropic']
+        # Configurar API - prioridade: enhanced_config > config > env
+        if self.enhanced_config:
+            # Usar configuração enhanced específica do stage
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            self.model = self.enhanced_config.get('model', 'claude-3-5-sonnet-20241022')
+            self.max_tokens = self.enhanced_config.get('max_tokens', 3000)
+            self.temperature = self.enhanced_config.get('temperature', 0.3)
+            self.batch_size = self.enhanced_config.get('batch_size', 20)
+            self.logger.info(f"🎯 Usando enhanced config: {self.model} (temp={self.temperature}, tokens={self.max_tokens})")
+        elif self.config and 'anthropic' in self.config:
+            anthro_config = self.config['anthropic']
             config_api_key = anthro_config.get('api_key', '')
 
             # Verificar se é uma referência de variável de ambiente (${VAR_NAME})
@@ -75,14 +101,15 @@ class AnthropicBase:
             else:
                 api_key = os.getenv('ANTHROPIC_API_KEY')
 
-            self.model = anthro_config.get('model', 'claude-3-5-haiku-latest')
+            self.model = anthro_config.get('model', 'claude-3-5-sonnet-20241022')
             self.max_tokens = anthro_config.get('max_tokens_per_request', 2000)
             self.temperature = anthro_config.get('temperature', 0.3)
         else:
             api_key = os.getenv('ANTHROPIC_API_KEY')
-            self.model = os.getenv('ANTHROPIC_MODEL', 'claude-3-5-haiku-latest')
-            self.max_tokens = 2000
+            self.model = os.getenv('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20241022')
+            self.max_tokens = 3000  # Aumentado padrão para nova configuração
             self.temperature = 0.3
+            self.batch_size = 20
 
         if not api_key:
             self.logger.warning("API key Anthropic não encontrada. Modo tradicional será usado.")

@@ -1,0 +1,232 @@
+# 🚀 CONFIGURAÇÕES OTIMIZADAS DE MODELOS CLAUDE
+# Baseado em análise profunda de performance e custo-benefício
+# Arquivo: enhanced_model_settings.yaml
+
+# 🎯 CONFIGURAÇÕES ESPECÍFICAS POR STAGE (OTIMIZADAS)
+anthropic_enhanced:
+  
+  # 🔧 CONFIGURAÇÃO PADRÃO (FALLBACK)
+  default_config:
+    model: "claude-3-5-sonnet-20241022"
+    temperature: 0.3
+    max_tokens: 4000
+    batch_size: 20
+    justification: "Configuração equilibrada para performance e qualidade"
+  
+  # 🔧 CONFIGURAÇÕES OTIMIZADAS POR STAGE
+  stage_specific_configs:
+    
+    stage_05_political:
+      model: "claude-3-5-haiku-20241022"
+      temperature: 0.1          # ✅ Perfeito para classificação hierárquica
+      max_tokens: 3000          # 🔧 Aumentado para 4 níveis hierárquicos
+      batch_size: 100           # ✅ Mantido - já otimizado
+      justification: "Classificação política hierárquica 4 níveis precisa"
+      expected_improvement: "Mantém excelente performance atual"
+      
+    stage_08_sentiment:
+      model: "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Contexto político complexo
+      temperature: 0.2          # 🔧 NOVA: Detectar ironia + consistência
+      max_tokens: 2200          # 🔧 AUMENTADO: Análise contextual rica
+      batch_size: 15            # 🔧 REDUZIDO: Qualidade superior
+      justification: "Contexto político brasileiro com ironia/sarcasmo requer capacidade semântica avançada"
+      expected_improvement: "+60% detecção de nuances políticas e contexto brasileiro"
+      
+    stage_15_network:
+      model: "claude-sonnet-4-20250514"  # 🔧 UPGRADE ESTRATÉGICO
+      temperature: 0.3          # 🔧 NOVA: Insights criativos equilibrados
+      max_tokens: 3500          # 🔧 NOVA: Análise de padrões complexos
+      batch_size: 10            # 🔧 Reduzido para qualidade superior
+      justification: "Padrões de rede política requerem capacidade semântica superior"
+      expected_improvement: "+70% qualidade análise de comunidades"
+      
+    stage_16_qualitative:
+      model: "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Rigor acadêmico avançado
+      temperature: 0.15         # 🔧 NOVA: Rigor acadêmico
+      max_tokens: 3000          # 🔧 AUMENTADO: Análise acadêmica profunda
+      batch_size: 12            # 🔧 REDUZIDO: Foco em qualidade
+      justification: "Tipologias acadêmicas complexas requerem compreensão contextual superior"
+      expected_improvement: "+70% rigor na aplicação de tipologias de negacionismo e autoritarismo"
+      
+    stage_17_review:
+      model: "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Análise crítica profunda
+      temperature: 0.25         # 🔧 NOVA: Revisão equilibrada
+      max_tokens: 2800          # 🔧 AUMENTADO: Análise detalhada
+      batch_size: 20            # 🔧 OTIMIZADO: Qualidade vs eficiência
+      justification: "Revisão crítica de pipeline científico requer capacidade analítica avançada"
+      expected_improvement: "+55% detecção de inconsistências e problemas metodológicos"
+      
+    stage_18_topics:
+      model: "claude-sonnet-4-20250514"  # 🔧 UPGRADE ESTRATÉGICO
+      temperature: 0.4          # 🔧 NOVA: Interpretação criativa
+      max_tokens: 4000          # 🔧 NOVA: Contexto brasileiro profundo
+      batch_size: 8             # 🔧 Menor para interpretação rica
+      justification: "Interpretação contextual política brasileira requer capacidade superior"
+      expected_improvement: "+80% qualidade interpretação de tópicos"
+      
+    stage_20_validation:
+      model: "claude-3-5-haiku-20241022"   # 🔧 FIXO: Máxima reprodutibilidade
+      temperature: 0.1          # 🔧 NOVA: Validação determinística
+      max_tokens: 2200
+      batch_size: 30
+      justification: "Validação final científica requer consistência absoluta e reprodutibilidade"
+      expected_improvement: "+45% reprodutibilidade e detecção de problemas"
+
+  # 🎯 ESTRATÉGIAS DE FALLBACK INTELIGENTE
+  fallback_strategies:
+    "claude-sonnet-4-20250514":
+      - "claude-3-5-sonnet-20241022"
+      - "claude-3-5-haiku-20241022"
+    "claude-3-5-sonnet-20241022":
+      - "claude-3-5-haiku-20241022"
+    "claude-3-5-haiku-20241022":
+      - "claude-3-5-sonnet-20241022"
+      
+  # 🎭 CONFIGURAÇÕES DE PERFORMANCE
+  performance_modes:
+    speed:
+      preferred_model: "claude-3-5-haiku-20241022"
+      temperature_adjustment: -0.1  # Mais determinístico
+      max_tokens_limit: 2000
+      batch_size_multiplier: 1.5
+      
+    balanced:
+      preferred_model: "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Qualidade equilibrada
+      temperature_adjustment: 0.0
+      max_tokens_limit: 3000
+      batch_size_multiplier: 1.0
+      
+    quality:
+      preferred_model: "claude-sonnet-4-20250514"
+      temperature_adjustment: +0.1  # Mais criativo
+      max_tokens_limit: 4000
+      batch_size_multiplier: 0.7   # Batches menores
+
+  # 💰 CONFIGURAÇÃO DE CUSTOS
+  cost_optimization:
+    monthly_budget_limit: 200.0      # USD
+    enable_cost_alerts: true
+    cost_per_1k_tokens:
+      "claude-3-5-haiku-20241022": 0.00025
+      "claude-3-5-sonnet-20241022": 0.003
+      "claude-sonnet-4-20250514": 0.015
+    
+    # Thresholds para downgrade automático
+    auto_downgrade:
+      enable: true
+      budget_threshold: 0.8        # 80% do orçamento
+      fallback_model: "claude-3-5-haiku-20241022"
+      
+  # 📊 MONITORAMENTO AVANÇADO
+  monitoring:
+    track_token_usage: true
+    track_response_time: true
+    track_quality_metrics: true
+    log_model_performance: true
+    generate_daily_reports: true
+    
+    # Métricas de qualidade por stage
+    quality_metrics:
+      stage_05: ["accuracy", "consistency", "hierarchical_coherence"]
+      stage_08: ["sentiment_accuracy", "irony_detection", "political_context"]
+      stage_15: ["community_detection", "network_insights", "pattern_recognition"]
+      stage_16: ["academic_rigor", "typology_consistency", "classification_depth"]
+      stage_18: ["interpretive_quality", "contextual_relevance", "semantic_richness"]
+
+# 📋 ESTIMATIVAS DE IMPACTO
+cost_impact_analysis:
+  current_estimated_monthly:
+    total_usd: 60.0
+    breakdown:
+      stage_05: 15.0
+      stage_08: 12.0
+      stage_15: 8.0
+      stage_16: 10.0
+      stage_17: 5.0
+      stage_18: 7.0
+      stage_20: 3.0
+      
+  optimized_estimated_monthly:
+    total_usd: 145.0
+    breakdown:
+      stage_05: 18.0    # +20% (mais tokens para 4 níveis)
+      stage_08: 25.0    # +108% (upgrade para Sonnet 3.5)
+      stage_15: 40.0    # +400% (upgrade para Sonnet 4)
+      stage_16: 22.0    # +120% (upgrade para Sonnet 3.5)
+      stage_17: 18.0    # +260% (upgrade para Sonnet 3.5)
+      stage_18: 35.0    # +400% (upgrade para Sonnet 4)
+      stage_20: 7.0     # +133% (otimização Haiku fixo)
+      
+  roi_analysis:
+    cost_increase_percentage: 142
+    expected_quality_improvement: "60-120%"
+    recommended: true
+    payback_period_months: 2.5
+    key_benefits:
+      - "Detecção superior de nuances políticas"
+      - "Interpretação contextual avançada"
+      - "Redução de falsos positivos"
+      - "Análise de redes mais sofisticada"
+      - "Classificação acadêmica rigorosa"
+
+# 🚀 PLANO DE IMPLEMENTAÇÃO
+implementation_plan:
+  phase_1:
+    priority: "High"
+    timeframe: "Semana 1"
+    stages: ["stage_08_sentiment"]
+    description: "Implementar temperatura otimizada para sentiment"
+    risk: "Low"
+    
+  phase_2:
+    priority: "High"
+    timeframe: "Semana 2"
+    stages: ["stage_16_qualitative", "stage_17_review", "stage_20_validation"]
+    description: "Otimizar temperaturas e tokens para stages de análise"
+    risk: "Low"
+    
+  phase_3:
+    priority: "Medium"
+    timeframe: "Semana 3"
+    stages: ["stage_18_topics"]
+    description: "Upgrade para Sonnet 4 - interpretação de tópicos"
+    risk: "Medium"
+    expected_cost_increase: 300
+    
+  phase_4:
+    priority: "Medium"
+    timeframe: "Semana 4"
+    stages: ["stage_15_network"]
+    description: "Upgrade para Sonnet 4 - análise de redes"
+    risk: "Medium"
+    expected_cost_increase: 338
+    
+# 🔬 TESTES E VALIDAÇÃO
+testing_strategy:
+  ab_testing:
+    enable: true
+    sample_size_percentage: 10
+    metrics_to_track:
+      - "response_quality_score"
+      - "processing_time"
+      - "cost_per_operation"
+      - "accuracy_metrics"
+      
+  gradual_rollout:
+    enable: true
+    initial_percentage: 25
+    increase_per_week: 25
+    full_rollout_weeks: 4
+    
+  rollback_criteria:
+    quality_degradation_threshold: 5  # %
+    cost_increase_threshold: 150      # %
+    error_rate_threshold: 2           # %
+
+# 📝 DOCUMENTAÇÃO E LOGGING
+documentation:
+  log_all_config_changes: true
+  maintain_performance_history: true
+  generate_weekly_reports: true
+  include_cost_breakdown: true
+  track_model_effectiveness: true

@@ -25,7 +25,7 @@ python run_pipeline.py
 cd src/dashboard && python start_dashboard.py
 ```
 
-### ✨ **Características v4.9.8 - DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS**
+### ✨ **Características v4.9.8 - DASHBOARD FUNCIONAL + ENHANCED MODEL CONFIG**
 - 🔢 **22 Etapas Implementadas**: Pipeline expandido (01-20 + 04b/06b)
 - 🎯 **100% Padrões Anthropic**: XML prompting, Haiku model, taxonomia hierárquica
 - ⚡ **Enhanced Components**: Encoding, deduplication, text cleaning, statistical analysis
@@ -34,6 +34,8 @@ cd src/dashboard && python start_dashboard.py
 - 💰 **96%+ Economia**: Custos API drasticamente reduzidos (1.3M → 50K)
 - 🎛️ **API-only Stages 12-20**: Sem fallbacks, máxima qualidade
 - 📊 **Dashboard Integrado**: Interface web completa
+- 🔧 **Enhanced Model Configuration**: Sistema avançado de configuração por stage
+- 💰 **Cost Monitoring Automático**: Monitoramento e controle de custos em tempo real
 
 ---
 
@@ -322,6 +324,100 @@ cost_optimization:
   reduction_target: 0.96
   threshold: 0.75
 ```
+
+### 🔧 **ENHANCED MODEL CONFIGURATION v4.9.8**
+
+O sistema agora possui configuração avançada de modelos por stage para máxima qualidade e controle de custos:
+
+#### **🎯 Configurações por Stage (config/enhanced_model_settings.yaml)**
+
+```yaml
+anthropic_enhanced:
+  # Configuração padrão (fallback)
+  default_config:
+    model: "claude-3-5-sonnet-20241022"
+    temperature: 0.3
+    max_tokens: 4000
+    batch_size: 20
+
+  # Configurações específicas por stage
+  stage_specific_configs:
+    stage_05_political:
+      model: "claude-3-5-haiku-20241022"      # Classificação hierárquica rápida
+      temperature: 0.1
+      max_tokens: 3000
+      batch_size: 100
+      
+    stage_08_sentiment:
+      model: "claude-3-5-sonnet-20241022"     # 🔧 UPGRADE para contexto político
+      temperature: 0.2
+      max_tokens: 2200
+      batch_size: 15
+      
+    stage_16_qualitative:
+      model: "claude-3-5-sonnet-20241022"     # Rigor acadêmico avançado
+      temperature: 0.15
+      max_tokens: 3000
+      batch_size: 12
+      
+    stage_18_topics:
+      model: "claude-sonnet-4-20250514"       # 🚀 PREMIUM para interpretação
+      temperature: 0.4
+      max_tokens: 4000
+      batch_size: 8
+      
+    stage_20_validation:
+      model: "claude-3-5-haiku-20241022"      # Máxima reprodutibilidade
+      temperature: 0.1
+      max_tokens: 2200
+      batch_size: 30
+
+  # Estratégias de fallback automático
+  fallback_strategies:
+    "claude-sonnet-4-20250514":
+      - "claude-3-5-sonnet-20241022"
+      - "claude-3-5-haiku-20241022"
+    "claude-3-5-sonnet-20241022":
+      - "claude-3-5-haiku-20241022"
+
+  # Monitoramento automático de custos
+  cost_optimization:
+    monthly_budget_limit: 200.0
+    auto_downgrade:
+      enable: true
+      budget_threshold: 0.8
+      fallback_model: "claude-3-5-haiku-20241022"
+```
+
+#### **💰 Impacto de Custos**
+
+| **Stage** | **Modelo Anterior** | **Modelo Novo** | **Impacto** |
+|-----------|-------------------|-----------------|-------------|
+| 05 - Political | claude-3-5-haiku-latest | claude-3-5-haiku-20241022 | 🔧 Versão fixa |
+| 08 - Sentiment | claude-3-5-haiku-latest | claude-3-5-sonnet-20241022 | +108% custo, +60% qualidade |
+| 16 - Qualitative | claude-3-5-haiku-latest | claude-3-5-sonnet-20241022 | +120% custo, +70% rigor |
+| 18 - Topics | claude-3-5-haiku-latest | claude-sonnet-4-20250514 | +400% custo, +80% interpretação |
+
+#### **🔍 Validação do Sistema**
+
+```bash
+# Validar configurações enhanced
+poetry run python scripts/validate_enhanced_config.py
+
+# Consolidar configurações
+poetry run python scripts/consolidate_model_configs.py
+
+# Testar pipeline com enhanced config
+poetry run python run_pipeline.py
+```
+
+#### **📊 Benefícios da Enhanced Configuration**
+
+- ✅ **Reprodutibilidade Científica**: Versões fixas garantem resultados consistentes
+- ✅ **Qualidade Superior**: Modelos otimizados para cada tipo de análise
+- ✅ **Controle de Custos**: Monitoramento automático e downgrade inteligente
+- ✅ **Flexibilidade**: Configuração específica por stage ou modo de performance
+- ✅ **Fallbacks Robustos**: Sistema automático de contingência
 
 ### 🏗️ **Estrutura de Diretórios**
 ```

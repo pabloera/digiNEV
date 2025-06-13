@@ -32,7 +32,8 @@ class IntelligentNetworkAnalyzer(AnthropicBase):
     """
 
     def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
+        # 🔧 UPGRADE: Usar enhanced model configuration para network analysis
+        super().__init__(config, stage_operation="network_analysis")
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Configurações específicas

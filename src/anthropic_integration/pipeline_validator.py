@@ -36,7 +36,8 @@ class CompletePipelineValidator(AnthropicBase):
     """
 
     def __init__(self, config: Dict[str, Any] = None, project_root: str = None):
-        super().__init__(config)
+        # 🔧 UPGRADE: Usar enhanced model configuration para validation
+        super().__init__(config, stage_operation="validation")
         self.error_handler = APIErrorHandler(project_root)
         self.quality_checker = APIQualityChecker(config)
         self.project_root = Path(project_root) if project_root else Path.cwd()

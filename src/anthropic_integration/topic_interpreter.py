@@ -16,7 +16,8 @@ class TopicInterpreter(AnthropicBase):
     """Classe para interpretação de tópicos com API Anthropic"""
 
     def __init__(self, config: dict):
-        super().__init__(config)
+        # 🔧 UPGRADE: Usar enhanced model configuration para topic interpretation
+        super().__init__(config, stage_operation="topic_interpretation")
 
         # Categorias de discurso político
         self.discourse_categories = [

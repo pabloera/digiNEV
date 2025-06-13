@@ -16,7 +16,8 @@ class QualitativeClassifier(AnthropicBase):
     """Classe para classificação qualitativa com API Anthropic"""
 
     def __init__(self, config: dict):
-        super().__init__(config)
+        # 🔧 UPGRADE: Usar enhanced model configuration para qualitative analysis
+        super().__init__(config, stage_operation="qualitative_analysis")
 
         # Tipologias acadêmicas expandidas
         self.academic_typologies = {

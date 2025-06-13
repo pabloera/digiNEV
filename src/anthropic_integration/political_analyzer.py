@@ -148,15 +148,18 @@ class PoliticalAnalyzer(AnthropicBase):
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        super().__init__(config)
+        # 🔧 UPGRADE: Usar enhanced model configuration para political analysis
+        super().__init__(config, stage_operation="political_analysis")
 
-        # CONFIGURAÇÃO ANTHROPIC-OPTIMIZED
-        self.model = "claude-3-5-haiku-20241022"  # Anthropic recommendation
-        self.max_tokens = 4000
-        self.temperature = 0.1  # Low for consistent classification
-
-        # BATCH OPTIMIZATION
-        self.batch_size = 100  # OTIMIZADO: 10 → 100 (90% redução de API calls)
+        # CONFIGURAÇÃO ENHANCED se não carregada (fallback)
+        if not hasattr(self, 'enhanced_config') or not self.enhanced_config:
+            self.model = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo mais capaz para política
+            self.max_tokens = 4000
+            self.temperature = 0.1  # Low for consistent classification
+            self.batch_size = 100  # OTIMIZADO: 10 → 100 (90% redução de API calls)
+        else:
+            # Usar configuração enhanced carregada
+            self.batch_size = self.enhanced_config.get('batch_size', 100)
         self.max_concurrent_batches = 5
         self.semaphore = asyncio.Semaphore(self.max_concurrent_batches)
 

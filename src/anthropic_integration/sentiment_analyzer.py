@@ -26,8 +26,10 @@ from .base import AnthropicBase
 class AnthropicSentimentAnalyzer(AnthropicBase):
     """Analisador de sentimentos ultra-otimizado para contexto político brasileiro"""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        # 🔧 UPGRADE: Usar enhanced model configuration para sentiment analysis
+        super().__init__(config, stage_operation="sentiment_analysis")
+        
         # Sistema de cache inteligente
         self._cache = {}
         self._cache_stats = {'hits': 0, 'misses': 0, 'saved': 0}
