@@ -1,77 +1,120 @@
 #!/usr/bin/env python3
 """
-Monitorador de Custos da API Anthropic
-Rastreia uso e calcula custos estimados
+Sistema Consolidado de Monitoramento de Custos Anthropic v4.9.8
+===============================================================
 
-Autor: Pablo Almada
-Data: 2025-05-29
+Combina funcionalidades dos sistemas original e enhanced em uma única implementação:
+- Monitoramento básico de custos (original)
+- Enhanced monitoring com alertas e auto-downgrade
+- Sistema unificado sem divisão de código
+
+🔧 CONSOLIDAÇÃO: Unifica cost_monitor.py + cost_monitor_enhanced.py
+💰 FEATURES: Monitoramento completo, alertas automáticos, controle de orçamento
+📊 RELATÓRIOS: Análise detalhada de custos por modelo/stage/operação
 """
 
 import json
 import logging
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
-class AnthropicCostMonitor:
+class ConsolidatedCostMonitor:
     """
-    Monitor de custos da API Anthropic
-    Rastreia tokens de entrada/saída e calcula custos estimados
+    Monitor consolidado de custos da API Anthropic
+    
+    Funcionalidades:
+    - Rastreamento básico de uso e custos
+    - Enhanced monitoring com alertas automáticos
+    - Auto-downgrade quando orçamento excede threshold
+    - Relatórios detalhados por modelo, stage e operação
+    - Singleton pattern para uso global
     """
 
-    # Preços por token (valores de maio 2025 - verificar atualizações)
+    # Preços por token (valores atualizados junho 2025)
     TOKEN_PRICES = {
         'claude-sonnet-4-20250514': {
+            'input': 0.000015,   # $15 per million input tokens
+            'output': 0.000075   # $75 per million output tokens
+        },
+        'claude-3-5-sonnet-20241022': {
             'input': 0.000003,   # $3 per million input tokens
             'output': 0.000015   # $15 per million output tokens
         },
-        'claude-3-5-sonnet-20241022': {
-            'input': 0.000003,
-            'output': 0.000015
-        },
         'claude-3-5-haiku-20241022': {
+            'input': 0.00000025, # $0.25 per million input tokens
+            'output': 0.00000125 # $1.25 per million output tokens
+        },
+        # Legacy support
+        'claude-3-5-haiku-latest': {
             'input': 0.00000025,
             'output': 0.00000125
         }
     }
 
-    def __init__(self, project_dir: Path):
+    def __init__(self, project_dir: Path, config: Dict[str, Any] = None):
         """
-        Inicializa o monitor de custos
+        Inicializa o monitor consolidado de custos
 
         Args:
             project_dir: Diretório base do projeto
+            config: Configuração de custos (opcional)
         """
         self.project_dir = Path(project_dir)
-        self.cost_file = self.project_dir / 'logs' / 'anthropic_costs.json'
+        self.config = config or {}
+        
+        # Configuração de diretórios
+        self.logs_dir = self.project_dir / 'logs'
+        self.logs_dir.mkdir(exist_ok=True)
+        
+        # Arquivos de dados
+        self.cost_file = self.logs_dir / 'consolidated_cost_monitor.json'
+        self.daily_reports_dir = self.logs_dir / 'cost_reports'
+        self.daily_reports_dir.mkdir(exist_ok=True)
+        
+        # Configuração de orçamento e alertas
+        self.monthly_budget = self.config.get('monthly_budget_limit', 200.0)
+        self.alert_threshold = self.config.get('budget_threshold', 0.8)
+        self.auto_downgrade_enabled = self.config.get('auto_downgrade', {}).get('enable', True)
+        self.fallback_model = self.config.get('auto_downgrade', {}).get('fallback_model', 'claude-3-5-haiku-20241022')
+        
+        # Thread safety
         self.session_start = datetime.now()
         self.lock = threading.Lock()
-
-        # Criar diretório de logs se não existir
-        self.cost_file.parent.mkdir(parents=True, exist_ok=True)
-
+        
         # Carregar dados existentes
         self.cost_data = self._load_cost_data()
 
     def _load_cost_data(self) -> Dict[str, Any]:
         """Carrega dados de custo existentes"""
-        if self.cost_file.exists():
-            try:
+        try:
+            if self.cost_file.exists():
                 with open(self.cost_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.warning(f"Erro ao carregar dados de custo: {e}")
+                    data = json.load(f)
+                logger.info(f"✅ Dados de custo carregados: {self.cost_file}")
+                return data
+            else:
+                logger.info("📊 Inicializando novo sistema de monitoramento de custos")
+        except Exception as e:
+            logger.error(f"❌ Erro ao carregar dados de custo: {e}")
 
+        # Estrutura unificada (original + enhanced)
         return {
+            # Estrutura original
             'total_cost': 0.0,
             'sessions': [],
             'daily_usage': {},
             'by_model': {},
-            'by_stage': {}
+            'by_stage': {},
+            # Estrutura enhanced
+            'daily_totals': {},
+            'monthly_totals': {},
+            'alerts': [],
+            'model_usage': {}
         }
 
     def _save_cost_data(self):
@@ -80,16 +123,17 @@ class AnthropicCostMonitor:
             with open(self.cost_file, 'w', encoding='utf-8') as f:
                 json.dump(self.cost_data, f, indent=2, ensure_ascii=False, default=str)
         except Exception as e:
-            logger.error(f"Erro ao salvar dados de custo: {e}")
+            logger.error(f"❌ Erro ao salvar dados de custo: {e}")
 
     def record_usage(self,
                     model: str,
                     input_tokens: int,
                     output_tokens: int,
                     stage: str = 'unknown',
-                    operation: str = 'general') -> float:
+                    operation: str = 'general',
+                    session_id: str = None) -> float:
         """
-        Registra uso da API e calcula custo
+        Registra uso da API e calcula custo (método consolidado)
 
         Args:
             model: Modelo usado
@@ -97,6 +141,7 @@ class AnthropicCostMonitor:
             output_tokens: Tokens de saída
             stage: Etapa do pipeline
             operation: Operação específica
+            session_id: ID da sessão (opcional)
 
         Returns:
             Custo estimado da operação
@@ -110,20 +155,38 @@ class AnthropicCostMonitor:
                 total_cost = input_cost + output_cost
             else:
                 # Usar preços do modelo padrão se modelo não conhecido
-                prices = self.TOKEN_PRICES['claude-sonnet-4-20250514']
+                prices = self.TOKEN_PRICES['claude-3-5-sonnet-20241022']
                 input_cost = input_tokens * prices['input']
                 output_cost = output_tokens * prices['output']
                 total_cost = input_cost + output_cost
                 logger.warning(f"Modelo {model} não encontrado, usando preços padrão")
 
-            # Registrar dados
+            # Timestamps
             now = datetime.now()
+            timestamp = now.isoformat()
             today = now.strftime('%Y-%m-%d')
+            month = now.strftime('%Y-%m')
 
-            # Atualizar total
+            # Criar registro de uso
+            usage_record = {
+                'timestamp': timestamp,
+                'model': model,
+                'input_tokens': input_tokens,
+                'output_tokens': output_tokens,
+                'total_tokens': input_tokens + output_tokens,
+                'input_cost': input_cost,
+                'output_cost': output_cost,
+                'total_cost': total_cost,
+                'stage': stage,
+                'operation': operation,
+                'session_id': session_id or 'default'
+            }
+
+            # ===== ESTRUTURA ORIGINAL =====
+            # Atualizar total geral
             self.cost_data['total_cost'] += total_cost
 
-            # Atualizar uso diário
+            # Atualizar uso diário (formato original)
             if today not in self.cost_data['daily_usage']:
                 self.cost_data['daily_usage'][today] = {
                     'cost': 0.0,
@@ -138,7 +201,7 @@ class AnthropicCostMonitor:
             daily['output_tokens'] += output_tokens
             daily['requests'] += 1
 
-            # Atualizar por modelo
+            # Atualizar por modelo (formato original)
             if model not in self.cost_data['by_model']:
                 self.cost_data['by_model'][model] = {
                     'cost': 0.0,
@@ -153,7 +216,7 @@ class AnthropicCostMonitor:
             model_data['output_tokens'] += output_tokens
             model_data['requests'] += 1
 
-            # Atualizar por etapa
+            # Atualizar por stage (formato original)
             if stage not in self.cost_data['by_stage']:
                 self.cost_data['by_stage'][stage] = {
                     'cost': 0.0,
@@ -168,134 +231,227 @@ class AnthropicCostMonitor:
             stage_data['output_tokens'] += output_tokens
             stage_data['requests'] += 1
 
-            # Registrar evento individual
-            usage_record = {
-                'timestamp': now.isoformat(),
-                'model': model,
-                'stage': stage,
-                'operation': operation,
-                'input_tokens': input_tokens,
-                'output_tokens': output_tokens,
-                'input_cost': input_cost,
-                'output_cost': output_cost,
-                'total_cost': total_cost
-            }
+            # ===== ESTRUTURA ENHANCED =====
+            # Atualizar totais diários (formato enhanced)
+            if today not in self.cost_data['daily_totals']:
+                self.cost_data['daily_totals'][today] = {
+                    'total_cost': 0.0,
+                    'total_tokens': 0,
+                    'requests': 0,
+                    'models': {}
+                }
 
-            # Adicionar à sessão atual
-            current_session = self._get_current_session()
-            current_session['operations'].append(usage_record)
-            current_session['total_cost'] += total_cost
+            daily_enhanced = self.cost_data['daily_totals'][today]
+            daily_enhanced['total_cost'] += total_cost
+            daily_enhanced['total_tokens'] += input_tokens + output_tokens
+            daily_enhanced['requests'] += 1
+
+            if model not in daily_enhanced['models']:
+                daily_enhanced['models'][model] = {'cost': 0.0, 'tokens': 0, 'requests': 0}
+            daily_enhanced['models'][model]['cost'] += total_cost
+            daily_enhanced['models'][model]['tokens'] += input_tokens + output_tokens
+            daily_enhanced['models'][model]['requests'] += 1
+
+            # Atualizar totais mensais (formato enhanced)
+            if month not in self.cost_data['monthly_totals']:
+                self.cost_data['monthly_totals'][month] = {
+                    'total_cost': 0.0,
+                    'total_tokens': 0,
+                    'requests': 0,
+                    'models': {},
+                    'stages': {}
+                }
+
+            monthly = self.cost_data['monthly_totals'][month]
+            monthly['total_cost'] += total_cost
+            monthly['total_tokens'] += input_tokens + output_tokens
+            monthly['requests'] += 1
+
+            if model not in monthly['models']:
+                monthly['models'][model] = {'cost': 0.0, 'tokens': 0, 'requests': 0}
+            monthly['models'][model]['cost'] += total_cost
+            monthly['models'][model]['tokens'] += input_tokens + output_tokens
+            monthly['models'][model]['requests'] += 1
+
+            if stage not in monthly['stages']:
+                monthly['stages'][stage] = {'cost': 0.0, 'tokens': 0, 'requests': 0}
+            monthly['stages'][stage]['cost'] += total_cost
+            monthly['stages'][stage]['tokens'] += input_tokens + output_tokens
+            monthly['stages'][stage]['requests'] += 1
+
+            # Adicionar à sessão se fornecida
+            if session_id:
+                if session_id not in self.cost_data['sessions']:
+                    self.cost_data['sessions'][session_id] = []
+                self.cost_data['sessions'][session_id].append(usage_record)
+
+            # Verificar alertas de orçamento
+            self._check_budget_alerts(monthly['total_cost'])
 
             # Salvar dados
             self._save_cost_data()
 
-            logger.info(f"API Usage - Stage: {stage}, Tokens: {input_tokens}→{output_tokens}, Cost: ${total_cost:.6f}")
-
+            logger.info(f"💰 Custo registrado: ${total_cost:.4f} ({model}, {stage}:{operation})")
             return total_cost
 
-    def _get_current_session(self) -> Dict[str, Any]:
-        """Obtém ou cria sessão atual"""
-        session_id = self.session_start.strftime('%Y%m%d_%H%M%S')
+    def _check_budget_alerts(self, current_monthly_cost: float):
+        """Verifica e emite alertas de orçamento"""
+        budget_usage = current_monthly_cost / self.monthly_budget
 
-        # Procurar sessão existente
-        for session in self.cost_data['sessions']:
-            if session['session_id'] == session_id:
-                return session
+        # Alert de 80%
+        if budget_usage >= self.alert_threshold and budget_usage < 1.0:
+            alert_msg = f"⚠️ ALERTA: Orçamento mensal em {budget_usage:.1%} (${current_monthly_cost:.2f}/${self.monthly_budget})"
+            self._add_alert("budget_warning", alert_msg)
+            logger.warning(alert_msg)
 
-        # Criar nova sessão
-        new_session = {
-            'session_id': session_id,
-            'start_time': self.session_start.isoformat(),
-            'total_cost': 0.0,
-            'operations': []
+        # Alert de 100%
+        elif budget_usage >= 1.0:
+            alert_msg = f"🚨 CRÍTICO: Orçamento mensal excedido em {budget_usage:.1%} (${current_monthly_cost:.2f}/${self.monthly_budget})"
+            self._add_alert("budget_exceeded", alert_msg)
+            logger.error(alert_msg)
+
+    def _add_alert(self, alert_type: str, message: str):
+        """Adiciona alerta ao log"""
+        alert = {
+            'timestamp': datetime.now().isoformat(),
+            'type': alert_type,
+            'message': message
         }
+        self.cost_data['alerts'].append(alert)
 
-        self.cost_data['sessions'].append(new_session)
-        return new_session
+        # Manter apenas últimos 100 alertas
+        if len(self.cost_data['alerts']) > 100:
+            self.cost_data['alerts'] = self.cost_data['alerts'][-100:]
 
-    def get_usage_summary(self) -> Dict[str, Any]:
+    def should_auto_downgrade(self) -> bool:
+        """Verifica se deve fazer auto-downgrade"""
+        if not self.auto_downgrade_enabled:
+            return False
+
+        month = datetime.now().strftime('%Y-%m')
+        monthly_cost = self.cost_data['monthly_totals'].get(month, {}).get('total_cost', 0.0)
+        budget_usage = monthly_cost / self.monthly_budget
+
+        if budget_usage >= self.alert_threshold:
+            logger.warning(f"🔽 Auto-downgrade ativado: {budget_usage:.1%} >= {self.alert_threshold:.1%}")
+            return True
+
+        return False
+
+    def get_recommended_model(self, preferred_model: str) -> str:
         """
-        Retorna resumo de uso da API
-
-        Returns:
-            Dicionário com estatísticas de uso
-        """
-        with self.lock:
-            today = datetime.now().strftime('%Y-%m-%d')
-
-            return {
-                'total_cost': self.cost_data['total_cost'],
-                'today_cost': self.cost_data['daily_usage'].get(today, {}).get('cost', 0.0),
-                'sessions_count': len(self.cost_data['sessions']),
-                'by_model': dict(self.cost_data['by_model']),
-                'by_stage': dict(self.cost_data['by_stage']),
-                'last_7_days': self._get_last_n_days_usage(7),
-                'current_session': self._get_current_session()
-            }
-
-    def _get_last_n_days_usage(self, n_days: int) -> Dict[str, float]:
-        """Retorna uso dos últimos N dias"""
-        from datetime import datetime, timedelta
-
-        usage = {}
-        base_date = datetime.now()
-
-        for i in range(n_days):
-            date = (base_date - timedelta(days=i)).strftime('%Y-%m-%d')
-            usage[date] = self.cost_data['daily_usage'].get(date, {}).get('cost', 0.0)
-
-        return usage
-
-    def check_cost_limits(self,
-                         daily_limit: float = 10.0,
-                         session_limit: float = 5.0) -> Dict[str, Any]:
-        """
-        Verifica limites de custo
+        Retorna modelo recomendado (pode fazer downgrade automático)
 
         Args:
-            daily_limit: Limite diário em USD
-            session_limit: Limite por sessão em USD
+            preferred_model: Modelo preferido
 
         Returns:
-            Status dos limites
+            Modelo recomendado (pode ser downgrade)
         """
-        today = datetime.now().strftime('%Y-%m-%d')
-        today_cost = self.cost_data['daily_usage'].get(today, {}).get('cost', 0.0)
-        session_cost = self._get_current_session()['total_cost']
+        if self.should_auto_downgrade():
+            if preferred_model != self.fallback_model:
+                logger.warning(f"🔽 Downgrade automático: {preferred_model} → {self.fallback_model}")
+                return self.fallback_model
+
+        return preferred_model
+
+    def get_summary(self) -> Dict[str, Any]:
+        """
+        Retorna resumo consolidado de uso (compatível com formato original)
+        """
+        now = datetime.now()
+        
+        # Calcular últimos 7 dias
+        last_7_days = {}
+        for i in range(7):
+            date = (now - timedelta(days=i)).strftime('%Y-%m-%d')
+            cost = self.cost_data['daily_usage'].get(date, {}).get('cost', 0.0)
+            last_7_days[date] = cost
 
         return {
-            'daily_limit': daily_limit,
-            'daily_usage': today_cost,
-            'daily_remaining': max(0, daily_limit - today_cost),
-            'daily_exceeded': today_cost > daily_limit,
-            'session_limit': session_limit,
-            'session_usage': session_cost,
-            'session_remaining': max(0, session_limit - session_cost),
-            'session_exceeded': session_cost > session_limit
+            'total_cost': self.cost_data['total_cost'],
+            'session_duration': str(now - self.session_start),
+            'daily_usage': self.cost_data['daily_usage'],
+            'by_model': self.cost_data['by_model'],
+            'by_stage': self.cost_data['by_stage'],
+            'last_7_days': last_7_days,
+            'current_session': str(self.session_start),
+            # Enhanced data
+            'monthly_budget': self.monthly_budget,
+            'budget_usage_percent': self._get_current_budget_usage() * 100,
+            'auto_downgrade_enabled': self.auto_downgrade_enabled,
+            'alerts_count': len(self.cost_data['alerts'])
         }
 
-    def generate_cost_report(self) -> str:
-        """
-        Gera relatório detalhado de custos
+    def _get_current_budget_usage(self) -> float:
+        """Calcula uso atual do orçamento mensal"""
+        month = datetime.now().strftime('%Y-%m')
+        monthly_cost = self.cost_data['monthly_totals'].get(month, {}).get('total_cost', 0.0)
+        return monthly_cost / self.monthly_budget
 
-        Returns:
-            Relatório formatado
-        """
-        summary = self.get_usage_summary()
-        limits = self.check_cost_limits()
+    def get_daily_report(self, date: str = None) -> Dict[str, Any]:
+        """Gera relatório diário (enhanced format)"""
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d')
 
+        # Usar dados enhanced se disponíveis, senão usar formato original
+        if date in self.cost_data['daily_totals']:
+            daily_data = self.cost_data['daily_totals'][date]
+        else:
+            daily_data = self.cost_data['daily_usage'].get(date, {})
+
+        return {
+            'date': date,
+            'total_cost': daily_data.get('total_cost', daily_data.get('cost', 0.0)),
+            'total_tokens': daily_data.get('total_tokens', 
+                daily_data.get('input_tokens', 0) + daily_data.get('output_tokens', 0)),
+            'total_requests': daily_data.get('requests', 0),
+            'models': daily_data.get('models', {}),
+            'cost_per_request': daily_data.get('total_cost', daily_data.get('cost', 0)) / 
+                max(daily_data.get('requests', 1), 1),
+            'tokens_per_request': daily_data.get('total_tokens', 
+                daily_data.get('input_tokens', 0) + daily_data.get('output_tokens', 0)) / 
+                max(daily_data.get('requests', 1), 1)
+        }
+
+    def get_monthly_report(self, month: str = None) -> Dict[str, Any]:
+        """Gera relatório mensal (enhanced format)"""
+        if month is None:
+            month = datetime.now().strftime('%Y-%m')
+
+        monthly_data = self.cost_data['monthly_totals'].get(month, {})
+        total_cost = monthly_data.get('total_cost', 0.0)
+        budget_usage = total_cost / self.monthly_budget
+
+        return {
+            'month': month,
+            'total_cost': total_cost,
+            'budget_limit': self.monthly_budget,
+            'budget_usage_percent': budget_usage * 100,
+            'remaining_budget': self.monthly_budget - total_cost,
+            'total_tokens': monthly_data.get('total_tokens', 0),
+            'total_requests': monthly_data.get('requests', 0),
+            'models': monthly_data.get('models', {}),
+            'stages': monthly_data.get('stages', {}),
+            'avg_cost_per_request': total_cost / max(monthly_data.get('requests', 1), 1),
+            'projected_monthly_cost': total_cost * (30 / datetime.now().day) if datetime.now().day > 0 else total_cost
+        }
+
+    def generate_report(self) -> str:
+        """
+        Gera relatório formatado de uso (formato original mantido)
+        """
+        summary = self.get_summary()
+        
         report = f"""
-📊 RELATÓRIO DE CUSTOS API ANTHROPIC
-{'='*50}
+💰 RELATÓRIO DE CUSTOS ANTHROPIC - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+{'='*80}
 
-💰 CUSTOS TOTAIS:
-   Total Geral: ${summary['total_cost']:.4f}
-   Hoje: ${summary['today_cost']:.4f}
-   Sessão Atual: ${summary['current_session']['total_cost']:.4f}
-
-🚦 LIMITES:
-   Diário: ${limits['daily_usage']:.4f} / ${limits['daily_limit']:.2f} ({'❌ EXCEDIDO' if limits['daily_exceeded'] else '✅ OK'})
-   Sessão: ${limits['session_usage']:.4f} / ${limits['session_limit']:.2f} ({'❌ EXCEDIDO' if limits['session_exceeded'] else '✅ OK'})
+💵 CUSTO TOTAL: ${summary['total_cost']:.4f}
+⏱️ DURAÇÃO DA SESSÃO: {summary['session_duration']}
+📊 ORÇAMENTO MENSAL: ${summary['monthly_budget']:.2f} ({summary['budget_usage_percent']:.1f}% usado)
+🔽 AUTO-DOWNGRADE: {'Ativado' if summary['auto_downgrade_enabled'] else 'Desativado'}
+⚠️ ALERTAS: {summary['alerts_count']} alertas registrados
 
 📈 USO POR MODELO:
 """
@@ -314,26 +470,35 @@ class AnthropicCostMonitor:
         return report
 
 
-# Instância global para facilitar uso
-_cost_monitor = None
+# Instância singleton para compatibilidade
+_consolidated_monitor = None
 
 
-def get_cost_monitor(project_dir: Optional[Path] = None) -> AnthropicCostMonitor:
+def get_cost_monitor(project_dir: Optional[Path] = None, config: Dict[str, Any] = None) -> ConsolidatedCostMonitor:
     """
-    Retorna instância global do monitor de custos
+    Retorna instância singleton do monitor consolidado (compatível com ambos os sistemas)
 
     Args:
-        project_dir: Diretório do projeto (usado apenas na primeira chamada)
+        project_dir: Diretório do projeto
+        config: Configuração de custos (para enhanced features)
 
     Returns:
-        Instância do monitor
+        Instância do monitor consolidado
     """
-    global _cost_monitor
+    global _consolidated_monitor
 
-    if _cost_monitor is None:
+    if _consolidated_monitor is None:
         if project_dir is None:
-            # Usar diretório atual como fallback
             project_dir = Path.cwd()
-        _cost_monitor = AnthropicCostMonitor(project_dir)
+        _consolidated_monitor = ConsolidatedCostMonitor(project_dir, config)
+        logger.info("💰 ConsolidatedCostMonitor inicializado")
 
-    return _cost_monitor
+    return _consolidated_monitor
+
+
+# Alias para compatibilidade com enhanced system
+def get_enhanced_cost_monitor(project_root: Path, config: Dict[str, Any] = None) -> ConsolidatedCostMonitor:
+    """
+    Alias para compatibilidade com sistema enhanced
+    """
+    return get_cost_monitor(project_root, config)

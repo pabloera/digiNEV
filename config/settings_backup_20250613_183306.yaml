@@ -1,95 +1,9 @@
-'# Enhanced Model Configuration':
-  info: Stage-specific model configurations consolidated in anthropic.stage_specific_configs
-  priority: stage_specific_configs > anthropic defaults > environment variables
-  supported_stages:
-  - political_analysis (stage_05_political)
-  - sentiment_analysis (stage_08_sentiment) 
-  - network_analysis (stage_15_network)
-  - qualitative_analysis (stage_16_qualitative)
-  - pipeline_review (stage_17_review)
-  - topic_interpretation (stage_18_topics)
-  - validation (stage_20_validation)
 anthropic:
   cost_monitoring: true
-  enhanced_config_enabled: true
   fallback_enabled: true
   max_tokens: 4000
   model: claude-3-5-sonnet-20241022
   temperature: 0.3
-  
-  # 🎯 CONFIGURAÇÕES ESPECÍFICAS POR STAGE (CONSOLIDADAS)
-  stage_specific_configs:
-    stage_05_political:
-      model: "claude-3-5-haiku-20241022"
-      temperature: 0.1
-      max_tokens: 3000
-      batch_size: 100
-      justification: "Classificação política hierárquica 4 níveis precisa"
-      
-    stage_08_sentiment:
-      model: "claude-3-5-sonnet-20241022"
-      temperature: 0.2
-      max_tokens: 2200
-      batch_size: 15
-      justification: "Contexto político brasileiro com ironia/sarcasmo requer capacidade semântica avançada"
-      
-    stage_15_network:
-      model: "claude-sonnet-4-20250514"
-      temperature: 0.3
-      max_tokens: 3500
-      batch_size: 10
-      justification: "Padrões de rede política requerem capacidade semântica superior"
-      
-    stage_16_qualitative:
-      model: "claude-3-5-sonnet-20241022"
-      temperature: 0.15
-      max_tokens: 3000
-      batch_size: 12
-      justification: "Tipologias acadêmicas complexas requerem compreensão contextual superior"
-      
-    stage_17_review:
-      model: "claude-3-5-sonnet-20241022"
-      temperature: 0.25
-      max_tokens: 2800
-      batch_size: 20
-      justification: "Revisão crítica de pipeline científico requer capacidade analítica avançada"
-      
-    stage_18_topics:
-      model: "claude-sonnet-4-20250514"
-      temperature: 0.4
-      max_tokens: 4000
-      batch_size: 8
-      justification: "Interpretação contextual política brasileira requer capacidade superior"
-      
-    stage_20_validation:
-      model: "claude-3-5-haiku-20241022"
-      temperature: 0.1
-      max_tokens: 2200
-      batch_size: 30
-      justification: "Validação final científica requer consistência absoluta e reprodutibilidade"
-
-  # 🎯 ESTRATÉGIAS DE FALLBACK INTELIGENTE
-  fallback_strategies:
-    "claude-sonnet-4-20250514":
-      - "claude-3-5-sonnet-20241022"
-      - "claude-3-5-haiku-20241022"
-    "claude-3-5-sonnet-20241022":
-      - "claude-3-5-haiku-20241022"
-    "claude-3-5-haiku-20241022":
-      - "claude-3-5-sonnet-20241022"
-      
-  # 💰 CONFIGURAÇÃO DE CUSTOS
-  cost_optimization:
-    monthly_budget_limit: 200.0
-    enable_cost_alerts: true
-    cost_per_1k_tokens:
-      "claude-3-5-haiku-20241022": 0.00025
-      "claude-3-5-sonnet-20241022": 0.003
-      "claude-sonnet-4-20250514": 0.015
-    auto_downgrade:
-      enable: true
-      budget_threshold: 0.8
-      fallback_model: "claude-3-5-haiku-20241022"
 cache:
   embedding_cache:
     compression_level: 6
@@ -136,11 +50,6 @@ encoding_fix:
   - hashtags
   confidence_threshold: 0.8
   use_anthropic: true
-enhanced_models:
-  enabled: true
-  fallback_to_default: true
-  stage_specific_configs: true
-  consolidated_in_settings: true
 feature_extraction:
   extract_emotional_features: true
   extract_political_features: true
@@ -222,7 +131,6 @@ processing:
 project:
   description: 'Análise de Discurso em Canais do Telegram: Bolsonarismo, Negacionismo
     e Autoritarismo'
-  model_config_version: 4.9.8
   name: dataanalysis-bolsonarismo
   version: 4.9.8
 qualitative:

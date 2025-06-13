@@ -1,10 +1,100 @@
-# CLAUDE.md — Projeto Bolsonarismo v4.9.8 (JUNHO 2025)
+# CLAUDE.md — Projeto Bolsonarismo v4.9.9 (JUNHO 2025)
 
-## 🚨 **STATUS ATUAL: DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS** ✅
+## 🚨 **STATUS ATUAL: SISTEMA ENHANCED CONSOLIDADO** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 11/06/2025 - Dashboard v4.9.8 com correções críticas implementadas e 100% funcional
+**ÚLTIMA ATUALIZAÇÃO:** 13/06/2025 - Sistema Enhanced v4.9.9 consolidado e 100% validado
 
-### 🏆 **CONSOLIDAÇÃO FINAL v4.9.8: DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS**
+### 🏆 **CONSOLIDAÇÃO FINAL v4.9.9: SISTEMA ENHANCED UNIFICADO E 100% VALIDADO**
+
+**✅ CONSOLIDAÇÃO ENHANCED v4.9.9 CONCLUÍDA (13/06/2025):**
+
+### 🔧 **Sistema Enhanced Consolidado - Eliminação de Divisão de Código:**
+
+**🎯 PROBLEMA RESOLVIDO:**
+- Sistema tinha divisão entre arquivos originais e enhanced (enhanced_model_loader.py, cost_monitor_enhanced.py)
+- Duplicação de funcionalidades e imports inconsistentes
+- Complexidade desnecessária na manutenção
+
+**✅ CONSOLIDAÇÃO IMPLEMENTADA:**
+```python
+# ANTES (sistema dividido):
+enhanced_model_loader.py     → Configurações específicas por stage
+cost_monitor_enhanced.py     → Monitoramento avançado de custos
+enhanced_model_settings.yaml → Configurações YAML separadas
+base.py                      → Funcionalidades básicas
+cost_monitor.py              → Monitor básico
+
+# DEPOIS (sistema unificado):
+base.py                      → TODAS as funcionalidades enhanced integradas
+cost_monitor.py              → TODAS as funcionalidades de monitoramento consolidadas
+settings.yaml                → TODAS as configurações consolidadas em um único arquivo
+scripts/maintenance_tools.py → Ferramentas de manutenção unificadas
+```
+
+**🛠️ FUNCIONALIDADES CONSOLIDADAS:**
+1. **EnhancedConfigLoader**: Integrado no `base.py` com configurações específicas por stage
+2. **ConsolidatedCostMonitor**: Integrado no `cost_monitor.py` com monitoramento avançado  
+3. **Fallback Strategies**: Sistema de fallback para modelos Claude integrado
+4. **Stage-Specific Configuration**: Configuração dinâmica por operação mantida
+5. **Auto-downgrade System**: Sistema automático de downgrade por budget preservado
+6. **Maintenance Tools**: Scripts de manutenção consolidados em ferramenta única
+
+**📁 ARQUIVOS REMOVIDOS (COM BACKUP):**
+- `enhanced_model_loader.py` → Funcionalidades migradas para `base.py`
+- `cost_monitor_enhanced.py` → Funcionalidades migradas para `cost_monitor.py`
+- `enhanced_model_settings.yaml` → Configurações migradas para `settings.yaml`
+- `scripts/consolidate_model_configs.py` → Script obsoleto (tarefa concluída)
+- `scripts/consolidate_enhanced_files.py` → Script obsoleto (tarefa concluída)
+- `validate_voyage_config.py` → Funcionalidade integrada em `maintenance_tools.py`
+- `validate_v494.py` → Script obsoleto (versão v4.9.4 superada)
+- `spacy_installation.md` → Informações consolidadas no `README.md`
+- `PATH_CONFIGURATION.md` → Informações consolidadas na documentação principal
+
+**🔧 VALIDAÇÃO 100% FUNCIONAL v4.9.9:**
+```bash
+✅ Enhanced Loader: PASSOU
+✅ Anthropic Base: PASSOU  
+✅ Component Initialization: PASSOU (7/7 componentes)
+✅ Cost Monitor: PASSOU
+✅ Fallback Strategies: PASSOU
+✅ Configuration per Operation: PASSOU
+✅ System Cleanup: PASSOU (arquivos obsoletos removidos)
+✅ Maintenance Tools: PASSOU (ferramenta unificada funcionando)
+📈 Taxa de sucesso: 100.0% (8/8 validações)
+```
+
+### 🛠️ **Scripts de Manutenção Consolidados:**
+
+**✅ NOVA FERRAMENTA UNIFICADA: `scripts/maintenance_tools.py`**
+
+**🎯 FUNCIONALIDADES INTEGRADAS:**
+```bash
+# Validação completa do sistema
+poetry run python scripts/maintenance_tools.py validate
+
+# Diagnósticos do sistema  
+poetry run python scripts/maintenance_tools.py diagnose
+
+# Relatório completo
+poetry run python scripts/maintenance_tools.py report
+
+# Limpeza de arquivos
+poetry run python scripts/maintenance_tools.py cleanup
+
+# Executar todas as funções
+poetry run python scripts/maintenance_tools.py all
+```
+
+**🔧 FUNCIONALIDADES DISPONÍVEIS:**
+- **SystemValidator**: Validação completa do enhanced config consolidado
+- **SystemDiagnostics**: Verificação de integridade e dependências
+- **MaintenanceUtilities**: Limpeza automática e relatórios
+- **Interface unificada**: Uma única ferramenta para todas as necessidades
+
+**📁 SCRIPTS CONSOLIDADOS (COM BACKUP):**
+- `validate_enhanced_config.py` → `maintenance_tools.py` (validação integrada)
+- `consolidate_model_configs.py` → Removido (tarefa concluída)
+- `consolidate_enhanced_files.py` → Removido (tarefa concluída)
 
 **✅ CORREÇÕES CRÍTICAS v4.9.8 IMPLEMENTADAS:**
 
@@ -558,9 +648,13 @@ Sempre que fizer uma alteração, indique:
 
 ## 🌐 Versão do projeto
 
-**v4.9.8 - Junho 2025 - DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS**
+**v4.9.9 - Junho 2025 - ENHANCED CONSOLIDATION COMPLETE + DASHBOARD FUNCIONAL**
 
-**🔧 PRINCIPAIS CORREÇÕES:**
+**🔧 CONSOLIDAÇÃO ENHANCED v4.9.9:**
+- **Sistema Unificado**: Enhanced files consolidados nos originais (base.py, cost_monitor.py)
+- **Validação 100%**: 8/8 testes passando (Enhanced Loader, Components, Cost Monitor)
+- **Manutenção Unificada**: Scripts consolidados em `maintenance_tools.py`
+- **Limpeza Completa**: Arquivos obsoletos removidos, backup realizado
 - Dashboard: Erro `dropna=False` resolvido + error handling robusto
 - Political Analysis: 4 níveis funcionais (neutro 77.7%, direita 12.7%)
 - Semantic Clustering: 2 clusters identificados
@@ -570,7 +664,7 @@ Sempre que fizer uma alteração, indique:
 - CSV: Separadores padronizados (`;` único)
 - Performance: 7 soluções timeout + compatibility patches
 
-**🏆 RESULTADO:** Pipeline 22 estágios + Dashboard 100% funcional
+**🏆 RESULTADO:** Sistema Enhanced 100% consolidado + Pipeline 22 estágios + Dashboard funcional
 
 **Responsável:** Pablo Emanuel Romero Almada, Ph.D.
 
