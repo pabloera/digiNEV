@@ -1,10 +1,10 @@
-# Pipeline Bolsonarismo v4.9.4 - Correção Crítica Aplicada 🚀
+# Pipeline Bolsonarismo v4.9.8 - Dashboard Funcional com Correções Críticas 🚀
 
 > **Análise de Discurso Político Brasileiro com Inteligência Artificial**
 > 
 > Pipeline unificado ultra-robusto para análise de mensagens do Telegram (2019-2023) focado em bolsonarismo, negacionismo e autoritarismo digital.
 > 
-> **v4.9.4 - Junho 2025**: 🚨 CORREÇÃO CRÍTICA aplicada - bug de deduplicação resolvido! Sistema agora processa corretamente 784K registros (vs 1.35M anteriormente), com 22 etapas implementadas, padrões Anthropic 100% seguidos, Voyage.ai + spaCy + Anthropic Enhanced, economia de 96%+ nos custos de API.
+> **v4.9.8 - Junho 2025**: 🎯 DASHBOARD FUNCIONAL com correções críticas implementadas! Análise temporal corrigida, erro `dropna=False` resolvido, 4 níveis políticos funcionais, 2 clusters semânticos identificados. Pipeline 22 etapas + Dashboard 100% operacional com 300 registros validados.
 
 ## 🚨 **INÍCIO RÁPIDO - LEIA PRIMEIRO!**
 
@@ -25,7 +25,7 @@ python run_pipeline.py
 cd src/dashboard && python start_dashboard.py
 ```
 
-### ✨ **Características v4.9.4 - DEDUPLICATION BUG FIXED**
+### ✨ **Características v4.9.8 - DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS**
 - 🔢 **22 Etapas Implementadas**: Pipeline expandido (01-20 + 04b/06b)
 - 🎯 **100% Padrões Anthropic**: XML prompting, Haiku model, taxonomia hierárquica
 - ⚡ **Enhanced Components**: Encoding, deduplication, text cleaning, statistical analysis

@@ -3,7 +3,7 @@
 # Informações do Projeto
 project:
   name: "dataanalysis-bolsonarismo"
-  version: "0.2.0"
+  version: "4.9.8"
   description: "Análise de Discurso em Canais do Telegram: Bolsonarismo, Negacionismo e Autoritarismo"
 
 # Configurações de Caminhos

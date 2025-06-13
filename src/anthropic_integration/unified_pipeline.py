@@ -1,12 +1,12 @@
 """
-UNIFIED ANTHROPIC PIPELINE SYSTEM v4.9.4
+UNIFIED ANTHROPIC PIPELINE SYSTEM v4.9.8
 ========================================
 Consolida todas as 22 etapas do pipeline com integração Anthropic centralizada,
 spaCy linguístico e integração completa com dashboard para análise em tempo real.
 
-🚨 v4.9.4 CORREÇÃO CRÍTICA: Bug de escopo de variáveis na deduplicação corrigido.
-Pipeline agora processa corretamente 784K registros após deduplicação real.
-Numeração expandida (01-20 + 04b/06b) para análise estatística dual.
+🎯 v4.9.8 DASHBOARD FUNCIONAL: Análise temporal corrigida, erro dropna=False resolvido.
+Dashboard 100% operacional com 4 níveis políticos e 2 clusters semânticos.
+Pipeline 22 etapas + todas correções críticas aplicadas e validadas.
 """
 
 import json

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dataanalysis-bolsonarismo"
-version = "0.1.0"
+version = "4.9.8"
 description = "Análise de Discurso em Canais do Telegram: Bolsonarismo, Negacionismo e Autoritarismo"
 authors = ["Pablo Almada <pabloera@gmail.com>"]
 readme = "README.md"

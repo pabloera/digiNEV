@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.9.5
+MAIN PIPELINE CONTROLLER - BOLSONARISMO v4.9.8
 ===============================================
 
 Controlador principal do pipeline com checkpoints e recuperação automática.
 Integra com o sistema unificado de anthropic_integration.
-Pipeline aprimorado: 22 etapas (01-20 + 04b/06b) com Stage 07 spaCy totalmente operacional.
+Pipeline completo: 22 etapas + Dashboard 100% funcional com correções críticas.
 
-🔤 CORREÇÃO v4.9.5: Stage 07 spaCy pt_core_news_lg 100% funcional com 57 entidades políticas.
-🛠️ CONFIGURAÇÃO v4.9.5: Pipeline inicializa 35/35 componentes (100% vs 48.6% anterior).
-🚨 CORREÇÃO v4.9.4: Bug de escopo de variáveis na deduplicação resolvido.
+🎯 DASHBOARD v4.9.8: Análise temporal corrigida, erro dropna=False resolvido.
+🏛️ POLITICAL v4.9.8: 4 níveis políticos funcionais, 2 clusters semânticos.
+🔤 SPACY v4.9.5: Stage 07 pt_core_news_lg com 57 entidades brasileiras.
+🚨 BUGS FIXED: Deduplicação + configuração + separadores CSV resolvidos.
 """
 
 import json

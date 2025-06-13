@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v4.9.5 - STAGE 07 SPACY TOTALMENTE OPERACIONAL
+PIPELINE BOLSONARISMO v4.9.8 - DASHBOARD FUNCIONAL COM CORREÇÕES CRÍTICAS
 ====================================================================
 
-Pipeline aprimorado com 22 etapas implementadas (01-20 + 04b/06b):
-- 🔤 STAGE 07 SPACY: pt_core_news_lg 100% funcional com 57 entidades políticas brasileiras
-- 🛠️ CONFIGURAÇÃO CORRIGIDA: Pipeline inicializa 35/35 componentes (100% vs 48.6% anterior)
-- 🚨 CORREÇÃO CRÍTICA: Bug de deduplicação resolvido (stages processam 784K vs 1.35M registros)
+Pipeline completo com 22 etapas + Dashboard 100% funcional:
+- 🎯 DASHBOARD: Análise temporal corrigida, erro dropna=False resolvido
+- 🏛️ POLITICAL ANALYSIS: 4 níveis funcionais (neutro 77.7%, direita 12.7%)
+- 🔍 SEMANTIC CLUSTERING: 2 clusters identificados e validados
+- 🔤 STAGE 07 SPACY: pt_core_news_lg funcional com 57 entidades brasileiras
+- 🚨 BUG FIXES: Deduplicação + configuração + separadores CSV
 - Integração completa com Dashboard
 - Voyage.ai + spaCy totalmente implementados
 - Análise estatística dual (antes/depois da limpeza)
