@@ -63,7 +63,7 @@ class EmergencyEmbeddingsCache:
             "disk_usage_mb": 0
         }
         
-        logger.info(f"🔧 EmergencyEmbeddingsCache inicializado: {cache_dir}")
+        logger.info(f"🔧 EmergencyEmbeddingsCache initialized: {cache_dir}")
         logger.info(f"⏰ TTL: {ttl_hours}h | Diretório: {self.cache_dir}")
     
     def _generate_cache_key(self, texts: List[str], model: str = "voyage-3.5-lite") -> str:

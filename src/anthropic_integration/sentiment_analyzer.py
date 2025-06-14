@@ -287,7 +287,7 @@ Textos: {formatted}
         results = []
         for text in texts:
             results.append({
-                'sentiment': 'neutral',
+                'sentiment': 'neutro',
                 'confidence': 0.5,
                 'emotions': ['unknown'],
                 'intensity': 'media',

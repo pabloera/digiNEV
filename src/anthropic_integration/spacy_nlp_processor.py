@@ -1,15 +1,15 @@
 """
-Processador NLP com spaCy para Análise Linguística Avançada - IMPLEMENTADO ✅
+spaCy NLP Processor for Advanced Linguistic Analysis - IMPLEMENTED ✅
 ===========================================================================
 
-✅ STATUS: CONCLUÍDO E FUNCIONAL
-✅ MODELO: pt_core_news_lg v3.8.0 ATIVO
-✅ PIPELINE: 7 componentes carregados com sucesso
-✅ ENTIDADES: 57 padrões políticos brasileiros ativos
-✅ FEATURES: 13 características linguísticas implementadas
+✅ STATUS: COMPLETED AND FUNCTIONAL
+✅ MODEL: pt_core_news_lg v3.8.0 ACTIVE
+✅ PIPELINE: 7 components loaded successfully
+✅ ENTITIES: 57 Brazilian political patterns active
+✅ FEATURES: 13 linguistic features implemented
 
-Componente para processamento linguístico profissional com spaCy pt_core_news_lg,
-incluindo análise morfológica, entidades nomeadas e features linguísticas brasileiras.
+Component for professional linguistic processing with spaCy pt_core_news_lg,
+including morphological analysis, named entities and Brazilian linguistic features.
 
 VERIFIED IMPLEMENTATION (2025-06-08):
 - Model: pt_core_news_lg v3.8.0 successfully loaded
@@ -45,25 +45,25 @@ logger = logging.getLogger(__name__)
 
 class SpacyNLPProcessor(AnthropicBase):
     """
-    ✅ Processador NLP Avançado com spaCy - IMPLEMENTAÇÃO CONCLUÍDA
+    ✅ Advanced spaCy NLP Processor - IMPLEMENTATION COMPLETED
     ============================================================
 
-    STATUS ATUAL (2025-06-08): ✅ FUNCIONAL E OPERACIONAL
+    CURRENT STATUS (2025-06-08): ✅ FUNCTIONAL AND OPERATIONAL
 
-    MODELO ATIVO:
+    ACTIVE MODEL:
     ✅ pt_core_news_lg v3.8.0 - Professional Portuguese NLP
     ✅ 7 Pipeline Components: ['tok2vec', 'morphologizer', 'parser', 'lemmatizer', 'attribute_ruler', 'entity_ruler', 'ner']
     ✅ 57 Brazilian Political Entity Patterns Loaded
     ✅ 13 Linguistic Features Implemented
 
     VERIFIED FEATURES:
-    ✅ Lematização profissional do português (Professional lemmatization)
-    ✅ Análise morfológica (POS tagging) - morphologizer active
-    ✅ Reconhecimento de entidades nomeadas (NER) - entity_ruler + ner active
-    ✅ Detecção de entidades políticas brasileiras (57 patterns)
-    ✅ Análise de complexidade linguística (Linguistic complexity)
-    ✅ Segmentação inteligente de hashtags (Hashtag segmentation)
-    ✅ Cálculo de diversidade lexical (Lexical diversity)
+    ✅ Professional Portuguese lemmatization
+    ✅ Morphological analysis (POS tagging) - morphologizer active
+    ✅ Named entity recognition (NER) - entity_ruler + ner active
+    ✅ Brazilian political entity detection (57 patterns)
+    ✅ Linguistic complexity analysis
+    ✅ Intelligent hashtag segmentation
+    ✅ Lexical diversity calculation
     ✅ Dependency parsing (parser active)
     ✅ Token analysis (tok2vec active)
     ✅ Morphological features (morphologizer active)

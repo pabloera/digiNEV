@@ -88,163 +88,163 @@ class PipelineMonitor:
     # Definição das 22 etapas do pipeline v4.9.1
     PIPELINE_STAGES = {
         "01_chunk_processing": {
-            "name": "Processamento de Chunks",
+            "name": "Chunk Processing",
             "category": "preprocessing",
             "expected_duration": 180,
             "critical": True,
-            "description": "Divisão do dataset em chunks processáveis"
+            "description": "Dataset division into processable chunks"
         },
         "02_encoding_validation": {
-            "name": "Validação de Encoding",
+            "name": "Encoding Validation",
             "category": "data_quality",
             "expected_duration": 300,
             "critical": True,
-            "description": "Detecção e correção de encoding com chardet"
+            "description": "Encoding detection and correction with chardet"
         },
         "03_deduplication": {
-            "name": "Deduplicação Global",
+            "name": "Global Deduplication",
             "category": "data_quality",
             "expected_duration": 240,
             "critical": True,
-            "description": "Remoção de duplicatas com múltiplas estratégias"
+            "description": "Duplicate removal with multiple strategies"
         },
         "04_feature_validation": {
-            "name": "Validação de Features",
+            "name": "Feature Validation",
             "category": "data_quality",
             "expected_duration": 180,
             "critical": True,
-            "description": "Verificação da integridade das colunas"
+            "description": "Column integrity verification"
         },
         "04b_statistical_analysis_pre": {
-            "name": "Análise Estatística (Pré)",
+            "name": "Statistical Analysis (Pre)",
             "category": "analysis",
             "expected_duration": 240,
             "critical": False,
-            "description": "Estatísticas antes da limpeza de texto"
+            "description": "Statistics before text cleaning"
         },
         "05_political_analysis": {
-            "name": "Análise Política",
+            "name": "Political Analysis",
             "category": "ai_processing",
             "expected_duration": 900,
             "critical": True,
-            "description": "Classificação política com claude-3-5-haiku-20241022"
+            "description": "Political classification with claude-3-5-haiku-20241022"
         },
         "06_text_cleaning": {
-            "name": "Limpeza de Texto",
+            "name": "Text Cleaning",
             "category": "preprocessing",
             "expected_duration": 300,
             "critical": True,
-            "description": "Limpeza graduada com validação robusta"
+            "description": "Graduated cleaning with robust validation"
         },
         "06b_statistical_analysis_post": {
-            "name": "Análise Estatística (Pós)",
+            "name": "Statistical Analysis (Post)",
             "category": "analysis",
             "expected_duration": 300,
             "critical": False,
-            "description": "Estatísticas após limpeza e comparação"
+            "description": "Statistics after cleaning and comparison"
         },
         "07_linguistic_processing": {
-            "name": "Processamento Linguístico",
+            "name": "Linguistic Processing",
             "category": "nlp_processing",
             "expected_duration": 600,
             "critical": True,
-            "description": "Análise com spaCy pt_core_news_lg"
+            "description": "Analysis with spaCy pt_core_news_lg"
         },
         "08_sentiment_analysis": {
-            "name": "Análise de Sentimento",
+            "name": "Sentiment Analysis",
             "category": "ai_processing",
             "expected_duration": 1200,
             "critical": True,
-            "description": "Análise de sentimento otimizada"
+            "description": "Optimized sentiment analysis"
         },
         "09_topic_modeling": {
-            "name": "Modelagem de Tópicos",
+            "name": "Topic Modeling",
             "category": "ai_processing",
             "expected_duration": 800,
             "critical": True,
             "description": "Topic modeling com Voyage.ai"
         },
         "10_tfidf_extraction": {
-            "name": "Extração TF-IDF",
+            "name": "TF-IDF Extraction",
             "category": "feature_engineering",
             "expected_duration": 400,
             "critical": False,
-            "description": "TF-IDF semântico com Voyage.ai"
+            "description": "Semantic TF-IDF with Voyage.ai"
         },
         "11_clustering": {
-            "name": "Clustering Semântico",
+            "name": "Semantic Clustering",
             "category": "ai_processing",
             "expected_duration": 600,
             "critical": False,
-            "description": "Clustering com embeddings Voyage.ai"
+            "description": "Clustering with Voyage.ai embeddings"
         },
         "12_hashtag_normalization": {
-            "name": "Normalização de Hashtags",
+            "name": "Hashtag Normalization",
             "category": "preprocessing",
             "expected_duration": 300,
             "critical": False,
-            "description": "Padronização de hashtags políticas"
+            "description": "Political hashtag standardization"
         },
         "13_domain_analysis": {
-            "name": "Análise de Domínio",
+            "name": "Domain Analysis",
             "category": "analysis",
             "expected_duration": 360,
             "critical": False,
-            "description": "Análise de domínios e fontes"
+            "description": "Domain and source analysis"
         },
         "14_temporal_analysis": {
-            "name": "Análise Temporal",
+            "name": "Temporal Analysis",
             "category": "analysis",
             "expected_duration": 420,
             "critical": False,
-            "description": "Padrões temporais e sazonalidade"
+            "description": "Temporal patterns and seasonality"
         },
         "15_network_analysis": {
-            "name": "Análise de Rede",
+            "name": "Network Analysis",
             "category": "analysis",
             "expected_duration": 480,
             "critical": False,
-            "description": "Análise de redes sociais e interações"
+            "description": "Social network and interaction analysis"
         },
         "16_qualitative_analysis": {
-            "name": "Análise Qualitativa",
+            "name": "Qualitative Analysis",
             "category": "ai_processing",
             "expected_duration": 540,
             "critical": False,
-            "description": "Análise qualitativa com IA"
+            "description": "AI-powered qualitative analysis"
         },
         "17_smart_pipeline_review": {
-            "name": "Revisão Inteligente",
+            "name": "Smart Review",
             "category": "validation",
             "expected_duration": 300,
             "critical": False,
-            "description": "Revisão automatizada da qualidade"
+            "description": "Automated quality review"
         },
         "18_topic_interpretation": {
-            "name": "Interpretação de Tópicos",
+            "name": "Topic Interpretation",
             "category": "ai_processing",
             "expected_duration": 360,
             "critical": False,
-            "description": "Interpretação semântica de tópicos"
+            "description": "Semantic topic interpretation"
         },
         "19_semantic_search": {
-            "name": "Busca Semântica",
+            "name": "Semantic Search",
             "category": "ai_processing",
             "expected_duration": 480,
             "critical": False,
-            "description": "Engine de busca semântica com Voyage.ai"
+            "description": "Semantic search engine with Voyage.ai"
         },
         "20_pipeline_validation": {
-            "name": "Validação Final",
+            "name": "Final Validation",
             "category": "validation",
             "expected_duration": 240,
             "critical": True,
-            "description": "Validação final de qualidade e integridade"
+            "description": "Final quality and integrity validation"
         }
     }
 
     def __init__(self, project_root: Path):
-        """Inicializa o monitor do pipeline"""
+        """Initialize pipeline monitor"""
         self.project_root = project_root
         self.checkpoints_dir = project_root / "checkpoints"
         self.logs_dir = project_root / "logs"

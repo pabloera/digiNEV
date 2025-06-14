@@ -842,8 +842,8 @@ Analise cada mensagem considerando:
             results = []
             for message_elem in root.findall('.//message'):
                 # Parse basic fields
-                political_level = self._get_xml_text(message_elem, 'political_level', 'non-political')
-                alignment = self._get_xml_text(message_elem, 'alignment', 'undefined')
+                political_level = self._get_xml_text(message_elem, 'political_level', 'não-político')
+                alignment = self._get_xml_text(message_elem, 'alignment', 'indefinido')
                 reasoning = self._get_xml_text(message_elem, 'reasoning', 'Automatic analysis')
                 confidence = float(self._get_xml_text(message_elem, 'confidence', '0.5'))
 

@@ -71,7 +71,7 @@ def configure_numpy_threads():
             import numpy.show_config
             logger.info("✅ NumPy configurado com BLAS otimizado")
         except:
-            logger.info("✅ NumPy carregado (BLAS status não verificável)")
+            logger.info("✅ NumPy loaded (BLAS status not verifiable)")
             
         return True
         

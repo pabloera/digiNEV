@@ -51,7 +51,7 @@ class ConfigurationLoader:
             logger.warning(f"Diretório de configuração não encontrado: {self.config_dir}")
             self.config_dir = Path(__file__).parent.parent.parent / "config"
         
-        logger.info(f"ConfigurationLoader inicializado - Environment: {self.environment}")
+        logger.info(f"ConfigurationLoader initialized - Environment: {self.environment}")
     
     def _find_project_root(self) -> Path:
         """Encontra a raiz do projeto procurando por arquivos característicos"""
@@ -326,7 +326,7 @@ class ConfigurationLoader:
             try:
                 config = self.load_config(config_name, required=False)
                 if config:
-                    logger.info(f"✅ Configuração opcional carregada: {config_name}")
+                    logger.info(f"✅ Optional configuration loaded: {config_name}")
                 else:
                     logger.warning(f"⚠️  Configuração opcional não encontrada: {config_name}")
             except Exception as e:

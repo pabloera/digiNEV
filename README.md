@@ -1,27 +1,27 @@
-# Monitor do Discurso Digital v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM 🏆
+# Digital Discourse Monitor v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM 🏆
 
-> **Análise de Discurso Político Brasileiro com Inteligência Artificial Enterprise-Grade**
+> **Brazilian Political Discourse Analysis with Enterprise-Grade Artificial Intelligence**
 > 
-> Sistema completo de análise de mensagens do Telegram (2019-2023) com pipeline otimizado de alto desempenho para produção, focado em discurso político, negacionismo e autoritarismo digital.
+> Complete Telegram message analysis system (2019-2023) with high-performance optimized pipeline for production, focused on political discourse, denialism and digital authoritarianism.
 > 
-> **v5.0.0 - Junho 2025**: 🏆 **PIPELINE OPTIMIZATION COMPLETE!** Transformação épica de 45% → 95% taxa de sucesso. **Pipeline ORIGINAL (22 stages) COM otimizações integradas**: 60% redução tempo, 50% redução memória, sistema enterprise-grade. **PRODUCTION READY!**
+> **v5.0.0 - June 2025**: 🏆 **PIPELINE OPTIMIZATION COMPLETE!** Epic transformation from 45% → 95% success rate. **ORIGINAL Pipeline (22 stages) WITH integrated optimizations**: 60% time reduction, 50% memory reduction, enterprise-grade system. **PRODUCTION READY!**
 
-## 🚨 **INÍCIO RÁPIDO - LEIA PRIMEIRO!**
+## 🚨 **QUICK START - READ FIRST!**
 
-### 📋 **PRÉ-REQUISITOS - CRITICAL SETUP**
+### 📋 **PREREQUISITES - CRITICAL SETUP**
 
-#### **Sistema e Software:**
-- **Python 3.12+** (obrigatório) - Testado com 3.12.5
-- **Poetry 1.5+** (gerenciador de dependências) - [Instalar Poetry](https://python-poetry.org/docs/#installation)
-- **4GB+ RAM** (recomendado) - Mínimo 2GB com otimizações
-- **5GB+ espaço em disco** (dados + cache + logs)
-- **Git** (para clonagem e versionamento)
+#### **System and Software:**
+- **Python 3.12+** (required) - Tested with 3.12.5
+- **Poetry 1.5+** (dependency manager) - [Install Poetry](https://python-poetry.org/docs/#installation)
+- **4GB+ RAM** (recommended) - Minimum 2GB with optimizations
+- **5GB+ disk space** (data + cache + logs)
+- **Git** (for cloning and versioning)
 
-#### **APIs Necessárias:**
-- **Anthropic API** - [Criar conta](https://console.anthropic.com/) (plano pago recomendado)
-- **Voyage.ai API** - [Criar conta](https://www.voyageai.com/) (tem tier gratuito)
+#### **Required APIs:**
+- **Anthropic API** - [Create account](https://console.anthropic.com/) (paid plan recommended)
+- **Voyage.ai API** - [Create account](https://www.voyageai.com/) (has free tier)
 
-#### **Dependências do Sistema (Opcional):**
+#### **System Dependencies (Optional):**
 ```bash
 # macOS (via Homebrew)
 brew install python@3.12 git
@@ -33,15 +33,15 @@ sudo apt update && sudo apt install python3.12 python3.12-pip git curl
 choco install python312 git
 ```
 
-### 🔧 **INSTALAÇÃO PASSO-A-PASSO**
+### 🔧 **STEP-BY-STEP INSTALLATION**
 
-#### **1. Clone e Setup Inicial**
+#### **1. Clone and Initial Setup**
 ```bash
-# Clonar repositório
+# Clone repository
 git clone https://github.com/[seu-usuario]/monitor-discurso-digital.git
 cd monitor-discurso-digital
 
-# Verificar versão Python
+# Check Python version
 python3 --version  # Deve ser 3.12+
 
 # Instalar Poetry (se não tiver)

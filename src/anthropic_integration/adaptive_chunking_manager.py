@@ -80,7 +80,7 @@ class AdaptiveChunkingManager:
         self.max_chunk_size = chunk_config.get('max_chunk_size', 50)
         self.min_chunk_size = chunk_config.get('min_chunk_size', 2)
 
-        self.logger.info("✅ AdaptiveChunkingManager inicializado com sucesso")
+        self.logger.info("✅ AdaptiveChunkingManager initialized successfully")
 
     def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
         """Carrega configuração de timeout management"""

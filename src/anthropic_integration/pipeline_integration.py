@@ -67,7 +67,7 @@ class APIPipelineIntegration:
             "comprehensive_final_validation": True
         }
 
-        logger.info("API Pipeline Integration inicializada")
+        logger.info("API Pipeline Integration initialized")
 
     def initialize_pipeline_run(self, pipeline_config: Dict[str, Any]) -> Dict[str, Any]:
         """Inicializa execução do pipeline com validações API"""

@@ -259,13 +259,13 @@ For each text, provide analysis in JSON format:
   "results": [
     {{
       "text_id": 1,
-      "sentiment_category": "positive|negative|neutral",
-      "political_alignment": "bolsonarista|anti_bolsonarista|neutral|undefined",
+      "sentiment_category": "positivo|negativo|neutro",
+      "political_alignment": "bolsonarista|antibolsonarista|neutro|indefinido",
       "conspiracy_indicators": ["indicator1", "indicator2"],
       "negacionism_indicators": ["type1", "type2"],
-      "discourse_type": "informative|opinion|mobilizing|attacking|defensive",
+      "discourse_type": "informativo|opinião|mobilizador|atacante|defensivo",
       "urgency_level": "low|medium|high",
-      "emotional_tone": "anger|fear|hope|sadness|joy|neutral",
+      "emotional_tone": "raiva|medo|esperança|tristeza|alegria|neutro",
       "target_entities": ["person", "institution", "group"],
       "call_to_action": true/false,
       "misinformation_risk": "low|medium|high",

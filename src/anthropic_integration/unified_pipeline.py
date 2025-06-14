@@ -309,17 +309,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                 setattr(self, component_name, component)
                 success_count += 1
-                logger.debug(f"Componente {component_name} inicializado com sucesso")
+                logger.debug(f"Component {component_name} initialized successfully")
             except Exception as e:
-                logger.error(f"Erro ao inicializar {component_name}: {e}")
+                logger.error(f"Error initializing {component_name}: {e}")
                 self.pipeline_state["initialization_errors"].append({
                     "component": component_name,
                     "error": str(e)
                 })
-                # Criar componente mock como fallback
+                # Create mock component as fallback
                 setattr(self, component_name, None)
 
-        # Inicializar processador de chunks separadamente
+        # Initialize chunk processor separately
         try:
             from src.data.processors.chunk_processor import ChunkConfig
             chunk_config = ChunkConfig(
@@ -331,7 +331,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             success_count += 1
             total_components += 1
         except Exception as e:
-            logger.error(f"Erro ao inicializar chunk_processor: {e}")
+            logger.error(f"Error initializing chunk_processor: {e}")
             self.chunk_processor = None
             self.pipeline_state["initialization_errors"].append({
                 "component": "chunk_processor",
@@ -339,9 +339,9 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             })
 
         success_rate = success_count / total_components if total_components > 0 else 0
-        logger.info(f"Inicialização de componentes: {success_count}/{total_components} ({success_rate:.1%})")
+        logger.info(f"Component initialization: {success_count}/{total_components} ({success_rate:.1%})")
 
-        return success_rate >= 0.8  # Considerar sucesso se 80%+ dos componentes funcionam
+        return success_rate >= 0.8  # Consider success if 80%+ of components work
 
     def get_pipeline_health(self) -> Dict[str, Any]:
         """Return pipeline health status"""
@@ -355,7 +355,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "ready_for_execution": True
             }
 
-            # Verificar status de cada componente
+            # Check status of each component
             required_components = [
                 'api_integration', 'chunk_processor', 'encoding_validator',
                 'text_cleaner', 'sentiment_analyzer'
@@ -368,7 +368,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     health_report["components_status"][component] = "failed"
                     health_report["overall_status"] = "degraded"
 
-            # Se muitos erros de inicialização, marcar como não saudável
+            # If many initialization errors, mark as unhealthy
             if health_report["initialization_errors"] > 3:
                 health_report["overall_status"] = "unhealthy"
                 health_report["ready_for_execution"] = False
@@ -393,17 +393,17 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         self.deduplication_validator = DeduplicationValidator(self.config)
         self.text_cleaner = IntelligentTextCleaner(self.config)
 
-        # Inicializar processador linguístico spaCy
+        # Initialize spaCy linguistic processor
         if SPACY_PROCESSOR_AVAILABLE:
             try:
                 self.spacy_nlp_processor = SpacyNLPProcessor(self.config)
-                logger.info("✅ SpacyNLPProcessor inicializado com sucesso")
+                logger.info("✅ SpacyNLPProcessor initialized successfully")
             except Exception as e:
-                logger.warning(f"⚠️ Falha ao inicializar SpacyNLPProcessor: {e}")
+                logger.warning(f"⚠️ Failed to initialize SpacyNLPProcessor: {e}")
                 self.spacy_nlp_processor = None
         else:
             self.spacy_nlp_processor = None
-            logger.info("❌ SpacyNLPProcessor não disponível")
+            logger.info("❌ SpacyNLPProcessor not available")
 
         self.sentiment_analyzer = AnthropicSentimentAnalyzer(self.config)
         self.topic_interpreter = TopicInterpreter(self.config)
@@ -416,7 +416,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         self.qualitative_classifier = QualitativeClassifier(self.config)
         self.pipeline_reviewer = SmartPipelineReviewer(self.config)
 
-        # Inicializar processador de chunks
+        # Initialize chunk processor
         from src.data.processors.chunk_processor import ChunkConfig
         chunk_config = ChunkConfig(
             chunk_size=self.pipeline_config["chunk_size"],
@@ -427,19 +427,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
     def run_complete_pipeline(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """
-        Executa pipeline completo em todos os datasets
+        Execute complete pipeline on all datasets
 
         Args:
-            dataset_paths: Lista de caminhos para os datasets
+            dataset_paths: List of paths to datasets
 
         Returns:
-            Resultados completos do pipeline
+            Complete pipeline results
         """
 
         self.pipeline_state["start_time"] = datetime.now()
-        logger.info(f"Iniciando pipeline completo para {len(dataset_paths)} datasets")
+        logger.info(f"Starting complete pipeline for {len(dataset_paths)} datasets")
 
-        # Inicializar integração API
+        # Initialize API integration
         api_init_result = self.api_integration.initialize_pipeline_run(self.pipeline_config)
 
         pipeline_results = {
@@ -451,19 +451,19 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         }
 
         try:
-            # Inicializar caminhos atuais dos datasets
+            # Initialize current dataset paths
             current_dataset_paths = dataset_paths.copy()
 
-            # Executar todas as 22 etapas sequencialmente (versão corrigida v4.9.4)
+            # Execute all 22 stages sequentially (corrected version v4.9.4)
             all_pipeline_stages = [
                 "01_chunk_processing",
                 "02_encoding_validation",  # ✨ ENHANCED: chardet + robust fallbacks
                 "03_deduplication",  # ✨ ENHANCED: global multi-strategy
                 "04_feature_validation",
-                "04b_statistical_analysis_pre",  # 📊 NEW: análise estatística pré-limpeza
+                "04b_statistical_analysis_pre",  # 📊 NEW: pre-cleaning statistical analysis
                 "05_political_analysis",
                 "06_text_cleaning",  # ✨ ENHANCED: validation + graduated cleaning
-                "06b_statistical_analysis_post",  # 📊 NEW: análise estatística pós-limpeza
+                "06b_statistical_analysis_post",  # 📊 NEW: post-cleaning statistical analysis
                 "07_linguistic_processing",  # 🔤 SPACY
                 "08_sentiment_analysis",
                 "09_topic_modeling",  # 🚀 VOYAGE.AI
@@ -480,7 +480,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "20_pipeline_validation"
             ]
 
-            logger.info(f"Executando {len(all_pipeline_stages)} etapas do pipeline v4.9.4 (corrigido com deduplicação funcional + análises estatísticas)")
+            logger.info(f"Executing {len(all_pipeline_stages)} pipeline stages v4.9.4 (corrected with functional deduplication + statistical analyses)")
 
             for stage_num, stage_name in enumerate(all_pipeline_stages, 1):
 
@@ -494,34 +494,34 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         "error": stage_result.get("error", "Unknown error")
                     })
 
-                    # Decidir se continuar ou parar
+                    # Decide whether to continue or stop
                     if stage_result.get("critical_error", False):
-                        logger.error(f"Erro crítico na etapa {stage_name}, parando pipeline")
+                        logger.error(f"Critical error in stage {stage_name}, stopping pipeline")
                         break
                 else:
-                    # Atualizar caminhos dos datasets para a próxima etapa
+                    # Update dataset paths for next stage
                     updated_paths = self._update_dataset_paths_after_stage(stage_name, current_dataset_paths, stage_result)
                     if updated_paths:
                         current_dataset_paths = updated_paths
-                        logger.info(f"Caminhos atualizados após {stage_name}: {len(current_dataset_paths)} datasets")
+                        logger.info(f"Paths updated after {stage_name}: {len(current_dataset_paths)} datasets")
 
-                # Salvar checkpoint após cada etapa
+                # Save checkpoint after each stage
                 self._save_pipeline_checkpoint(stage_name, stage_result)
 
-            # Executar validação final
+            # Execute final validation
             if pipeline_results["overall_success"]:
                 final_validation = self._execute_final_validation(pipeline_results)
                 pipeline_results["final_validation"] = final_validation
 
         except Exception as e:
-            logger.error(f"Erro na execução do pipeline: {e}")
+            logger.error(f"Error in pipeline execution: {e}")
             pipeline_results["overall_success"] = False
             pipeline_results["errors"].append({
                 "stage": "pipeline_execution",
                 "error": str(e)
             })
 
-        # Finalizar pipeline
+        # Finalize pipeline
         self.pipeline_state["end_time"] = datetime.now()
         self.pipeline_state["total_duration"] = (
             self.pipeline_state["end_time"] - self.pipeline_state["start_time"]
@@ -535,11 +535,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "failed_stages": len(self.pipeline_state["failed_stages"])
         }
 
-        # Adicionar relatório consolidado de otimização de custos
+        # Add consolidated cost optimization report
         if hasattr(self, 'voyage_embeddings') and self.voyage_embeddings:
             pipeline_results["voyage_cost_summary"] = self._generate_cost_optimization_summary(pipeline_results)
 
-        # Salvar resultado final
+        # Save final result
         self._save_final_results(pipeline_results)
 
         return pipeline_results
@@ -552,7 +552,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             quota_info = self.voyage_embeddings._estimate_quota_usage()
             model_info = self.voyage_embeddings.get_embedding_model_info()
 
-            # Calcular totais do pipeline
+            # Calculate pipeline totals
             total_datasets = len(pipeline_results.get("datasets_processed", []))
             total_cost = cost_info['estimated_cost_usd'] * total_datasets
             total_tokens = cost_info['estimated_tokens'] * total_datasets
@@ -584,7 +584,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             return summary
 
         except Exception as e:
-            logger.error(f"Erro ao gerar relatório de custos: {e}")
+            logger.error(f"Error generating cost report: {e}")
             return {"error": str(e)}
 
     def _generate_cost_recommendations(self) -> List[str]:
@@ -593,33 +593,33 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         recommendations = []
 
         try:
-            # Verificar configuração atual
+            # Check current configuration
             if not self.voyage_embeddings.enable_sampling:
-                recommendations.append("🔥 ATIVE a amostragem inteligente para reduzir custos em 97%")
+                recommendations.append("🔥 ENABLE intelligent sampling to reduce costs by 97%")
 
             if self.voyage_embeddings.model_name != 'voyage-3.5-lite':
-                recommendations.append("💰 MIGRE para voyage-3.5-lite (modelo mais econômico com 200M tokens gratuitos)")
+                recommendations.append("💰 MIGRATE to voyage-3.5-lite (more economical model with 200M free tokens)")
 
             if self.voyage_embeddings.batch_size < 128:
-                recommendations.append("⚡ AUMENTE batch_size para 128 para melhor throughput")
+                recommendations.append("⚡ INCREASE batch_size to 128 for better throughput")
 
-            # Verificar uso eficiente
+            # Check efficient usage
             quota_info = self.voyage_embeddings._estimate_quota_usage()
             if quota_info.get('estimated_usage_percent', 0) > 80:
-                recommendations.append("⚠️  USO ALTO da cota gratuita - considere aumentar limites de amostragem")
+                recommendations.append("⚠️  HIGH USAGE of free quota - consider increasing sampling limits")
 
-            # Configuração ideal
+            # Ideal configuration
             if (self.voyage_embeddings.enable_sampling and
                 self.voyage_embeddings.model_name == 'voyage-3.5-lite' and
                 self.voyage_embeddings.batch_size >= 128):
-                recommendations.append("✅ CONFIGURAÇÃO IDEAL - Sistema otimizado para máxima economia")
+                recommendations.append("✅ IDEAL CONFIGURATION - System optimized for maximum savings")
 
-            # Alertas de performance
+            # Performance alerts
             if self.voyage_embeddings.max_messages_per_dataset > 100000:
-                recommendations.append("📊 CONSIDERE reduzir max_messages_per_dataset para <50K para melhor performance")
+                recommendations.append("📊 CONSIDER reducing max_messages_per_dataset to <50K for better performance")
 
         except Exception as e:
-            recommendations.append(f"❌ Erro ao gerar recomendações: {e}")
+            recommendations.append(f"❌ Error generating recommendations: {e}")
 
         return recommendations
 
@@ -632,34 +632,34 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         while attempt <= max_retries:
             try:
                 if attempt > 0:
-                    logger.info(f"Tentativa {attempt + 1}/{max_retries + 1} para etapa {stage_name}")
+                    logger.info(f"Attempt {attempt + 1}/{max_retries + 1} for stage {stage_name}")
 
                 result = self._execute_stage(stage_name, dataset_paths)
 
                 if result.get("success", False):
                     if attempt > 0:
-                        logger.info(f"Etapa {stage_name} recuperada na tentativa {attempt + 1}")
+                        logger.info(f"Stage {stage_name} recovered on attempt {attempt + 1}")
                     return result
                 else:
-                    last_error = result.get("error", "Erro desconhecido")
+                    last_error = result.get("error", "Unknown error")
 
             except Exception as e:
                 last_error = str(e)
-                logger.warning(f"Tentativa {attempt + 1} falhou para {stage_name}: {e}")
+                logger.warning(f"Attempt {attempt + 1} failed for {stage_name}: {e}")
 
             attempt += 1
 
-            # Se não é a última tentativa, tentar recuperação
+            # If not the last attempt, try recovery
             if attempt <= max_retries:
-                logger.info(f"Tentando recuperar etapa {stage_name}...")
+                logger.info(f"Attempting to recover stage {stage_name}...")
 
-                # Estratégias de recuperação específicas
+                # Specific recovery strategies
                 recovery_success = self._attempt_stage_recovery(stage_name, last_error)
                 if not recovery_success:
-                    logger.warning(f"Recuperação automática falhou para {stage_name}")
+                    logger.warning(f"Automatic recovery failed for {stage_name}")
 
-        # Se chegou até aqui, todas as tentativas falharam
-        logger.error(f"Etapa {stage_name} falhou após {max_retries + 1} tentativas")
+        # If we got here, all attempts failed
+        logger.error(f"Stage {stage_name} failed after {max_retries + 1} attempts")
         return {
             "stage": stage_name,
             "success": False,
@@ -678,7 +678,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "encoding": self._recover_encoding_error
         }
 
-        # Identificar tipo de erro
+        # Identify error type
         error_lower = error.lower()
 
         if "memory" in error_lower or "memoryerror" in error_lower:
@@ -694,72 +694,72 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
     def _recover_memory_error(self, stage_name: str) -> bool:
         """Recover from memory errors"""
-        logger.info(f"Tentando recuperar erro de memória para {stage_name}")
+        logger.info(f"Attempting to recover memory error for {stage_name}")
 
-        # Reduzir chunk size
+        # Reduce chunk size
         if hasattr(self, 'chunk_processor') and self.chunk_processor:
             original_size = self.chunk_processor.config.chunk_size
             new_size = max(1000, original_size // 2)
             self.chunk_processor.config.chunk_size = new_size
-            logger.info(f"Chunk size reduzido de {original_size} para {new_size}")
+            logger.info(f"Chunk size reduced from {original_size} to {new_size}")
             return True
 
         return False
 
     def _recover_api_error(self, stage_name: str) -> bool:
-        """Recupera de erros de API"""
-        logger.info(f"Tentando recuperar erro de API para {stage_name}")
+        """Recover from API errors"""
+        logger.info(f"Attempting to recover API error for {stage_name}")
 
-        # Forçar modo tradicional
+        # Force traditional mode
         if hasattr(self, 'pipeline_config'):
             self.pipeline_config["use_anthropic"] = False
-            logger.info("Modo Anthropic desabilitado, usando processamento tradicional")
+            logger.info("Anthropic mode disabled, using traditional processing")
             return True
 
         return False
 
     def _recover_file_error(self, stage_name: str) -> bool:
-        """Recupera de erros de arquivo"""
-        logger.info(f"Tentando recuperar erro de arquivo para {stage_name}")
+        """Recover from file errors"""
+        logger.info(f"Attempting to recover file error for {stage_name}")
 
-        # Criar diretórios necessários
+        # Create necessary directories
         try:
             output_dir = Path(self.pipeline_config.get("output_path", "data/interim"))
             output_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Diretório {output_dir} criado/verificado")
+            logger.info(f"Directory {output_dir} created/verified")
             return True
         except Exception as e:
-            logger.error(f"Falha ao criar diretório: {e}")
+            logger.error(f"Failed to create directory: {e}")
             return False
 
     def _recover_encoding_error(self, stage_name: str) -> bool:
-        """Recupera de erros de encoding"""
-        logger.info(f"Tentando recuperar erro de encoding para {stage_name}")
+        """Recover from encoding errors"""
+        logger.info(f"Attempting to recover encoding error for {stage_name}")
 
-        # Modificar configuração de encoding do chunk processor
+        # Modify chunk processor encoding configuration
         if hasattr(self, 'chunk_processor') and self.chunk_processor:
             self.chunk_processor.config.on_bad_lines = 'skip'
             self.chunk_processor.config.encoding = 'utf-8'
-            logger.info("Configuração de encoding ajustada para modo tolerante")
+            logger.info("Encoding configuration adjusted to tolerant mode")
             return True
 
         return False
 
     def _update_dataset_paths_after_stage(self, stage_name: str, original_paths: List[str], stage_result: Dict[str, Any]) -> Optional[List[str]]:
         """
-        Atualiza caminhos dos datasets após uma etapa que modifica os dados
+        Update dataset paths after a stage that modifies data
 
         Args:
-            stage_name: Nome da etapa executada
-            original_paths: Caminhos originais dos datasets
-            stage_result: Resultado da etapa executada
+            stage_name: Name of executed stage
+            original_paths: Original dataset paths
+            stage_result: Result of executed stage
 
         Returns:
-            Lista de novos caminhos ou None se não houve mudança
+            List of new paths or None if no change
         """
 
         try:
-            # Etapas que geram novos arquivos e precisam atualizar os caminhos (v4.9.2 - corrigido)
+            # Stages that generate new files and need to update paths (v4.9.2 - corrected)
             path_updating_stages = {
                 "01_chunk_processing": "chunks_processed",
                 "02_encoding_validation": "corrections_applied", 
@@ -790,52 +790,52 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             reports = stage_result.get(report_key, {})
 
             if not reports:
-                logger.warning(f"Nenhum relatório encontrado para {stage_name}")
+                logger.warning(f"No report found for {stage_name}")
                 return None
 
-            # Extrair novos caminhos dos relatórios
+            # Extract new paths from reports
             new_paths = []
             for original_path in original_paths:
-                # Procurar output_path correspondente no relatório
+                # Search for corresponding output_path in report
                 report_data = reports.get(original_path)
                 if report_data and "output_path" in report_data:
                     new_path = report_data["output_path"]
                     new_paths.append(new_path)
-                    logger.debug(f"Caminho atualizado: {original_path} -> {new_path}")
+                    logger.debug(f"Path updated: {original_path} -> {new_path}")
                 else:
-                    # Se não encontrou novo caminho, manter o original
+                    # If no new path found, keep original
                     new_paths.append(original_path)
-                    logger.warning(f"Caminho não atualizado para {original_path} na etapa {stage_name}")
+                    logger.warning(f"Path not updated for {original_path} in stage {stage_name}")
 
-            # Verificar se os novos arquivos existem
+            # Check if new files exist
             existing_paths = []
             for path in new_paths:
                 if os.path.exists(path):
                     existing_paths.append(path)
-                    logger.debug(f"Arquivo confirmado: {path}")
+                    logger.debug(f"File confirmed: {path}")
                 else:
-                    logger.error(f"Arquivo esperado não existe: {path}")
-                    # Usar caminho original como fallback
+                    logger.error(f"Expected file does not exist: {path}")
+                    # Use original path as fallback
                     original_idx = new_paths.index(path)
                     if original_idx < len(original_paths):
                         existing_paths.append(original_paths[original_idx])
 
             if existing_paths:
-                logger.info(f"Caminhos atualizados com sucesso para {stage_name}: {len(existing_paths)} arquivos")
+                logger.info(f"Paths updated successfully for {stage_name}: {len(existing_paths)} files")
                 return existing_paths
             else:
-                logger.error(f"Nenhum arquivo válido após {stage_name}")
+                logger.error(f"No valid files after {stage_name}")
                 return None
 
         except Exception as e:
-            logger.error(f"Erro ao atualizar caminhos após {stage_name}: {e}")
+            logger.error(f"Error updating paths after {stage_name}: {e}")
             return None
 
     def _execute_stage(self, stage_name: str, dataset_paths: List[str]) -> Dict[str, Any]:
         """Execute a specific pipeline stage"""
 
         self.pipeline_state["current_stage"] = stage_name
-        logger.info(f"Executando etapa: {stage_name}")
+        logger.info(f"Executing stage: {stage_name}")
 
         stage_result = {
             "stage": stage_name,
@@ -853,7 +853,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         try:
             # ✅ SEQUENTIAL STAGE MAPPINGS v5.0.2 - NUMERAÇÃO PURA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA
             stage_methods = {
-                # FASE 1: Preparação e Validação de Dados (01-08)
+                # PHASE 1: Data Preparation and Validation (01-08)
                 "01_chunk_processing": self._stage_01_chunk_processing,
                 "02_encoding_validation": self._stage_02_encoding_validation,
                 "03_statistical_analysis_pre": self._stage_03_statistical_analysis_pre,
@@ -863,20 +863,20 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "07_text_cleaning": self._stage_07_text_cleaning,
                 "08_statistical_analysis_post": self._stage_08_statistical_analysis_post,
 
-                # FASE 2: Processamento de Texto e NLP (09-13)
+                # PHASE 2: Text Processing and NLP (09-13)
                 "09_linguistic_processing": self._stage_09_linguistic_processing,  # 🔤 SPACY
                 "10_sentiment_analysis": self._stage_10_sentiment_analysis,
                 "11_topic_modeling": self._stage_11_topic_modeling,  # 🚀 VOYAGE.AI
                 "12_tfidf_extraction": self._stage_12_tfidf_extraction,  # 🚀 VOYAGE.AI
                 "13_clustering": self._stage_13_clustering,  # 🚀 VOYAGE.AI
 
-                # FASE 3: Análise Estrutural e de Rede (14-17)
+                # PHASE 3: Structural and Network Analysis (14-17)
                 "14_hashtag_normalization": self._stage_14_hashtag_normalization,
                 "15_domain_analysis": self._stage_15_domain_analysis,
                 "16_temporal_analysis": self._stage_16_temporal_analysis,
                 "17_network_analysis": self._stage_17_network_analysis,
 
-                # FASE 4: Análise Avançada e Finalização (18-22)
+                # PHASE 4: Advanced Analysis and Finalization (18-22)
                 "18_qualitative_analysis": self._stage_18_qualitative_analysis,
                 "19_smart_pipeline_review": self._stage_19_smart_pipeline_review,
                 "20_topic_interpretation": self._stage_20_topic_interpretation,
@@ -918,10 +918,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 stage_result["success"] = True
                 self.pipeline_state["completed_stages"].append(stage_name)
             else:
-                raise ValueError(f"Etapa desconhecida: {stage_name}")
+                raise ValueError(f"Unknown stage: {stage_name}")
 
         except Exception as e:
-            logger.error(f"Erro na etapa {stage_name}: {e}")
+            logger.error(f"Error in stage {stage_name}: {e}")
             stage_result["error"] = str(e)
             stage_result["error_type"] = type(e).__name__
             stage_result["critical_error"] = self._is_critical_error(stage_name, e)
@@ -937,7 +937,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 process = psutil.Process()
                 stage_result["memory_usage"] = f"{process.memory_info().rss / 1024 / 1024:.1f} MB"
                 
-                # Forçar garbage collection após cada stage para liberar memória
+                # Force garbage collection after each stage to free memory
                 gc.collect()
                 
             except ImportError:
@@ -4654,10 +4654,10 @@ def add_validation_methods_to_pipeline():
         for idx in result_df.index:
             if idx not in processed_df.index:
                 # Análise qualitativa básica
-                result_df.loc[idx, 'narrative_frame'] = 'neutral'
-                result_df.loc[idx, 'rhetorical_strategy'] = 'informative'
-                result_df.loc[idx, 'discourse_quality'] = 'medium'
-                result_df.loc[idx, 'symbolic_universe'] = 'general'
+                result_df.loc[idx, 'narrative_frame'] = 'neutro'
+                result_df.loc[idx, 'rhetorical_strategy'] = 'informativo'
+                result_df.loc[idx, 'discourse_quality'] = 'médio'
+                result_df.loc[idx, 'symbolic_universe'] = 'geral'
             else:
                 # Copiar resultados processados
                 for col in ['narrative_frame', 'rhetorical_strategy', 'discourse_quality', 'symbolic_universe']:
