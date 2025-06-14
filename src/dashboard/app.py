@@ -113,7 +113,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 class PipelineDashboardNew:
     """Dashboard principal integrado v4.9.1"""
 
@@ -301,7 +300,7 @@ class PipelineDashboardNew:
                 elif overview['failed_stages'] > 0:
                     st.metric("Falharam", overview['failed_stages'])
                 else:
-                    st.metric("Status", "✅ OK")
+                    st.metric("Status", "OK")
                     
         except Exception as e:
             st.error(f"Erro carregando overview: {e}")
@@ -345,7 +344,7 @@ class PipelineDashboardNew:
             elif overview['running_stages'] > 0:
                 st.info(f"🔄 {overview['running_stages']} etapa(s) em execução...")
             elif overview['overall_progress'] == 1.0:
-                st.success("✅ Pipeline concluído com sucesso!")
+                st.success("Pipeline concluído com sucesso!")
 
             # Métricas simples
             col1, col2, col3 = st.columns(3)
@@ -458,28 +457,28 @@ class PipelineDashboardNew:
             with col1:
                 st.metric(
                     "Stage 17: Pipeline Review",
-                    "✅ Concluído",
+                    "Concluído",
                     "Análise de qualidade"
                 )
             
             with col2:
                 st.metric(
                     "Stage 18: Topic Interpretation", 
-                    "✅ Concluído",
+                    "Concluído",
                     "13 lotes processados"
                 )
             
             with col3:
                 st.metric(
                     "Stage 19: Semantic Search",
-                    "✅ Concluído", 
+                    "Concluído", 
                     "222 docs indexados"
                 )
                 
             with col4:
                 st.metric(
                     "Stage 20: Pipeline Validation",
-                    "✅ Concluído",
+                    "Concluído",
                     "Validação final"
                 )
             
@@ -598,7 +597,7 @@ class PipelineDashboardNew:
                 
                 with col3:
                     ready_for_analysis = overall_assessment.get('ready_for_analysis', False)
-                    status = "✅ Pronto" if ready_for_analysis else "⚠️ Revisar"
+                    status = "Pronto" if ready_for_analysis else "⚠️ Revisar"
                     st.metric("Status para Análise", status)
                 
                 # Issues identificadas
@@ -623,10 +622,10 @@ class PipelineDashboardNew:
             st.subheader("📅 Timeline de Execução")
             
             stages_info = [
-                {"stage": "Stage 17", "name": "Smart Pipeline Review", "status": "✅ Concluído", "time": "~5 min"},
-                {"stage": "Stage 18", "name": "Topic Interpretation", "status": "✅ Concluído", "time": "~3 min"}, 
-                {"stage": "Stage 19", "name": "Semantic Search", "status": "✅ Concluído", "time": "~12 min"},
-                {"stage": "Stage 20", "name": "Pipeline Validation", "status": "✅ Concluído", "time": "~11 min"}
+                {"stage": "Stage 17", "name": "Smart Pipeline Review", "status": "Concluído", "time": "~5 min"},
+                {"stage": "Stage 18", "name": "Topic Interpretation", "status": "Concluído", "time": "~3 min"}, 
+                {"stage": "Stage 19", "name": "Semantic Search", "status": "Concluído", "time": "~12 min"},
+                {"stage": "Stage 20", "name": "Pipeline Validation", "status": "Concluído", "time": "~11 min"}
             ]
             
             for stage_info in stages_info:
@@ -698,7 +697,7 @@ class PipelineDashboardNew:
                         efficiency = expected / actual if actual > 0 else 0
                         st.markdown(f"- **{stage['name']}**: {efficiency:.2f}x eficiência")
                 else:
-                    st.success("✅ Todas as etapas estão dentro do desempenho esperado")
+                    st.success("Todas as etapas estão dentro do desempenho esperado")
 
             else:
                 st.info("ℹ️ Nenhuma etapa concluída para análise de performance")
@@ -932,12 +931,10 @@ class PipelineDashboardNew:
             if remaining > 0:
                 st.sidebar.markdown(f"🔄 Próxima atualização em: {remaining:.0f}s")
 
-
 def main():
     """Função principal"""
     dashboard = PipelineDashboardNew()
     dashboard.run()
-
 
 if __name__ == "__main__":
     main()

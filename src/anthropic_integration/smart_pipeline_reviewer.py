@@ -19,7 +19,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class SmartPipelineReviewer(AnthropicBase):
     """
     Revisor inteligente de pipeline usando API Anthropic
@@ -656,7 +655,6 @@ Responda em JSON:
         efficiency = max(0, min(1, (120 - avg_time_per_stage) / 120))
 
         return efficiency
-
 
 def get_smart_pipeline_reviewer(config: Dict[str, Any]) -> SmartPipelineReviewer:
     """

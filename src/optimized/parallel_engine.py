@@ -50,7 +50,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class StageNode:
     """Representa um stage no grafo de dependências"""
@@ -64,7 +63,6 @@ class StageNode:
     priority: int = 1  # 1=highest, 5=lowest
     can_run_parallel: bool = True
     data_size_factor: float = 1.0  # Multiplier for data size impact
-
 
 @dataclass
 class StageResult:
@@ -80,7 +78,6 @@ class StageResult:
     cost_usd: float = 0.0
     worker_id: str = ""
 
-
 @dataclass
 class ParallelExecutionPlan:
     """Plano de execução paralela otimizado"""
@@ -89,7 +86,6 @@ class ParallelExecutionPlan:
     max_parallel_stages: int
     resource_allocation: Dict[str, Any]
     optimization_strategy: str
-
 
 class DependencyGraphBuilder:
     """
@@ -185,7 +181,6 @@ class DependencyGraphBuilder:
             'cpu_per_worker': max_cpu_wave // 4
         }
 
-
 class ResourceManager:
     """
     Gerencia recursos do sistema para execução paralela otimizada
@@ -264,7 +259,6 @@ class ResourceManager:
         self.thread_pool.shutdown(wait=True)
         self.process_pool.shutdown(wait=True)
         logger.info("🔧 ResourceManager shutdown complete")
-
 
 class ParallelProcessingEngine:
     """
@@ -570,7 +564,6 @@ class ParallelProcessingEngine:
         self.resource_manager.shutdown()
         logger.info("🔧 ParallelProcessingEngine shutdown complete")
 
-
 # Factory functions
 def create_production_parallel_engine() -> ParallelProcessingEngine:
     """Cria engine configurado para produção"""
@@ -579,14 +572,12 @@ def create_production_parallel_engine() -> ParallelProcessingEngine:
         enable_process_pool=True
     )
 
-
 def create_development_parallel_engine() -> ParallelProcessingEngine:
     """Cria engine configurado para desenvolvimento"""
     return ParallelProcessingEngine(
         max_workers=min(4, psutil.cpu_count()),
         enable_process_pool=False
     )
-
 
 # Global instance
 _global_parallel_engine = None

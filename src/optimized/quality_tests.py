@@ -44,7 +44,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class QualityMetric:
     """Métrica de qualidade"""
@@ -53,7 +52,6 @@ class QualityMetric:
     tolerance: float = 0.05  # 5% default tolerance
     unit: str = ""
     description: str = ""
-
 
 @dataclass
 class TestResult:
@@ -65,7 +63,6 @@ class TestResult:
     execution_time: float
     timestamp: datetime = field(default_factory=datetime.now)
     error_message: Optional[str] = None
-
 
 @dataclass
 class RegressionReport:
@@ -79,7 +76,6 @@ class RegressionReport:
     summary: Dict[str, Any]
     recommendations: List[str]
     timestamp: datetime = field(default_factory=datetime.now)
-
 
 class DataConsistencyValidator:
     """Valida consistência dos dados através do pipeline"""
@@ -267,7 +263,6 @@ class DataConsistencyValidator:
             'text_issues': text_issues,
             'text_columns_analyzed': list(text_columns)
         }
-
 
 class ResultConsistencyTester:
     """Testa consistência dos resultados entre execuções"""
@@ -492,7 +487,6 @@ class ResultConsistencyTester:
             'shape_mismatch': False
         }
 
-
 class PerformanceRegressionTester:
     """Testa regressões de performance"""
     
@@ -622,7 +616,6 @@ class PerformanceRegressionTester:
             }
         }
 
-
 class QualityRegressionTestSuite:
     """Suite completa de testes de qualidade e regressão"""
     
@@ -708,7 +701,7 @@ class QualityRegressionTestSuite:
             self._save_report(report)
             
             execution_time = time.time() - start_time
-            logger.info(f"✅ Quality test suite completed in {execution_time:.2f}s")
+            logger.info(f"Quality test suite completed in {execution_time:.2f}s")
             logger.info(f"📊 Results: {passed_tests}/{len(test_results)} passed, Score: {overall_score:.1f}/100")
             
             return report
@@ -927,17 +920,14 @@ class QualityRegressionTestSuite:
         
         logger.info(f"📁 Quality test report saved: {json_file}")
 
-
 # Factory functions
 def create_production_quality_tests() -> QualityRegressionTestSuite:
     """Cria suite de testes para validação de produção"""
     return QualityRegressionTestSuite("quality_test_results/production")
 
-
 def create_development_quality_tests() -> QualityRegressionTestSuite:
     """Cria suite de testes para desenvolvimento"""
     return QualityRegressionTestSuite("quality_test_results/development")
-
 
 # Global instance
 _global_quality_tests = None

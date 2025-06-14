@@ -11,7 +11,6 @@ from typing import Dict, List, Optional, Tuple
 
 from .base import AnthropicBase
 
-
 class TopicInterpreter(AnthropicBase):
     """Classe para interpretação de tópicos com API Anthropic"""
 

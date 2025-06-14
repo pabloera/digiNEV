@@ -24,7 +24,6 @@ from plotly.subplots import make_subplots
 # Configuração de logging
 logger = logging.getLogger(__name__)
 
-
 class StageStatus(Enum):
     """Status possíveis de uma etapa"""
     PENDING = "pending"
@@ -33,7 +32,6 @@ class StageStatus(Enum):
     FAILED = "failed"
     SKIPPED = "skipped"
     PROTECTED = "protected"
-
 
 @dataclass
 class StageMetrics:
@@ -60,7 +58,6 @@ class StageMetrics:
         if self.error_messages is None:
             self.error_messages = []
 
-
 @dataclass
 class PipelineSession:
     """Sessão completa de execução do pipeline"""
@@ -80,7 +77,6 @@ class PipelineSession:
             self.stages_metrics = {}
         if self.dataset_info is None:
             self.dataset_info = {}
-
 
 class PipelineMonitor:
     """Monitor principal do pipeline com todas as 22 etapas"""

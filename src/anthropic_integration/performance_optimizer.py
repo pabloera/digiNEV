@@ -18,7 +18,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class PerformanceOptimizer(AnthropicBase):
     """
     Otimizador de performance para APIs com estratégias de amostragem inteligente
@@ -590,7 +589,6 @@ class PerformanceOptimizer(AnthropicBase):
 
         return recommendations
 
-
 class EnhancedPoliticalAnalyzer:
     """Wrapper otimizado para análise política"""
 
@@ -611,7 +609,6 @@ class EnhancedPoliticalAnalyzer:
 
         return result_df
 
-
 class EnhancedSentimentAnalyzer:
     """Wrapper otimizado para análise de sentimento"""
 
@@ -630,7 +627,6 @@ class EnhancedSentimentAnalyzer:
 
         return result_df
 
-
 class EnhancedVoyageAnalyzer:
     """Wrapper otimizado para Voyage.AI"""
 
@@ -648,7 +644,6 @@ class EnhancedVoyageAnalyzer:
         result_df['embedding_cluster'] = 0  # Placeholder
 
         return result_df
-
 
 class EnhancedTextCleaner:
     """Wrapper otimizado para limpeza de texto"""

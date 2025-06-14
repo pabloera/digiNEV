@@ -18,7 +18,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class SemanticHashtagAnalyzer(AnthropicBase):
     """
     Analisador semântico de hashtags usando API Anthropic

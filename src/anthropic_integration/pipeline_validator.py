@@ -21,7 +21,6 @@ from .intelligent_text_cleaner import IntelligentTextCleaner
 
 logger = logging.getLogger(__name__)
 
-
 class CompletePipelineValidator(AnthropicBase):
     """
     Validador completo de pipeline usando API Anthropic

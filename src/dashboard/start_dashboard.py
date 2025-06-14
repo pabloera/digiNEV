@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 """
-DIGITAL DISCOURSE MONITOR DASHBOARD v5.0.0 - INTEGRATED WITH PIPELINE + PERFORMANCE OPTIMIZED
-=============================================================================================
-Script to start integrated dashboard with real-time pipeline monitoring
-and complete results visualization.
+Dashboard startup script for Digital Discourse Monitor.
 
-🚀 v5.0.0: Optimized dashboard with 85-95% better performance + consolidated architecture.
-💾 v5.0.0: Automatic memory management + pre-compiled regex + unified cache.
-📊 v5.0.0: Enterprise-grade monitoring + automatic resource cleanup.
-📊 v4.9.5: Standardized CSV separators with `;` in all 22 stages.
+Launches the web dashboard with pipeline monitoring and data visualization.
 """
 
 import os
@@ -25,7 +19,6 @@ sys.path.insert(0, str(project_root / 'src'))
 # Configure environment variables
 os.environ['STREAMLIT_TELEMETRY_OPTOUT'] = '1'
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
-
 
 def setup_dashboard_environment():
     """Configure dashboard environment"""
@@ -49,8 +42,7 @@ def setup_dashboard_environment():
     for directory in dashboard_dirs:
         directory.mkdir(parents=True, exist_ok=True)
 
-    print("✅ Ambiente do dashboard configurado")
-
+    print("Ambiente do dashboard configurado")
 
 def check_pipeline_integration():
     """Verificar integração com pipeline"""
@@ -72,7 +64,6 @@ def check_pipeline_integration():
         print(f"⚠️  Erro verificando integração: {e}")
         return False
 
-
 def monitor_pipeline_results():
     """Monitora novos resultados do pipeline em background"""
     results_dir = project_root / 'src' / 'dashboard' / 'data' / 'dashboard_results'
@@ -91,7 +82,6 @@ def monitor_pipeline_results():
 
         except Exception:
             break
-
 
 def main():
     """Função principal para iniciar dashboard integrado"""
@@ -137,7 +127,7 @@ def main():
             '--theme.secondaryBackgroundColor', '#f0f2f6'
         ])
     except KeyboardInterrupt:
-        print("\n\n✅ Dashboard terminated")
+        print("\n\nDashboard terminated")
     except Exception as e:
         print(f"\n❌ Error: {e}")
         print("\n💡 Tips to resolve issues:")
@@ -145,7 +135,6 @@ def main():
         print("- Check if dependencies are installed")
         print("- Run 'python run_pipeline.py' to generate data first")
         print("- Check if APIs are configured in .env file")
-
 
 if __name__ == "__main__":
     main()

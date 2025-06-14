@@ -17,7 +17,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class IntelligentTextCleaner(AnthropicBase):
     """
     Limpeza de texto contextual usando API Anthropic

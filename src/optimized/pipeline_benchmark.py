@@ -53,7 +53,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class BenchmarkConfig:
     """Configuração para benchmarks"""
@@ -64,7 +63,6 @@ class BenchmarkConfig:
     enable_profiling: bool = True
     save_detailed_results: bool = True
     output_dir: str = "benchmark_results"
-
 
 @dataclass
 class BenchmarkResult:
@@ -86,7 +84,6 @@ class BenchmarkResult:
     detailed_metrics: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
 
-
 @dataclass
 class ComparisonResult:
     """Resultado de comparação entre pipelines"""
@@ -96,7 +93,6 @@ class ComparisonResult:
     regressions: Dict[str, float]
     quality_preserved: bool
     targets_achieved: Dict[str, bool]
-
 
 class ResourceMonitor:
     """Monitor de recursos do sistema durante benchmarks"""
@@ -165,7 +161,6 @@ class ResourceMonitor:
             'samples_count': len(self.samples),
             'monitoring_duration': self.samples[-1]['timestamp'] - self.samples[0]['timestamp'] if len(self.samples) > 1 else 0
         }
-
 
 class QualityValidator:
     """Valida que otimizações mantêm qualidade dos resultados"""
@@ -282,7 +277,6 @@ class QualityValidator:
         
         return result
 
-
 class PipelineBenchmark:
     """
     Sistema principal de benchmark para validação das otimizações
@@ -371,7 +365,7 @@ class PipelineBenchmark:
             total_time = time.time() - start_time
             summary['total_benchmark_time'] = total_time
             
-            logger.info(f"✅ Full benchmark completed in {total_time:.2f}s")
+            logger.info(f"Full benchmark completed in {total_time:.2f}s")
             logger.info(f"📊 Overall performance score: {overall_score:.1f}/100")
             
             # Save detailed results
@@ -973,7 +967,6 @@ class PipelineBenchmark:
         
         logger.info(f"📁 Detailed results saved to {self.output_dir}")
 
-
 # Factory functions
 def create_production_benchmark() -> PipelineBenchmark:
     """Cria benchmark configurado para validação de produção"""
@@ -987,7 +980,6 @@ def create_production_benchmark() -> PipelineBenchmark:
     )
     return PipelineBenchmark(config)
 
-
 def create_development_benchmark() -> PipelineBenchmark:
     """Cria benchmark configurado para desenvolvimento"""
     config = BenchmarkConfig(
@@ -999,7 +991,6 @@ def create_development_benchmark() -> PipelineBenchmark:
         save_detailed_results=True
     )
     return PipelineBenchmark(config)
-
 
 # Global instance
 _global_benchmark = None

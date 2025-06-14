@@ -1,24 +1,8 @@
 """
-Memory Profiler and Optimizer - Week 5 Production Fine-tuning
-============================================================
+Memory profiler and optimizer for production pipeline execution.
 
-Sistema avançado de profiling e otimização de memória para produção:
-- Memory profiling detalhado por stage
-- Garbage collection otimizado
-- Memory leak detection
-- Adaptive memory management
-- Production-ready memory monitoring
-
-BENEFÍCIOS SEMANA 5:
-- 50% redução uso de memória (8GB → 4GB alvo atingido)
-- Detecção e prevenção de memory leaks
-- Otimização automática de garbage collection
-- Monitoramento preditivo de recursos
-
-Sistema enterprise-grade para gestão de memória em produção.
-
-Data: 2025-06-14
-Status: SEMANA 5 MEMORY OPTIMIZATION
+Provides memory monitoring, garbage collection optimization, and adaptive
+memory management to maintain target memory usage under 4GB.
 """
 
 import gc
@@ -42,7 +26,6 @@ warnings.filterwarnings('ignore', category=pd.errors.PerformanceWarning)
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class MemorySnapshot:
     """Snapshot de uso de memória em um momento específico"""
@@ -55,7 +38,6 @@ class MemorySnapshot:
     operation_type: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class MemoryLeak:
     """Detecção de vazamento de memória"""
@@ -67,7 +49,6 @@ class MemoryLeak:
     recommended_action: str
     stack_trace: Optional[str] = None
 
-
 @dataclass
 class GCStats:
     """Estatísticas de garbage collection"""
@@ -76,7 +57,6 @@ class GCStats:
     uncollectable_objects: Dict[int, int]
     total_time_seconds: float
     efficiency_score: float
-
 
 class MemoryProfiler:
     """Profiler detalhado de memória por stage"""
@@ -338,7 +318,6 @@ class MemoryProfiler:
         
         return opportunities
 
-
 class GarbageCollectionOptimizer:
     """Otimizador inteligente de garbage collection"""
     
@@ -492,7 +471,6 @@ class GarbageCollectionOptimizer:
         
         return recommendations
 
-
 class AdaptiveMemoryManager:
     """Gerenciador adaptativo de memória que integra profiling e otimização"""
     
@@ -598,7 +576,7 @@ class AdaptiveMemoryManager:
         
         if memory_freed > 0:
             self.memory_savings_mb += memory_freed * 1024
-            logger.info(f"✅ Emergency intervention freed {memory_freed:.2f}GB memory")
+            logger.info(f"Emergency intervention freed {memory_freed:.2f}GB memory")
         
         self.emergency_interventions += 1
     
@@ -717,7 +695,6 @@ class AdaptiveMemoryManager:
         
         return recommendations
 
-
 # Factory functions
 def create_production_memory_manager() -> AdaptiveMemoryManager:
     """Cria memory manager configurado para produção"""
@@ -726,14 +703,12 @@ def create_production_memory_manager() -> AdaptiveMemoryManager:
         emergency_threshold_gb=6.0  # 6GB emergency threshold
     )
 
-
 def create_development_memory_manager() -> AdaptiveMemoryManager:
     """Cria memory manager configurado para desenvolvimento"""
     return AdaptiveMemoryManager(
         target_memory_gb=2.0,      # 2GB target for development
         emergency_threshold_gb=3.0  # 3GB emergency threshold
     )
-
 
 # Global instance
 _global_memory_manager = None

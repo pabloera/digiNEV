@@ -6,7 +6,7 @@ Sistema de timeout progressivo com escalação automática para resolver
 falhas de timeout persistentes, especialmente no Stage 8 (Sentiment Analysis).
 
 IMPLEMENTADO PARA RESOLVER:
-- ✅ Timeouts repetidos em stages API-intensivos
+- Timeouts repetidos em stages API-intensivos
 - ✅ Falta de recovery progressivo
 - ✅ Timeouts fixos inadequados para datasets variáveis
 - ✅ Necessidade de timeout adaptativo baseado em contexto
@@ -29,14 +29,12 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-
 class TimeoutStrategy(Enum):
     """Estratégias de timeout disponíveis"""
     FIXED = "fixed"
     PROGRESSIVE = "progressive"
     ADAPTIVE = "adaptive"
     EXPONENTIAL = "exponential"
-
 
 @dataclass
 class TimeoutAttempt:
@@ -52,7 +50,6 @@ class TimeoutAttempt:
     data_size: int = 0
     processing_time: float = 0.0
 
-
 @dataclass
 class StageTimeoutProfile:
     """Perfil de timeout para um stage específico"""
@@ -67,10 +64,9 @@ class StageTimeoutProfile:
     average_processing_time: float = 0.0
     recommended_timeout: int = 0
 
-
 class ProgressiveTimeoutManager:
     """
-    ✅ Gerenciador de Timeout Progressivo - SOLUÇÃO PARA TIMEOUTS PERSISTENTES
+    Gerenciador de Timeout Progressivo - SOLUÇÃO PARA TIMEOUTS PERSISTENTES
     =========================================================================
 
     RESOLVE PROBLEMAS:
@@ -108,7 +104,7 @@ class ProgressiveTimeoutManager:
         # Inicializar perfis de stages
         self._initialize_stage_profiles()
 
-        self.logger.info("✅ ProgressiveTimeoutManager inicializado com sucesso")
+        self.logger.info("ProgressiveTimeoutManager inicializado com sucesso")
         self.logger.info(f"⚙️ Estratégia global: {self.global_strategy.value}")
         self.logger.info(f"🔄 Escalação configurada: {self.escalation_timeouts}")
 
@@ -173,7 +169,7 @@ class ProgressiveTimeoutManager:
     def get_timeout_for_stage(self, stage_name: str, data_size: int = 0,
                              attempt_number: int = 1) -> int:
         """
-        ✅ Calcula timeout otimizado para um stage específico
+        Calcula timeout otimizado para um stage específico
 
         ALGORITMO:
         1. Verifica perfil do stage
@@ -272,7 +268,7 @@ class ProgressiveTimeoutManager:
     def execute_with_progressive_timeout(self, stage_name: str, processing_function: Callable,
                                        data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         """
-        ✅ Executa função com timeout progressivo e recovery automático
+        Executa função com timeout progressivo e recovery automático
 
         FEATURES:
         - Retry automático com timeout aumentado
@@ -313,7 +309,7 @@ class ProgressiveTimeoutManager:
                 self._record_attempt(attempt_record)
                 self._update_stage_profile_on_success(stage_name, attempt_record)
 
-                self.logger.info(f"✅ {stage_name} concluído com sucesso na tentativa {attempt}")
+                self.logger.info(f"{stage_name} concluído com sucesso na tentativa {attempt}")
                 return result
 
             except TimeoutError:
@@ -383,7 +379,7 @@ class ProgressiveTimeoutManager:
             result = self._execute_with_timeout(processing_function, emergency_sample,
                                                emergency_timeout, *args, **kwargs)
 
-            self.logger.info(f"✅ Fallback de emergência bem-sucedido para {stage_name}")
+            self.logger.info(f"Fallback de emergência bem-sucedido para {stage_name}")
             return result
 
         except Exception as e:
@@ -487,10 +483,8 @@ class ProgressiveTimeoutManager:
             else:
                 self.logger.warning(f"⚠️ Stage {stage_name} não encontrado para ajuste")
 
-
 # Instância global para uso no pipeline
 progressive_timeout_manager = None
-
 
 def get_progressive_timeout_manager() -> ProgressiveTimeoutManager:
     """Factory function para obter instância do manager"""
@@ -498,7 +492,6 @@ def get_progressive_timeout_manager() -> ProgressiveTimeoutManager:
     if progressive_timeout_manager is None:
         progressive_timeout_manager = ProgressiveTimeoutManager()
     return progressive_timeout_manager
-
 
 # Decorator para aplicar timeout progressivo automaticamente
 def with_progressive_timeout(stage_name: str):

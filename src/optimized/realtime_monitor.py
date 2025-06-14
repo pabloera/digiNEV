@@ -48,7 +48,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class AlertLevel(Enum):
     """Níveis de alerta do sistema"""
     LOW = "low"
@@ -56,14 +55,12 @@ class AlertLevel(Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
-
 class MetricType(Enum):
     """Tipos de métricas monitoradas"""
     PERFORMANCE = "performance"
     RESOURCE = "resource"
     QUALITY = "quality"
     SYSTEM = "system"
-
 
 @dataclass
 class Alert:
@@ -78,7 +75,6 @@ class Alert:
     resolved: bool = False
     resolution_time: Optional[datetime] = None
 
-
 @dataclass
 class MetricValue:
     """Valor de uma métrica"""
@@ -87,7 +83,6 @@ class MetricValue:
     unit: str
     timestamp: datetime = field(default_factory=datetime.now)
     metadata: Dict[str, Any] = field(default_factory=dict)
-
 
 @dataclass
 class PerformanceSnapshot:
@@ -98,7 +93,6 @@ class PerformanceSnapshot:
     resource_usage: Dict[str, float]
     quality_indicators: Dict[str, float]
     active_optimizations: List[str]
-
 
 class MetricsCollector:
     """Coletador de métricas do sistema"""
@@ -216,7 +210,6 @@ class MetricsCollector:
         
         return metrics
 
-
 class AlertSystem:
     """Sistema de alertas baseado em thresholds"""
     
@@ -326,7 +319,7 @@ class AlertSystem:
                 if metric.value < alert.threshold_value * 0.9:  # 10% hysteresis
                     alert.resolved = True
                     alert.resolution_time = datetime.now()
-                    logger.info(f"✅ ALERT RESOLVED: {alert.message}")
+                    logger.info(f"ALERT RESOLVED: {alert.message}")
     
     def _generate_alert_message(self, metric: MetricValue, level: AlertLevel, threshold: float) -> str:
         """Gera mensagem de alerta"""
@@ -350,7 +343,6 @@ class AlertSystem:
         """Retorna histórico de alertas"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         return [alert for alert in self.alert_history if alert.timestamp >= cutoff_time]
-
 
 class PerformanceMonitor:
     """Monitor principal de performance em tempo real"""
@@ -768,7 +760,6 @@ class PerformanceMonitor:
         
         return recommendations
 
-
 # Factory functions
 def create_production_monitor() -> PerformanceMonitor:
     """Cria monitor configurado para produção"""
@@ -777,14 +768,12 @@ def create_production_monitor() -> PerformanceMonitor:
         snapshot_interval=10.0  # Snapshot every 10 seconds
     )
 
-
 def create_development_monitor() -> PerformanceMonitor:
     """Cria monitor configurado para desenvolvimento"""
     return PerformanceMonitor(
         metrics_interval=2.0,  # Collect every 2 seconds  
         snapshot_interval=30.0  # Snapshot every 30 seconds
     )
-
 
 # Global instance
 _global_performance_monitor = None

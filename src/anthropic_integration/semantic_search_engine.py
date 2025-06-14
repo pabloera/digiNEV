@@ -24,7 +24,6 @@ from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
 logger = logging.getLogger(__name__)
 
-
 class SemanticSearchEngine(AnthropicBase):
     """
     Advanced Semantic Search & Intelligence Engine
@@ -61,7 +60,7 @@ class SemanticSearchEngine(AnthropicBase):
         self.voyage_optimized = hasattr(self.embedding_analyzer, 'voyage_available') and self.embedding_analyzer.voyage_available
 
         if self.voyage_optimized:
-            logger.info("✅ Semantic Search: Voyage.ai integration active")
+            logger.info("Semantic Search: Voyage.ai integration active")
             # Optimize for Voyage.ai usage
             self.similarity_threshold = max(0.75, self.similarity_threshold)  # Higher precision
             self.enable_query_optimization = True
@@ -1145,7 +1144,6 @@ Responda em JSON:
         summary += " A análise revela padrões complexos de engajamento e evolução semântica no período analisado."
 
         return summary
-
 
 def create_semantic_search_engine(
     config: Dict[str, Any],

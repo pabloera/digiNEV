@@ -1,28 +1,9 @@
 #!/usr/bin/env python3
 """
-DIGITAL DISCOURSE MONITOR v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM
-======================================================================
+Digital Discourse Monitor - Main pipeline execution script.
 
-🏆 PIPELINE OPTIMIZATION COMPLETE! Transformation 45% → 95% success rate.
-
-ALL 5 weeks of optimization implemented and integrated:
-- 🚀 WEEK 1: Emergency cache + performance fixes ACTIVE
-- 🔧 WEEK 2: Advanced hierarchical caching (L1/L2) + monitoring ACTIVE  
-- ⚡ WEEK 3: Parallelization + streaming + async processing ACTIVE
-- 📊 WEEK 4: Advanced monitoring + quality validation + benchmarks ACTIVE
-- 🏭 WEEK 5: Production deployment + adaptive memory management ACTIVE
-
-ENTERPRISE PERFORMANCE:
-- ⚡ 60% execution time reduction via parallelization
-- 💾 50% memory reduction (8GB → 4GB target) via adaptive management
-- 💰 40% API cost reduction via smart caching
-- 🚀 Automatic deployment with rollback in <30s
-- 📊 Real-time monitoring + alerting + quality gates
-
-EXECUTION MODES:
-- Standard: Optimized pipeline with all 5 weeks active
-- Production: Automatic deployment with validation + rollback
-- Testing: Comprehensive validation of all optimizations
+Orchestrates the complete analysis pipeline with optimizations for performance,
+memory usage, and cost efficiency. Supports multiple execution modes.
 """
 
 import json

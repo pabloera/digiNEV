@@ -34,7 +34,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class VoyageClusteringAnalyzer(AnthropicBase):
     """
     Advanced clustering analyzer using Voyage.ai embeddings
@@ -71,7 +70,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
             try:
                 self.voyage_analyzer = VoyageEmbeddingAnalyzer(config)
                 self.use_voyage_embeddings = True
-                self.logger.info("✅ Voyage embeddings habilitado para clustering")
+                self.logger.info("Voyage embeddings habilitado para clustering")
             except Exception as e:
                 self.logger.warning(f"⚠️ Falha ao inicializar Voyage para clustering: {e}")
                 self.use_voyage_embeddings = False
@@ -341,7 +340,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                     'model': kmeans
                 })
 
-                self.logger.info(f"✅ K-means: silhouette = {kmeans_silhouette:.3f}")
+                self.logger.info(f"K-means: silhouette = {kmeans_silhouette:.3f}")
 
             except Exception as e:
                 self.logger.warning(f"⚠️ K-means falhou: {e}")
@@ -371,7 +370,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                         'n_clusters_found': n_clusters_dbscan
                     })
 
-                    self.logger.info(f"✅ DBSCAN: {n_clusters_dbscan} clusters, silhouette = {dbscan_silhouette:.3f}")
+                    self.logger.info(f"DBSCAN: {n_clusters_dbscan} clusters, silhouette = {dbscan_silhouette:.3f}")
                 else:
                     self.logger.warning(f"⚠️ DBSCAN encontrou poucos clusters: {n_clusters_dbscan}")
 
@@ -392,7 +391,7 @@ class VoyageClusteringAnalyzer(AnthropicBase):
                     'model': agg
                 })
 
-                self.logger.info(f"✅ Agglomerative: silhouette = {agg_silhouette:.3f}")
+                self.logger.info(f"Agglomerative: silhouette = {agg_silhouette:.3f}")
 
             except Exception as e:
                 self.logger.warning(f"⚠️ Agglomerative falhou: {e}")
@@ -755,7 +754,6 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'há', 'nos', 'já', 'está', 'eu', 'também', 'só',
             'pelo', 'pela', 'até', 'isso', 'ela', 'entre', 'era', 'depois', 'sem', 'mesmo', 'aos', 'ter'
         ]
-
 
 def create_voyage_clustering_analyzer(config: Dict[str, Any]) -> VoyageClusteringAnalyzer:
     """

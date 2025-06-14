@@ -19,7 +19,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class IntelligentDomainAnalyzer(AnthropicBase):
     """
     Analisador inteligente de domínios usando API Anthropic
@@ -559,7 +558,6 @@ Responda em JSON:
             'high_frequency_domains': len(extraction['domain_stats']),
             'methodology': 'intelligent_domain_analysis_with_ai'
         }
-
 
 def get_intelligent_domain_analyzer(config: Dict[str, Any]) -> IntelligentDomainAnalyzer:
     """

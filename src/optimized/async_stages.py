@@ -59,7 +59,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class AsyncStageResult:
     """Resultado de execução assíncrona de um stage"""
@@ -73,7 +72,6 @@ class AsyncStageResult:
     error_message: Optional[str] = None
     processing_stats: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class BatchRequest:
     """Request para processamento em batch"""
@@ -83,7 +81,6 @@ class BatchRequest:
     parameters: Dict[str, Any] = field(default_factory=dict)
     priority: int = 1
     created_at: datetime = field(default_factory=datetime.now)
-
 
 class AsyncSentimentProcessor:
     """
@@ -152,7 +149,7 @@ class AsyncSentimentProcessor:
         
         execution_time = time.time() - stage_start
         
-        logger.info(f"✅ Sentiment analysis completed: {successful_batches}/{len(batches)} batches, "
+        logger.info(f"Sentiment analysis completed: {successful_batches}/{len(batches)} batches, "
                    f"{total_api_calls} API calls, ${total_cost:.4f} cost in {execution_time:.2f}s")
         
         return AsyncStageResult(
@@ -241,7 +238,6 @@ class AsyncSentimentProcessor:
         else:
             return original_df
 
-
 class AsyncTopicProcessor:
     """
     Processador assíncrono para topic modeling (Stage 09)
@@ -306,7 +302,7 @@ class AsyncTopicProcessor:
             
             execution_time = time.time() - stage_start
             
-            logger.info(f"✅ Topic modeling completed in {execution_time:.2f}s")
+            logger.info(f"Topic modeling completed in {execution_time:.2f}s")
             
             return AsyncStageResult(
                 stage_id="09_topic_modeling",
@@ -450,7 +446,6 @@ class AsyncTopicProcessor:
             enhanced_df['n_topics_available'] = lda_results['n_topics']
         
         return enhanced_df
-
 
 class AsyncStageOrchestrator:
     """
@@ -630,7 +625,6 @@ class AsyncStageOrchestrator:
             yield item
             await asyncio.sleep(0)  # Allow other tasks to run
 
-
 # Factory functions
 def create_async_stage_orchestrator(config: Dict[str, Any] = None) -> AsyncStageOrchestrator:
     """Cria orchestrador configurado para async stages"""
@@ -650,7 +644,6 @@ def create_async_stage_orchestrator(config: Dict[str, Any] = None) -> AsyncStage
         }
     
     return AsyncStageOrchestrator(config)
-
 
 # Global instance
 _global_async_orchestrator = None

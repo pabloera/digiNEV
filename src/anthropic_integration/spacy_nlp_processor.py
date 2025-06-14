@@ -1,22 +1,8 @@
 """
-spaCy NLP Processor for Advanced Linguistic Analysis - IMPLEMENTED ✅
-===========================================================================
+Portuguese NLP processing using spaCy pt_core_news_lg model.
 
-✅ STATUS: COMPLETED AND FUNCTIONAL
-✅ MODEL: pt_core_news_lg v3.8.0 ACTIVE
-✅ PIPELINE: 7 components loaded successfully
-✅ ENTITIES: 57 Brazilian political patterns active
-✅ FEATURES: 13 linguistic features implemented
-
-Component for professional linguistic processing with spaCy pt_core_news_lg,
-including morphological analysis, named entities and Brazilian linguistic features.
-
-VERIFIED IMPLEMENTATION (2025-06-08):
-- Model: pt_core_news_lg v3.8.0 successfully loaded
-- Components: ['tok2vec', 'morphologizer', 'parser', 'lemmatizer', 'attribute_ruler', 'entity_ruler', 'ner']
-- Political entities: 57 Brazilian patterns active
-- Integration: Stage 07 operational in 22-stage pipeline
-- Testing: All initialization and processing tests PASSED
+Provides linguistic analysis including tokenization, named entity recognition,
+morphological analysis, and Brazilian political entity detection.
 """
 
 import json
@@ -42,51 +28,19 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class SpacyNLPProcessor(AnthropicBase):
     """
-    ✅ Advanced spaCy NLP Processor - IMPLEMENTATION COMPLETED
-    ============================================================
-
-    CURRENT STATUS (2025-06-08): ✅ FUNCTIONAL AND OPERATIONAL
-
-    ACTIVE MODEL:
-    ✅ pt_core_news_lg v3.8.0 - Professional Portuguese NLP
-    ✅ 7 Pipeline Components: ['tok2vec', 'morphologizer', 'parser', 'lemmatizer', 'attribute_ruler', 'entity_ruler', 'ner']
-    ✅ 57 Brazilian Political Entity Patterns Loaded
-    ✅ 13 Linguistic Features Implemented
-
-    VERIFIED FEATURES:
-    ✅ Professional Portuguese lemmatization
-    ✅ Morphological analysis (POS tagging) - morphologizer active
-    ✅ Named entity recognition (NER) - entity_ruler + ner active
-    ✅ Brazilian political entity detection (57 patterns)
-    ✅ Linguistic complexity analysis
-    ✅ Intelligent hashtag segmentation
-    ✅ Lexical diversity calculation
-    ✅ Dependency parsing (parser active)
-    ✅ Token analysis (tok2vec active)
-    ✅ Morphological features (morphologizer active)
-    ✅ Sentence segmentation
-    ✅ Political entity ruler (custom patterns)
-    ✅ Batch processing optimization
-
-    INTEGRATION STATUS:
-    ✅ Stage 07 - Linguistic Processing: OPERATIONAL
-    ✅ Pipeline v4.9.1 Enhanced: ACTIVE
-    ✅ Error handling and fallbacks: CONFIGURED
-    ✅ Performance optimization: ACTIVE
+    Portuguese NLP processor using spaCy pt_core_news_lg model.
+    
+    Performs tokenization, POS tagging, NER, lemmatization, and Brazilian
+    political entity detection on Portuguese text.
     """
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        # ✅ IMPLEMENTATION STATUS: COMPLETE AND OPERATIONAL (2025-06-08)
-        # ✅ Model: pt_core_news_lg v3.8.0 successfully loaded and tested
-        # ✅ Integration: Stage 07 - Linguistic Processing active in pipeline
-        # ✅ Features: 13 linguistic features implemented and verified
-        # ✅ Entities: 57 Brazilian political patterns loaded
+        # Initialize spaCy configuration
 
         # Configurações do spaCy
         nlp_config = config.get('nlp', {})
@@ -130,7 +84,7 @@ class SpacyNLPProcessor(AnthropicBase):
             self._configure_spacy_pipeline()
 
             self.spacy_available = True
-            self.logger.info(f"✅ spaCy inicializado com sucesso: {self.spacy_model}")
+            self.logger.info(f"spaCy inicializado com sucesso: {self.spacy_model}")
 
         except IOError:
             self.logger.warning(f"⚠️ Modelo {self.spacy_model} não encontrado. Tentando modelo menor...")
@@ -140,7 +94,7 @@ class SpacyNLPProcessor(AnthropicBase):
                 self.nlp = spacy.load('pt_core_news_sm')
                 self._configure_spacy_pipeline()
                 self.spacy_available = True
-                self.logger.info("✅ spaCy inicializado com modelo pt_core_news_sm")
+                self.logger.info("spaCy inicializado com modelo pt_core_news_sm")
 
             except IOError:
                 self.logger.error("❌ Nenhum modelo spaCy português encontrado")
@@ -181,7 +135,7 @@ class SpacyNLPProcessor(AnthropicBase):
                 })
 
             ruler.add_patterns(political_patterns)
-            self.logger.info(f"✅ Adicionados {len(political_patterns)} padrões políticos ao NER")
+            self.logger.info(f"Adicionados {len(political_patterns)} padrões políticos ao NER")
 
         except Exception as e:
             self.logger.warning(f"⚠️ Erro ao adicionar padrões políticos: {e}")
@@ -226,35 +180,14 @@ class SpacyNLPProcessor(AnthropicBase):
 
     def process_linguistic_features(self, df: pd.DataFrame, text_column: str = 'body_cleaned') -> Dict[str, Any]:
         """
-        ✅ Processa Features Linguísticas Avançadas com spaCy - IMPLEMENTADO
-        ==================================================================
-
-        STATUS: ✅ FUNCIONAL E OPERACIONAL (2025-06-08)
-        MODELO: pt_core_news_lg v3.8.0 ATIVO
-
-        FEATURES IMPLEMENTADAS (13 total):
-        ✅ Professional Portuguese lemmatization
-        ✅ Morphological analysis (POS tagging)
-        ✅ Named entity recognition (NER)
-        ✅ Brazilian political entity detection (57 patterns)
-        ✅ Linguistic complexity analysis
-        ✅ Lexical diversity calculation
-        ✅ Intelligent hashtag segmentation
-        ✅ Sentence segmentation
-        ✅ Token analysis
-        ✅ Dependency parsing
-        ✅ Morphological features
-        ✅ Political entity ruler
-        ✅ Batch processing optimization
+        Process linguistic features using spaCy Portuguese model.
 
         Args:
-            df: DataFrame com textos para processar
-            text_column: Nome da coluna com texto
+            df: DataFrame with texts to process
+            text_column: Name of column containing text
 
         Returns:
-            Dict com resultado do processamento linguístico completo
-
-        VERIFIED: All tests passed, integration active
+            Dict with complete linguistic processing results
         """
         self.logger.info(f"🔤 Iniciando processamento linguístico para {len(df)} textos")
 
@@ -334,7 +267,7 @@ class SpacyNLPProcessor(AnthropicBase):
                         self.logger.warning(f"⚠️ Erro em texto individual: {individual_error}")
                         all_results.append(self._create_empty_feature_dict())
 
-        self.logger.info(f"✅ Processamento concluído: {len(all_results)} resultados")
+        self.logger.info(f"Processamento concluído: {len(all_results)} resultados")
         return all_results
 
     def _extract_linguistic_features(self, doc, original_text: str) -> Dict[str, Any]:
@@ -540,7 +473,7 @@ class SpacyNLPProcessor(AnthropicBase):
             values = [result.get(feature_name, None) for result in linguistic_results]
             enhanced_df[feature_name] = values
 
-        self.logger.info(f"✅ Adicionadas {len(feature_names)} colunas linguísticas")
+        self.logger.info(f"Adicionadas {len(feature_names)} colunas linguísticas")
         return enhanced_df
 
     def _calculate_linguistic_statistics(self, linguistic_results: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -617,7 +550,6 @@ class SpacyNLPProcessor(AnthropicBase):
             'complexity_category': 'unknown',
             'lexical_richness': 'unknown'
         }
-
 
 def create_spacy_nlp_processor(config: Dict[str, Any]) -> SpacyNLPProcessor:
     """

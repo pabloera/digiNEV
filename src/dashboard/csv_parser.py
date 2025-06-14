@@ -13,7 +13,6 @@ import pandas as pd
 # Configure logging
 logger = logging.getLogger(__name__)
 
-
 class RobustCSVParser:
     """
     Robust CSV parser that implements the same separator detection and
@@ -81,7 +80,7 @@ class RobustCSVParser:
                     logger.warning(f"⚠️  Colunas esperadas não encontradas: {list(df.columns)[:5]}")
                     # Não é erro crítico para o dashboard, pode ser dataset diferente
 
-                logger.debug(f"✅ CSV parseado: {len(df.columns)} colunas, {len(df)} linhas")
+                logger.debug(f"CSV parseado: {len(df.columns)} colunas, {len(df)} linhas")
             return df
         except Exception as e:
             logger.warning(f"Tentativa de parsing falhou: {e}")
@@ -221,7 +220,7 @@ class RobustCSVParser:
                     if nrows and len(df) > nrows:
                         df = df.head(nrows)
 
-                    logger.info(f"✅ Parsing bem-sucedido em chunks (config {i+1}): {len(df)} linhas, {len(df.columns)} colunas")
+                    logger.info(f"Parsing bem-sucedido em chunks (config {i+1}): {len(df)} linhas, {len(df.columns)} colunas")
                     return df
 
             except Exception as e:
@@ -243,7 +242,7 @@ class RobustCSVParser:
 
             df = self._try_parse_csv(file_path, **config)
             if df is not None:
-                logger.info(f"✅ Parsing bem-sucedido com configuração {i+1}: {len(df)} linhas, {len(df.columns)} colunas")
+                logger.info(f"Parsing bem-sucedido com configuração {i+1}: {len(df)} linhas, {len(df.columns)} colunas")
                 logger.debug(f"Colunas detectadas: {list(df.columns)[:10]}")
                 return df
 
@@ -289,10 +288,8 @@ class RobustCSVParser:
                 'rows_sample': 0
             }
 
-
 # Singleton instance for easy usage
 robust_csv_parser = RobustCSVParser()
-
 
 # Convenience functions for backward compatibility
 def load_csv_robust(file_path: str, nrows: Optional[int] = None,
@@ -300,11 +297,9 @@ def load_csv_robust(file_path: str, nrows: Optional[int] = None,
     """Carrega CSV com parsing robusto"""
     return robust_csv_parser.load_csv_robust(file_path, nrows, chunksize)
 
-
 def validate_csv_detailed(file_path: str) -> Dict[str, Any]:
     """Valida CSV com detalhes"""
     return robust_csv_parser.validate_csv_detailed(file_path)
-
 
 def detect_separator(file_path: str) -> str:
     """Detecta separador do CSV"""

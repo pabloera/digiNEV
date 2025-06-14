@@ -1,74 +1,9 @@
 """
-Anthropic Integration Base Module v5.0.0 - TASK-025 API Documentation
-=====================================================================
+Base class for Anthropic API integrations with configuration management and cost monitoring.
 
-This module provides the base class and configuration management for all Anthropic API
-integrations in the Monitor do Discurso Digital project.
-
-**Module Purpose:**
-    Centralizes Anthropic API access, configuration management, cost monitoring,
-    and enhanced model loading with stage-specific optimizations.
-
-**Key Classes:**
-    - AnthropicBase: Main base class for all Anthropic-powered processors
-    - EnhancedConfigLoader: Stage-specific configuration management  
-    - AnthropicConfig: Configuration data structure
-
-**Key Features:**
-    - ✅ Enhanced configuration system with stage-specific settings
-    - ✅ Cost monitoring and budget limits
-    - ✅ Fallback strategies for model reliability
-    - ✅ Rate limiting and retry logic
-    - ✅ Comprehensive logging and error handling
-
-**API Integration:**
-    - Primary API: Anthropic Claude (claude-3-5-sonnet-20241022)
-    - Fallback support for multiple model versions
-    - Automatic retry with exponential backoff
-    - Cost tracking and budget enforcement
-
-**Configuration Files:**
-    - config/settings.yaml: Main configuration (consolidated)
-    - config/anthropic.yaml: API-specific settings
-    - .env: API keys and sensitive data
-
-**Usage Example:**
-    ```python
-    from anthropic_integration.base import AnthropicBase
-    
-    class MyProcessor(AnthropicBase):
-        def __init__(self):
-            super().__init__(stage_name="my_stage")
-            
-        def process_data(self, data):
-            response = self.client.messages.create(
-                model=self.model,
-                messages=[{"role": "user", "content": "Analyze this data"}]
-            )
-            return response
-    ```
-
-**Error Handling:**
-    Raises:
-        - APIConnectionError: When Anthropic API is unreachable
-        - AuthenticationError: When API key is invalid
-        - RateLimitError: When API rate limits are exceeded
-        - CostLimitError: When budget limits are exceeded
-
-**Dependencies:**
-    - anthropic: Official Anthropic Python client
-    - pyyaml: Configuration file parsing
-    - python-dotenv: Environment variable management
-
-**Version History:**
-    - v4.9.8: Enhanced configuration consolidation
-    - v5.0.0: TASK-025 API documentation + centralized config loader
-
-**Author:** Pablo Emanuel Romero Almada, Ph.D.
-**License:** MIT
+Provides centralized access to Anthropic Claude API with stage-specific settings,
+fallback strategies, and budget tracking.
 """
-
-
 
 import json
 import logging
@@ -99,7 +34,6 @@ try:
 except ImportError:
     COST_MONITOR_AVAILABLE = False
 
-
 @dataclass
 class AnthropicConfig:
     """Configuração para API Anthropic"""
@@ -107,7 +41,6 @@ class AnthropicConfig:
     model: str = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo fixo reproduzível
     max_tokens: int = 2000
     temperature: float = 0.3
-
 
 class EnhancedConfigLoader:
     """
@@ -140,7 +73,7 @@ class EnhancedConfigLoader:
             if self.config_path.exists():
                 with open(self.config_path, 'r', encoding='utf-8') as f:
                     config = yaml.safe_load(f)
-                logging.getLogger(__name__).info(f"✅ Configurações consolidadas carregadas: {self.config_path}")
+                logging.getLogger(__name__).info(f"Consolidated configuration loaded: {self.config_path}")
                 return config
             else:
                 logging.getLogger(__name__).warning(f"⚠️ Arquivo de configuração não encontrado: {self.config_path}")
@@ -190,10 +123,8 @@ class EnhancedConfigLoader:
             logging.getLogger(__name__).info(f"🔄 Fallbacks para {primary_model}: {fallbacks}")
         return fallbacks
 
-
 # Singleton instance do enhanced config loader
 _enhanced_config_loader = None
-
 
 def get_enhanced_config_loader(config_path: Optional[str] = None) -> EnhancedConfigLoader:
     """Obtém instância singleton do EnhancedConfigLoader"""
@@ -205,13 +136,11 @@ def get_enhanced_config_loader(config_path: Optional[str] = None) -> EnhancedCon
     
     return _enhanced_config_loader
 
-
 def load_operation_config(operation: str) -> Dict[str, Any]:
     """Função de conveniência para carregar configuração por operação"""
     loader = get_enhanced_config_loader()
     stage_id = loader.get_stage_from_operation(operation)
     return loader.get_stage_config(stage_id)
-
 
 class AnthropicBase:
     """
@@ -328,7 +257,7 @@ class AnthropicBase:
                 loader = get_enhanced_config_loader()
                 self.enhanced_config = load_operation_config(stage_operation)
                 self.enhanced_config_available = True
-                self.logger.info(f"✅ Enhanced config carregada para {stage_operation}: {self.enhanced_config.get('model', 'N/A')}")
+                self.logger.info(f"Enhanced config carregada para {stage_operation}: {self.enhanced_config.get('model', 'N/A')}")
             except Exception as e:
                 self.logger.warning(f"⚠️ Erro ao carregar enhanced config para {stage_operation}: {e}")
 
@@ -392,7 +321,7 @@ class AnthropicBase:
             except Exception as e:
                 self.logger.warning(f"Não foi possível inicializar monitor de custos: {e}")
 
-        # ✅ WEEK 2 SMART CLAUDE CACHE INTEGRATION
+        # Initialize smart cache and performance monitoring
         self.smart_claude_cache = None
         self.performance_monitor = None
         self.week2_cache_available = False
@@ -501,7 +430,7 @@ class AnthropicBase:
         max_tokens = kwargs.get('max_tokens', self.max_tokens)
         temperature = kwargs.get('temperature', self.temperature)
         
-        # ✅ WEEK 2 SMART CLAUDE CACHE - Check semantic cache first
+        # Check semantic cache first if available
         if self.week2_cache_available and self.smart_claude_cache:
             try:
                 from ..optimized.smart_claude_cache import ClaudeRequest, ClaudeResponse
@@ -649,7 +578,7 @@ class AnthropicBase:
                         except Exception as cost_e:
                             self.logger.warning(f"Erro ao registrar custos fallback: {cost_e}")
                     
-                    self.logger.info(f"✅ Fallback bem-sucedido: {fallback_model}")
+                    self.logger.info(f"Fallback bem-sucedido: {fallback_model}")
                     return response.content[0].text
                     
                 except Exception as fallback_e:
@@ -686,10 +615,8 @@ class AnthropicBase:
             if hasattr(self, 'logger') and self.logger:
                 self.logger.debug(f"Parse JSON direto falhou: {e}. Aplicando correções robustas...")
 
-            # NOVA CORREÇÃO: Verificar se resposta é Claude introdutório
+            # Clean Claude introductory text from response
             import re
-
-            # CORREÇÃO PRINCIPAL: Detectar e remover texto introdutório do Claude
             claude_intro_patterns = [
                 r"^Aqui está a análise detalhada[^{]*",
                 r"^Vou analisar[^{]*",
@@ -713,7 +640,7 @@ class AnthropicBase:
                         try:
                             result = json.loads(cleaned_response)
                             if hasattr(self, 'logger') and self.logger:
-                                self.logger.info("✅ JSON parseado após remoção de introdução")
+                                self.logger.info("JSON parseado após remoção de introdução")
                             return result
                         except json.JSONDecodeError:
                             pass
@@ -747,7 +674,7 @@ class AnthropicBase:
             if isinstance(result, dict):
                 if expected_structure in result:
                     if hasattr(self, 'logger') and self.logger:
-                        self.logger.info(f"✅ JSON parseado com sucesso - estrutura '{expected_structure}' encontrada")
+                        self.logger.info(f"JSON parseado com sucesso - estrutura '{expected_structure}' encontrada")
                     return result
                 else:
                     # Tentar adaptar estrutura
@@ -799,7 +726,7 @@ class AnthropicBase:
                     parsed[key] = [] if key in ['results', 'items', 'data'] else {}
 
             if hasattr(self, 'logger'):
-                self.logger.info("✅ Claude response parseada com sucesso")
+                self.logger.info("Claude response parseada com sucesso")
             return parsed
 
         except Exception as e:
@@ -846,7 +773,6 @@ class AnthropicBase:
                 continue
 
         return results
-
 
 class APIUsageTracker:
     """Rastreador de uso da API para controle de custos (mantém implementação original)"""

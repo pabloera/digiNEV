@@ -16,7 +16,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class DatasetStatisticsGenerator(AnthropicBase):
     """
     Gerador de Estatísticas Completas do Dataset
@@ -562,7 +561,6 @@ class DatasetStatisticsGenerator(AnthropicBase):
         """
 
         return html
-
 
 def create_dataset_statistics_generator(config: Dict[str, Any]) -> DatasetStatisticsGenerator:
     """

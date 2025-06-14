@@ -11,7 +11,6 @@ from typing import Dict, List, Optional
 
 from .base import AnthropicBase
 
-
 class ClusterValidator(AnthropicBase):
     """Classe para validação de clusters com API Anthropic"""
 

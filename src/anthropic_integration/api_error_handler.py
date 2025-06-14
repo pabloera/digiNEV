@@ -16,7 +16,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class APIError:
     """Classe para representar erros da API"""
@@ -29,7 +28,6 @@ class APIError:
     resolved: bool = False
     resolution_details: Optional[str] = None
 
-
 @dataclass
 class APIOperationResult:
     """Resultado de uma operação da API"""
@@ -38,7 +36,6 @@ class APIOperationResult:
     error: Optional[APIError] = None
     retry_count: int = 0
     total_time: float = 0.0
-
 
 class APIErrorHandler:
     """
@@ -329,7 +326,6 @@ class APIErrorHandler:
             "error_types": error_types,
             "recent_errors": [asdict(e) for e in filtered_errors[-5:]]  # Últimos 5 erros
         }
-
 
 class APIQualityChecker(AnthropicBase):
     """

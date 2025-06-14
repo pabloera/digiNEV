@@ -36,7 +36,7 @@ try:
     from ..utils.gensim_patch import get_lda_model_safe, safe_import_gensim
     LDA_MODEL_CLASS, LDA_BACKEND = get_lda_model_safe()
     LDA_AVAILABLE = LDA_MODEL_CLASS is not None
-    logger.info(f"✅ Topic modeling usando {LDA_BACKEND}: {LDA_MODEL_CLASS.__name__ if LDA_MODEL_CLASS else 'N/A'}")
+    logger.info(f"Topic modeling usando {LDA_BACKEND}: {LDA_MODEL_CLASS.__name__ if LDA_MODEL_CLASS else 'N/A'}")
 except ImportError:
     # Fallback tradicional
     try:
@@ -44,13 +44,12 @@ except ImportError:
         LDA_MODEL_CLASS = LatentDirichletAllocation
         LDA_BACKEND = "sklearn"
         LDA_AVAILABLE = True
-        logger.info("✅ Topic modeling fallback: scikit-learn LDA")
+        logger.info("Topic modeling fallback: scikit-learn LDA")
     except ImportError:
         LDA_MODEL_CLASS = None
         LDA_BACKEND = "none"
         LDA_AVAILABLE = False
         logger.warning("⚠️  Nenhum backend LDA disponível")
-
 
 class VoyageTopicModeler(AnthropicBase):
     """
@@ -86,7 +85,7 @@ class VoyageTopicModeler(AnthropicBase):
             try:
                 self.voyage_analyzer = VoyageEmbeddingAnalyzer(config)
                 self.use_voyage_embeddings = True
-                self.logger.info("✅ Voyage embeddings habilitado para topic modeling")
+                self.logger.info("Voyage embeddings habilitado para topic modeling")
             except Exception as e:
                 self.logger.warning(f"⚠️ Falha ao inicializar Voyage para topic modeling: {e}")
                 self.use_voyage_embeddings = False
@@ -587,7 +586,6 @@ Forneça interpretação JSON:
             'seus', 'suas', 'nem', 'nas', 'me', 'esse', 'eles', 'estão', 'você', 'tinha', 'foram', 'essa',
             'num', 'numa', 'pelos', 'pelas', 'este', 'del', 'te', 'lo', 'le', 'les', 'são', 'vai', 'vou'
         ]
-
 
 def create_voyage_topic_modeler(config: Dict[str, Any]) -> VoyageTopicModeler:
     """

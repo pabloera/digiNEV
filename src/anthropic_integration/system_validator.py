@@ -16,7 +16,6 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-
 class SystemValidator:
     """Valida sistema e dependências antes da execução do pipeline"""
 
@@ -58,7 +57,7 @@ class SystemValidator:
                 else:
                     importlib.import_module(dep)
                 self.validation_results["dependencies"]["passed"].append(dep)
-                logger.debug(f"✅ Dependência {dep} encontrada")
+                logger.debug(f"Dependência {dep} encontrada")
             except ImportError as e:
                 self.validation_results["dependencies"]["failed"].append({
                     "dependency": dep,
@@ -73,7 +72,7 @@ class SystemValidator:
             try:
                 importlib.import_module(dep)
                 self.validation_results["dependencies"]["passed"].append(dep)
-                logger.debug(f"✅ Dependência opcional {dep} encontrada")
+                logger.debug(f"Dependência opcional {dep} encontrada")
             except ImportError as e:
                 self.validation_results["dependencies"]["failed"].append({
                     "dependency": dep,
@@ -104,7 +103,7 @@ class SystemValidator:
                     with open(config_path, 'r') as f:
                         yaml.safe_load(f)
                     self.validation_results["config_files"]["passed"].append(config_file)
-                    logger.debug(f"✅ Arquivo de configuração {config_file} válido")
+                    logger.debug(f"Arquivo de configuração {config_file} válido")
                 else:
                     raise FileNotFoundError(f"Arquivo não encontrado: {config_path}")
 
@@ -150,7 +149,7 @@ class SystemValidator:
             full_path = self.project_root / dir_path
             if full_path.exists() and full_path.is_dir():
                 self.validation_results["directories"]["passed"].append(dir_path)
-                logger.debug(f"✅ Diretório {dir_path} encontrado")
+                logger.debug(f"Diretório {dir_path} encontrado")
             else:
                 self.validation_results["directories"]["failed"].append({
                     "directory": dir_path,
@@ -165,7 +164,7 @@ class SystemValidator:
             full_path = self.project_root / dir_path
             if full_path.exists() and full_path.is_dir():
                 self.validation_results["directories"]["passed"].append(dir_path)
-                logger.debug(f"✅ Diretório {dir_path} encontrado")
+                logger.debug(f"Diretório {dir_path} encontrado")
             else:
                 try:
                     full_path.mkdir(parents=True, exist_ok=True)
@@ -189,7 +188,7 @@ class SystemValidator:
         env_file = self.project_root / '.env'
         if env_file.exists():
             self.validation_results["environment"]["passed"].append(".env file exists")
-            logger.debug("✅ Arquivo .env encontrado")
+            logger.debug("Arquivo .env encontrado")
         else:
             self.validation_results["environment"]["failed"].append({
                 "item": ".env file",
@@ -204,7 +203,7 @@ class SystemValidator:
             # Validar formato da chave (não expor o valor)
             if api_key.startswith('sk-ant-'):
                 self.validation_results["environment"]["passed"].append("ANTHROPIC_API_KEY format valid")
-                logger.debug("✅ ANTHROPIC_API_KEY com formato válido")
+                logger.debug("ANTHROPIC_API_KEY com formato válido")
             else:
                 self.validation_results["environment"]["failed"].append({
                     "item": "ANTHROPIC_API_KEY",
@@ -224,7 +223,7 @@ class SystemValidator:
         python_version = sys.version_info
         if python_version >= (3, 8):
             self.validation_results["environment"]["passed"].append(f"Python {python_version.major}.{python_version.minor}")
-            logger.debug(f"✅ Python {python_version.major}.{python_version.minor} compatível")
+            logger.debug(f"Python {python_version.major}.{python_version.minor} compatível")
         else:
             self.validation_results["environment"]["failed"].append({
                 "item": "Python version",
@@ -249,7 +248,7 @@ class SystemValidator:
         # Determinar status geral
         if deps_ok and config_ok and dirs_ok and env_ok:
             self.validation_results["overall_status"] = "healthy"
-            logger.info("✅ Validação do sistema: SUCESSO")
+            logger.info("Validação do sistema: SUCESSO")
         elif deps_ok and config_ok and dirs_ok:  # Ambiente pode ter problemas não críticos
             self.validation_results["overall_status"] = "warning"
             logger.warning("⚠️ Validação do sistema: AVISOS (sistema funcional)")
@@ -277,7 +276,7 @@ class SystemValidator:
 
         # Dependências
         report.append(f"\n📦 Dependências:")
-        report.append(f"   ✅ Aprovadas: {len(self.validation_results['dependencies']['passed'])}")
+        report.append(f"   Aprovadas: {len(self.validation_results['dependencies']['passed'])}")
         report.append(f"   ❌ Falhas: {len(self.validation_results['dependencies']['failed'])}")
 
         for failure in self.validation_results['dependencies']['failed']:
@@ -286,7 +285,7 @@ class SystemValidator:
 
         # Arquivos de configuração
         report.append(f"\n⚙️ Configurações:")
-        report.append(f"   ✅ Válidas: {len(self.validation_results['config_files']['passed'])}")
+        report.append(f"   Válidas: {len(self.validation_results['config_files']['passed'])}")
         report.append(f"   ❌ Inválidas: {len(self.validation_results['config_files']['failed'])}")
 
         for failure in self.validation_results['config_files']['failed']:
@@ -295,16 +294,15 @@ class SystemValidator:
 
         # Diretórios
         report.append(f"\n📁 Diretórios:")
-        report.append(f"   ✅ Encontrados: {len(self.validation_results['directories']['passed'])}")
+        report.append(f"   Encontrados: {len(self.validation_results['directories']['passed'])}")
         report.append(f"   ❌ Problemas: {len(self.validation_results['directories']['failed'])}")
 
         # Ambiente
         report.append(f"\n🌍 Ambiente:")
-        report.append(f"   ✅ Configurações OK: {len(self.validation_results['environment']['passed'])}")
+        report.append(f"   Configurações OK: {len(self.validation_results['environment']['passed'])}")
         report.append(f"   ❌ Problemas: {len(self.validation_results['environment']['failed'])}")
 
         return "\n".join(report)
-
 
 def validate_system(project_root: str = None) -> Tuple[bool, str]:
     """
@@ -321,7 +319,6 @@ def validate_system(project_root: str = None) -> Tuple[bool, str]:
     report = validator.generate_report()
 
     return success, report
-
 
 if __name__ == "__main__":
     # Teste da validação

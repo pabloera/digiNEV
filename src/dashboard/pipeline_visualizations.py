@@ -19,7 +19,6 @@ from plotly.subplots import make_subplots
 
 from .pipeline_monitor import PipelineMonitor, StageMetrics, StageStatus
 
-
 class PipelineVisualizations:
     """Classe principal para visualizações do pipeline"""
 
@@ -86,7 +85,7 @@ class PipelineVisualizations:
             elif overview['running_stages'] > 0:
                 st.metric("Status", "🔄 Executando", f"{overview['running_stages']} ativas")
             elif overview['completed_stages'] == overview['total_stages']:
-                st.metric("Status", "✅ Concluído", "100% completo")
+                st.metric("Status", "Concluído", "100% completo")
             else:
                 st.metric("Status", "⏸️ Pausado", "Aguardando")
 

@@ -20,7 +20,6 @@ from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
 logger = logging.getLogger(__name__)
 
-
 class IntelligentQuerySystem(AnthropicBase):
     """
     Intelligent Query System for Political Discourse Analysis
@@ -850,7 +849,6 @@ Gere insights em JSON:
             logger.warning(f"AI insight generation failed: {e}")
             return {}
 
-
 def create_intelligent_query_system(
     config: Dict[str, Any],
     search_engine: SemanticSearchEngine = None
@@ -866,7 +864,6 @@ def create_intelligent_query_system(
         IntelligentQuerySystem instance
     """
     return IntelligentQuerySystem(config, search_engine)
-
 
 # CLI Interface
 def main():
@@ -922,7 +919,6 @@ def main():
             print(json.dumps(batch_result, indent=2, ensure_ascii=False, default=str))
     else:
         print("Specify --interactive, --query, or --batch mode")
-
 
 if __name__ == "__main__":
     main()

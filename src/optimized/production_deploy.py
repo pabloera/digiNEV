@@ -49,7 +49,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class DeploymentStatus(Enum):
     """Status do deployment"""
     PENDING = "pending"
@@ -59,14 +58,12 @@ class DeploymentStatus(Enum):
     FAILED = "failed"
     ROLLED_BACK = "rolled_back"
 
-
 class ValidationResult(Enum):
     """Resultado da validação"""
     PASSED = "passed"
     FAILED = "failed"
     WARNING = "warning"
     SKIPPED = "skipped"
-
 
 @dataclass
 class ValidationCheck:
@@ -78,7 +75,6 @@ class ValidationCheck:
     timeout_seconds: int = 300
     retry_attempts: int = 1
 
-
 @dataclass
 class ValidationReport:
     """Relatório de validação"""
@@ -89,7 +85,6 @@ class ValidationReport:
     message: str
     details: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
-
 
 @dataclass
 class DeploymentConfig:
@@ -104,7 +99,6 @@ class DeploymentConfig:
     monitoring_duration_minutes: int = 60
     validation_dataset_size: int = 1000
 
-
 @dataclass
 class DeploymentRecord:
     """Registro de deployment"""
@@ -118,7 +112,6 @@ class DeploymentRecord:
     rollback_info: Optional[Dict[str, Any]] = None
     deployment_time_seconds: float = 0.0
     error_message: Optional[str] = None
-
 
 class ProductionValidator:
     """Validador para produção"""
@@ -620,7 +613,6 @@ class ProductionValidator:
             'score': np.random.uniform(0, 1, size)
         })
 
-
 class ProductionDeploymentSystem:
     """
     Sistema completo de deployment para produção
@@ -709,12 +701,12 @@ class ProductionDeploymentSystem:
             deployment_record.performance_metrics = monitoring_results
             
             # Phase 5: Final validation
-            logger.info("✅ Phase 5: Final validation")
+            logger.info("Phase 5: Final validation")
             final_validation = await self._final_health_check(config)
             
             if final_validation['healthy']:
                 deployment_record.status = DeploymentStatus.DEPLOYED
-                logger.info(f"✅ Deployment {deployment_id} completed successfully")
+                logger.info(f"Deployment {deployment_id} completed successfully")
             else:
                 deployment_record.status = DeploymentStatus.FAILED
                 deployment_record.error_message = f"Final health check failed: {final_validation['error']}"
@@ -809,7 +801,7 @@ class ProductionDeploymentSystem:
                 logger.error("Deployment test failed")
                 return False
             
-            logger.info("✅ Optimization systems deployed successfully")
+            logger.info("Optimization systems deployed successfully")
             return True
             
         except Exception as e:
@@ -947,7 +939,7 @@ class ProductionDeploymentSystem:
                 if backup_path:
                     logger.info(f"📁 Rollback using backup: {backup_path}")
             
-            logger.info(f"✅ Rollback completed for {deployment_record.deployment_id}")
+            logger.info(f"Rollback completed for {deployment_record.deployment_id}")
             
         except Exception as e:
             logger.error(f"Error during rollback: {e}")
@@ -995,17 +987,14 @@ class ProductionDeploymentSystem:
             for d in recent_deployments
         ]
 
-
 # Factory functions
 def create_production_deployment_system() -> ProductionDeploymentSystem:
     """Cria sistema de deployment para produção"""
     return ProductionDeploymentSystem("deployment_backups/production")
 
-
 def create_staging_deployment_system() -> ProductionDeploymentSystem:
     """Cria sistema de deployment para staging"""
     return ProductionDeploymentSystem("deployment_backups/staging")
-
 
 # Global instance
 _global_deployment_system = None

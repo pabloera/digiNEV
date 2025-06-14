@@ -19,7 +19,6 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-
 class OptimizedCache:
     """
     High-performance cache system with compression and smart eviction
@@ -357,7 +356,6 @@ class OptimizedCache:
             'statistics': stats
         }
 
-
 class EmbeddingCache(OptimizedCache):
     """
     Specialized cache for embeddings with additional features
@@ -425,7 +423,6 @@ class EmbeddingCache(OptimizedCache):
             'models_used': list(self.embedding_stats['models_used']),
             'cache_stats': self.get_stats()
         }
-
 
 def get_optimized_cache(cache_dir: Union[str, Path], cache_type: str = 'general', **kwargs) -> OptimizedCache:
     """

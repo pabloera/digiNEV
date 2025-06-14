@@ -26,7 +26,6 @@ warnings.filterwarnings('ignore')
 
 logger = logging.getLogger(__name__)
 
-
 class TemporalEvolutionTracker(AnthropicBase):
     """
     Temporal Semantic Evolution Tracker for Political Discourse Analysis
@@ -979,7 +978,6 @@ Responda em JSON:
             current_date = month_end
 
         return windows
-
 
 def create_temporal_evolution_tracker(
     config: Dict[str, Any],

@@ -35,7 +35,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class SystemMetrics:
     """Métricas de sistema coletadas em tempo real"""
@@ -49,7 +48,6 @@ class SystemMetrics:
     network_io_bytes: Tuple[int, int]  # (bytes_sent, bytes_recv)
     active_threads: int
     open_files: int
-
 
 @dataclass
 class PipelineMetrics:
@@ -65,7 +63,6 @@ class PipelineMetrics:
     api_calls_made: int
     cost_estimate_usd: float
 
-
 @dataclass
 class CacheMetrics:
     """Métricas de performance de cache"""
@@ -80,7 +77,6 @@ class CacheMetrics:
     evictions_count: int
     compression_ratio: float
 
-
 @dataclass
 class APIMetrics:
     """Métricas de uso de APIs"""
@@ -94,7 +90,6 @@ class APIMetrics:
     error_rate: float
     quota_remaining: Optional[float]
 
-
 @dataclass
 class PerformanceAlert:
     """Alerta de performance"""
@@ -106,7 +101,6 @@ class PerformanceAlert:
     current_value: float
     threshold_value: float
     recommended_action: str
-
 
 class MetricsCollector:
     """
@@ -320,7 +314,6 @@ class MetricsCollector:
             }
         }
 
-
 class AlertSystem:
     """
     Sistema de alertas baseado em thresholds de performance
@@ -484,7 +477,6 @@ class AlertSystem:
                 ]
         
         return sorted(filtered_alerts, key=lambda x: x.timestamp, reverse=True)
-
 
 class PerformanceMonitor:
     """
@@ -686,17 +678,14 @@ class PerformanceMonitor:
             "performance_grade": self.generate_executive_summary()["session_overview"]["performance_grade"]
         }
 
-
 # Factory functions
 def create_production_monitor(config: Dict[str, Any]) -> PerformanceMonitor:
     """Cria monitor configurado para produção"""
     return PerformanceMonitor(config, "performance_reports/production")
 
-
 def create_development_monitor(config: Dict[str, Any]) -> PerformanceMonitor:
     """Cria monitor configurado para desenvolvimento"""
     return PerformanceMonitor(config, "performance_reports/development")
-
 
 # Global instance
 _global_performance_monitor = None

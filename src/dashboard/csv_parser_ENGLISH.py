@@ -13,7 +13,6 @@ import pandas as pd
 # Configure logging
 logger = logging.getLogger(__name__)
 
-
 class RobustCSVParser:
     """
     Robust CSV parser that implements the same separator detection and
@@ -155,10 +154,8 @@ class RobustCSVParser:
                 'error': str(e)
             }
 
-
 # Global instance for easy access
 robust_csv_parser = RobustCSVParser()
-
 
 def parse_csv_file(file_path: str, max_rows: Optional[int] = None) -> pd.DataFrame:
     """
@@ -172,7 +169,6 @@ def parse_csv_file(file_path: str, max_rows: Optional[int] = None) -> pd.DataFra
         Parsed DataFrame or empty DataFrame if failed
     """
     return robust_csv_parser.parse_csv_robust(file_path, max_rows)
-
 
 def get_csv_info(file_path: str) -> Dict[str, Any]:
     """

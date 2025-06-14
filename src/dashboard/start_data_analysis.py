@@ -35,7 +35,7 @@ def main():
     # Verificar se dados estão disponíveis
     data_path = project_root / "data/interim/sample_dataset_v495_19_pipeline_validated.csv"
     if data_path.exists():
-        print(f"✅ Dataset encontrado: {data_path.name}")
+        print(f"Dataset encontrado: {data_path.name}")
         print(f"📊 Dados prontos para análise!")
     else:
         print("⚠️  Dataset não encontrado")
@@ -69,14 +69,13 @@ def main():
             '--theme.secondaryBackgroundColor', '#f0f2f6'
         ])
     except KeyboardInterrupt:
-        print("\\n\\n✅ Dashboard de análise encerrado")
+        print("\\n\\nDashboard de análise encerrado")
     except Exception as e:
         print(f"\\n❌ Erro: {e}")
         print("\\n💡 Dicas para resolver problemas:")
         print("- Verifique se o Poetry está ativo: poetry shell")
         print("- Verifique se o dataset existe: ls data/interim/")
         print("- Execute o pipeline primeiro: poetry run python run_pipeline.py")
-
 
 if __name__ == "__main__":
     main()

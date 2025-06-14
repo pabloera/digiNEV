@@ -19,7 +19,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class DeduplicationValidator(AnthropicBase):
     """
     Validador avançado de deduplicação usando API Anthropic
@@ -187,7 +186,7 @@ class DeduplicationValidator(AnthropicBase):
     def _detect_text_column(self, df: pd.DataFrame) -> str:
         """Detecta automaticamente a coluna de texto principal"""
 
-        # CORREÇÃO CRÍTICA: Verificar se o CSV foi parseado corretamente
+        # Verificar se o CSV foi parseado corretamente
         if len(df.columns) == 1 and ',' in df.columns[0]:
             # Header mal interpretado - CSV não foi parseado corretamente
             logger.error(f"PARSING CSV INCORRETO detectado. Header: {df.columns[0][:100]}...")
@@ -479,10 +478,10 @@ CRITÉRIOS:
             dedup_column = None
             if 'body_cleaned' in df.columns:
                 dedup_column = 'body_cleaned'
-                logger.info("✅ Usando 'body_cleaned' para deduplicação (texto já processado)")
+                logger.info("Usando 'body_cleaned' para deduplicação (texto já processado)")
             elif 'body' in df.columns:
                 dedup_column = 'body'
-                logger.info("✅ Usando 'body' para deduplicação (texto original)")
+                logger.info("Usando 'body' para deduplicação (texto original)")
             else:
                 logger.error(f"❌ Colunas 'body' ou 'body_cleaned' não encontradas. Disponíveis: {list(df.columns)}")
                 return df
@@ -542,7 +541,7 @@ CRITÉRIOS:
             elif reduction_rate > 70.0:
                 logger.warning(f"⚠️  Taxa de duplicação muito alta ({reduction_rate:.1f}%). Verificar dados.")
             else:
-                logger.info(f"✅ Taxa de duplicação normal: {reduction_rate:.1f}%")
+                logger.info(f"Taxa de duplicação normal: {reduction_rate:.1f}%")
 
             # 8. ESTATÍSTICAS FINAIS
             final_records = len(deduplicated_df)
@@ -928,7 +927,7 @@ Responda em formato JSON:
             }
         })
         
-        logger.info(f"✅ Filtragem concluída:")
+        logger.info(f"Filtragem concluída:")
         logger.info(f"   ➤ Registros originais: {len(df)}")
         logger.info(f"   ➤ Registros com texto: {valid_count} ({100*valid_count/len(df):.1f}%)")
         logger.info(f"   ➤ Registros removidos: {empty_count} ({100*empty_count/len(df):.1f}%)")

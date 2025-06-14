@@ -18,7 +18,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class StatisticalAnalyzer(AnthropicBase):
     """
     Analisador estatístico para comparação antes/depois da limpeza

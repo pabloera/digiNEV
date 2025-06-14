@@ -58,7 +58,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class StreamChunk:
     """Representa um chunk de dados no streaming pipeline"""
@@ -75,7 +74,6 @@ class StreamChunk:
             self.memory_size_mb = self.data.memory_usage(deep=True).sum() / (1024 * 1024)
             self.row_count = len(self.data)
 
-
 @dataclass
 class StreamConfig:
     """Configuração do streaming pipeline"""
@@ -87,7 +85,6 @@ class StreamConfig:
     gc_frequency: int = 3  # Run GC every N chunks
     lazy_loading: bool = True
     disk_cache_dir: str = "cache/streaming"
-
 
 class AdaptiveChunkManager:
     """
@@ -164,7 +161,6 @@ class AdaptiveChunkManager:
         # Record memory usage
         current_memory = psutil.Process().memory_info().rss / (1024 * 1024)
         self.memory_history.append(current_memory)
-
 
 class StreamCompressor:
     """
@@ -249,7 +245,6 @@ class StreamCompressor:
         except Exception as e:
             logger.error(f"Error decompressing chunk: {e}")
             return None
-
 
 class StreamBuffer:
     """
@@ -379,7 +374,6 @@ class StreamBuffer:
                 self.disk_chunks.clear()
             except Exception as e:
                 logger.warning(f"Error cleaning up disk cache: {e}")
-
 
 class StreamingPipeline:
     """
@@ -615,7 +609,7 @@ class StreamingPipeline:
         
         # Final stage statistics
         stage_duration = time.time() - stage_start_time
-        logger.info(f"✅ Stage {stage_name} completed: {chunks_processed} chunks, "
+        logger.info(f"Stage {stage_name} completed: {chunks_processed} chunks, "
                    f"{total_rows:,} rows in {stage_duration:.2f}s")
     
     def _perform_garbage_collection(self):
@@ -664,7 +658,6 @@ class StreamingPipeline:
         
         logger.info(f"🧹 StreamingPipeline cleanup completed")
 
-
 # Factory functions
 def create_production_streaming_pipeline() -> StreamingPipeline:
     """Cria streaming pipeline configurado para produção"""
@@ -679,7 +672,6 @@ def create_production_streaming_pipeline() -> StreamingPipeline:
     )
     return StreamingPipeline(config)
 
-
 def create_development_streaming_pipeline() -> StreamingPipeline:
     """Cria streaming pipeline configurado para desenvolvimento"""
     config = StreamConfig(
@@ -692,7 +684,6 @@ def create_development_streaming_pipeline() -> StreamingPipeline:
         lazy_loading=True
     )
     return StreamingPipeline(config)
-
 
 # Global instance
 _global_streaming_pipeline = None

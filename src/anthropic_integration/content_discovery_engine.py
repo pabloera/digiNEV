@@ -24,7 +24,6 @@ from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
 logger = logging.getLogger(__name__)
 
-
 class ContentDiscoveryEngine(AnthropicBase):
     """
     Automated Content Discovery Engine for Political Discourse Analysis
@@ -1505,7 +1504,6 @@ Responda em JSON:
             })
 
         return anomalies
-
 
 def create_content_discovery_engine(
     config: Dict[str, Any],

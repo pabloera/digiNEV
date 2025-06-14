@@ -28,7 +28,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 
-# ✅ EMERGENCY CACHE INTEGRATION - Critical Performance Fix
+# EMERGENCY CACHE INTEGRATION - Critical Performance Fix
 try:
     from ..optimized.emergency_embeddings import get_global_embeddings_cache
     EMERGENCY_CACHE_AVAILABLE = True
@@ -38,7 +38,6 @@ except ImportError:
 
 from .base import AnthropicBase
 
-# ✅ WEEK 2 ADVANCED OPTIMIZATIONS - Unified Embeddings Engine + Smart Claude Cache + Performance Monitor
 try:
     from ..optimized.unified_embeddings_engine import get_global_unified_engine, EmbeddingRequest
     from ..optimized.smart_claude_cache import get_global_claude_cache, ClaudeRequest
@@ -53,7 +52,6 @@ except ImportError:
     ClaudeRequest = None
 
 logger = logging.getLogger(__name__)
-
 
 class VoyageEmbeddingAnalyzer(AnthropicBase):
     """
@@ -192,7 +190,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
             logger.warning(f"⚠️  Model {self.model_name} has NO FREE QUOTA - all usage will be charged")
         else:
             free_quota_millions = model_info['free_quota'] / 1000000
-            logger.info(f"✅ Model {self.model_name} has {free_quota_millions:.0f}M free tokens")
+            logger.info(f"Model {self.model_name} has {free_quota_millions:.0f}M free tokens")
 
         # Recomendações baseadas na configuração
         if not self.enable_sampling and self.model_name != 'voyage-3.5-lite':
@@ -385,8 +383,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
 
         logger.info(f"🚀 Generating embeddings for {len(texts)} texts with model {self.model_name}")
 
-        # ✅ WEEK 2 UNIFIED EMBEDDINGS ENGINE - Advanced hierarchical cache with L1/L2 levels
-        if WEEK2_OPTIMIZATIONS_AVAILABLE:
+                if WEEK2_OPTIMIZATIONS_AVAILABLE:
             try:
                 unified_engine = get_global_unified_engine()
                 performance_monitor = get_global_performance_monitor()
@@ -453,7 +450,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
             except Exception as e:
                 logger.warning(f"⚠️ Unified engine failed, falling back to emergency cache: {e}")
         
-        # ✅ EMERGENCY CACHE FALLBACK - Original emergency cache as backup
+        # EMERGENCY CACHE FALLBACK - Original emergency cache as backup
         if EMERGENCY_CACHE_AVAILABLE:
             try:
                 emergency_cache = get_global_embeddings_cache()
@@ -485,7 +482,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
                     }
                     
                     cache_status = "HIT" if cache_stats.get('cache_hit') else "COMPUTED"
-                    logger.info(f"✅ Emergency Cache {cache_status}: {len(texts)} texts in {cache_stats.get('total_time', 0):.2f}s")
+                    logger.info(f"Emergency Cache {cache_status}: {len(texts)} texts in {cache_stats.get('total_time', 0):.2f}s")
                     return result
                     
             except Exception as e:
@@ -751,7 +748,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
             
             if all_embeddings:
                 embeddings_array = np.array(all_embeddings)
-                logger.info(f"✅ Direct computation successful: {embeddings_array.shape}")
+                logger.info(f"Direct computation successful: {embeddings_array.shape}")
                 return embeddings_array
             else:
                 logger.error("No embeddings generated in direct computation")
@@ -1390,7 +1387,6 @@ Responda apenas com a descrição do tópico:
             'executions_possible': executions_possible,
             'tokens_remaining_after_execution': free_quota - estimated_tokens
         }
-
 
 def create_voyage_embedding_analyzer(config: Dict[str, Any]) -> VoyageEmbeddingAnalyzer:
     """

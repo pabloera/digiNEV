@@ -22,7 +22,6 @@ import pandas as pd
 
 from .base import AnthropicBase
 
-
 class AnthropicSentimentAnalyzer(AnthropicBase):
     """Ultra-optimized sentiment analyzer for Brazilian political context"""
 
@@ -80,7 +79,7 @@ class AnthropicSentimentAnalyzer(AnthropicBase):
         # Log performance
         elapsed = time.time() - start_time
         hit_rate = self._cache_stats['hits'] / max(1, self._cache_stats['hits'] + self._cache_stats['misses'])
-        self.logger.info(f"✅ Completed in {elapsed:.2f}s | Cache: {hit_rate:.1%} | {len(texts)/elapsed:.1f} texts/s")
+        self.logger.info(f"Completed in {elapsed:.2f}s | Cache: {hit_rate:.1%} | {len(texts)/elapsed:.1f} texts/s")
 
         return df
 
@@ -91,7 +90,6 @@ class AnthropicSentimentAnalyzer(AnthropicBase):
 
         self.logger.info(f"🚀 Analysis: {len(texts)} texts")
         return self._analyze_with_cache(texts)
-
 
     def _create_optimized_prompt(self, texts: List[str]) -> str:
         """
@@ -167,7 +165,6 @@ Textos: {formatted}
 
         key = self._get_cache_key(text)
         self._cache[key] = result.copy()
-
 
     def _analyze_with_cache(self, texts: List[str]) -> List[Dict[str, Any]]:
         """Análise com sistema de cache inteligente"""

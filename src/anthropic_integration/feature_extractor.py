@@ -17,7 +17,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class FeatureExtractor(AnthropicBase):
     """
     Advanced feature extractor using Anthropic API

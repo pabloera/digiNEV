@@ -37,7 +37,6 @@ from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class SearchResult:
     """Individual search result"""
@@ -49,7 +48,6 @@ class SearchResult:
     metadata: Dict[str, Any]
     relevance_explanation: str
 
-
 @dataclass
 class SearchStats:
     """Search performance statistics"""
@@ -60,7 +58,6 @@ class SearchStats:
     total_docs: int
     results_returned: int
     cache_hits: int
-
 
 class HybridSearchEngine(AnthropicBase):
     """
@@ -599,7 +596,6 @@ class HybridSearchEngine(AnthropicBase):
             'search_cache_cleaned': search_cleaned,
             'total_cleaned': embedding_cleaned + search_cleaned
         }
-
 
 def get_hybrid_search_engine(config: Dict[str, Any],
                             embedding_analyzer: VoyageEmbeddingAnalyzer = None) -> HybridSearchEngine:

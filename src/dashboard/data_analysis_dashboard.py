@@ -73,7 +73,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 class DataAnalysisDashboard:
     """Dashboard principal para análise dos dados processados"""
     
@@ -1396,12 +1395,10 @@ class DataAnalysisDashboard:
             length_by_category = self.df.groupby('political_category')['text_length'].agg(['mean', 'median', 'std'])
             st.dataframe(length_by_category, use_container_width=True)
 
-
 def main():
     """Função principal"""
     dashboard = DataAnalysisDashboard()
     dashboard.run()
-
 
 if __name__ == "__main__":
     main()

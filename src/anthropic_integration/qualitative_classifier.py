@@ -11,7 +11,6 @@ from typing import Dict, List, Optional
 
 from .base import AnthropicBase
 
-
 class QualitativeClassifier(AnthropicBase):
     """Classe para classificação qualitativa com API Anthropic"""
 

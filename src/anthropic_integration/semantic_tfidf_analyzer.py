@@ -28,7 +28,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class SemanticTfidfAnalyzer(AnthropicBase):
     """
     Analisador TF-IDF com semântica usando API Anthropic
@@ -722,7 +721,7 @@ Responda em JSON:
                 category_semantic_analysis = self._analyze_category_with_embeddings_enhanced(category_terms)
                 result['category_semantic_analysis'] = category_semantic_analysis
 
-            self.logger.info(f"✅ Análise TF-IDF semântica concluída com {len(ai_enhanced_groups)} grupos")
+            self.logger.info(f"Análise TF-IDF semântica concluída com {len(ai_enhanced_groups)} grupos")
             return result
 
         except Exception as e:
@@ -1152,7 +1151,6 @@ Responda em JSON:
             'seus', 'suas', 'nem', 'nas', 'me', 'esse', 'eles', 'estão', 'você', 'tinha', 'foram', 'essa',
             'num', 'numa', 'pelos', 'pelas', 'essa', 'este', 'del', 'te', 'lo', 'le', 'les'
         ]
-
 
 def get_semantic_tfidf_analyzer(config: Dict[str, Any]) -> SemanticTfidfAnalyzer:
     """

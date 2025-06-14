@@ -101,7 +101,6 @@ from .statistical_analyzer import StatisticalAnalyzer
 
 logger = logging.getLogger(__name__)
 
-
 class UnifiedAnthropicPipeline(AnthropicBase):
     """
     Unified pipeline with Anthropic integration for all 20 stages
@@ -113,7 +112,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
     04. feature_validation - Basic feature validation and enrichment
     05. political_analysis - Deep political analysis via API
     06. text_cleaning - Intelligent text cleaning
-    07. linguistic_processing - Advanced linguistic processing with spaCy ✅ ACTIVE 🔤
+    07. linguistic_processing - Advanced linguistic processing with spaCy ACTIVE 🔤
     08. sentiment_analysis - Multidimensional sentiment analysis
     09. topic_modeling - Topic modeling with interpretation 🚀
     10. tfidf_extraction - Semantic TF-IDF extraction 🚀
@@ -269,7 +268,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("statistical_analyzer", lambda: StatisticalAnalyzer(self.config)),
             ("performance_optimizer", lambda: PerformanceOptimizer(self.config)),
 
-            # ✅ NEW MANAGERS FOR TIMEOUT AND PERFORMANCE SOLUTIONS
+            # NEW MANAGERS FOR TIMEOUT AND PERFORMANCE SOLUTIONS
             ("adaptive_chunking_manager", lambda: get_adaptive_chunking_manager()),
             ("concurrent_processor", lambda: get_concurrent_processor()),
             ("progressive_timeout_manager", lambda: get_progressive_timeout_manager())
@@ -397,7 +396,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if SPACY_PROCESSOR_AVAILABLE:
             try:
                 self.spacy_nlp_processor = SpacyNLPProcessor(self.config)
-                logger.info("✅ SpacyNLPProcessor initialized successfully")
+                logger.info("SpacyNLPProcessor initialized successfully")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to initialize SpacyNLPProcessor: {e}")
                 self.spacy_nlp_processor = None
@@ -612,7 +611,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             if (self.voyage_embeddings.enable_sampling and
                 self.voyage_embeddings.model_name == 'voyage-3.5-lite' and
                 self.voyage_embeddings.batch_size >= 128):
-                recommendations.append("✅ IDEAL CONFIGURATION - System optimized for maximum savings")
+                recommendations.append("IDEAL CONFIGURATION - System optimized for maximum savings")
 
             # Performance alerts
             if self.voyage_embeddings.max_messages_per_dataset > 100000:
@@ -851,7 +850,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         start_time = time.time()
 
         try:
-            # ✅ SEQUENTIAL STAGE MAPPINGS v5.0.2 - NUMERAÇÃO PURA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA
+            # SEQUENTIAL STAGE MAPPINGS v5.0.2 - NUMERAÇÃO PURA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA
             stage_methods = {
                 # PHASE 1: Data Preparation and Validation (01-08)
                 "01_chunk_processing": self._stage_01_chunk_processing,
@@ -883,7 +882,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "21_semantic_search": self._stage_21_semantic_search,  # 🚀 VOYAGE.AI
                 "22_pipeline_validation": self._stage_22_pipeline_validation,
 
-                # ✅ LEGACY ALIASES - Mapeamento para métodos originais (compatibilidade total)
+                # LEGACY ALIASES - Mapeamento para métodos originais (compatibilidade total)
                 "01b_feature_validation": self._stage_01b_feature_validation,
                 "01c_political_analysis": self._stage_01c_political_analysis,
                 "02a_encoding_validation": self._stage_02a_encoding_validation,
@@ -1077,7 +1076,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "duplicate_frequency_added": "duplicate_frequency" in deduplicated_df.columns
                         })
 
-                        logger.info(f"✅ Deduplicação concluída: {original_count} → {final_count} ({reduction_ratio:.1%} redução)")
+                        logger.info(f"Deduplicação concluída: {original_count} → {final_count} ({reduction_ratio:.1%} redução)")
 
                     else:
                         logger.info("🔧 Usando deduplicação tradicional (API não disponível)")
@@ -1191,7 +1190,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             }
             results["datasets_processed"] = len(results["feature_validation_reports"])
 
-            logger.info(f"✅ Features validadas e salvas em: {output_path}")
+            logger.info(f"Features validadas e salvas em: {output_path}")
 
         return results
 
@@ -1236,7 +1235,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                         political_report.update(optimization_report)
                         results["anthropic_used"] = True
-                        logger.info("✅ Análise política Anthropic concluída")
+                        logger.info("Análise política Anthropic concluída")
                     except Exception as anthropic_error:
                         logger.warning(f"⚠️ Falha na análise Anthropic: {anthropic_error}, usando fallback")
                         analyzed_df, political_report = self._enhanced_traditional_political_analysis(df)
@@ -1256,7 +1255,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(analyzed_df)
                 }
-                logger.info(f"✅ Análise política salva em: {output_path}")
+                logger.info(f"Análise política salva em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -1270,7 +1269,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 05 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 05 concluído com sucesso")
+            logger.info("Stage 05 concluído com sucesso")
 
         return results
 
@@ -1483,7 +1482,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                 "quality_score": cleaning_report.get("quality_score", 0.0)
                             }
                             method_used = "enhanced_validation"
-                            logger.info(f"✅ Limpeza aprimorada concluída - Score: {cleaning_report.get('quality_score', 0.0):.2f}")
+                            logger.info(f"Limpeza aprimorada concluída - Score: {cleaning_report.get('quality_score', 0.0):.2f}")
                         else:
                             # Fallback para método inteligente original
                             logger.info("Tentando limpeza inteligente via Anthropic...")
@@ -1493,7 +1492,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             else:
                                 quality_report = {"method": "anthropic", "success": True}
                             method_used = "anthropic"
-                            logger.info("✅ Limpeza Anthropic bem-sucedida")
+                            logger.info("Limpeza Anthropic bem-sucedida")
 
                         results["anthropic_used"] = True
                     except Exception as e:
@@ -1509,7 +1508,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         cleaned_df = simple_cleaner.clean_text_simple(df, backup=False)
                         quality_report = {"method": "simple", "success": True, "fallback_used": True}
                         method_used = "simple"
-                        logger.info("✅ Limpeza simples bem-sucedida")
+                        logger.info("Limpeza simples bem-sucedida")
                     except Exception as e:
                         logger.error(f"Limpeza simples também falhou: {e}")
 
@@ -1546,19 +1545,13 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
     def _stage_06b_linguistic_processing(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """
-        ✅ Etapa 07: Processamento Linguístico Avançado com spaCy - IMPLEMENTADO
-        =====================================================================
-
-        STATUS: ✅ CONCLUÍDO E FUNCIONAL (2025-06-08)
-        MODELO: pt_core_news_lg v3.8.0 ATIVO
-        FEATURES: 13 características linguísticas implementadas
-        ENTIDADES: 57 padrões políticos brasileiros carregados
-        INTEGRAÇÃO: Stage 07 operacional no pipeline v4.9.1
-
-        VERIFIED: All tests passed, processing operational
+        Stage 07: Portuguese linguistic processing with spaCy.
+        
+        Processes text for linguistic analysis including tokenization, POS tagging,
+        NER, and political entity detection using pt_core_news_lg model.
         """
 
-        logger.info("🔤 INICIANDO ETAPA 07: PROCESSAMENTO LINGUÍSTICO COM SPACY ✅ IMPLEMENTADO")
+        logger.info("🔤 INICIANDO ETAPA 07: PROCESSAMENTO LINGUÍSTICO COM SPACY ")
         results = {"linguistic_reports": {}}
 
         for dataset_path in dataset_paths:
@@ -1594,7 +1587,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         processed_df = linguistic_result['enhanced_dataframe']
                         stats = linguistic_result['linguistics_statistics']
                         method_used = "spacy_advanced"
-                        logger.info(f"✅ Processamento spaCy concluído: {linguistic_result['features_extracted']} features extraídas")
+                        logger.info(f"Processamento spaCy concluído: {linguistic_result['features_extracted']} features extraídas")
                     else:
                         # Fallback em caso de erro
                         processed_df = self._add_basic_linguistic_features(df, text_column)
@@ -1612,7 +1605,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Salvar dados com features linguísticas
                 output_path = self._get_stage_output_path("07_linguistic_processed", dataset_path)
                 self._save_processed_data(processed_df, output_path)
-                logger.info(f"✅ Dados linguisticamente processados salvos: {output_path}")
+                logger.info(f"Dados linguisticamente processados salvos: {output_path}")
 
                 results["linguistic_reports"][dataset_path] = {
                     "output_path": output_path,
@@ -1699,7 +1692,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 if self._validate_sentiment_dependencies():
                     try:
                         logger.info("🚀 Usando análise Anthropic ULTRA-OTIMIZADA para sentiment")
-                        # ✅ USAR NOVO MÉTODO ULTRA-OTIMIZADO COM TODAS AS OTIMIZAÇÕES
+                        # USAR NOVO MÉTODO ULTRA-OTIMIZADO COM TODAS AS OTIMIZAÇÕES
                         sentiment_df = self.sentiment_analyzer.analyze_sentiment_ultra_optimized(optimized_df)
 
                         # Estender resultados para dataset completo se necessário
@@ -1710,7 +1703,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         sentiment_report.update(optimization_report)
                         results["anthropic_used"] = True
                         results["ultra_optimized"] = True
-                        logger.info("✅ Análise Anthropic ULTRA-OTIMIZADA concluída")
+                        logger.info("Análise Anthropic ULTRA-OTIMIZADA concluída")
                     except Exception as anthropic_error:
                         logger.warning(f"⚠️ Falha na análise Anthropic: {anthropic_error}, usando fallback")
                         sentiment_df, sentiment_report = self._enhanced_traditional_sentiment_analysis(df)
@@ -1730,7 +1723,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(sentiment_df)
                 }
-                logger.info(f"✅ Sentiment analysis salvo em: {output_path}")
+                logger.info(f"Sentiment analysis salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -1744,7 +1737,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 08 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 08 concluído com sucesso")
+            logger.info("Stage 08 concluído com sucesso")
 
         return results
 
@@ -1810,7 +1803,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             }
                             topic_report.update(optimization_report)
                             results["voyage_used"] = True
-                            logger.info(f"✅ Voyage topic modeling concluído: {topic_result.get('n_topics_extracted', 0)} tópicos")
+                            logger.info(f"Voyage topic modeling concluído: {topic_result.get('n_topics_extracted', 0)} tópicos")
                         else:
                             raise ValueError("Voyage topic modeling retornou resultado inválido")
 
@@ -1825,7 +1818,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         topic_df = self.topic_interpreter.extract_and_interpret_topics(df)
                         topic_report = self.topic_interpreter.generate_topic_report(topic_df)
                         results["anthropic_used"] = True
-                        logger.info("✅ Modelagem Anthropic concluída")
+                        logger.info("Modelagem Anthropic concluída")
                     except Exception as anthropic_error:
                         logger.warning(f"⚠️ Falha na modelagem Anthropic: {anthropic_error}, usando fallback")
                         topic_df, topic_report = self._enhanced_traditional_topic_modeling(df)
@@ -1846,7 +1839,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "records_processed": len(topic_df),
                     "topics_extracted": topic_report.get('n_topics', 0)
                 }
-                logger.info(f"✅ Topic modeling salvo em: {output_path}")
+                logger.info(f"Topic modeling salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -1860,7 +1853,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 09 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 09 concluído com sucesso")
+            logger.info("Stage 09 concluído com sucesso")
 
         return results
 
@@ -1897,7 +1890,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         tfidf_df = tfidf_result.get('dataframe', df)
                         tfidf_report = tfidf_result.get('analysis', {})
                         results["anthropic_used"] = True
-                        logger.info("✅ Extração Anthropic concluída")
+                        logger.info("Extração Anthropic concluída")
                     except Exception as anthropic_error:
                         logger.warning(f"⚠️ Falha na extração Anthropic: {anthropic_error}, usando fallback")
                         tfidf_df, tfidf_report = self._enhanced_traditional_tfidf_extraction(df)
@@ -1951,7 +1944,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             }
 
                         results["voyage_used"] = True
-                        logger.info("✅ Integração Voyage.ai concluída")
+                        logger.info("Integração Voyage.ai concluída")
 
                     except Exception as voyage_error:
                         logger.warning(f"⚠️ Falha na integração Voyage.ai: {voyage_error}")
@@ -1969,7 +1962,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(tfidf_df)
                 }
-                logger.info(f"✅ TF-IDF extraction salvo em: {output_path}")
+                logger.info(f"TF-IDF extraction salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -1983,7 +1976,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 10 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 10 concluído com sucesso")
+            logger.info("Stage 10 concluído com sucesso")
 
         return results
 
@@ -2036,7 +2029,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             'analysis_timestamp': clustering_result.get('analysis_timestamp')
                         }
                         results["voyage_used"] = True
-                        logger.info(f"✅ Voyage clustering concluído: {clustering_result.get('n_clusters', 0)} clusters")
+                        logger.info(f"Voyage clustering concluído: {clustering_result.get('n_clusters', 0)} clusters")
                     else:
                         # Fallback para método tradicional
                         logger.warning("⚠️ Voyage clustering falhou, usando fallback")
@@ -2066,7 +2059,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(clustered_df)
                 }
-                logger.info(f"✅ Clustering salvo em: {output_path}")
+                logger.info(f"Clustering salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -2080,7 +2073,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 11 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 11 concluído com sucesso")
+            logger.info("Stage 11 concluído com sucesso")
 
         return results
 
@@ -2145,7 +2138,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                     hashtag_report.update(optimization_report)
                     results["anthropic_used"] = True
-                    logger.info("✅ Análise de hashtags Anthropic concluída")
+                    logger.info("Análise de hashtags Anthropic concluída")
                 else:
                     error_msg = f"❌ Dependências Anthropic não disponíveis para hashtag analysis"
                     logger.error(error_msg)
@@ -2162,7 +2155,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(normalized_df)
                 }
-                logger.info(f"✅ Hashtag normalization salvo em: {output_path}")
+                logger.info(f"Hashtag normalization salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -2176,7 +2169,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 12 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 12 concluído com sucesso")
+            logger.info("Stage 12 concluído com sucesso")
 
         return results
 
@@ -2255,7 +2248,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                     domain_report.update(optimization_report)
                     results["anthropic_used"] = True
-                    logger.info("✅ Análise de domínios Anthropic concluída")
+                    logger.info("Análise de domínios Anthropic concluída")
                 else:
                     error_msg = f"❌ Dependências Anthropic não disponíveis para domain analysis"
                     logger.error(error_msg)
@@ -2272,7 +2265,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                     "input_path": input_path,
                     "records_processed": len(domain_df)
                 }
-                logger.info(f"✅ Domain analysis salvo em: {output_path}")
+                logger.info(f"Domain analysis salvo em: {output_path}")
 
             except Exception as e:
                 error_msg = f"❌ Erro processando {dataset_path}: {str(e)}"
@@ -2286,7 +2279,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 13 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 13 concluído com sucesso")
+            logger.info("Stage 13 concluído com sucesso")
 
         return results
 
@@ -2670,7 +2663,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         logger.warning(f"⚠️  Colunas esperadas não encontradas: {list(df.columns)[:5]}")
                         # Não é erro crítico, pode ser dataset processado diferentemente
 
-                    logger.debug(f"✅ CSV parseado: {len(df.columns)} colunas, {len(df)} linhas")
+                    logger.debug(f"CSV parseado: {len(df.columns)} colunas, {len(df)} linhas")
                 return df
             except Exception as e:
                 logger.warning(f"Tentativa de parsing falhou: {e}")
@@ -2680,7 +2673,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         import csv
         csv.field_size_limit(500000)  # Aumentar limite para 500KB por campo
 
-        # CORREÇÃO CRÍTICA: Detectar separador automaticamente analisando primeira linha
+        # Detectar separador automaticamente analisando primeira linha
         def detect_separator(file_path):
             """Detecta o separador do CSV analisando a primeira linha com validação robusta"""
             try:
@@ -2801,7 +2794,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                     if chunks:
                         df = pd.concat(chunks, ignore_index=True)
-                        logger.info(f"✅ Parsing bem-sucedido em chunks (config {i+1}): {len(df)} linhas, {len(df.columns)} colunas")
+                        logger.info(f"Parsing bem-sucedido em chunks (config {i+1}): {len(df)} linhas, {len(df.columns)} colunas")
                         return df
 
                 except Exception as e:
@@ -2816,7 +2809,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             for i, config in enumerate(parse_configs):
                 df = try_parse_csv(input_path, **config)
                 if df is not None:
-                    logger.info(f"✅ Parsing bem-sucedido com configuração {i+1}: {len(df)} linhas, {len(df.columns)} colunas")
+                    logger.info(f"Parsing bem-sucedido com configuração {i+1}: {len(df)} linhas, {len(df.columns)} colunas")
                     logger.debug(f"Colunas detectadas: {list(df.columns)[:10]}")
                     return df
 
@@ -2844,7 +2837,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             cached_columns = set(self._column_mapping_cache.keys())
             current_columns = set(df.columns)
             if cached_columns.issubset(current_columns):
-                logger.debug("✅ Usando mapeamento de colunas do cache")
+                logger.debug("Usando mapeamento de colunas do cache")
                 return self._column_mapping_cache
 
         column_mapping = {}
@@ -3385,7 +3378,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                         "output_path": output_path
                     }
                     results["validation_reports"][dataset_path] = validation_result
-                    logger.info(f"✅ Chunk processado salvo: {output_path}")
+                    logger.info(f"Chunk processado salvo: {output_path}")
 
                 else:
                     error_msg = f"❌ Dataset vazio ou ilegível: {dataset_path}"
@@ -3413,7 +3406,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 01 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 01 concluído com sucesso")
+            logger.info("Stage 01 concluído com sucesso")
 
         return results
 
@@ -3452,7 +3445,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
                         # Carregamento otimizado
                         df = self.encoding_validator.enhance_csv_loading_with_fallbacks(input_path)
-                        logger.info(f"✅ CSV carregado com encoding: {encoding_detection.get('recommended_encoding', 'utf-8')}")
+                        logger.info(f"CSV carregado com encoding: {encoding_detection.get('recommended_encoding', 'utf-8')}")
 
                     except Exception as encoding_error:
                         logger.warning(f"⚠️ Falha na detecção avançada ({encoding_error}), usando fallback")
@@ -3497,7 +3490,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                                 "quality_improvement": quality_score,
                                 "records_processed": len(corrected_df)
                             }
-                            logger.info(f"✅ Encoding corrigido: {output_path}")
+                            logger.info(f"Encoding corrigido: {output_path}")
                         else:
                             results["corrections_applied"][dataset_path] = {
                                 "corrections": 0,
@@ -3516,7 +3509,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                             "quality_score": quality_score,
                             "records_processed": len(df)
                         }
-                        logger.info(f"✅ Qualidade satisfatória: {output_path}")
+                        logger.info(f"Qualidade satisfatória: {output_path}")
 
                 else:
                     error_msg = f"❌ Dataset vazio para validação de encoding: {dataset_path}"
@@ -3536,7 +3529,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         if results["has_errors"]:
             logger.warning(f"⚠️ Stage 02 concluído com {len(results['errors'])} erros")
         else:
-            logger.info("✅ Stage 02 concluído com sucesso")
+            logger.info("Stage 02 concluído com sucesso")
 
         return results
 
@@ -3641,7 +3634,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         results["pipeline_success"] = results["pipeline_quality_score"] >= success_threshold
 
         if results["pipeline_success"]:
-            logger.info(f"✅ Pipeline validado com sucesso! Score: {results['pipeline_quality_score']:.2f}")
+            logger.info(f"Pipeline validado com sucesso! Score: {results['pipeline_quality_score']:.2f}")
         else:
             logger.warning(f"⚠️ Pipeline com qualidade baixa. Score: {results['pipeline_quality_score']:.2f}")
 
@@ -3679,7 +3672,6 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             "qualitative_category", "pipeline_reviewed", "topic_interpretation"
         ]
 
-
 def create_unified_pipeline(config: Dict[str, Any] = None, project_root: str = None) -> UnifiedAnthropicPipeline:
     """
     Função de conveniência para criar pipeline unificado
@@ -3693,7 +3685,6 @@ def create_unified_pipeline(config: Dict[str, Any] = None, project_root: str = N
     """
 
     return UnifiedAnthropicPipeline(config, project_root)
-
 
 # Métodos de extensão para melhorias do implementation guide
 def add_enhanced_methods_to_pipeline():
@@ -3842,7 +3833,6 @@ def add_enhanced_methods_to_pipeline():
     UnifiedAnthropicPipeline._stage_04b_statistical_analysis_pre = _stage_04b_statistical_analysis_pre
     UnifiedAnthropicPipeline._stage_06b_statistical_analysis_post = _stage_06b_statistical_analysis_post
     UnifiedAnthropicPipeline._apply_performance_optimization = _apply_performance_optimization
-
 
 def add_validation_methods_to_pipeline():
     """Adiciona métodos de validação e path resolution seguros"""
@@ -5162,15 +5152,14 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._enhanced_traditional_tfidf_extraction = _enhanced_traditional_tfidf_extraction
     UnifiedAnthropicPipeline._get_best_text_column = _get_best_text_column
 
-
 # ===============================
-# ✅ SEQUENTIAL STAGE ALIASES v5.0.1 - CORREÇÃO NUMERAÇÃO SEQUENCIAL
+# SEQUENTIAL STAGE ALIASES v5.0.1 - CORREÇÃO NUMERAÇÃO SEQUENCIAL
 # ===============================
 
 def add_sequential_aliases_to_pipeline():
     """Adiciona aliases para numeração sequencial v5.0.2 - PURA NUMÉRICA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA"""
     
-    # ✅ NOVA NUMERAÇÃO SEQUENCIAL v5.0.2
+    # NOVA NUMERAÇÃO SEQUENCIAL v5.0.2
     def _stage_03_statistical_analysis_pre(self, dataset_paths):
         """Stage 03: Statistical Analysis PRE-deduplication (original: _stage_04b_statistical_analysis_pre)"""
         # Check if dataset_paths is actually a DataFrame (for direct testing)
@@ -5194,7 +5183,7 @@ def add_sequential_aliases_to_pipeline():
                     df['stats_total_records'] = stats['total_records']
                     df['stats_total_columns'] = stats['total_columns']
                     
-                    logger.info(f"✅ Análise estatística: {stats['total_records']} registros, {stats['total_columns']} colunas")
+                    logger.info(f"Análise estatística: {stats['total_records']} registros, {stats['total_columns']} colunas")
                     return df
                     
                 except Exception as e:
@@ -5218,7 +5207,7 @@ def add_sequential_aliases_to_pipeline():
             try:
                 # Use traditional deduplication method for direct DataFrame
                 deduped_df = self._traditional_deduplication(df)
-                logger.info(f"✅ Deduplicação: {len(df)} → {len(deduped_df)} registros")
+                logger.info(f"Deduplicação: {len(df)} → {len(deduped_df)} registros")
                 return deduped_df
             except Exception as e:
                 logger.error(f"Erro na deduplicação: {e}")

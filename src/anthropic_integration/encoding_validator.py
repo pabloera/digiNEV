@@ -20,7 +20,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class EncodingValidator(AnthropicBase):
     """
     Validador avançado de encoding usando API Anthropic

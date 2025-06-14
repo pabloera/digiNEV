@@ -18,7 +18,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class SmartTemporalAnalyzer(AnthropicBase):
     """
     Analisador temporal inteligente usando API Anthropic
@@ -593,7 +592,6 @@ Responda em JSON:
             'analysis_quality': 'ai_enhanced' if event_interpretation.get('interpretations') else 'statistical_only',
             'methodology': 'smart_temporal_analysis_with_ai'
         }
-
 
 def get_smart_temporal_analyzer(config: Dict[str, Any]) -> SmartTemporalAnalyzer:
     """

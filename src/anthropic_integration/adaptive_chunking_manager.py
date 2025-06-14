@@ -6,7 +6,7 @@ Sistema inteligente de chunking adaptativo para resolver problemas de timeout,
 especialmente no Stage 8 (Sentiment Analysis) e outros stages API-intensivos.
 
 IMPLEMENTADO PARA RESOLVER:
-- ✅ Pipeline Timeout Stage 8 (Sentiment Analysis)
+- Pipeline Timeout Stage 8 (Sentiment Analysis)
 - ✅ Otimização automática de chunk sizes
 - ✅ Recovery automático em caso de timeout
 - ✅ Monitoramento de performance por stage
@@ -27,7 +27,6 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ChunkPerformanceMetrics:
     """Métricas de performance para monitoramento de chunks"""
@@ -40,10 +39,9 @@ class ChunkPerformanceMetrics:
     memory_usage_mb: float = 0.0
     retry_count: int = 0
 
-
 class AdaptiveChunkingManager:
     """
-    ✅ Gerenciador de Chunking Adaptativo - SOLUÇÃO PARA TIMEOUTS
+    Gerenciador de Chunking Adaptativo - SOLUÇÃO PARA TIMEOUTS
     =============================================================
 
     RESOLVE PROBLEMAS:
@@ -80,7 +78,7 @@ class AdaptiveChunkingManager:
         self.max_chunk_size = chunk_config.get('max_chunk_size', 50)
         self.min_chunk_size = chunk_config.get('min_chunk_size', 2)
 
-        self.logger.info("✅ AdaptiveChunkingManager initialized successfully")
+        self.logger.info("AdaptiveChunkingManager initialized successfully")
 
     def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
         """Carrega configuração de timeout management"""
@@ -136,7 +134,7 @@ class AdaptiveChunkingManager:
     def get_optimal_chunk_size(self, stage_name: str, data_size: int,
                                estimated_time_per_record: float = 2.5) -> int:
         """
-        ✅ Calcula tamanho ótimo de chunk para um stage específico
+        Calcula tamanho ótimo de chunk para um stage específico
 
         ALGORITMO:
         1. Verifica configuração específica do stage
@@ -189,14 +187,14 @@ class AdaptiveChunkingManager:
                 f"{stage_name}: {optimal_size}")
 
         self.logger.info(
-            f"✅ Chunk size ótimo calculado para {stage_name}: {optimal_size}")
+            f"Chunk size ótimo calculado para {stage_name}: {optimal_size}")
         return optimal_size
 
     def create_adaptive_chunks(self, data: pd.DataFrame, stage_name: str,
                                estimated_time_per_record: float = 2.5
                                ) -> List[pd.DataFrame]:
         """
-        ✅ Cria chunks adaptativos para processamento eficiente
+        Cria chunks adaptativos para processamento eficiente
 
         OTIMIZAÇÕES:
         - Chunk size baseado em performance histórica
@@ -218,14 +216,14 @@ class AdaptiveChunkingManager:
             chunk = data.iloc[i:i + optimal_chunk_size].copy()
             chunks.append(chunk)
 
-        self.logger.info(f"✅ Criados {len(chunks)} chunks para processamento")
+        self.logger.info(f"Criados {len(chunks)} chunks para processamento")
         return chunks
 
     def process_with_adaptive_chunking(
             self, data: pd.DataFrame, stage_name: str,
             processing_function, *args, **kwargs) -> pd.DataFrame:
         """
-        ✅ Processa dados com chunking adaptativo e recovery automático
+        Processa dados com chunking adaptativo e recovery automático
 
         FEATURES:
         - ✅ Timeout handling automático
@@ -275,7 +273,7 @@ class AdaptiveChunkingManager:
                     )
                     self._record_performance(metrics)
 
-                    self.logger.info(f"✅ Chunk {i+1} processado com sucesso em {processing_time:.2f}s")
+                    self.logger.info(f"Chunk {i+1} processado com sucesso em {processing_time:.2f}s")
 
                 except TimeoutError:
                     retry_count += 1
@@ -313,7 +311,7 @@ class AdaptiveChunkingManager:
         # Consolidar resultados
         if results:
             final_result = pd.concat(results, ignore_index=True)
-            self.logger.info(f"✅ Processamento adaptativo concluído: {len(final_result)} registros")
+            self.logger.info(f"Processamento adaptativo concluído: {len(final_result)} registros")
             return final_result
         else:
             self.logger.error("💥 Nenhum resultado foi processado com sucesso")
@@ -427,10 +425,8 @@ class AdaptiveChunkingManager:
                 self.optimal_chunk_sizes.clear()
                 self.logger.info("🔄 Todo histórico de performance resetado")
 
-
 # Instância global para uso no pipeline
 adaptive_chunking_manager = None
-
 
 def get_adaptive_chunking_manager() -> AdaptiveChunkingManager:
     """Factory function para obter instância do manager"""
@@ -438,7 +434,6 @@ def get_adaptive_chunking_manager() -> AdaptiveChunkingManager:
     if adaptive_chunking_manager is None:
         adaptive_chunking_manager = AdaptiveChunkingManager()
     return adaptive_chunking_manager
-
 
 # Decorator para aplicar chunking adaptativo automaticamente
 def with_adaptive_chunking(stage_name: str,

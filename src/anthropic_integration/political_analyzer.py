@@ -1,24 +1,8 @@
 """
-PoliticalAnalyzer Enhanced v5.0.0 - FINAL CONSOLIDATED IMPLEMENTATION
-====================================================================
+Brazilian political discourse analyzer using Anthropic Claude API.
 
-ANTHROPIC-NATIVE IMPLEMENTATION with all official standards:
-✅ XML Structured Prompting (Ticket Routing Guide)
-✅ claude-3-5-haiku-20241022 (Classification Optimized)
-✅ Hierarchical Brazilian Political Taxonomy (3 levels)
-✅ Concurrent Batch Processing (5x parallel)
-✅ RAG Integration with Enhanced Examples
-✅ Pydantic Schema Validation (Enterprise Quality)
-✅ Comprehensive Logging & Versioning
-✅ Intelligent Token Control & Truncation
-✅ Multi-Level Fallback Strategies
-✅ A/B Experiment Control System
-
-PERFORMANCE: 90% time reduction (14h → 45-90min), 95% reliability
-COMPLIANCE: 100% official Anthropic standards implemented
-QUALITY: Enterprise-grade with complete observability
-
-Replaces previous implementation while maintaining 100% pipeline compatibility.
+Classifies text into political categories using hierarchical taxonomy
+and XML-structured prompts for reliable political analysis.
 """
 
 import asyncio
@@ -58,12 +42,10 @@ logger = logging.getLogger(__name__)
 
 # PYDANTIC SCHEMAS FOR VALIDATION
 
-
 class PoliticalLevel(str, Enum):
     """Enum for valid political levels"""
     POLITICO = "político"
     NAO_POLITICO = "não-político"
-
 
 class PoliticalAlignment(str, Enum):
     """Enum for valid political alignments"""
@@ -71,7 +53,6 @@ class PoliticalAlignment(str, Enum):
     ANTIBOLSONARISTA = "antibolsonarista"
     NEUTRO = "neutro"
     INDEFINIDO = "indefinido"
-
 
 class PoliticalClassificationSchema(BaseModel):
     """Pydantic schema for structured political classification validation"""
@@ -92,7 +73,6 @@ class PoliticalClassificationSchema(BaseModel):
     def indicators_must_be_clean(cls, v):
         return [indicator.strip() for indicator in v if indicator.strip()]
 
-
 class PromptLogEntry(BaseModel):
     """Schema for logging prompts and responses"""
     session_id: str
@@ -108,7 +88,6 @@ class PromptLogEntry(BaseModel):
     processing_time: float
     success: bool
     error_message: Optional[str] = None
-
 
 @dataclass
 class PoliticalClassificationResult:
@@ -137,13 +116,12 @@ class PoliticalClassificationResult:
             negacionism_indicators=self.negacionism_indicators
         )
 
-
 class PoliticalAnalyzer(AnthropicBase):
     """
     Optimized Political Analyzer - ANTHROPIC NATIVE
 
     IMPLEMENTED OPTIMIZATIONS:
-    ✅ Model claude-3-5-haiku-20241022 for fast classification
+    Model claude-3-5-haiku-20241022 for fast classification
     ✅ Optimized batch size: 10 → 100 records
     ✅ Concurrent processing with semaphore
     ✅ Smart filtering using existing features
@@ -186,7 +164,7 @@ class PoliticalAnalyzer(AnthropicBase):
             self.confidence_threshold = get_model_setting("anthropic", "confidence_threshold", 0.7)
             self.max_concurrent_batches = get_config_value("api_limits.processing.max_batch_size", 5)
             
-            logger.info(f"✅ TASK-023: Configuration loaded from ConfigurationLoader - Model: {self.model}")
+            logger.info(f"TASK-023: Configuration loaded from ConfigurationLoader - Model: {self.model}")
         else:
             # ENHANCED CONFIGURATION if not loaded (fallback)
             if not hasattr(self, 'enhanced_config') or not self.enhanced_config:
@@ -257,7 +235,7 @@ class PoliticalAnalyzer(AnthropicBase):
         self.political_examples = self._load_enhanced_political_examples()
         self.example_embeddings = {}  # Cache for similarity search
 
-        logger.info("✅ PoliticalAnalyzer OPTIMIZED initialized with claude-3-5-haiku-20241022")
+        logger.info("PoliticalAnalyzer OPTIMIZED initialized with claude-3-5-haiku-20241022")
         logger.info(f"📊 Configuration: batch_size={self.batch_size}, concurrent={self.max_concurrent_batches}")
 
     def analyze_political_discourse(
@@ -317,7 +295,7 @@ class PoliticalAnalyzer(AnthropicBase):
         # STEP 5: FINAL REPORT
         report = self._generate_optimized_report(enriched_df, len(filtered_df), lexicon_results)
 
-        logger.info("✅ OPTIMIZED political analysis completed")
+        logger.info("OPTIMIZED political analysis completed")
         return enriched_df, report
 
     def _smart_filter_political_relevance(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
@@ -404,7 +382,7 @@ class PoliticalAnalyzer(AnthropicBase):
                     all_results.extend(batch_result)
                 successful_batches += 1
 
-        logger.info(f"✅ Processing completed: {successful_batches}/{total_batches} successful batches")
+        logger.info(f"Processing completed: {successful_batches}/{total_batches} successful batches")
 
         # CONVERT TO DATAFRAME
         return self._results_to_dataframe(all_results, df.index)
@@ -482,7 +460,7 @@ class PoliticalAnalyzer(AnthropicBase):
                 # 7. CACHE RESULTS
                 self._cache_batch_results(batch_data['texts'], results)
 
-                logger.info(f"✅ {batch_id} processed successfully in {processing_time:.2f}s")
+                logger.info(f"{batch_id} processed successfully in {processing_time:.2f}s")
                 return results
 
             except Exception as e:

@@ -24,7 +24,6 @@ warnings.filterwarnings('ignore')
 
 logger = logging.getLogger(__name__)
 
-
 class AnalyticsDashboard(AnthropicBase):
     """
     Advanced Analytics Dashboard for Political Discourse Analysis
@@ -969,7 +968,6 @@ class AnalyticsDashboard(AnthropicBase):
 """
 
         return html
-
 
 def create_analytics_dashboard(
     config: Dict[str, Any],

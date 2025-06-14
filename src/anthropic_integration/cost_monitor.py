@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-
 class ConsolidatedCostMonitor:
     """
     Monitor consolidado de custos da API Anthropic
@@ -90,7 +89,7 @@ class ConsolidatedCostMonitor:
             if self.cost_file.exists():
                 with open(self.cost_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                logger.info(f"✅ Dados de custo carregados: {self.cost_file}")
+                logger.info(f"Dados de custo carregados: {self.cost_file}")
                 return data
             else:
                 logger.info("📊 Inicializando novo sistema de monitoramento de custos")
@@ -464,10 +463,8 @@ class ConsolidatedCostMonitor:
 
         return report
 
-
 # Instância singleton para compatibilidade
 _consolidated_monitor = None
-
 
 def get_cost_monitor(project_dir: Optional[Path] = None, config: Dict[str, Any] = None) -> ConsolidatedCostMonitor:
     """
@@ -489,7 +486,6 @@ def get_cost_monitor(project_dir: Optional[Path] = None, config: Dict[str, Any] 
         logger.info("💰 ConsolidatedCostMonitor inicializado")
 
     return _consolidated_monitor
-
 
 # Alias para compatibilidade com enhanced system
 def get_enhanced_cost_monitor(project_root: Path, config: Dict[str, Any] = None) -> ConsolidatedCostMonitor:

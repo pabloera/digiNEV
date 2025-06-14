@@ -18,7 +18,6 @@ from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
 
-
 class IntelligentNetworkAnalyzer(AnthropicBase):
     """
     Analisador inteligente de redes usando API Anthropic
@@ -670,7 +669,6 @@ Responda em JSON:
             'analysis_quality': 'ai_enhanced' if community_analysis.get('communities') else 'structural_only',
             'methodology': 'intelligent_network_analysis_with_ai'
         }
-
 
 def get_intelligent_network_analyzer(config: Dict[str, Any]) -> IntelligentNetworkAnalyzer:
     """

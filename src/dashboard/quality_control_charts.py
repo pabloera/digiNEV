@@ -21,7 +21,6 @@ import streamlit as st
 from plotly.subplots import make_subplots
 from scipy import stats
 
-
 @dataclass
 class QualityMetric:
     """Métrica de qualidade para controle estatístico"""
@@ -36,7 +35,6 @@ class QualityMetric:
     specification_lower: float
     sample_size: int = 1
 
-
 @dataclass
 class ControlLimits:
     """Limites de controle estatístico"""
@@ -45,7 +43,6 @@ class ControlLimits:
     lower_control_limit: float
     upper_spec_limit: float
     lower_spec_limit: float
-
 
 class QualityControlCharts:
     """Classe principal para gráficos de controle de qualidade"""
@@ -623,7 +620,7 @@ class QualityControlCharts:
                 })
 
         if not alerts:
-            st.success("✅ Todos os processos estão dentro dos limites de controle")
+            st.success("Todos os processos estão dentro dos limites de controle")
             return
 
         # Mostrar alertas

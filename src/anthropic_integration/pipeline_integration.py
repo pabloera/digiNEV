@@ -20,7 +20,6 @@ from .pipeline_validator import CompletePipelineValidator
 
 logger = logging.getLogger(__name__)
 
-
 class APIPipelineIntegration:
     """
     Classe principal de integração das validações API no pipeline
@@ -545,7 +544,6 @@ class APIPipelineIntegration:
 
         except Exception as e:
             logger.error(f"Erro ao limpar checkpoints antigos: {e}")
-
 
 # Função de conveniência para integração fácil
 def initialize_api_pipeline_integration(config: Dict[str, Any] = None, project_root: str = None) -> APIPipelineIntegration:

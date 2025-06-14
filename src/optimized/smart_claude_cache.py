@@ -39,7 +39,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ClaudeRequest:
     """Request para API Claude com contexto semântico"""
@@ -52,7 +51,6 @@ class ClaudeRequest:
     metadata: Dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
     priority: int = 1  # 1=highest, 5=lowest
-
 
 @dataclass
 class ClaudeResponse:
@@ -70,7 +68,6 @@ class ClaudeResponse:
     semantic_similarity: float = 0.0
     created_at: datetime = field(default_factory=datetime.now)
 
-
 @dataclass
 class CacheEntry:
     """Entrada do cache com metadados semânticos"""
@@ -81,7 +78,6 @@ class CacheEntry:
     last_accessed: datetime = field(default_factory=datetime.now)
     quality_score: float = 1.0
     context_tags: Set[str] = field(default_factory=set)
-
 
 class SemanticSimilarityMatcher:
     """
@@ -176,7 +172,6 @@ class SemanticSimilarityMatcher:
             self._refit_vectorizer()
         except ValueError:
             pass
-
 
 class SmartClaudeCache:
     """
@@ -804,7 +799,6 @@ class SmartClaudeCache:
             "disk_files_cleared": disk_cleared
         }
 
-
 # Factory functions
 def create_production_claude_cache() -> SmartClaudeCache:
     """Cria cache configurado para produção"""
@@ -816,7 +810,6 @@ def create_production_claude_cache() -> SmartClaudeCache:
         similarity_threshold=0.85
     )
 
-
 def create_development_claude_cache() -> SmartClaudeCache:
     """Cria cache configurado para desenvolvimento"""
     return SmartClaudeCache(
@@ -826,7 +819,6 @@ def create_development_claude_cache() -> SmartClaudeCache:
         ttl_hours=24,
         similarity_threshold=0.80
     )
-
 
 # Global instance
 _global_claude_cache = None

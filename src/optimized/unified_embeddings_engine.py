@@ -46,7 +46,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class EmbeddingRequest:
     """Request para geração de embeddings"""
@@ -57,7 +56,6 @@ class EmbeddingRequest:
     priority: int = 1  # 1=highest, 5=lowest
     metadata: Dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
-
 
 @dataclass
 class EmbeddingResult:
@@ -72,7 +70,6 @@ class EmbeddingResult:
     cache_level: str = "miss"  # l1_memory, l2_disk, l3_distributed, miss
     quality_score: float = 1.0
 
-
 @dataclass
 class CacheStrategy:
     """Estratégia de cache configurável"""
@@ -84,7 +81,6 @@ class CacheStrategy:
     auto_cleanup: bool = True
     precompute_common: bool = True
     batch_size: int = 256
-
 
 class AdvancedEmbeddingCache:
     """
@@ -451,7 +447,6 @@ class AdvancedEmbeddingCache:
             }
         }
 
-
 class UnifiedEmbeddingsEngine:
     """
     Engine unificado de embeddings com cache avançado e batch optimization
@@ -762,7 +757,6 @@ class UnifiedEmbeddingsEngine:
         self.executor.shutdown(wait=True)
         logger.info("🔧 UnifiedEmbeddingsEngine shutdown complete")
 
-
 # Factory functions
 def create_production_engine() -> UnifiedEmbeddingsEngine:
     """Cria engine configurado para produção"""
@@ -778,7 +772,6 @@ def create_production_engine() -> UnifiedEmbeddingsEngine:
     )
     return UnifiedEmbeddingsEngine(strategy, workers=8)
 
-
 def create_development_engine() -> UnifiedEmbeddingsEngine:
     """Cria engine configurado para desenvolvimento"""
     strategy = CacheStrategy(
@@ -792,7 +785,6 @@ def create_development_engine() -> UnifiedEmbeddingsEngine:
         batch_size=128
     )
     return UnifiedEmbeddingsEngine(strategy, workers=4)
-
 
 # Global instance
 _global_unified_engine = None

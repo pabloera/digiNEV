@@ -6,7 +6,7 @@ Sistema de processamento concorrente para acelerar stages API-intensivos,
 especialmente para resolver gargalos no Stage 8 (Sentiment Analysis).
 
 IMPLEMENTADO PARA RESOLVER:
-- ✅ Processamento sequencial lento em stages API
+- Processamento sequencial lento em stages API
 - ✅ Subutilização de recursos durante chamadas API
 - ✅ Gargalos de throughput em análise de sentimentos
 - ✅ Falta de paralelização controlada
@@ -29,7 +29,6 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ConcurrentProcessingMetrics:
     """Métricas de processamento concorrente"""
@@ -43,10 +42,9 @@ class ConcurrentProcessingMetrics:
     timeout_batches: int
     throughput_records_per_second: float
 
-
 class ConcurrentProcessor:
     """
-    ✅ Processador Concorrente com Semáforos - SOLUÇÃO PARA PERFORMANCE
+    Processador Concorrente com Semáforos - SOLUÇÃO PARA PERFORMANCE
     ==================================================================
 
     RESOLVE PROBLEMAS:
@@ -84,7 +82,7 @@ class ConcurrentProcessor:
         # Configurações específicas por tipo de processing
         self.processing_configs = self._setup_processing_configs()
 
-        self.logger.info("✅ ConcurrentProcessor inicializado com sucesso")
+        self.logger.info("ConcurrentProcessor inicializado com sucesso")
         self.logger.info(f"⚙️ Max workers configurado: {self.max_workers}")
 
     def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
@@ -246,7 +244,7 @@ class ConcurrentProcessor:
                                   stage_name: str, processing_function: Callable,
                                   *args, **kwargs) -> pd.DataFrame:
         """
-        ✅ Processa batches de forma concorrente com controle de semáforos
+        Processa batches de forma concorrente com controle de semáforos
 
         OPTIMIZAÇÕES:
         - Semáforos para controlar concorrência por tipo de stage
@@ -298,7 +296,7 @@ class ConcurrentProcessor:
                     if result is not None:
                         results.append(result)
                         successful_batches += 1
-                        self.logger.debug(f"✅ Batch {batch_index + 1} processado com sucesso")
+                        self.logger.debug(f"Batch {batch_index + 1} processado com sucesso")
                     else:
                         failed_batches += 1
                         self.logger.warning(f"⚠️ Batch {batch_index + 1} retornou resultado vazio")
@@ -333,7 +331,7 @@ class ConcurrentProcessor:
             )
             self._record_metrics(metrics)
 
-            self.logger.info(f"✅ Processamento concorrente concluído para {stage_name}")
+            self.logger.info(f"Processamento concorrente concluído para {stage_name}")
             self.logger.info(f"📊 Resultados: {total_records} registros em {total_time:.2f}s")
             self.logger.info(f"🚀 Throughput: {throughput:.1f} registros/segundo")
             self.logger.info(f"📈 Taxa de sucesso: {successful_batches}/{len(batches)} batches")
@@ -432,10 +430,8 @@ class ConcurrentProcessor:
         else:
             self.logger.warning(f"⚠️ Stage {stage_name} não encontrado para ajuste de concorrência")
 
-
 # Instância global para uso no pipeline
 concurrent_processor = None
-
 
 def get_concurrent_processor() -> ConcurrentProcessor:
     """Factory function para obter instância do processor"""
@@ -443,7 +439,6 @@ def get_concurrent_processor() -> ConcurrentProcessor:
     if concurrent_processor is None:
         concurrent_processor = ConcurrentProcessor()
     return concurrent_processor
-
 
 # Decorator para aplicar processamento concorrente automaticamente
 def with_concurrent_processing(stage_name: str):
@@ -465,14 +460,13 @@ def with_concurrent_processing(stage_name: str):
         return wrapper
     return decorator
 
-
 # Função utilitária para combinar chunking adaptativo + processamento concorrente
 def process_with_adaptive_chunking_and_concurrency(data: pd.DataFrame, stage_name: str,
                                                   processing_function: Callable,
                                                   estimated_time_per_record: float = 2.5,
                                                   *args, **kwargs) -> pd.DataFrame:
     """
-    ✅ Combina chunking adaptativo + processamento concorrente
+    Combina chunking adaptativo + processamento concorrente
 
     OTIMIZAÇÃO MÁXIMA:
     1. Cria chunks adaptativos baseados em performance

@@ -34,7 +34,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 class EmergencyEmbeddingsCache:
     """
     Cache de emergência para eliminar redundância de embeddings Voyage.ai
@@ -240,7 +239,7 @@ class EmergencyEmbeddingsCache:
                     "embedding_shape": embeddings.shape
                 }
                 
-                logger.info(f"✅ Embeddings computed and cached: {len(texts)} texts in {stats['compute_time']:.2f}s")
+                logger.info(f"Embeddings computed and cached: {len(texts)} texts in {stats['compute_time']:.2f}s")
                 return embeddings, stats
             else:
                 raise ValueError("Compute function returned empty embeddings")
@@ -351,7 +350,6 @@ class EmergencyEmbeddingsCache:
             "expired_disk_files": expired_disk
         }
 
-
 class VoyageEmbeddingsCacheIntegration:
     """
     Integração do cache de embeddings com os stages existentes
@@ -413,7 +411,6 @@ class VoyageEmbeddingsCacheIntegration:
         
         return report
 
-
 # Factory function para fácil integração
 def create_emergency_embeddings_cache(cache_dir: str = "cache/embeddings") -> VoyageEmbeddingsCacheIntegration:
     """
@@ -426,7 +423,6 @@ def create_emergency_embeddings_cache(cache_dir: str = "cache/embeddings") -> Vo
         Instância configurada do cache
     """
     return VoyageEmbeddingsCacheIntegration(cache_dir)
-
 
 # Instância global para uso em todo o pipeline
 _global_embeddings_cache = None

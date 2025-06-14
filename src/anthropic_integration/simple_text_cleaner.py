@@ -15,7 +15,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 class SimpleTextCleaner:
     """Limpeza de texto simples e robusta"""
 
@@ -89,7 +88,7 @@ class SimpleTextCleaner:
                 logger.warning(f"Erro limpando linha {idx}: {e}")
                 result_df.at[idx, output_column] = str(row.get(text_column, ""))
 
-        logger.info(f"✅ Limpeza concluída: {cleaned_count}/{len(df)} textos processados")
+        logger.info(f"Limpeza concluída: {cleaned_count}/{len(df)} textos processados")
         return result_df
 
     def _clean_single_text(self, text: str) -> str:
@@ -136,7 +135,6 @@ class SimpleTextCleaner:
         cleaned = re.sub(r'\s+', ' ', cleaned).strip()
 
         return cleaned
-
 
 def create_text_cleaner_fallback():
     """Cria instância do limpador de texto para fallback"""

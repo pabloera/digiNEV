@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 """
-Script Consolidado de Ferramentas de Manutenção v4.9.8
-======================================================
+Consolidated maintenance tools for system validation and diagnostics.
 
-Consolida todas as ferramentas de manutenção do sistema enhanced em um único script.
-Inclui validação, diagnósticos, e ferramentas de verificação do sistema.
-
-🔧 CONSOLIDAÇÃO: Unifica ferramentas de manutenção
-✅ VALIDAÇÃO: Sistema de validação completo do enhanced config
-🎯 DIAGNÓSTICO: Ferramentas de análise e verificação
-🛠️ UTILITÁRIOS: Funções auxiliares para manutenção
+Provides unified validation, diagnostics, and maintenance utilities
+for the Digital Discourse Monitor system.
 """
 
 import argparse
@@ -52,7 +46,7 @@ class SystemValidator:
                 logger.error("❌ Singleton pattern falhou")
                 return False
                 
-            logger.info("✅ Singleton pattern funcionando")
+            logger.info("Singleton pattern funcionando")
             
             # Testar carregamento de stages
             test_operations = [
@@ -71,12 +65,12 @@ class SystemValidator:
                     if 'model' not in config:
                         logger.error(f"❌ Configuração inválida para {operation}: falta 'model'")
                         return False
-                    logger.info(f"✅ {operation}: {config.get('model', 'N/A')}")
+                    logger.info(f"{operation}: {config.get('model', 'N/A')}")
                 except Exception as e:
                     logger.error(f"❌ Erro ao carregar config para {operation}: {e}")
                     return False
             
-            logger.info("✅ EnhancedConfigLoader consolidado validado com sucesso")
+            logger.info("EnhancedConfigLoader consolidado validado com sucesso")
             return True
             
         except ImportError as e:
@@ -96,15 +90,15 @@ class SystemValidator:
             # Testar inicialização sem stage_operation específico (usa configuração padrão)
             test_config = {'anthropic': {'model': 'claude-3-5-sonnet-20241022'}}
             base1 = AnthropicBase(config=test_config)
-            logger.info(f"✅ AnthropicBase sem stage: {getattr(base1, 'model', 'N/A')}")
+            logger.info(f"AnthropicBase sem stage: {getattr(base1, 'model', 'N/A')}")
             
             # Testar inicialização com stage_operation
             base2 = AnthropicBase(stage_operation="political_analysis")
-            logger.info(f"✅ AnthropicBase com political_analysis: {getattr(base2, 'model', 'N/A')}")
+            logger.info(f"AnthropicBase com political_analysis: {getattr(base2, 'model', 'N/A')}")
             
             # Verificar se enhanced config foi carregada
             if hasattr(base2, 'enhanced_config') and base2.enhanced_config:
-                logger.info("✅ Enhanced config carregada com sucesso")
+                logger.info("Enhanced config carregada com sucesso")
             else:
                 logger.warning("⚠️ Enhanced config não carregada (usando fallback)")
             
@@ -134,13 +128,13 @@ class SystemValidator:
             )
             
             if cost > 0:
-                logger.info(f"✅ Custo calculado: ${cost:.6f}")
+                logger.info(f"Custo calculado: ${cost:.6f}")
             else:
                 logger.warning("⚠️ Custo calculado como 0")
             
             # Testar relatório
             report = monitor.get_daily_report()
-            logger.info(f"✅ Relatório diário gerado: {report.get('total_cost', 0):.6f} USD")
+            logger.info(f"Relatório diário gerado: {report.get('total_cost', 0):.6f} USD")
             
             return True
             
@@ -184,13 +178,13 @@ class SystemValidator:
                 
                 # Verificar se enhanced config foi aplicada
                 model = getattr(component, 'model', 'N/A')
-                logger.info(f"✅ {class_name}: {model}")
+                logger.info(f"{class_name}: {model}")
                 success_count += 1
                 
             except Exception as e:
                 logger.error(f"❌ Erro ao inicializar {class_name}: {e}")
         
-        logger.info(f"✅ {success_count}/{len(components_to_test)} componentes inicializados com sucesso")
+        logger.info(f"{success_count}/{len(components_to_test)} componentes inicializados com sucesso")
         return success_count == len(components_to_test)
 
     def run_validation_suite(self) -> bool:
@@ -214,7 +208,7 @@ class SystemValidator:
             
             try:
                 if test_func():
-                    logger.info(f"✅ {test_name}: PASSOU")
+                    logger.info(f"{test_name}: PASSOU")
                     passed += 1
                 else:
                     logger.error(f"❌ {test_name}: FALHOU")
@@ -225,19 +219,18 @@ class SystemValidator:
         logger.info(f"\n{'='*50}")
         logger.info("📊 RELATÓRIO FINAL DE VALIDAÇÃO")
         logger.info('='*50)
-        logger.info(f"✅ Testes passaram: {passed}/{total}")
+        logger.info(f"Testes passaram: {passed}/{total}")
         logger.info(f"❌ Testes falharam: {total - passed}/{total}")
         logger.info(f"📈 Taxa de sucesso: {(passed/total)*100:.1f}%")
         
         if passed == total:
             logger.info("🎉 TODAS AS VALIDAÇÕES PASSARAM!")
-            logger.info("✅ Sistema enhanced está funcionando corretamente")
+            logger.info("Sistema enhanced está funcionando corretamente")
             return True
         else:
             logger.error("⚠️ ALGUMAS VALIDAÇÕES FALHARAM!")
             logger.error("❌ Sistema enhanced precisa de correções")
             return False
-
 
 class SystemDiagnostics:
     """Ferramentas de diagnóstico do sistema"""
@@ -267,7 +260,7 @@ class SystemDiagnostics:
             logger.error(f"❌ Arquivos ausentes: {missing_files}")
             return False
         
-        logger.info("✅ Estrutura de arquivos correta")
+        logger.info("Estrutura de arquivos correta")
         return True
     
     def check_configuration_integrity(self) -> bool:
@@ -293,7 +286,7 @@ class SystemDiagnostics:
                 logger.error("❌ stage_specific_configs ausente na configuração anthropic")
                 return False
             
-            logger.info("✅ Configurações íntegras")
+            logger.info("Configurações íntegras")
             return True
             
         except Exception as e:
@@ -323,7 +316,7 @@ class SystemDiagnostics:
             logger.error(f"❌ Dependências ausentes: {missing_deps}")
             return False
         
-        logger.info("✅ Dependências críticas disponíveis")
+        logger.info("Dependências críticas disponíveis")
         return True
     
     def check_voyage_configuration(self) -> bool:
@@ -363,7 +356,7 @@ class SystemDiagnostics:
                     logger.error("❌ voyage_embeddings.py: modelo não padronizado no código")
                     return False
             
-            logger.info("✅ Configuração Voyage.ai padronizada (voyage-3.5-lite)")
+            logger.info("Configuração Voyage.ai padronizada (voyage-3.5-lite)")
             return True
             
         except Exception as e:
@@ -397,7 +390,6 @@ class SystemDiagnostics:
         logger.info(f"📄 Relatório salvo: {report_path}")
         return report
 
-
 class MaintenanceUtilities:
     """Utilitários gerais de manutenção"""
     
@@ -428,7 +420,7 @@ class MaintenanceUtilities:
                     shutil.rmtree(file_path)
                     cleaned_count += 1
         
-        logger.info(f"✅ {cleaned_count} arquivos/diretórios limpos")
+        logger.info(f"{cleaned_count} arquivos/diretórios limpos")
         return True
     
     def check_log_sizes(self) -> Dict[str, Any]:
@@ -445,7 +437,6 @@ class MaintenanceUtilities:
         
         logger.info(f"📊 Informações de logs: {log_info}")
         return log_info
-
 
 def main():
     """Função principal com interface de linha de comando"""
@@ -490,7 +481,7 @@ def main():
             logger.info("📊 GERANDO RELATÓRIO DO SISTEMA")
             logger.info("="*60)
             report = diagnostics.generate_system_report()
-            logger.info(f"✅ Relatório gerado com sucesso")
+            logger.info(f"Relatório gerado com sucesso")
         
         if args.action in ['cleanup', 'all']:
             logger.info("\n" + "="*60)
@@ -512,7 +503,6 @@ def main():
     except Exception as e:
         logger.error(f"\n❌ Erro durante manutenção: {e}")
         return False
-
 
 if __name__ == "__main__":
     success = main()
