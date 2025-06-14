@@ -8,11 +8,11 @@ disable_existing_loggers: false
 formatters:
   standard:
     format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    datefmt: "%Y-%m-%d %H:%M:%S"
+    date_format: "%Y-%m-%d %H:%M:%S"
   
   detailed:
     format: "%(asctime)s [%(levelname)s] %(name)s (%(filename)s:%(lineno)d): %(message)s"
-    datefmt: "%Y-%m-%d %H:%M:%S"
+    date_format: "%Y-%m-%d %H:%M:%S"
   
   simple:
     format: "%(levelname)s: %(message)s"
@@ -30,8 +30,8 @@ handlers:
     level: DEBUG
     formatter: detailed
     filename: logs/main/main.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 5
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
     encoding: utf8
   
   file_pipeline:
@@ -39,8 +39,8 @@ handlers:
     level: DEBUG
     formatter: detailed
     filename: logs/pipeline/pipeline.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 10
+    max_bytes: 10485760  # 10MB
+    backup_count: 10
     encoding: utf8
   
   file_utils:
@@ -48,8 +48,8 @@ handlers:
     level: INFO
     formatter: standard
     filename: logs/utils/utils.log
-    maxBytes: 5242880  # 5MB
-    backupCount: 3
+    max_bytes: 5242880  # 5MB
+    backup_count: 3
     encoding: utf8
     
   file_anthropic:
@@ -57,8 +57,8 @@ handlers:
     level: DEBUG
     formatter: detailed
     filename: logs/anthropic/anthropic.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 5
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
     encoding: utf8
     
   error_file:
@@ -66,36 +66,36 @@ handlers:
     level: ERROR
     formatter: detailed
     filename: logs/errors.log
-    maxBytes: 10485760  # 10MB
-    backupCount: 10
+    max_bytes: 10485760  # 10MB
+    backup_count: 10
     encoding: utf8
 
 # Loggers
 loggers:
   # Logger principal da aplicação
-  bolsonarismo_analysis:
+  monitor_discurso_digital:
     level: INFO
     handlers: [console, file_main]
     propagate: false
   
   # Loggers por componente
-  bolsonarismo_analysis.pipeline:
+  monitor_discurso_digital.pipeline:
     level: DEBUG
     handlers: [console, file_pipeline]
     propagate: false
   
-  bolsonarismo_analysis.utils:
+  monitor_discurso_digital.utils:
     level: INFO
     handlers: [console, file_utils]
     propagate: false
   
-  bolsonarismo_analysis.anthropic:
+  monitor_discurso_digital.anthropic:
     level: DEBUG
     handlers: [console, file_anthropic]
     propagate: false
   
   # Logger para erros de todas as fontes
-  bolsonarismo_analysis.errors:
+  monitor_discurso_digital.errors:
     level: ERROR
     handlers: [console, error_file]
     propagate: false

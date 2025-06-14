@@ -38,14 +38,13 @@ import numpy as np
 import pandas as pd
 import psutil
 
-# Dashboard components
+# Dashboard components availability flag
+PLOTLY_AVAILABLE = False
 try:
-    import plotly.graph_objects as go
-    import plotly.express as px
-    from plotly.subplots import make_subplots
+    import plotly
     PLOTLY_AVAILABLE = True
 except ImportError:
-    PLOTLY_AVAILABLE = False
+    pass
 
 logger = logging.getLogger(__name__)
 

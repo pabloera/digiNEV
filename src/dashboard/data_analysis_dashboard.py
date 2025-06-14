@@ -1,5 +1,5 @@
 """
-Dashboard de Análise de Dados - Pipeline Bolsonarismo v4.9.7
+Dashboard de Análise de Dados - Monitor do Discurso Digital v5.0.0
 ============================================================
 
 Dashboard focado exclusivamente na apresentação dos RESULTADOS das análises

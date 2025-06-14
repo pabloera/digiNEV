@@ -958,10 +958,13 @@ Responda em formato JSON:
             "quality_scores": {}
         }
 
-        # Fazer backup dos dados originais
+        # Fazer backup dos dados originais com limpeza automática
         backup_file = f"data/interim/deduplication_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         df.to_csv(backup_file, index=False, sep=';', encoding='utf-8')
         logger.info(f"Backup criado: {backup_file}")
+        
+        # Limpar backups antigos automaticamente
+        self._cleanup_old_backups("data/interim", max_age_days=7)
 
         result_df = df.copy()
 
@@ -1369,3 +1372,46 @@ Responda em formato JSON:
             quality_assessment["quality_level"] = "poor"
 
         return quality_assessment
+    
+    def _cleanup_old_backups(self, backup_dir: str, max_age_days: int = 7) -> None:
+        """
+        Remove automaticamente arquivos de backup antigos para gerenciar espaço em disco
+        
+        Args:
+            backup_dir: Diretório de backups
+            max_age_days: Idade máxima em dias (padrão: 7 dias)
+        """
+        try:
+            from pathlib import Path
+            from datetime import datetime, timedelta
+            
+            backup_path = Path(backup_dir)
+            if not backup_path.exists():
+                return
+                
+            cutoff_date = datetime.now() - timedelta(days=max_age_days)
+            
+            # Buscar arquivos de backup (padrão: *backup*.csv)
+            backup_files = list(backup_path.glob("*backup*.csv"))
+            removed_count = 0
+            
+            for backup_file in backup_files:
+                try:
+                    # Verificar idade do arquivo
+                    file_time = datetime.fromtimestamp(backup_file.stat().st_mtime)
+                    
+                    if file_time < cutoff_date:
+                        backup_file.unlink()  # Remover arquivo
+                        removed_count += 1
+                        logger.debug(f"Backup antigo removido: {backup_file.name}")
+                        
+                except Exception as e:
+                    logger.warning(f"Erro ao remover backup {backup_file.name}: {e}")
+                    
+            if removed_count > 0:
+                logger.info(f"🧹 Limpeza automática: {removed_count} backups antigos removidos")
+            else:
+                logger.debug("🧹 Limpeza automática: nenhum backup antigo encontrado")
+                
+        except Exception as e:
+            logger.error(f"Erro na limpeza automática de backups: {e}")

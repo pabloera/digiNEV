@@ -25,8 +25,6 @@ Status: SEMANA 5 PRODUCTION DEPLOYMENT
 import asyncio
 import json
 import logging
-import shutil
-import subprocess
 import sys
 import time
 from dataclasses import dataclass, field

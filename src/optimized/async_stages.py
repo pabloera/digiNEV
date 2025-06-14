@@ -24,18 +24,17 @@ Status: SEMANA 3 CORE IMPLEMENTATION
 import asyncio
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union, Callable, Coroutine
+from typing import Any, Dict, List, Optional, Tuple, Union, Callable
 
 import pandas as pd
 import numpy as np
 
 # ML/NLP libraries
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
-from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans
 
 # Week 2 and 3 integrations
 try:

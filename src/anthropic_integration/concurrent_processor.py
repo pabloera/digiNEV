@@ -19,9 +19,8 @@ import asyncio
 import logging
 import threading
 import time
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from queue import Queue
 from threading import Lock, Semaphore
 from typing import Any, Callable, Dict, List, Optional, Tuple
 

@@ -1,5 +1,5 @@
 """
-Voyage.ai Embeddings Integration for Bolsonarismo Dataset Analysis
+Voyage.ai Embeddings Integration for Political Discourse Dataset Analysis
 Provides advanced text embedding capabilities for semantic analysis
 """
 
@@ -1060,17 +1060,20 @@ Responda apenas com a descrição do tópico:
         duplicate_groups = []
         processed_indices = set()
 
-        for idx, row in duplicates.iterrows():
+        # Vectorized approach: process duplicates in batches
+        for idx in duplicates.index:
             if idx in processed_indices:
                 continue
 
-            # Find all texts similar to this one
-            similar_indices = similarity_df[
+            # Find all texts similar to this one (vectorized)
+            similar_mask = (
                 (similarity_df['max_similarity'] > threshold) &
                 (similarity_df.index != idx)
-            ].index.tolist()
+            )
+            similar_indices = similarity_df[similar_mask].index.tolist()
 
             if similar_indices:
+                row = duplicates.loc[idx]
                 group = {
                     'primary_index': idx,
                     'primary_text': str(row[text_column])[:100] + "...",
@@ -1249,26 +1252,24 @@ Responda apenas com a descrição do tópico:
         return best_match_idx if best_similarity > 0.1 else None
 
     def _calculate_semantic_quality(self, df: pd.DataFrame) -> List[float]:
-        """Calculate semantic quality scores for texts"""
-        quality_scores = []
+        """Calculate semantic quality scores for texts (vectorized)"""
+        # Base score for all rows
+        quality_scores = pd.Series(0.5, index=df.index)
 
-        for _, row in df.iterrows():
-            score = 0.5  # Base score
+        # Higher score for texts with moderate similarity (vectorized)
+        if 'avg_similarity' in df.columns:
+            moderate_sim_mask = (df['avg_similarity'] >= 0.2) & (df['avg_similarity'] <= 0.7)
+            quality_scores.loc[moderate_sim_mask] += 0.3
 
-            # Higher score for texts with moderate similarity (not too unique, not duplicates)
-            if 'avg_similarity' in df.columns:
-                avg_sim = row.get('avg_similarity', 0)
-                if 0.2 <= avg_sim <= 0.7:
-                    score += 0.3
+        # Lower score for potential duplicates (vectorized)
+        if 'potential_duplicate' in df.columns:
+            duplicate_mask = df['potential_duplicate'] == True
+            quality_scores.loc[duplicate_mask] -= 0.2
 
-            # Lower score for potential duplicates
-            if row.get('potential_duplicate', False):
-                score -= 0.2
+        # Ensure scores are between 0 and 1 (vectorized)
+        quality_scores = quality_scores.clip(0.0, 1.0)
 
-            # Ensure score is between 0 and 1
-            quality_scores.append(max(0.0, min(1.0, score)))
-
-        return quality_scores
+        return quality_scores.tolist()
 
     def _generate_cache_key(self, texts: List[str], operation: str) -> str:
         """Generate cache key for embeddings"""

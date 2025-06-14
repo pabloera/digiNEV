@@ -1,5 +1,5 @@
 """
-Dashboard Integrado do Pipeline Bolsonarismo v4.9.7
+Dashboard Integrado do Monitor do Discurso Digital v5.0.0
 ===================================================
 
 Dashboard completo com monitoramento em tempo real das 20 etapas do pipeline,
@@ -30,7 +30,7 @@ from plotly.subplots import make_subplots
 
 # Configuração da página
 st.set_page_config(
-    page_title="Pipeline Bolsonarismo v4.9.7",
+    page_title="Monitor do Discurso Digital v5.0.0",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -175,7 +175,7 @@ class PipelineDashboardNew:
 
     def _render_header(self):
         """Renderiza o cabeçalho principal"""
-        st.markdown('<div class="main-header">🎯 Pipeline Bolsonarismo v4.9.7</div>', unsafe_allow_html=True)
+        st.markdown('<div class="main-header">🎯 Monitor do Discurso Digital v5.0.0</div>', unsafe_allow_html=True)
         st.markdown("---")
 
         # Status bar

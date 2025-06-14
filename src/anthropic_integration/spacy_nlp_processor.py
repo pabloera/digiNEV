@@ -33,7 +33,6 @@ import pandas as pd
 # spaCy imports with error handling
 try:
     import spacy
-    from spacy.lang.pt import Portuguese
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False

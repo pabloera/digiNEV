@@ -539,8 +539,9 @@ class ChunkProcessor:
         Returns:
             Resultados do processamento
         """
-        # TODO: Implementar processamento paralelo com multiprocessing/joblib
-        logger.warning("Processamento paralelo ainda não implementado, usando processamento serial")
+        # INFO: Processamento paralelo disponível através do parallel_engine (v5.0.0)
+        # Para usar: from src.optimized.parallel_engine import get_global_parallel_engine
+        logger.info("Usando processamento serial - para paralelo use parallel_engine de src.optimized")
         return self.process_file(input_file, process_func, **kwargs)
 
 

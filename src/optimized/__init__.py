@@ -1,5 +1,5 @@
 """
-Optimized Components for Bolsonarismo Pipeline
+Optimized Components for Monitor do Discurso Digital Pipeline
 ==============================================
 
 Critical performance optimizations to resolve pipeline bottlenecks:

@@ -199,18 +199,20 @@ class IntelligentNetworkAnalyzer(AnthropicBase):
         """
         G = nx.Graph()
 
-        # Implementação simplificada - conectar canais com palavras-chave similares
+        # Implementação otimizada - conectar canais com palavras-chave similares (vetorizada)
         channel_keywords = defaultdict(set)
 
-        for _, row in df.iterrows():
-            channel = row[channel_column]
-            text = str(row[text_column]).lower()
-
-            # Extrair palavras simples (implementação básica)
-            words = set(text.split())
-            words = {w for w in words if len(w) > 4}  # Filtrar palavras muito curtas
-
-            channel_keywords[channel].update(words)
+        # Preprocessar texto de forma vetorizada
+        df_copy = df.copy()
+        df_copy['text_lower'] = df_copy[text_column].astype(str).str.lower()
+        df_copy['words'] = df_copy['text_lower'].str.split()
+        
+        # Agrupar por canal e processar em batch
+        grouped = df_copy.groupby(channel_column)['words'].apply(
+            lambda x: set(word for words_list in x for word in words_list if len(word) > 4)
+        )
+        
+        channel_keywords = dict(grouped)
 
         # Calcular similaridade entre canais
         channels = list(channel_keywords.keys())
@@ -243,23 +245,25 @@ class IntelligentNetworkAnalyzer(AnthropicBase):
         """
         G = nx.DiGraph()
 
-        # Procurar por menções (@canal) ou referências
+        # Procurar por menções (@canal) ou referências (otimizado)
         mentions = defaultdict(int)
 
-        for _, row in df.iterrows():
-            source = row[channel_column]
-            text = str(row[text_column])
-
-            # Buscar padrões de menção simples
-            # (implementação básica - pode ser expandida)
-            if '@' in text:
-                # Extrair possíveis menções
-                words = text.split()
-                for word in words:
-                    if word.startswith('@') and len(word) > 1:
-                        target = word[1:].strip('.,!?')
-                        if target and target != source:
-                            mentions[(source, target)] += 1
+        # Filtrar apenas linhas com menções para processar
+        has_mentions = df[text_column].astype(str).str.contains('@', na=False)
+        df_with_mentions = df[has_mentions].copy()
+        
+        if not df_with_mentions.empty:
+            # Processar menções de forma vetorizada
+            df_with_mentions['mentions'] = df_with_mentions[text_column].astype(str).str.findall(r'@(\w+)')
+            
+            # Processar cada linha com menções
+            for _, row in df_with_mentions.iterrows():
+                source = row[channel_column]
+                found_mentions = row['mentions']
+                
+                for target in found_mentions:
+                    if target and target != source:
+                        mentions[(source, target)] += 1
 
         # Adicionar arestas à rede
         for (source, target), count in mentions.items():

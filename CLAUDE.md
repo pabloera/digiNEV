@@ -1,4 +1,4 @@
-# CLAUDE.md — Projeto Bolsonarismo v5.0.0 (JUNHO 2025)
+# CLAUDE.md — Monitor do Discurso Digital v5.0.0 (JUNHO 2025)
 
 ## 🚨 **STATUS ATUAL: PIPELINE OPTIMIZATION COMPLETE - PRODUCTION READY** ✅
 

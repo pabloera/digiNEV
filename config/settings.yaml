@@ -177,13 +177,7 @@ lda:
   iterations: 1000
   n_topics: 15
   use_anthropic_interpretation: true
-logging:
-  date_format: '%Y-%m-%d %H:%M:%S'
-  default_level: INFO
-  file_rotation: 30
-  format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-  log_to_console: true
-  log_to_file: true
+# Configurações de logging removidas - usar config/logging.yaml
 network_analysis:
   community_sample_size: 100
   max_nodes: 500
@@ -220,11 +214,11 @@ processing:
   sample_size: 10000
   timeout: 3600
 project:
-  description: 'Análise de Discurso em Canais do Telegram: Bolsonarismo, Negacionismo
-    e Autoritarismo'
-  model_config_version: 4.9.8
-  name: dataanalysis-bolsonarismo
-  version: 4.9.8
+  description: 'Monitor do Discurso Digital - Análise de Discurso Político Brasileiro: 
+    Polarização, Negacionismo e Autoritarismo'
+  model_config_version: 5.0.0
+  name: monitor-discurso-digital
+  version: 5.0.0
 qualitative:
   confidence_threshold: 0.8
   conspiracy_detection: true

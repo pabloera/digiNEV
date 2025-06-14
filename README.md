@@ -1,12 +1,124 @@
-# Pipeline Bolsonarismo v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM 🏆
+# Monitor do Discurso Digital v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM 🏆
 
 > **Análise de Discurso Político Brasileiro com Inteligência Artificial Enterprise-Grade**
 > 
-> Sistema completo de análise de mensagens do Telegram (2019-2023) com pipeline otimizado de alto desempenho para produção, focado em bolsonarismo, negacionismo e autoritarismo digital.
+> Sistema completo de análise de mensagens do Telegram (2019-2023) com pipeline otimizado de alto desempenho para produção, focado em discurso político, negacionismo e autoritarismo digital.
 > 
 > **v5.0.0 - Junho 2025**: 🏆 **PIPELINE OPTIMIZATION COMPLETE!** Transformação épica de 45% → 95% taxa de sucesso. **Pipeline ORIGINAL (22 stages) COM otimizações integradas**: 60% redução tempo, 50% redução memória, sistema enterprise-grade. **PRODUCTION READY!**
 
 ## 🚨 **INÍCIO RÁPIDO - LEIA PRIMEIRO!**
+
+### 📋 **PRÉ-REQUISITOS - CRITICAL SETUP**
+
+#### **Sistema e Software:**
+- **Python 3.12+** (obrigatório) - Testado com 3.12.5
+- **Poetry 1.5+** (gerenciador de dependências) - [Instalar Poetry](https://python-poetry.org/docs/#installation)
+- **4GB+ RAM** (recomendado) - Mínimo 2GB com otimizações
+- **5GB+ espaço em disco** (dados + cache + logs)
+- **Git** (para clonagem e versionamento)
+
+#### **APIs Necessárias:**
+- **Anthropic API** - [Criar conta](https://console.anthropic.com/) (plano pago recomendado)
+- **Voyage.ai API** - [Criar conta](https://www.voyageai.com/) (tem tier gratuito)
+
+#### **Dependências do Sistema (Opcional):**
+```bash
+# macOS (via Homebrew)
+brew install python@3.12 git
+
+# Ubuntu/Debian
+sudo apt update && sudo apt install python3.12 python3.12-pip git curl
+
+# Windows (via Chocolatey)
+choco install python312 git
+```
+
+### 🔧 **INSTALAÇÃO PASSO-A-PASSO**
+
+#### **1. Clone e Setup Inicial**
+```bash
+# Clonar repositório
+git clone https://github.com/[seu-usuario]/monitor-discurso-digital.git
+cd monitor-discurso-digital
+
+# Verificar versão Python
+python3 --version  # Deve ser 3.12+
+
+# Instalar Poetry (se não tiver)
+curl -sSL https://install.python-poetry.org | python3 -
+export PATH="$HOME/.local/bin:$PATH"  # Adicionar ao PATH
+```
+
+#### **2. Setup do Ambiente Virtual**
+```bash
+# Configurar Poetry para criar .venv local
+poetry config virtualenvs.in-project true
+
+# Instalar dependências (pode levar 5-10 minutos)
+poetry install
+
+# Verificar instalação
+poetry env info
+poetry show | head -10
+```
+
+#### **3. Configuração de APIs**
+```bash
+# Copiar templates de configuração
+cp config/anthropic.yaml.template config/anthropic.yaml
+cp config/voyage_embeddings.yaml.template config/voyage_embeddings.yaml
+
+# Criar arquivo .env com suas API keys
+echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE_AQUI]" > .env
+echo "VOYAGE_API_KEY=pa-[SUA_CHAVE_AQUI]" >> .env
+
+# Verificar configuração
+poetry run poetry run python -c "
+import os
+from dotenv import load_dotenv
+load_dotenv()
+print('✅ Anthropic API:', 'OK' if os.getenv('ANTHROPIC_API_KEY') else '❌ MISSING')
+print('✅ Voyage API:', 'OK' if os.getenv('VOYAGE_API_KEY') else '❌ MISSING')
+"
+```
+
+#### **4. Download de Modelos (Opcional)**
+```bash
+# Download modelo spaCy português (1GB)
+poetry run poetry run python -m spacy download pt_core_news_lg
+
+# Verificar modelos
+poetry run poetry run python -c "
+import spacy
+try:
+    nlp = spacy.load('pt_core_news_lg')
+    print('✅ spaCy modelo português: OK')
+except:
+    print('⚠️ spaCy modelo não encontrado (opcional)')
+"
+```
+
+#### **5. Teste de Instalação**
+```bash
+# Teste rápido do sistema
+poetry run poetry run python -c "
+from src.anthropic_integration.base import AnthropicBase
+from src.common import get_config_loader
+import pandas as pd
+
+print('🧪 Testando sistema...')
+loader = get_config_loader()
+if loader.validate_required_configs():
+    print('✅ Configurações: OK')
+else:
+    print('❌ Problemas nas configurações')
+
+# Teste dados de exemplo
+test_df = pd.DataFrame({'texto': ['Teste do sistema', 'Pipeline funcionando']})
+print(f'✅ DataFrame teste: {len(test_df)} registros')
+print('🎉 Sistema pronto para uso!')
+"
+```
 
 ### 🚀 **Quick Start - PRODUCTION READY**
 ```bash
@@ -19,16 +131,16 @@ echo "ANTHROPIC_API_KEY=sk-ant-api03-[SUA_CHAVE]" > .env
 echo "VOYAGE_API_KEY=pa-[SUA_CHAVE]" >> .env
 
 # 3. Executar pipeline OTIMIZADO (todas as 5 semanas ativas)
-poetry run python run_pipeline.py
+poetry run poetry run python run_pipeline.py
 
-# 4. Testar todas as otimizações
-poetry run python test_all_weeks_consolidated.py
+# 4. Testar sistema completo
+poetry run python src/tests/test_pipeline.py
 
 # 5. Dashboard funcional
 poetry run python src/dashboard/start_dashboard.py
 
 # 6. Deployment para produção (NOVO!)
-poetry run python -c "
+poetry run poetry run python -c "
 from src.optimized.production_deploy import get_global_deployment_system, DeploymentConfig
 import asyncio
 deployment = get_global_deployment_system()
@@ -92,10 +204,7 @@ src/
 │   ├── start_dashboard.py           # Interface web funcional
 │   └── visualizer.py               # Visualizações interativas
 └── tests/                            # 🧪 COMPREHENSIVE TEST SUITE
-    ├── test_week1_emergency.py      # Week 1 validation (6 tests)
-    ├── test_week2_advanced_caching.py # Week 2 validation (7 tests)
-    ├── test_week5_production.py     # Week 5 validation (7 tests)
-    └── test_all_weeks_consolidated.py # All weeks integration test
+    └── test_pipeline.py             # Pipeline validation and testing
 ```
 
 ### 🏆 **NOVIDADES v5.0.0 - PIPELINE OPTIMIZATION:**
@@ -141,46 +250,46 @@ src/
 ### **Execução Completa**
 ```bash
 # Pipeline completo (22 etapas)
-python run_pipeline.py
+poetry run poetry run python run_pipeline.py
 
 # Com dataset específico
-python run_pipeline.py --dataset "data/uploads/meu_dataset.csv"
+poetry run poetry run python run_pipeline.py --dataset "data/uploads/meu_dataset.csv"
 
 # Com logging detalhado
-python run_pipeline.py --verbose
+poetry run poetry run python run_pipeline.py --verbose
 
 # Forçar reinício sem checkpoints
-python run_pipeline.py --force-restart
+poetry run poetry run python run_pipeline.py --force-restart
 ```
 
 ### **Execução Seletiva**
 ```bash
 # Executar a partir de uma etapa específica
-python src/main.py --start-from 08_sentiment_analysis
+poetry run poetry run python src/main.py --start-from 08_sentiment_analysis
 
 # Executar etapa individual
-python src/main.py --stage 05_political_analysis
+poetry run poetry run python src/main.py --stage 05_political_analysis
 
 # Executar apenas etapas Anthropic
-python src/main.py --anthropic-only
+poetry run poetry run python src/main.py --anthropic-only
 
 # Executar apenas etapas Voyage.ai
-python src/main.py --voyage-only
+poetry run poetry run python src/main.py --voyage-only
 ```
 
 ### **Diagnóstico e Manutenção**
 ```bash
 # Verificar status do pipeline
-python run_pipeline.py --status
+poetry run poetry run python run_pipeline.py --status
 
 # Limpar checkpoints e recomeçar
-python run_pipeline.py --clean
+poetry run poetry run python run_pipeline.py --clean
 
 # Verificar dependências
-python run_pipeline.py --check-deps
+poetry run poetry run python run_pipeline.py --check-deps
 
 # Relatório de custos
-python -c "from src.anthropic_integration.cost_monitor import get_cost_report; print(get_cost_report())"
+poetry run poetry run python -c "from src.anthropic_integration.cost_monitor import get_cost_report; print(get_cost_report())"
 ```
 
 ### **🔄 Recovery e Troubleshooting**
@@ -188,19 +297,19 @@ python -c "from src.anthropic_integration.cost_monitor import get_cost_report; p
 #### **Cenários de Recovery**
 ```bash
 # 1. Pipeline travou em alguma etapa
-python run_pipeline.py --recover
+poetry run poetry run python run_pipeline.py --recover
 
 # 2. Erro de API (Anthropic/Voyage)
-python run_pipeline.py --retry-failed
+poetry run poetry run python run_pipeline.py --retry-failed
 
 # 3. Problema de memória
-python run_pipeline.py --low-memory
+poetry run poetry run python run_pipeline.py --low-memory
 
 # 4. Corrupção de dados
-python run_pipeline.py --validate-and-fix
+poetry run poetry run python run_pipeline.py --validate-and-fix
 
 # 5. Reset completo
-python run_pipeline.py --reset-all
+poetry run poetry run python run_pipeline.py --reset-all
 rm -rf checkpoints/* logs/* data/interim/*
 ```
 
@@ -213,7 +322,7 @@ tail -f logs/pipeline_execution.log
 watch -n 5 "ls -la checkpoints/"
 
 # Monitoramento de custos
-python -c "from src.anthropic_integration.cost_monitor import monitor_realtime; monitor_realtime()"
+poetry run poetry run python -c "from src.anthropic_integration.cost_monitor import monitor_realtime; monitor_realtime()"
 ```
 
 ---
@@ -261,7 +370,7 @@ tqdm>=4.65.0
 #### **Modelos spaCy**
 ```bash
 # Instalar modelo português
-python -m spacy download pt_core_news_lg
+poetry run python -m spacy download pt_core_news_lg
 ```
 
 #### **APIs Externas**
@@ -293,10 +402,10 @@ COST_MONITORING=true
 
 #### **2. Configuração Principal (config/settings.yaml)**
 ```yaml
-# Configuração atualizada para v4.9.1
+# Configuração atualizada para v5.0.0
 project:
-  name: "dataanalysis-bolsonarismo"
-  version: "4.9.1"
+  name: "monitor-discurso-digital"
+  version: "5.0.0"
   
 # APIs
 anthropic:
@@ -365,7 +474,7 @@ cost_optimization:
   threshold: 0.75
 ```
 
-### 🔧 **ENHANCED MODEL CONFIGURATION v4.9.8**
+### 🔧 **ENHANCED MODEL CONFIGURATION v5.0.0**
 
 O sistema agora possui configuração avançada de modelos por stage para máxima qualidade e controle de custos:
 
@@ -441,14 +550,14 @@ anthropic_enhanced:
 #### **🔍 Validação do Sistema**
 
 ```bash
-# Validar configurações enhanced
-poetry run python scripts/validate_enhanced_config.py
+# Ferramentas de manutenção consolidadas
+poetry run python scripts/maintenance_tools.py validate
 
-# Consolidar configurações
-poetry run python scripts/consolidate_model_configs.py
+# Diagnóstico completo do sistema  
+poetry run python scripts/maintenance_tools.py diagnose
 
-# Testar pipeline com enhanced config
-poetry run python run_pipeline.py
+# Testar pipeline completo
+poetry run poetry run python run_pipeline.py
 ```
 
 #### **📊 Benefícios da Enhanced Configuration**
@@ -461,7 +570,7 @@ poetry run python run_pipeline.py
 
 ### 🏗️ **Estrutura de Diretórios**
 ```
-dataanalysis-bolsonarismo/
+monitor-discurso-digital/
 ├── .env                          # Variáveis de ambiente
 ├── run_pipeline.py              # Executor principal
 ├── src/
@@ -483,7 +592,7 @@ dataanalysis-bolsonarismo/
 
 ---
 
-## 📈 **Características Técnicas v4.9.1**
+## 📈 **Características Técnicas v5.0.0**
 
 ### 🎯 **Otimizações Implementadas**
 - **96% Economia de Custos**: Sampling inteligente (1.3M → 50K registros)
@@ -515,17 +624,17 @@ dataanalysis-bolsonarismo/
 #### **Erro de API**
 ```bash
 # Verificar configuração
-python -c "import os; print('ANTHROPIC_API_KEY:', os.getenv('ANTHROPIC_API_KEY')[:10] + '...')"
+poetry run python -c "import os; print('ANTHROPIC_API_KEY:', os.getenv('ANTHROPIC_API_KEY')[:10] + '...')"
 
 # Testar conectividade
-python -c "from src.anthropic_integration.base import AnthropicBase; AnthropicBase({}).test_connection()"
+poetry run python -c "from src.anthropic_integration.base import AnthropicBase; AnthropicBase({}).test_connection()"
 ```
 
 #### **Problema de Memória**
 ```bash
 # Executar com menor chunk size
 export CHUNK_SIZE=5000
-python run_pipeline.py --low-memory
+poetry run python run_pipeline.py --low-memory
 ```
 
 #### **Falha em Etapa Específica**
@@ -534,22 +643,22 @@ python run_pipeline.py --low-memory
 grep "Stage 05" logs/pipeline_execution.log
 
 # Reiniciar da etapa
-python src/main.py --start-from 05_political_analysis
+poetry run python src/main.py --start-from 05_political_analysis
 ```
 
 ### 🔧 **Comandos de Diagnóstico**
 ```bash
 # Status completo do sistema
-python run_pipeline.py --health-check
+poetry run python run_pipeline.py --health-check
 
 # Validar configurações
-python run_pipeline.py --validate-config
+poetry run python run_pipeline.py --validate-config
 
 # Limpar cache corrompido
-python run_pipeline.py --clear-cache
+poetry run python run_pipeline.py --clear-cache
 
 # Verificar dependências
-python run_pipeline.py --check-dependencies
+poetry run python run_pipeline.py --check-dependencies
 ```
 
 ---
@@ -563,7 +672,7 @@ python run_pipeline.py --check-dependencies
 - **Transição Governamental** (2022-2023)
 
 ### **Fenômenos Estudados**
-- **Bolsonarismo** e extrema-direita digital
+- **Discurso político** e extrema-direita digital
 - **Negacionismo científico** e histórico
 - **Autoritarismo** e ataques à democracia
 - **Desinformação** e teorias conspiratórias
@@ -608,26 +717,21 @@ else:
 ## 📚 **Documentação Completa para Manutenção**
 
 ### 🚀 **Para Novos Usuários**
-- **[INSTALLATION.md](INSTALLATION.md)** - Guia completo de instalação passo-a-passo
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Solução de problemas comuns
-- **[API_REFERENCE.md](API_REFERENCE.md)** - Referência completa da API e módulos
+- **[CLAUDE.md](CLAUDE.md)** - Instruções para Claude Code e histórico completo do projeto
+- **[SECURITY_SETUP.md](SECURITY_SETUP.md)** - Configuração de segurança
 
 ### 🔧 **Para Administradores**
-- **[MAINTENANCE.md](MAINTENANCE.md)** - Guia de manutenção e monitoramento
-- **[SECURITY_SETUP.md](SECURITY_SETUP.md)** - Configuração de segurança
-- **[pipeline_optimization.md](pipeline_optimization.md)** - Detalhes das otimizações v5.0.0
+- **[scripts/maintenance_tools.py](scripts/maintenance_tools.py)** - Ferramentas de manutenção consolidadas
+- **[config/](config/)** - Arquivos de configuração específicos  
 
 ### 📖 **Documentação Técnica**
-- **[CLAUDE.md](CLAUDE.md)** - Instruções para Claude Code e histórico do projeto
-- **[config/](config/)** - Arquivos de configuração específicos  
 - **[src/dashboard/README.md](src/dashboard/README.md)** - Setup do dashboard
-- **[INTEGRATION_CONFIRMATION.md](INTEGRATION_CONFIRMATION.md)** - Confirmação da integração das otimizações
+- **[CODIGO_AUDIT_RELATORIO_FINAL.md](CODIGO_AUDIT_RELATORIO_FINAL.md)** - Relatório de auditoria e melhorias
 
-### 🎯 **Quick Links**
-- **Instalação**: [INSTALLATION.md](INSTALLATION.md) → `poetry install` → `poetry run python run_pipeline.py`
-- **Problemas**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md) → Soluções para erros comuns
-- **API**: [API_REFERENCE.md](API_REFERENCE.md) → Como usar cada módulo do pipeline
-- **Manutenção**: [MAINTENANCE.md](MAINTENANCE.md) → Tarefas diárias, semanais, mensais
+### 🎯 **Quick Start**
+- **Instalação**: `poetry install` → `poetry run poetry run python run_pipeline.py`
+- **Manutenção**: `poetry run python scripts/maintenance_tools.py all`
+- **Dashboard**: `poetry run python src/dashboard/start_dashboard.py`
 
 ---
 
@@ -641,4 +745,4 @@ Este projeto é destinado para **pesquisa acadêmica** sobre:
 
 ---
 
-**Pipeline Bolsonarismo v4.9.1** - Sistema completo de análise científica de discurso político brasileiro com inteligência artificial, otimizado para máxima qualidade e economia de custos.
+**Monitor do Discurso Digital v5.0.0** - Sistema completo de análise científica de discurso político brasileiro com inteligência artificial, otimizado para máxima qualidade e economia de custos.

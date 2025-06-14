@@ -81,7 +81,7 @@ class SemanticHashtagAnalyzer(AnthropicBase):
         context_info = {
             'period': '2019-2023',
             'platform': 'telegram',
-            'political_movement': 'bolsonarismo',
+            'political_movement': 'discurso_politico',
             'country': 'brasil',
             'language': 'portugues_brasileiro'
         }
@@ -143,7 +143,7 @@ HASHTAGS PARA ANÁLISE:
 CONTEXTO:
 - Período: {context.get('period', '2019-2023')}
 - Plataforma: {context.get('platform', 'Telegram')}
-- Movimento: {context.get('political_movement', 'Bolsonarismo')}
+- Movimento: {context.get('political_movement', 'Discurso Político')}
 - País: {context.get('country', 'Brasil')}
 
 CATEGORIAS DE DISCURSO:

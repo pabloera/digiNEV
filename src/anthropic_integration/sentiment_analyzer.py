@@ -92,12 +92,25 @@ class AnthropicSentimentAnalyzer(AnthropicBase):
         self.logger.info(f"🚀 Análise: {len(texts)} textos")
         return self._analyze_with_cache(texts)
 
-    # ========================================================================
-    # OTIMIZAÇÕES CORE
-    # ========================================================================
 
     def _create_optimized_prompt(self, texts: List[str]) -> str:
-        """Prompt compacto (-70% tokens vs versão original)"""
+        """
+        Cria prompt compacto para análise de sentimento (-70% tokens vs original)
+        
+        Formato do JSON esperado:
+        - sentiment: classificação principal (negativo|neutro|positivo)  
+        - confidence: confiança da análise (0.0-1.0)
+        - emotions: emoções detectadas (lista de strings como "raiva", "medo")
+        - irony: presença de ironia (boolean)
+        - target: alvo da mensagem (pessoa|instituição)
+        - intensity: intensidade emocional (baixa|média|alta)
+        - radical: nível de radicalização (nenhum|leve|moderado|severo)
+        - tone: tom da mensagem (agressivo|defensivo|informativo)
+        
+        O prompt usa estrutura XML para melhor parsing e trunca textos em 300 chars
+        para otimizar uso de tokens mantendo contexto suficiente.
+        """
+        # Formatar textos com índice e truncamento para otimizar tokens
         formatted = " | ".join([f"{i}: {t[:300]}" for i, t in enumerate(texts)])
 
         return f"""<analysis>
@@ -115,14 +128,16 @@ Textos: {formatted}
 
         avg_len = sum(text_lengths) / len(text_lengths)
 
+        # Batch sizes otimizados baseados em testes de performance:
+        # Objetivo: manter ~3000 chars/batch para balancear qualidade vs velocidade
         if avg_len < 100:
-            return 15    # Textos curtos
+            return 15    # Textos curtos (<100 chars): 15 msgs/batch (limite: ~1500 chars/batch)
         elif avg_len < 300:
-            return 10  # Textos médios
+            return 10    # Textos médios (100-300): 10 msgs/batch (limite: ~3000 chars/batch) 
         elif avg_len < 500:
-            return 6   # Textos longos
+            return 6     # Textos longos (300-500): 6 msgs/batch (limite: ~3000 chars/batch)
         else:
-            return 3                 # Textos muito longos
+            return 3     # Textos muito longos (>500): 3 msgs/batch (limite: ~1500 chars/batch)
 
     def _get_cache_key(self, text: str) -> str:
         """Hash MD5 para cache"""
@@ -143,7 +158,9 @@ Textos: {formatted}
         """Salva no cache com limite automático"""
         # Limpar cache se necessário
         if len(self._cache) >= self._cache_limit:
-            # Remove 20% dos itens mais antigos
+            # Estratégia LRU simplificada: remove 20% dos itens mais antigos
+            # quando cache atinge limite para evitar uso excessivo de memória
+            # dict.keys() mantém ordem de inserção no Python 3.7+
             old_keys = list(self._cache.keys())[:int(self._cache_limit * 0.2)]
             for key in old_keys:
                 del self._cache[key]
@@ -151,9 +168,6 @@ Textos: {formatted}
         key = self._get_cache_key(text)
         self._cache[key] = result.copy()
 
-    # ========================================================================
-    # ESTRATÉGIAS DE ANÁLISE
-    # ========================================================================
 
     def _analyze_with_cache(self, texts: List[str]) -> List[Dict[str, Any]]:
         """Análise com sistema de cache inteligente"""

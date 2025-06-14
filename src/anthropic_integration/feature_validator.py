@@ -250,30 +250,29 @@ class FeatureValidator:
             df['media_type'] = 'text'  # Default
             report["created_column"] = True
 
-        # Analisar conteúdo para detectar tipo de mídia
-        for idx, row in df.iterrows():
-            detected_type = 'text'  # Default
+        # Analisar conteúdo para detectar tipo de mídia (vetorizado)
+        # Combinar todas as colunas de texto de forma vetorizada
+        combined_text_series = pd.Series('', index=df.index)
+        for col in text_columns:
+            if col in df.columns:
+                combined_text_series += ' ' + df[col].astype(str).str.lower().fillna('')
 
-            # Verificar em todas as colunas de texto
-            combined_text = ''
-            for col in text_columns:
-                if col in df.columns and pd.notna(row[col]):
-                    combined_text += ' ' + str(row[col]).lower()
+        # Detectar tipo de mídia para todas as linhas usando operações vetorizadas
+        detected_types = pd.Series('text', index=df.index)  # Default
+        
+        for media_type, pattern in self.media_patterns.items():
+            # Usar str.contains para operação vetorizada
+            matches = combined_text_series.str.contains(pattern, case=False, na=False, regex=True)
+            detected_types.loc[matches] = media_type
 
-            # Detectar tipo de mídia baseado em padrões
-            if combined_text:
-                for media_type, pattern in self.media_patterns.items():
-                    if re.search(pattern, combined_text, re.IGNORECASE):
-                        detected_type = media_type
-                        break
-
-            # Atualizar apenas se diferente e não for None/NaN
-            if pd.notna(df.at[idx, 'media_type']) and df.at[idx, 'media_type'] != detected_type:
-                df.at[idx, 'media_type'] = detected_type
-                report["updated_count"] += 1
-            elif pd.isna(df.at[idx, 'media_type']):
-                df.at[idx, 'media_type'] = detected_type
-                report["updated_count"] += 1
+        # Atualizar coluna de forma vetorizada
+        needs_update = (
+            df['media_type'].isna() | 
+            (df['media_type'].notna() & (df['media_type'] != detected_types))
+        )
+        
+        df.loc[needs_update, 'media_type'] = detected_types.loc[needs_update]
+        report["updated_count"] = needs_update.sum()
 
         report["final_media_types"] = df['media_type'].value_counts().to_dict()
         return df, report
@@ -302,19 +301,25 @@ class FeatureValidator:
             report["total_hashtags"] = non_empty.sum()
             report["empty_hashtags"] = (~non_empty).sum()
 
-            # Verificar hashtags malformadas (sem #)
+            # Verificar hashtags malformadas (sem #) - vetorizado
             if report["total_hashtags"] > 0:
                 hashtag_sample = df[non_empty][hashtag_col].astype(str).head(1000)
-                malformed = hashtag_sample.apply(
-                    lambda x: len(x) > 0 and not x.strip().startswith('#')
-                ).sum()
+                # Operação vetorizada para detectar hashtags malformadas
+                is_non_empty = hashtag_sample.str.len() > 0
+                starts_with_hash = hashtag_sample.str.strip().str.startswith('#')
+                malformed_mask = is_non_empty & ~starts_with_hash
+                malformed = malformed_mask.sum()
                 report["malformed_hashtags"] = malformed
 
-                # Corrigir hashtags malformadas
+                # Corrigir hashtags malformadas de forma vetorizada
                 if malformed > 0:
-                    df[hashtag_col] = df[hashtag_col].apply(
-                        lambda x: f"#{x}" if pd.notna(x) and str(x).strip() and not str(x).strip().startswith('#') else x
+                    hashtag_series = df[hashtag_col].astype(str)
+                    needs_correction = (
+                        hashtag_series.notna() & 
+                        (hashtag_series.str.strip() != '') & 
+                        ~hashtag_series.str.strip().str.startswith('#')
                     )
+                    df.loc[needs_correction, hashtag_col] = '#' + hashtag_series.loc[needs_correction].str.strip()
 
         return df, report
 

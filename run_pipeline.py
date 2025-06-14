@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PIPELINE BOLSONARISMO v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM
+MONITOR DO DISCURSO DIGITAL v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM
 ================================================================
 
 🏆 PIPELINE OPTIMIZATION COMPLETE! Transformação 45% → 95% taxa de sucesso.
@@ -39,10 +39,10 @@ import yaml
 # Configure performance optimizations FIRST (before any imports)
 try:
     from src.utils.performance_config import configure_all_performance
-    performance_results = configure_all_performance()
+    _performance_results = configure_all_performance()
 except ImportError:
     print("⚠️  Performance config não encontrado - continuando sem otimizações")
-    performance_results = {}
+    _performance_results = {}
 
 # Add src to path
 src_path = Path(__file__).parent / "src"
@@ -261,7 +261,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
     }
     
     try:
-        # ✅ STEP 1: Initialize optimization systems FIRST
+        # PASSO 1: Inicializar sistemas de otimização primeiro
         logger.info("🚀 Inicializando sistemas de otimização v5.0.0...")
         optimization_status = check_optimization_systems()
         execution_results['optimizations_applied'] = optimization_status
@@ -269,19 +269,19 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         active_optimizations = sum(optimization_status.values())
         logger.info(f"⚡ Otimizações ativas: {active_optimizations}/5 weeks")
         
-        # ✅ STEP 2: Initialize ORIGINAL pipeline WITH optimizations
+        # PASSO 2: Inicializar pipeline ORIGINAL com otimizações integradas
         from src.anthropic_integration.unified_pipeline import UnifiedAnthropicPipeline
 
         # Create pipeline instance with optimization integration
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
         logger.info("📊 Pipeline ORIGINAL (22 stages) inicializado")
         
-        # ✅ STEP 3: Apply optimization layers to original pipeline
-        optimized_pipeline = None
+        # PASSO 3: Aplicar camadas de otimização ao pipeline original
+        _optimized_pipeline = None
         if optimization_status.get('week1_emergency', False):
             try:
                 from src.optimized.optimized_pipeline import get_global_optimized_pipeline
-                optimized_pipeline = get_global_optimized_pipeline()
+                _optimized_pipeline = get_global_optimized_pipeline()
                 logger.info("✅ Week 1-2: Emergency cache + advanced caching APLICADO ao pipeline original")
             except Exception as e:
                 logger.warning(f"⚠️ Week 1-2 optimization not applied: {e}")
@@ -499,7 +499,7 @@ def check_optimization_systems():
 def main():
     """Entry point para execução do pipeline ORIGINAL (22 stages) COM otimizações v5.0.0"""
     
-    print("🏆 PIPELINE BOLSONARISMO v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM")
+    print("🏆 MONITOR DO DISCURSO DIGITAL v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM")
     print("=" * 80)
     print("📊 EXECUÇÃO: Pipeline ORIGINAL (22 stages) COM Otimizações v5.0.0")
     print("🚀 PIPELINE OPTIMIZATION COMPLETE! (45% → 95% success rate)")

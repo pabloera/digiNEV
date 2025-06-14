@@ -1,5 +1,5 @@
 """
-PoliticalAnalyzer Enhanced v4.9.1 - IMPLEMENTAÇÃO FINAL CONSOLIDADA
+PoliticalAnalyzer Enhanced v5.0.0 - IMPLEMENTAÇÃO FINAL CONSOLIDADA
 ==================================================================
 
 ANTHROPIC-NATIVE IMPLEMENTATION com todos os padrões oficiais:
@@ -46,6 +46,13 @@ except ImportError:
 
 from .api_error_handler import APIErrorHandler, APIQualityChecker
 from .base import AnthropicBase
+
+# TASK-023 v5.0.0: Import configuration loader to eliminate hardcoded values
+try:
+    from src.common.config_loader import get_model_setting, get_config_value
+    CONFIG_LOADER_AVAILABLE = True
+except ImportError:
+    CONFIG_LOADER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -145,22 +152,55 @@ class PoliticalAnalyzer(AnthropicBase):
     ✅ RAG com exemplos políticos brasileiros
     ✅ Cache unificado baseado em hash_id
     ✅ Consolidação de funções (8 → 3 funções principais)
+    ✅ Regex patterns pré-compilados para performance
     """
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        # Pré-compilar regex patterns para melhor performance
+        import re
+        political_keywords = [
+            'bolsonaro', 'lula', 'pt', 'psl', 'pl', 'psol', 'psdb', 'mdb',
+            'política', 'político', 'eleição', 'voto', 'candidato', 'presidente',
+            'deputado', 'senador', 'congresso', 'câmara', 'senado', 'governo',
+            'esquerda', 'direita', 'conservador', 'liberal', 'comunista', 'socialista',
+            'fascista', 'democracia', 'ditadura', 'golpe', 'impeachment', 'corrupção'
+        ]
+        
+        # Compilar pattern uma vez para reutilização
+        self._political_pattern = re.compile(
+            '|'.join(re.escape(kw) for kw in political_keywords), 
+            re.IGNORECASE
+        )
+        
+        logger.info("🚀 PoliticalAnalyzer inicializado com regex patterns pré-compilados")
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        # 🔧 UPGRADE: Usar enhanced model configuration para political analysis
-        super().__init__(config, stage_operation="political_analysis")
-
-        # CONFIGURAÇÃO ENHANCED se não carregada (fallback)
-        if not hasattr(self, 'enhanced_config') or not self.enhanced_config:
-            self.model = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo mais capaz para política
-            self.max_tokens = 4000
-            self.temperature = 0.1  # Low for consistent classification
-            self.batch_size = 100  # OTIMIZADO: 10 → 100 (90% redução de API calls)
+        # TASK-023 v5.0.0: Load configuration from centralized files instead of hardcoded values
+        if CONFIG_LOADER_AVAILABLE:
+            # Use centralized configuration
+            self.model = get_model_setting("anthropic", "default_model", "claude-3-5-sonnet-20241022")
+            self.max_tokens = get_model_setting("anthropic", "max_tokens", 4000)
+            self.temperature = get_model_setting("anthropic", "temperature", 0.1)
+            self.batch_size = get_model_setting("anthropic", "batch_size", 100)
+            self.confidence_threshold = get_model_setting("anthropic", "confidence_threshold", 0.7)
+            self.max_concurrent_batches = get_config_value("api_limits.processing.max_batch_size", 5)
+            
+            logger.info(f"✅ TASK-023: Configurações carregadas do ConfigurationLoader - Modelo: {self.model}")
         else:
-            # Usar configuração enhanced carregada
-            self.batch_size = self.enhanced_config.get('batch_size', 100)
-        self.max_concurrent_batches = 5
+            # CONFIGURAÇÃO ENHANCED se não carregada (fallback)
+            if not hasattr(self, 'enhanced_config') or not self.enhanced_config:
+                self.model = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo mais capaz para política
+                self.max_tokens = 4000
+                self.temperature = 0.1  # Low for consistent classification
+                self.batch_size = 100  # OTIMIZADO: 10 → 100 (90% redução de API calls)
+                self.confidence_threshold = 0.7
+            else:
+                # Usar configuração enhanced carregada
+                self.batch_size = self.enhanced_config.get('batch_size', 100)
+            self.max_concurrent_batches = 5
+            
+            logger.warning("⚠️ TASK-023: ConfigurationLoader não disponível, usando valores padrão")
         self.semaphore = asyncio.Semaphore(self.max_concurrent_batches)
 
         # CACHE UNIFICADO
@@ -172,7 +212,7 @@ class PoliticalAnalyzer(AnthropicBase):
 
         # LOGGING & VERSIONING
         self.session_id = str(uuid.uuid4())
-        self.prompt_version = "v4.9.1-anthropic-enhanced"
+        self.prompt_version = "v5.0.0-anthropic-enhanced"
         self.prompt_logs: List[Dict] = []
         self.log_dir = Path("logs/political_analyzer")
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -309,7 +349,8 @@ class PoliticalAnalyzer(AnthropicBase):
         ]
 
         text_lower = df[text_column].fillna('').str.lower()
-        political_content = text_lower.str.contains('|'.join(political_keywords), regex=True, na=False)
+        # Usar pattern pré-compilado para melhor performance
+        political_content = text_lower.apply(lambda x: bool(self._political_pattern.search(x)) if pd.notna(x) else False)
         conditions.append(political_content)
 
         # COMBINAR TODAS AS CONDIÇÕES

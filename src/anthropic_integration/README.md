@@ -1,4 +1,4 @@
-# Anthropic Integration v4.9.1
+# Anthropic Integration v5.0.0
 
 > Módulos de integração com Anthropic API para 22 etapas do pipeline
 

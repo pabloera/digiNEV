@@ -1,29 +1,71 @@
 """
-Módulo base consolidado para integração com API Anthropic v4.9.8
-================================================================
+Anthropic Integration Base Module v5.0.0 - TASK-025 API Documentation
+=====================================================================
 
-Consolida funcionalidades de:
-- base.py: Classe base AnthropicBase
-- enhanced_model_loader.py: Configurações específicas por stage
-- Configuração dinâmica sem divisão de código
+This module provides the base class and configuration management for all Anthropic API
+integrations in the Monitor do Discurso Digital project.
 
-🔧 CONSOLIDAÇÃO: Unifica base.py + enhanced_model_loader.py
-✅ ENHANCED CONFIG: Sistema de configuração por stage integrado
-🎯 OTIMIZAÇÃO: Carregamento dinâmico de configurações
-"""
+**Module Purpose:**
+    Centralizes Anthropic API access, configuration management, cost monitoring,
+    and enhanced model loading with stage-specific optimizations.
 
-"""
-Módulo base consolidado para integração com API Anthropic v4.9.8
-================================================================
+**Key Classes:**
+    - AnthropicBase: Main base class for all Anthropic-powered processors
+    - EnhancedConfigLoader: Stage-specific configuration management  
+    - AnthropicConfig: Configuration data structure
 
-CONSOLIDAÇÃO ENHANCED: Este módulo agora inclui funcionalidades que anteriormente
-estavam em arquivos separados:
-- enhanced_model_loader.py: Configurações específicas por stage (INTEGRADO)
-- cost_monitor_enhanced.py: Monitoramento avançado (→ cost_monitor.py)
+**Key Features:**
+    - ✅ Enhanced configuration system with stage-specific settings
+    - ✅ Cost monitoring and budget limits
+    - ✅ Fallback strategies for model reliability
+    - ✅ Rate limiting and retry logic
+    - ✅ Comprehensive logging and error handling
 
-🔧 ENHANCED CONFIG: Sistema de configuração por stage totalmente integrado
-✅ COST MONITORING: Monitor consolidado com alertas automáticos
-🎯 SIMPLIFICAÇÃO: Sistema unificado sem divisão de código
+**API Integration:**
+    - Primary API: Anthropic Claude (claude-3-5-sonnet-20241022)
+    - Fallback support for multiple model versions
+    - Automatic retry with exponential backoff
+    - Cost tracking and budget enforcement
+
+**Configuration Files:**
+    - config/settings.yaml: Main configuration (consolidated)
+    - config/anthropic.yaml: API-specific settings
+    - .env: API keys and sensitive data
+
+**Usage Example:**
+    ```python
+    from anthropic_integration.base import AnthropicBase
+    
+    class MyProcessor(AnthropicBase):
+        def __init__(self):
+            super().__init__(stage_name="my_stage")
+            
+        def process_data(self, data):
+            response = self.client.messages.create(
+                model=self.model,
+                messages=[{"role": "user", "content": "Analyze this data"}]
+            )
+            return response
+    ```
+
+**Error Handling:**
+    Raises:
+        - APIConnectionError: When Anthropic API is unreachable
+        - AuthenticationError: When API key is invalid
+        - RateLimitError: When API rate limits are exceeded
+        - CostLimitError: When budget limits are exceeded
+
+**Dependencies:**
+    - anthropic: Official Anthropic Python client
+    - pyyaml: Configuration file parsing
+    - python-dotenv: Environment variable management
+
+**Version History:**
+    - v4.9.8: Enhanced configuration consolidation
+    - v5.0.0: TASK-025 API documentation + centralized config loader
+
+**Author:** Pablo Emanuel Romero Almada, Ph.D.
+**License:** MIT
 """
 
 
@@ -31,12 +73,10 @@ estavam em arquivos separados:
 import json
 import logging
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import anthropic
 from anthropic import Anthropic
 from dotenv import load_dotenv
 import yaml
@@ -52,16 +92,12 @@ else:
     # Fallback para carregar do diretório atual
     load_dotenv()
 
-# Import cost monitor (consolidado)
+# Import cost monitor
 try:
-    from .cost_monitor_consolidated import get_cost_monitor
+    from .cost_monitor import get_cost_monitor
     COST_MONITOR_AVAILABLE = True
 except ImportError:
-    try:
-        from .cost_monitor import get_cost_monitor
-        COST_MONITOR_AVAILABLE = True
-    except ImportError:
-        COST_MONITOR_AVAILABLE = False
+    COST_MONITOR_AVAILABLE = False
 
 
 @dataclass
@@ -178,7 +214,98 @@ def load_operation_config(operation: str) -> Dict[str, Any]:
 
 
 class AnthropicBase:
-    """Classe base consolidada para integração com API Anthropic"""
+    """
+    Base class for all Anthropic API integrations in the pipeline.
+    
+    **Class Purpose:**
+        Provides standardized Anthropic API access with enhanced configuration management,
+        cost monitoring, fallback strategies, and error handling for all pipeline stages.
+    
+    **Key Features:**
+        - Stage-specific configuration loading from enhanced config system
+        - Cost monitoring and budget enforcement
+        - Automatic fallback strategies for model reliability
+        - Rate limiting and retry logic with exponential backoff
+        - Comprehensive logging and error handling
+        - Support for multiple configuration sources (enhanced config, YAML, env vars)
+    
+    **Configuration Priority (highest to lowest):**
+        1. Enhanced stage-specific config (stage_operation parameter)
+        2. YAML configuration file (config parameter)
+        3. Environment variables (.env file)
+        4. Default values
+    
+    **Attributes:**
+        client (Anthropic): Initialized Anthropic API client
+        model (str): Claude model to use (default: claude-3-5-sonnet-20241022)
+        max_tokens (int): Maximum tokens per request (default: 3000)
+        temperature (float): Model temperature 0.0-1.0 (default: 0.3)
+        batch_size (int): Number of requests per batch (default: 20)
+        api_available (bool): Whether API client is ready for use
+        cost_monitor (CostMonitor): Cost tracking and budget enforcement
+        enhanced_config_available (bool): Whether enhanced config is loaded
+        
+    **Methods:**
+        get_api_client() -> Anthropic: Returns authenticated API client
+        is_api_available() -> bool: Checks if API is ready for use
+        get_effective_config() -> Dict: Returns current effective configuration
+        log_api_usage(tokens_used: int, cost: float): Logs API usage for monitoring
+        
+    **Usage Example:**
+        ```python
+        # Basic usage with environment variables
+        processor = AnthropicBase()
+        
+        # Stage-specific configuration
+        processor = AnthropicBase(stage_operation="political_analysis")
+        
+        # Custom configuration
+        config = {"anthropic": {"model": "claude-3-5-haiku-20241022"}}
+        processor = AnthropicBase(config=config)
+        
+        # Use the client
+        if processor.is_api_available():
+            response = processor.client.messages.create(
+                model=processor.model,
+                max_tokens=processor.max_tokens,
+                messages=[{"role": "user", "content": "Hello!"}]
+            )
+        ```
+    
+    **Error Handling:**
+        The class handles various API errors gracefully:
+        - Missing API keys: Logs warning, sets api_available=False
+        - Invalid API keys: Raises AuthenticationError
+        - Network issues: Implements retry logic with backoff
+        - Rate limits: Automatically retries with appropriate delays
+        - Cost limits: Enforces budget limits via cost monitor
+    
+    **Configuration Files:**
+        - config/settings.yaml: Main consolidated configuration
+        - config/anthropic.yaml: API-specific settings
+        - .env: API keys (ANTHROPIC_API_KEY)
+        
+    **Stage Operations Supported:**
+        - "political_analysis": Political classification (Stage 05)
+        - "sentiment_analysis": Sentiment analysis (Stage 08)
+        - "network_analysis": Network analysis (Stage 15)
+        - "qualitative_analysis": Qualitative analysis (Stage 16)
+        - "pipeline_review": Pipeline review (Stage 17)
+        - "topic_interpretation": Topic interpretation (Stage 18)
+        - "validation": Final validation (Stage 20)
+    
+    **Dependencies:**
+        - anthropic>=0.40.0: Official Anthropic Python client
+        - python-dotenv: Environment variable loading
+        - pyyaml: Configuration file parsing
+        
+    **Thread Safety:**
+        This class is thread-safe for read operations. For write operations
+        (like cost monitoring), proper synchronization should be implemented
+        in the inheriting classes.
+        
+    **Version:** v5.0.0 (TASK-025 API Documentation)
+    """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None, stage_operation: Optional[str] = None):
         """

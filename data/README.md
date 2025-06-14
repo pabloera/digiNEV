@@ -1,4 +1,4 @@
-# 📁 Estrutura de Dados - Pipeline Bolsonarismo
+# 📁 Estrutura de Dados - Monitor do Discurso Digital
 
 ## 🎯 **Organização dos Diretórios**
 
@@ -170,4 +170,4 @@ cp -r data/dashboard_results/ backup/
 
 **📁 Estrutura de dados completamente organizada e automatizada**
 
-**Para mais detalhes, consulte: [documentation/DOCUMENTACAO_CENTRAL.md](../documentation/DOCUMENTACAO_CENTRAL.md)**
+**Para mais detalhes, consulte: [CLAUDE.md](../CLAUDE.md) ou [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)**

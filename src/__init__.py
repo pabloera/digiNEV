@@ -1,1 +1,1 @@
-# Bolsonarismo Analysis Module
+# Monitor do Discurso Digital Module

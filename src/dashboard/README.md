@@ -1,4 +1,4 @@
-# Dashboard Pipeline Bolsonarismo v4.9.1 📊
+# Dashboard Monitor do Discurso Digital v5.0.0 📊
 
 > Interface web para análise de datasets com 22 etapas do pipeline
 

@@ -1,5 +1,5 @@
 """
-Voyage-Enhanced Clustering Analyzer for Bolsonarismo Dataset
+Voyage-Enhanced Clustering Analyzer for Political Discourse Dataset
 ==========================================================
 
 Advanced clustering using Voyage.ai embeddings for semantic grouping of

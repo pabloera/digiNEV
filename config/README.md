@@ -1,4 +1,4 @@
-# 📁 Configurações do Pipeline v4.9.1
+# 📁 Configurações do Pipeline v5.0.0
 
 ## 🔧 Arquivos Principais
 

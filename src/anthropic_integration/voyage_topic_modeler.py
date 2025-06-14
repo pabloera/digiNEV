@@ -1,5 +1,5 @@
 """
-Voyage-Enhanced Topic Modeling for Bolsonarismo Analysis
+Voyage-Enhanced Topic Modeling for Political Discourse Analysis
 ========================================================
 
 Advanced topic modeling using Voyage.ai embeddings combined with traditional LDA
