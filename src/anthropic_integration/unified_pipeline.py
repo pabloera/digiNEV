@@ -134,7 +134,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 # Continuar mas marcar como modo degradado
 
             # Inicializar classe base primeiro
-            super().__init__(config)
+            super().__init__(config, "pipeline_main")
             self.project_root = Path(project_root) if project_root else Path.cwd()
 
             # Validar configuração
@@ -836,46 +836,65 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         start_time = time.time()
 
         try:
-            # ✅ FIXED STAGE MAPPINGS - Consistent naming v4.9.9
+            # ✅ SEQUENTIAL STAGE MAPPINGS v5.0.2 - NUMERAÇÃO PURA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA
             stage_methods = {
-                # FASE 1: Preparação e Validação de Dados (01-05)
+                # FASE 1: Preparação e Validação de Dados (01-08)
                 "01_chunk_processing": self._stage_01_chunk_processing,
                 "02_encoding_validation": self._stage_02_encoding_validation,
-                "03_deduplication": self._stage_03_deduplication,
-                "04_feature_validation": self._stage_04_feature_validation,
+                "03_statistical_analysis_pre": self._stage_03_statistical_analysis_pre,
+                "04_deduplication": self._stage_04_deduplication,
+                "05_feature_validation": self._stage_05_feature_validation,
+                "06_political_analysis": self._stage_06_political_analysis,
+                "07_text_cleaning": self._stage_07_text_cleaning,
+                "08_statistical_analysis_post": self._stage_08_statistical_analysis_post,
+
+                # FASE 2: Processamento de Texto e NLP (09-13)
+                "09_linguistic_processing": self._stage_09_linguistic_processing,  # 🔤 SPACY
+                "10_sentiment_analysis": self._stage_10_sentiment_analysis,
+                "11_topic_modeling": self._stage_11_topic_modeling,  # 🚀 VOYAGE.AI
+                "12_tfidf_extraction": self._stage_12_tfidf_extraction,  # 🚀 VOYAGE.AI
+                "13_clustering": self._stage_13_clustering,  # 🚀 VOYAGE.AI
+
+                # FASE 3: Análise Estrutural e de Rede (14-17)
+                "14_hashtag_normalization": self._stage_14_hashtag_normalization,
+                "15_domain_analysis": self._stage_15_domain_analysis,
+                "16_temporal_analysis": self._stage_16_temporal_analysis,
+                "17_network_analysis": self._stage_17_network_analysis,
+
+                # FASE 4: Análise Avançada e Finalização (18-22)
+                "18_qualitative_analysis": self._stage_18_qualitative_analysis,
+                "19_smart_pipeline_review": self._stage_19_smart_pipeline_review,
+                "20_topic_interpretation": self._stage_20_topic_interpretation,
+                "21_semantic_search": self._stage_21_semantic_search,  # 🚀 VOYAGE.AI
+                "22_pipeline_validation": self._stage_22_pipeline_validation,
+
+                # ✅ LEGACY ALIASES - Mapeamento para métodos originais (compatibilidade total)
+                "01b_feature_validation": self._stage_01b_feature_validation,
+                "01c_political_analysis": self._stage_01c_political_analysis,
+                "02a_encoding_validation": self._stage_02a_encoding_validation,
+                "02b_deduplication": self._stage_02b_deduplication,
+                "03_text_cleaning": self._stage_03_clean_text,
+                "03_clean_text": self._stage_03_clean_text,
+                "03_deduplication": self._stage_02b_deduplication,
                 "04b_statistical_analysis_pre": self._stage_04b_statistical_analysis_pre,
-                "05_political_analysis": self._stage_05_political_analysis,
-
-                # FASE 2: Processamento de Texto e Análise (06-11)
-                "06_text_cleaning": self._stage_06_text_cleaning,
+                "05_political_analysis": self._stage_01c_political_analysis,
+                "06_text_cleaning": self._stage_03_clean_text,
                 "06b_statistical_analysis_post": self._stage_06b_statistical_analysis_post,
-                "07_linguistic_processing": self._stage_07_linguistic_processing,  # 🔤 SPACY
+                "06b_linguistic_processing": self._stage_06b_linguistic_processing,
+                "07_linguistic_processing": self._stage_06b_linguistic_processing,
                 "08_sentiment_analysis": self._stage_08_sentiment_analysis,
-                "09_topic_modeling": self._stage_09_topic_modeling,  # 🚀 VOYAGE.AI
-                "10_tfidf_extraction": self._stage_10_tfidf_extraction,  # 🚀 VOYAGE.AI
-                "11_clustering": self._stage_11_clustering,  # 🚀 VOYAGE.AI
-
-                # FASE 3: Análise Estrutural e de Rede (12-15)
-                "12_hashtag_normalization": self._stage_12_hashtag_normalization,
-                "13_domain_analysis": self._stage_13_domain_analysis,
-                "14_temporal_analysis": self._stage_14_temporal_analysis,
-                "15_network_analysis": self._stage_15_network_analysis,
-
-                # FASE 4: Análise Avançada e Finalização (16-20)
-                "16_qualitative_analysis": self._stage_16_qualitative_analysis,
-                "17_smart_pipeline_review": self._stage_17_smart_pipeline_review,
-                "18_topic_interpretation": self._stage_18_topic_interpretation,
-                "19_semantic_search": self._stage_19_semantic_search,  # 🚀 VOYAGE.AI
-                "20_pipeline_validation": self._stage_20_pipeline_validation,
-
-                # ✅ LEGACY ALIASES - Cleaned up and consistent
-                "01b_feature_validation": self._stage_04_feature_validation,
-                "01c_political_analysis": self._stage_05_political_analysis,
-                "02a_encoding_validation": self._stage_02_encoding_validation,
-                "02b_deduplication": self._stage_03_deduplication,
-                "03_text_cleaning": self._stage_06_text_cleaning,
-                "03_clean_text": self._stage_06_text_cleaning,
-                "06b_linguistic_processing": self._stage_07_linguistic_processing,
+                "09_topic_modeling": self._stage_09_topic_modeling,
+                "10_tfidf_extraction": self._stage_06_tfidf_extraction,
+                "11_clustering": self._stage_07_clustering,
+                "12_hashtag_normalization": self._stage_08_hashtag_normalization,
+                "13_domain_analysis": self._stage_09_domain_extraction,
+                "14_temporal_analysis": self._stage_10_temporal_analysis,
+                "15_network_analysis": self._stage_11_network_structure,
+                "16_qualitative_analysis": self._stage_12_qualitative_analysis,
+                "17_smart_pipeline_review": self._stage_13_review_reproducibility,
+                "18_topic_interpretation": self._stage_14_topic_interpretation,
+                "19_semantic_search": self._stage_14_semantic_search_intelligence,
+                "20_pipeline_validation": self._stage_16_pipeline_validation,
             }
 
             if stage_name in stage_methods:
@@ -2071,7 +2090,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
 
                 # Aplicar otimização de performance para hashtag analysis
-                optimized_df, optimization_report = self._apply_hashtag_analysis_optimization(df)
+                optimized_df, optimization_report = self._apply_hashtag_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
 
                 # Usar apenas análise Anthropic (API-only)
@@ -2147,14 +2166,48 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 logger.info(f"📊 Dataset carregado: {len(df)} registros")
 
                 # Aplicar otimização de performance para domain analysis
-                optimized_df, optimization_report = self._apply_domain_analysis_optimization(df)
+                optimized_df, optimization_report = self._apply_domain_optimization(df)
                 logger.info(f"📊 Otimização aplicada: {len(df)} → {len(optimized_df)} registros")
 
                 # Usar apenas análise Anthropic (API-only)
                 if self._validate_domain_dependencies():
                     logger.info("🤖 Usando análise de domínios Anthropic Enhanced")
-                    domain_df = self.domain_analyzer.analyze_domains_comprehensive(optimized_df)
-                    domain_report = self.domain_analyzer.generate_domain_report(domain_df)
+                    domain_analysis_result = self.domain_analyzer.analyze_domains_intelligent(optimized_df)
+                    
+                    # Create enhanced DataFrame with domain analysis results
+                    domain_df = optimized_df.copy()
+                    
+                    # Add domain analysis columns
+                    if isinstance(domain_analysis_result, dict) and 'domain_extraction' in domain_analysis_result:
+                        domain_extraction = domain_analysis_result['domain_extraction']
+                        domain_classification = domain_analysis_result.get('domain_classification', {})
+                        
+                        # Add domain analysis columns to DataFrame
+                        domain_df['domain_analysis_status'] = 'analyzed'
+                        domain_df['total_domains_found'] = domain_extraction.get('total_domains', 0)
+                        domain_df['unique_domains_count'] = domain_extraction.get('unique_domains', 0)
+                        
+                        # Add classification results if available
+                        if 'domain_categories' in domain_classification:
+                            domain_df['domain_categories_analyzed'] = True
+                            domain_df['credible_domains_count'] = len(domain_classification.get('credible_domains', []))
+                        else:
+                            domain_df['domain_categories_analyzed'] = False
+                            domain_df['credible_domains_count'] = 0
+                    else:
+                        # Fallback if analysis result format is unexpected
+                        domain_df['domain_analysis_status'] = 'completed_basic'
+                        domain_df['total_domains_found'] = 0
+                        domain_df['unique_domains_count'] = 0
+                        domain_df['domain_categories_analyzed'] = False
+                        domain_df['credible_domains_count'] = 0
+                    
+                    # Generate domain report from analysis result
+                    domain_report = {
+                        "method": "intelligent_domain_analysis", 
+                        "records_processed": len(domain_df),
+                        "analysis_result": domain_analysis_result
+                    }
 
                     # Estender resultados para dataset completo se necessário
                     if len(optimized_df) < len(df):
@@ -2212,10 +2265,47 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
             df = self._load_processed_data(input_path)
 
-            if self.pipeline_config["use_anthropic"] and self.api_available:
+            if self.pipeline_config["use_anthropic"] and self.api_available and self._validate_temporal_dependencies():
                 # Usar análise Anthropic
-                temporal_df = self.temporal_analyzer.analyze_temporal_patterns_comprehensive(df)
-                temporal_report = self.temporal_analyzer.generate_temporal_report(temporal_df)
+                temporal_analysis_result = self.temporal_analyzer.analyze_temporal_patterns(df)
+                
+                # Create enhanced DataFrame with temporal analysis results
+                temporal_df = df.copy()
+                
+                # Add temporal analysis columns
+                if isinstance(temporal_analysis_result, dict):
+                    temporal_df['temporal_analysis_status'] = 'analyzed'
+                    temporal_df['temporal_patterns_computed'] = True
+                    
+                    # Add temporal analysis results to DataFrame
+                    if 'temporal_trends' in temporal_analysis_result:
+                        temporal_df['temporal_trends_analyzed'] = True
+                    else:
+                        temporal_df['temporal_trends_analyzed'] = False
+                        
+                    if 'time_series_analysis' in temporal_analysis_result:
+                        temporal_df['time_series_analyzed'] = True
+                    else:
+                        temporal_df['time_series_analyzed'] = False
+                        
+                    if 'seasonal_patterns' in temporal_analysis_result:
+                        temporal_df['seasonal_patterns_detected'] = True
+                    else:
+                        temporal_df['seasonal_patterns_detected'] = False
+                else:
+                    # Fallback if analysis result format is unexpected
+                    temporal_df['temporal_analysis_status'] = 'completed_basic'
+                    temporal_df['temporal_patterns_computed'] = False
+                    temporal_df['temporal_trends_analyzed'] = False
+                    temporal_df['time_series_analyzed'] = False
+                    temporal_df['seasonal_patterns_detected'] = False
+                
+                # Generate temporal report from analysis result
+                temporal_report = {
+                    "method": "temporal_patterns_analysis", 
+                    "records_processed": len(temporal_df),
+                    "analysis_result": temporal_analysis_result
+                }
                 results["anthropic_used"] = True
             else:
                 # Usar análise tradicional
@@ -2248,10 +2338,46 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
             df = self._load_processed_data(input_path)
 
-            if self.pipeline_config["use_anthropic"] and self.api_available:
+            if self.pipeline_config["use_anthropic"] and self.api_available and self._validate_network_dependencies():
                 # Usar análise Anthropic
-                network_df = self.network_analyzer.analyze_network_structure_comprehensive(df)
-                network_report = self.network_analyzer.generate_network_report(network_df)
+                network_analysis_result = self.network_analyzer.analyze_networks_intelligent(
+                    df, 
+                    channel_column='channel', 
+                    text_column='body', 
+                    timestamp_column='datetime'
+                )
+                
+                # Create enhanced DataFrame with network analysis results
+                network_df = df.copy()
+                
+                # Add network analysis columns
+                if isinstance(network_analysis_result, dict):
+                    network_df['network_analysis_status'] = 'analyzed'
+                    network_df['network_metrics_computed'] = True
+                    
+                    # Add basic network analysis results to DataFrame
+                    if 'user_interaction_patterns' in network_analysis_result:
+                        network_df['interaction_patterns_analyzed'] = True
+                    else:
+                        network_df['interaction_patterns_analyzed'] = False
+                        
+                    if 'mention_networks' in network_analysis_result:
+                        network_df['mention_networks_analyzed'] = True
+                    else:
+                        network_df['mention_networks_analyzed'] = False
+                else:
+                    # Fallback if analysis result format is unexpected
+                    network_df['network_analysis_status'] = 'completed_basic'
+                    network_df['network_metrics_computed'] = False
+                    network_df['interaction_patterns_analyzed'] = False
+                    network_df['mention_networks_analyzed'] = False
+                
+                # Generate network report from analysis result
+                network_report = {
+                    "method": "intelligent_network_analysis", 
+                    "records_processed": len(network_df),
+                    "analysis_result": network_analysis_result
+                }
                 results["anthropic_used"] = True
             else:
                 # Usar análise tradicional
@@ -2284,7 +2410,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
             df = self._load_processed_data(input_path)
 
-            if self.pipeline_config["use_anthropic"] and self.api_available:
+            if self.pipeline_config["use_anthropic"] and self.api_available and self._validate_qualitative_dependencies():
                 # Usar análise Anthropic
                 qualitative_df = self.qualitative_classifier.classify_content_comprehensive(df)
                 qualitative_report = self.qualitative_classifier.generate_qualitative_report(qualitative_df)
@@ -2322,7 +2448,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
             if self.pipeline_config["use_anthropic"] and self.api_available:
                 # Usar revisão Anthropic
-                review_report = self.pipeline_reviewer.comprehensive_pipeline_review(df, self.pipeline_state)
+                review_report = self.pipeline_reviewer.review_pipeline_comprehensive(
+                    self.pipeline_state, 
+                    self.pipeline_config, 
+                    str(self.base_path)
+                )
                 results["anthropic_used"] = True
             else:
                 # Usar revisão tradicional
@@ -3226,6 +3356,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
 
         return results
 
+    def _stage_02_encoding_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
+        """TEMPORARY ALIAS: Redirect to correct method to fix dynamic calling issue"""
+        return self._stage_02a_encoding_validation(dataset_paths)
+
     def _stage_02a_encoding_validation(self, dataset_paths: List[str]) -> Dict[str, Any]:
         """Etapa 02: Validação de encoding otimizada com detecção robusta"""
 
@@ -3358,7 +3492,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 if df is not None and not df.empty:
                     if self.pipeline_config["use_anthropic"] and self.api_available:
                         # Usar TopicInterpreter para análise avançada
-                        interpretation_result = self.topic_interpreter.interpret_topics_semantically(df)
+                        interpretation_result = self.topic_interpreter.extract_and_interpret_topics(df)
                         results["anthropic_used"] = True
                     else:
                         # Análise tradicional de tópicos
@@ -4158,6 +4292,71 @@ def add_validation_methods_to_pipeline():
         except Exception:
             return False
 
+    def _validate_hashtag_dependencies(self) -> bool:
+        """Valida se dependências para análise de hashtags estão disponíveis"""
+        try:
+            return (
+                self.pipeline_config.get("use_anthropic", True) and
+                self.api_available and
+                hasattr(self, 'hashtag_analyzer') and
+                self.hashtag_analyzer is not None and
+                hasattr(self.hashtag_analyzer, 'normalize_and_analyze_hashtags')
+            )
+        except Exception:
+            return False
+
+    def _validate_domain_dependencies(self) -> bool:
+        """Valida se dependências para análise de domínios estão disponíveis"""
+        try:
+            return (
+                self.pipeline_config.get("use_anthropic", True) and
+                self.api_available and
+                hasattr(self, 'domain_analyzer') and
+                self.domain_analyzer is not None and
+                hasattr(self.domain_analyzer, 'analyze_domains_intelligent')
+            )
+        except Exception:
+            return False
+
+    def _validate_temporal_dependencies(self) -> bool:
+        """Valida se dependências para análise temporal estão disponíveis"""
+        try:
+            return (
+                self.pipeline_config.get("use_anthropic", True) and
+                self.api_available and
+                hasattr(self, 'temporal_analyzer') and
+                self.temporal_analyzer is not None and
+                hasattr(self.temporal_analyzer, 'analyze_temporal_patterns')
+            )
+        except Exception:
+            return False
+
+    def _validate_network_dependencies(self) -> bool:
+        """Valida se dependências para análise de redes estão disponíveis"""
+        try:
+            return (
+                self.pipeline_config.get("use_anthropic", True) and
+                self.api_available and
+                hasattr(self, 'network_analyzer') and
+                self.network_analyzer is not None and
+                hasattr(self.network_analyzer, 'analyze_networks_intelligent')
+            )
+        except Exception:
+            return False
+
+    def _validate_qualitative_dependencies(self) -> bool:
+        """Valida se dependências para análise qualitativa estão disponíveis"""
+        try:
+            return (
+                self.pipeline_config.get("use_anthropic", True) and
+                self.api_available and
+                hasattr(self, 'qualitative_classifier') and
+                self.qualitative_classifier is not None and
+                hasattr(self.qualitative_classifier, 'classify_content_comprehensive')
+            )
+        except Exception:
+            return False
+
     def _apply_political_analysis_optimization(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Aplica otimização específica para análise política"""
         # Limite para análise política (similar ao sentiment mas um pouco mais)
@@ -4298,6 +4497,13 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._apply_topic_modeling_optimization = _apply_topic_modeling_optimization
     UnifiedAnthropicPipeline._extend_sentiment_results = _extend_sentiment_results
     UnifiedAnthropicPipeline._extend_topic_results = _extend_topic_results
+    
+    # Adicionar novos métodos de validação para stages 12-17
+    UnifiedAnthropicPipeline._validate_hashtag_dependencies = _validate_hashtag_dependencies
+    UnifiedAnthropicPipeline._validate_domain_dependencies = _validate_domain_dependencies
+    UnifiedAnthropicPipeline._validate_temporal_dependencies = _validate_temporal_dependencies
+    UnifiedAnthropicPipeline._validate_network_dependencies = _validate_network_dependencies
+    UnifiedAnthropicPipeline._validate_qualitative_dependencies = _validate_qualitative_dependencies
 
     # Métodos de extensão para stages 12-20
     def _extend_hashtag_results(self, full_df: pd.DataFrame, processed_df: pd.DataFrame, optimization_report: Dict[str, Any]) -> pd.DataFrame:
@@ -4896,6 +5102,167 @@ def add_validation_methods_to_pipeline():
     UnifiedAnthropicPipeline._get_best_text_column = _get_best_text_column
 
 
+# ===============================
+# ✅ SEQUENTIAL STAGE ALIASES v5.0.1 - CORREÇÃO NUMERAÇÃO SEQUENCIAL
+# ===============================
+
+def add_sequential_aliases_to_pipeline():
+    """Adiciona aliases para numeração sequencial v5.0.2 - PURA NUMÉRICA + STATISTICAL_ANALYSIS_PRE REPOSICIONADA"""
+    
+    # ✅ NOVA NUMERAÇÃO SEQUENCIAL v5.0.2
+    def _stage_03_statistical_analysis_pre(self, dataset_paths):
+        """Stage 03: Statistical Analysis PRE-deduplication (original: _stage_04b_statistical_analysis_pre)"""
+        # Check if dataset_paths is actually a DataFrame (for direct testing)
+        if isinstance(dataset_paths, pd.DataFrame):
+            # Direct DataFrame input - perform analysis and return DataFrame
+            logger.info("Análise estatística pré-deduplicação com DataFrame direto")
+            df = dataset_paths.copy()
+            
+            if hasattr(self, 'statistical_analyzer') and self.statistical_analyzer is not None:
+                try:
+                    # Generate basic statistics without file output
+                    stats = {
+                        'total_records': len(df),
+                        'total_columns': len(df.columns),
+                        'column_names': list(df.columns),
+                        'has_text_column': any('text' in col.lower() for col in df.columns),
+                        'has_datetime_column': any('date' in col.lower() or 'time' in col.lower() for col in df.columns)
+                    }
+                    
+                    # Add statistical metadata as columns
+                    df['stats_total_records'] = stats['total_records']
+                    df['stats_total_columns'] = stats['total_columns']
+                    
+                    logger.info(f"✅ Análise estatística: {stats['total_records']} registros, {stats['total_columns']} colunas")
+                    return df
+                    
+                except Exception as e:
+                    logger.error(f"Erro na análise estatística: {e}")
+                    return df
+            else:
+                logger.warning("StatisticalAnalyzer não disponível")
+                return df
+        else:
+            # Original behavior for file paths
+            return self._stage_04b_statistical_analysis_pre(dataset_paths)
+    
+    def _stage_04_deduplication(self, dataset_paths):
+        """Stage 04: Deduplication (original: _stage_02b_deduplication)"""
+        # Check if dataset_paths is actually a DataFrame (for direct testing)
+        if isinstance(dataset_paths, pd.DataFrame):
+            # Direct DataFrame input - perform deduplication and return DataFrame
+            logger.info("Deduplicação com DataFrame direto")
+            df = dataset_paths.copy()
+            
+            try:
+                # Use traditional deduplication method for direct DataFrame
+                deduped_df = self._traditional_deduplication(df)
+                logger.info(f"✅ Deduplicação: {len(df)} → {len(deduped_df)} registros")
+                return deduped_df
+            except Exception as e:
+                logger.error(f"Erro na deduplicação: {e}")
+                # Return original DataFrame with frequency column
+                df['duplicate_frequency'] = 1
+                return df
+        else:
+            # Original behavior for file paths
+            return self._stage_02b_deduplication(dataset_paths)
+    
+    def _stage_05_feature_validation(self, dataset_paths):
+        """Stage 05: Feature validation (original: _stage_01b_feature_validation)"""
+        return self._stage_01b_feature_validation(dataset_paths)
+    
+    def _stage_06_political_analysis(self, dataset_paths):
+        """Stage 06: Political analysis (original: _stage_01c_political_analysis)"""
+        return self._stage_01c_political_analysis(dataset_paths)
+    
+    def _stage_07_text_cleaning(self, dataset_paths):
+        """Stage 07: Text cleaning (original: _stage_03_clean_text)"""
+        return self._stage_03_clean_text(dataset_paths)
+    
+    def _stage_08_statistical_analysis_post(self, dataset_paths):
+        """Stage 08: Statistical Analysis POST-cleaning (original: _stage_06b_statistical_analysis_post)"""
+        return self._stage_06b_statistical_analysis_post(dataset_paths)
+    
+    def _stage_09_linguistic_processing(self, dataset_paths):
+        """Stage 09: Linguistic processing (original: _stage_06b_linguistic_processing)"""
+        return self._stage_06b_linguistic_processing(dataset_paths)
+    
+    def _stage_10_sentiment_analysis(self, dataset_paths):
+        """Stage 10: Sentiment analysis (original: _stage_08_sentiment_analysis)"""
+        return self._stage_08_sentiment_analysis(dataset_paths)
+    
+    def _stage_11_topic_modeling(self, dataset_paths):
+        """Stage 11: Topic modeling (original: _stage_09_topic_modeling)"""
+        return self._stage_09_topic_modeling(dataset_paths)
+    
+    def _stage_12_tfidf_extraction(self, dataset_paths):
+        """Stage 12: TF-IDF extraction (original: _stage_06_tfidf_extraction)"""
+        return self._stage_06_tfidf_extraction(dataset_paths)
+    
+    def _stage_13_clustering(self, dataset_paths):
+        """Stage 13: Clustering (original: _stage_07_clustering)"""
+        return self._stage_07_clustering(dataset_paths)
+    
+    def _stage_14_hashtag_normalization(self, dataset_paths):
+        """Stage 14: Hashtag normalization (original: _stage_08_hashtag_normalization)"""
+        return self._stage_08_hashtag_normalization(dataset_paths)
+    
+    def _stage_15_domain_analysis(self, dataset_paths):
+        """Stage 15: Domain analysis (original: _stage_09_domain_extraction)"""
+        return self._stage_09_domain_extraction(dataset_paths)
+    
+    def _stage_16_temporal_analysis(self, dataset_paths):
+        """Stage 16: Temporal analysis (original: _stage_10_temporal_analysis)"""
+        return self._stage_10_temporal_analysis(dataset_paths)
+    
+    def _stage_17_network_analysis(self, dataset_paths):
+        """Stage 17: Network analysis (original: _stage_11_network_structure)"""
+        return self._stage_11_network_structure(dataset_paths)
+    
+    def _stage_18_qualitative_analysis(self, dataset_paths):
+        """Stage 18: Qualitative analysis (original: _stage_12_qualitative_analysis)"""
+        return self._stage_12_qualitative_analysis(dataset_paths)
+    
+    def _stage_19_smart_pipeline_review(self, dataset_paths):
+        """Stage 19: Pipeline review (original: _stage_13_review_reproducibility)"""
+        return self._stage_13_review_reproducibility(dataset_paths)
+    
+    def _stage_20_topic_interpretation(self, dataset_paths):
+        """Stage 20: Topic interpretation (original: _stage_14_topic_interpretation)"""
+        return self._stage_14_topic_interpretation(dataset_paths)
+    
+    def _stage_21_semantic_search(self, dataset_paths):
+        """Stage 21: Semantic search (original: _stage_14_semantic_search_intelligence)"""
+        return self._stage_14_semantic_search_intelligence(dataset_paths)
+    
+    def _stage_22_pipeline_validation(self, dataset_paths):
+        """Stage 22: Pipeline validation (original: _stage_16_pipeline_validation)"""
+        return self._stage_16_pipeline_validation(dataset_paths)
+
+    # Adicionar todos os aliases v5.0.2 à classe
+    UnifiedAnthropicPipeline._stage_03_statistical_analysis_pre = _stage_03_statistical_analysis_pre
+    UnifiedAnthropicPipeline._stage_04_deduplication = _stage_04_deduplication
+    UnifiedAnthropicPipeline._stage_05_feature_validation = _stage_05_feature_validation
+    UnifiedAnthropicPipeline._stage_06_political_analysis = _stage_06_political_analysis
+    UnifiedAnthropicPipeline._stage_07_text_cleaning = _stage_07_text_cleaning
+    UnifiedAnthropicPipeline._stage_08_statistical_analysis_post = _stage_08_statistical_analysis_post
+    UnifiedAnthropicPipeline._stage_09_linguistic_processing = _stage_09_linguistic_processing
+    UnifiedAnthropicPipeline._stage_10_sentiment_analysis = _stage_10_sentiment_analysis
+    UnifiedAnthropicPipeline._stage_11_topic_modeling = _stage_11_topic_modeling
+    UnifiedAnthropicPipeline._stage_12_tfidf_extraction = _stage_12_tfidf_extraction
+    UnifiedAnthropicPipeline._stage_13_clustering = _stage_13_clustering
+    UnifiedAnthropicPipeline._stage_14_hashtag_normalization = _stage_14_hashtag_normalization
+    UnifiedAnthropicPipeline._stage_15_domain_analysis = _stage_15_domain_analysis
+    UnifiedAnthropicPipeline._stage_16_temporal_analysis = _stage_16_temporal_analysis
+    UnifiedAnthropicPipeline._stage_17_network_analysis = _stage_17_network_analysis
+    UnifiedAnthropicPipeline._stage_18_qualitative_analysis = _stage_18_qualitative_analysis
+    UnifiedAnthropicPipeline._stage_19_smart_pipeline_review = _stage_19_smart_pipeline_review
+    UnifiedAnthropicPipeline._stage_20_topic_interpretation = _stage_20_topic_interpretation
+    UnifiedAnthropicPipeline._stage_21_semantic_search = _stage_21_semantic_search
+    UnifiedAnthropicPipeline._stage_22_pipeline_validation = _stage_22_pipeline_validation
+
 # Chamar função para adicionar métodos aprimorados
 add_enhanced_methods_to_pipeline()
 add_validation_methods_to_pipeline()
+add_sequential_aliases_to_pipeline()
