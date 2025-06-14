@@ -46,3 +46,12 @@ src/dashboard/temp/
 *.sublime-*
 .DS_Store
 Thumbs.db
+# Large data files
+*.csv
+pipeline_outputs/*.csv
+data/uploads/*.csv
+data/interim/*.csv
+test_backups/
+e2e_test_backups/
+src/dashboard/data/uploads/
+
