@@ -605,13 +605,29 @@ else:
 
 ---
 
-## 📚 **Documentação Adicional**
+## 📚 **Documentação Completa para Manutenção**
 
-Para informações mais detalhadas, consulte:
-- **[CLAUDE.md](CLAUDE.md)** - Instruções para Claude Code e configurações avançadas
-- **[config/](config/)** - Arquivos de configuração específicos
-- **[src/dashboard/README.md](src/dashboard/README.md)** - Setup do dashboard
+### 🚀 **Para Novos Usuários**
+- **[INSTALLATION.md](INSTALLATION.md)** - Guia completo de instalação passo-a-passo
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Solução de problemas comuns
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Referência completa da API e módulos
+
+### 🔧 **Para Administradores**
+- **[MAINTENANCE.md](MAINTENANCE.md)** - Guia de manutenção e monitoramento
 - **[SECURITY_SETUP.md](SECURITY_SETUP.md)** - Configuração de segurança
+- **[pipeline_optimization.md](pipeline_optimization.md)** - Detalhes das otimizações v5.0.0
+
+### 📖 **Documentação Técnica**
+- **[CLAUDE.md](CLAUDE.md)** - Instruções para Claude Code e histórico do projeto
+- **[config/](config/)** - Arquivos de configuração específicos  
+- **[src/dashboard/README.md](src/dashboard/README.md)** - Setup do dashboard
+- **[INTEGRATION_CONFIRMATION.md](INTEGRATION_CONFIRMATION.md)** - Confirmação da integração das otimizações
+
+### 🎯 **Quick Links**
+- **Instalação**: [INSTALLATION.md](INSTALLATION.md) → `poetry install` → `poetry run python run_pipeline.py`
+- **Problemas**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md) → Soluções para erros comuns
+- **API**: [API_REFERENCE.md](API_REFERENCE.md) → Como usar cada módulo do pipeline
+- **Manutenção**: [MAINTENANCE.md](MAINTENANCE.md) → Tarefas diárias, semanais, mensais
 
 ---
 
