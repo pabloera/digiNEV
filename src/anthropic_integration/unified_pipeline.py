@@ -836,60 +836,46 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         start_time = time.time()
 
         try:
-            # Mapear etapa para método correspondente - RENUMERADO v4.8 (Sequência 01-20)
+            # ✅ FIXED STAGE MAPPINGS - Consistent naming v4.9.9
             stage_methods = {
                 # FASE 1: Preparação e Validação de Dados (01-05)
                 "01_chunk_processing": self._stage_01_chunk_processing,
-                "02_encoding_validation": self._stage_02a_encoding_validation,
-                "03_deduplication": self._stage_02b_deduplication,
-                "04_feature_validation": self._stage_01b_feature_validation,
+                "02_encoding_validation": self._stage_02_encoding_validation,
+                "03_deduplication": self._stage_03_deduplication,
+                "04_feature_validation": self._stage_04_feature_validation,
                 "04b_statistical_analysis_pre": self._stage_04b_statistical_analysis_pre,
-                "05_political_analysis": self._stage_01c_political_analysis,
+                "05_political_analysis": self._stage_05_political_analysis,
 
                 # FASE 2: Processamento de Texto e Análise (06-11)
-                "06_text_cleaning": self._stage_03_clean_text,
+                "06_text_cleaning": self._stage_06_text_cleaning,
                 "06b_statistical_analysis_post": self._stage_06b_statistical_analysis_post,
-                "07_linguistic_processing": self._stage_06b_linguistic_processing,  # 🔤 SPACY
+                "07_linguistic_processing": self._stage_07_linguistic_processing,  # 🔤 SPACY
                 "08_sentiment_analysis": self._stage_08_sentiment_analysis,
                 "09_topic_modeling": self._stage_09_topic_modeling,  # 🚀 VOYAGE.AI
-                "10_tfidf_extraction": self._stage_06_tfidf_extraction,  # 🚀 VOYAGE.AI
-                "11_clustering": self._stage_07_clustering,  # 🚀 VOYAGE.AI
+                "10_tfidf_extraction": self._stage_10_tfidf_extraction,  # 🚀 VOYAGE.AI
+                "11_clustering": self._stage_11_clustering,  # 🚀 VOYAGE.AI
 
                 # FASE 3: Análise Estrutural e de Rede (12-15)
-                "12_hashtag_normalization": self._stage_08_hashtag_normalization,
-                "13_domain_analysis": self._stage_09_domain_extraction,
-                "14_temporal_analysis": self._stage_10_temporal_analysis,
-                "15_network_analysis": self._stage_11_network_structure,
+                "12_hashtag_normalization": self._stage_12_hashtag_normalization,
+                "13_domain_analysis": self._stage_13_domain_analysis,
+                "14_temporal_analysis": self._stage_14_temporal_analysis,
+                "15_network_analysis": self._stage_15_network_analysis,
 
                 # FASE 4: Análise Avançada e Finalização (16-20)
-                "16_qualitative_analysis": self._stage_12_qualitative_analysis,
-                "17_smart_pipeline_review": self._stage_13_review_reproducibility,
-                "18_topic_interpretation": self._stage_14_topic_interpretation,
-                "19_semantic_search": self._stage_14_semantic_search_intelligence,  # 🚀 VOYAGE.AI
-                "20_pipeline_validation": self._stage_16_pipeline_validation,
+                "16_qualitative_analysis": self._stage_16_qualitative_analysis,
+                "17_smart_pipeline_review": self._stage_17_smart_pipeline_review,
+                "18_topic_interpretation": self._stage_18_topic_interpretation,
+                "19_semantic_search": self._stage_19_semantic_search,  # 🚀 VOYAGE.AI
+                "20_pipeline_validation": self._stage_20_pipeline_validation,
 
-                # Aliases para compatibilidade com numeração antiga
-                "01b_features_validation": self._stage_01b_feature_validation,
-                "01b_feature_validation": self._stage_01b_feature_validation,
-                "01c_political_analysis": self._stage_01c_political_analysis,
-                "02a_encoding_validation": self._stage_02a_encoding_validation,
-                "02b_deduplication": self._stage_02b_deduplication,
-                "03_text_cleaning": self._stage_03_clean_text,
-                "03_clean_text": self._stage_03_clean_text,
-                "06b_linguistic_processing": self._stage_06b_linguistic_processing,  # LEGACY
-                "07_sentiment_analysis": self._stage_08_sentiment_analysis,  # LEGACY - REDIRECTED
-                "08_topic_modeling": self._stage_09_topic_modeling,  # LEGACY - REDIRECTED
-                "09_tfidf_extraction": self._stage_06_tfidf_extraction,  # LEGACY
-                "10_clustering": self._stage_07_clustering,  # LEGACY
-                "11_hashtag_normalization": self._stage_08_hashtag_normalization,  # LEGACY
-                "12_domain_analysis": self._stage_09_domain_extraction,  # LEGACY
-                "13_temporal_analysis": self._stage_10_temporal_analysis,  # LEGACY
-                "14_network_analysis": self._stage_11_network_structure,  # LEGACY
-                "15_qualitative_analysis": self._stage_12_qualitative_analysis,  # LEGACY
-                "16_smart_pipeline_review": self._stage_13_review_reproducibility,  # LEGACY
-                "17_topic_interpretation": self._stage_14_topic_interpretation,  # LEGACY
-                "18_semantic_search": self._stage_14_semantic_search_intelligence,  # LEGACY
-                "19_pipeline_validation": self._stage_16_pipeline_validation  # LEGACY
+                # ✅ LEGACY ALIASES - Cleaned up and consistent
+                "01b_feature_validation": self._stage_04_feature_validation,
+                "01c_political_analysis": self._stage_05_political_analysis,
+                "02a_encoding_validation": self._stage_02_encoding_validation,
+                "02b_deduplication": self._stage_03_deduplication,
+                "03_text_cleaning": self._stage_06_text_cleaning,
+                "03_clean_text": self._stage_06_text_cleaning,
+                "06b_linguistic_processing": self._stage_07_linguistic_processing,
             }
 
             if stage_name in stage_methods:

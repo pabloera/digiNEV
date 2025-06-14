@@ -28,6 +28,14 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 
+# ✅ EMERGENCY CACHE INTEGRATION - Critical Performance Fix
+try:
+    from ..optimized.emergency_embeddings import get_global_embeddings_cache
+    EMERGENCY_CACHE_AVAILABLE = True
+except ImportError:
+    EMERGENCY_CACHE_AVAILABLE = False
+    get_global_embeddings_cache = None
+
 from .base import AnthropicBase
 
 logger = logging.getLogger(__name__)
@@ -347,7 +355,7 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
         cache_key: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Generate embeddings for a list of texts
+        Generate embeddings for a list of texts with Emergency Cache Integration
 
         Args:
             texts: List of texts to embed
@@ -361,13 +369,51 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
             logger.error("Voyage.ai client not available")
             return self._fallback_embeddings(texts)
 
-        logger.info(f"Generating embeddings for {len(texts)} texts with model {self.model_name}")
+        logger.info(f"🚀 Generating embeddings for {len(texts)} texts with model {self.model_name}")
 
-        # Check cache first
+        # ✅ EMERGENCY CACHE INTEGRATION - Check global cache first
+        if EMERGENCY_CACHE_AVAILABLE:
+            try:
+                emergency_cache = get_global_embeddings_cache()
+                embeddings, cache_stats = emergency_cache.get_stage_embeddings(
+                    stage_name=cache_key or "unknown",
+                    texts=texts,
+                    compute_func=self._compute_embeddings_direct,
+                    model=self.model_name,
+                    input_type=input_type
+                )
+                
+                if embeddings is not None and len(embeddings) > 0:
+                    # Converter para formato esperado
+                    result = {
+                        'embeddings': embeddings.tolist() if hasattr(embeddings, 'tolist') else embeddings,
+                        'model': self.model_name,
+                        'embedding_size': embeddings.shape[1] if len(embeddings.shape) > 1 else len(embeddings[0]) if len(embeddings) > 0 else 0,
+                        'processing_stats': {
+                            'total_texts': cache_stats.get('text_count', len(texts)),
+                            'successful_embeddings': cache_stats.get('text_count', len(texts)),
+                            'failed_embeddings': 0,
+                            'cache_hit': cache_stats.get('cache_hit', False),
+                            'compute_time': cache_stats.get('compute_time', 0),
+                            'total_time': cache_stats.get('total_time', 0)
+                        },
+                        'timestamp': datetime.now().isoformat(),
+                        'input_type': input_type,
+                        'emergency_cache_used': True
+                    }
+                    
+                    cache_status = "HIT" if cache_stats.get('cache_hit') else "COMPUTED"
+                    logger.info(f"✅ Emergency Cache {cache_status}: {len(texts)} texts in {cache_stats.get('total_time', 0):.2f}s")
+                    return result
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Emergency cache failed, falling back to standard process: {e}")
+
+        # Original cache check (fallback)
         if cache_key and self.cache_embeddings:
             cached_result = self._load_from_cache(cache_key)
             if cached_result:
-                logger.info(f"Loaded embeddings from cache: {cache_key}")
+                logger.info(f"📦 Loaded embeddings from standard cache: {cache_key}")
                 return cached_result
 
         # Process texts in batches with token counting
@@ -573,6 +619,65 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
                 'error': str(e),
                 'embeddings': []
             }
+
+    def _compute_embeddings_direct(self, texts: List[str], model: str = None, **kwargs) -> np.ndarray:
+        """
+        Direct computation method for emergency cache integration
+        
+        Args:
+            texts: List of texts to embed
+            model: Model name (optional, uses self.model_name if None)
+            **kwargs: Additional arguments
+            
+        Returns:
+            NumPy array of embeddings
+        """
+        if not self.voyage_available:
+            logger.error("Voyage.ai client not available for direct computation")
+            return np.array([])
+            
+        try:
+            model_to_use = model or self.model_name
+            input_type = kwargs.get('input_type', 'document')
+            
+            logger.info(f"🔄 Direct computation: {len(texts)} texts with {model_to_use}")
+            
+            # Process in batches if too many texts
+            all_embeddings = []
+            batch_size = 128  # Conservative batch size
+            
+            for i in range(0, len(texts), batch_size):
+                batch_texts = texts[i:i + batch_size]
+                processed_batch = self._preprocess_texts(batch_texts)
+                
+                if not processed_batch:
+                    continue
+                    
+                # Generate embeddings for batch
+                batch_result = self._generate_batch_embeddings(
+                    processed_batch,
+                    input_type
+                )
+                
+                if batch_result['success']:
+                    all_embeddings.extend(batch_result['embeddings'])
+                else:
+                    logger.warning(f"Batch {i//batch_size + 1} failed: {batch_result.get('error', 'Unknown error')}")
+                
+                # Small delay between batches
+                time.sleep(0.1)
+            
+            if all_embeddings:
+                embeddings_array = np.array(all_embeddings)
+                logger.info(f"✅ Direct computation successful: {embeddings_array.shape}")
+                return embeddings_array
+            else:
+                logger.error("No embeddings generated in direct computation")
+                return np.array([])
+                
+        except Exception as e:
+            logger.error(f"❌ Error in direct computation: {e}")
+            return np.array([])
 
     def analyze_text_similarity(
         self,

@@ -262,17 +262,17 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
         logger.info("Pipeline unificado inicializado")
         
-        # Executar todas as etapas sequencialmente (v4.9.4 - Deduplication Bug Fixed)
+        # ✅ OPTIMIZED EXECUTION ORDER v4.9.9 - Stage 05 moved after Stage 07 for better quality
         all_stages = [
             '01_chunk_processing',
             '02_encoding_validation',  # Enhanced with chardet detection
             '03_deduplication',        # Global multi-strategy deduplication  
             '04_feature_validation',
             '04b_statistical_analysis_pre',  # NEW: Pre-cleaning statistics
-            '05_political_analysis',
             '06_text_cleaning',        # Enhanced with validation and graduated cleaning
             '06b_statistical_analysis_post', # NEW: Post-cleaning statistics and comparison
-            '07_linguistic_processing', # spaCy integration
+            '07_linguistic_processing', # spaCy integration - MOVED BEFORE political analysis
+            '05_political_analysis',   # REORDERED: Now executes after linguistic processing for better quality
             '08_sentiment_analysis',
             '09_topic_modeling',       # Voyage.ai enhanced
             '10_tfidf_extraction',     # Voyage.ai enhanced
