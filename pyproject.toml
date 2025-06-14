@@ -4,12 +4,20 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dataanalysis-bolsonarismo"
-version = "4.9.8"
-description = "Análise de Discurso em Canais do Telegram: Bolsonarismo, Negacionismo e Autoritarismo"
+version = "5.0.0"
+description = "Enterprise-Grade Analysis System for Telegram Discourse: Bolsonarismo, Denialism and Digital Authoritarianism - Pipeline Optimization Complete"
 authors = ["Pablo Almada <pabloera@gmail.com>"]
 readme = "README.md"
 license = "MIT"
 packages = [{include = "src"}]
+
+[tool.poetry.keywords]
+keywords = ["nlp", "telegram", "political-analysis", "discourse-analysis", "pipeline-optimization", "enterprise-grade", "production-ready"]
+
+[tool.poetry.urls]
+homepage = "https://github.com/pabloalmada/dataanalysis-bolsonarismo"
+repository = "https://github.com/pabloalmada/dataanalysis-bolsonarismo"
+documentation = "https://github.com/pabloalmada/dataanalysis-bolsonarismo/blob/main/pipeline_optimization.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
@@ -85,6 +93,21 @@ ipykernel = ">=6.25.2,<7.0.0"
 jupyter = ">=1.0.0,<2.0.0"
 jupyterlab = ">=4.0.0,<5.0.0"
 
+[tool.poetry.group.optimization]
+optional = false
+
+[tool.poetry.group.optimization.dependencies]
+# Week 1-5 Optimization Dependencies
+asyncio-mqtt = "^0.16.1"  # Async processing
+aiofiles = "^24.1.0"  # Async file operations
+psutil = ">=5.9.0,<6.0.0"  # System monitoring
+memory-profiler = "^0.61.0"  # Memory profiling
+py-spy = "^0.3.14"  # Performance profiling
+cachetools = "^5.3.0"  # Advanced caching
+redis = {version = "^5.0.0", optional = true}  # Distributed caching
+prometheus-client = "^0.20.0"  # Metrics collection
+uvloop = {version = "^0.19.0", markers = "sys_platform != 'win32'"}  # Event loop optimization
+
 [tool.poetry.group.deep-learning]
 optional = true
 
@@ -94,7 +117,22 @@ transformers = ">=4.35.2,<5.0.0"
 torch = ">=2.1.0,<3.0.0"
 
 [tool.poetry.scripts]
+# Main Pipeline Execution
 pipeline = "run_pipeline:main"
+
+# Optimization Testing & Validation
+test-optimization = "test_all_weeks_consolidated:main"
+test-week1 = "test_week1_emergency:main"
+test-week2 = "test_week2_advanced_caching:main" 
+test-week5 = "test_week5_production:main"
+
+# Production Deployment
+deploy-production = "src.optimized.production_deploy:get_global_deployment_system"
+memory-optimizer = "src.optimized.memory_optimizer:get_global_memory_manager"
+
+# Performance Monitoring
+monitor-performance = "src.optimized.realtime_monitor:get_global_performance_monitor"
+benchmark-pipeline = "src.optimized.pipeline_benchmark:get_global_benchmark"
 
 [tool.black]
 line-length = 88
