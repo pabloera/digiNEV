@@ -1,8 +1,8 @@
-# CLAUDE.md — Monitor do Discurso Digital v5.0.0 (JUNHO 2025)
+# CLAUDE.md — Digital Discourse Monitor v5.0.0 (JUNE 2025)
 
 ## 🚨 **STATUS ATUAL: PIPELINE OPTIMIZATION COMPLETE - PRODUCTION READY** ✅
 
-**ÚLTIMA ATUALIZAÇÃO:** 14/06/2025 - Pipeline Optimization v5.0.0 - TODAS as 5 semanas implementadas e 100% validadas
+**LAST UPDATE:** 14/06/2025 - Pipeline Optimization v5.0.0 - ALL 5 weeks implemented and 100% validated
 
 ## 🏆 **PIPELINE OPTIMIZATION v5.0.0: ENTERPRISE-GRADE PRODUCTION SYSTEM COMPLETE**
 

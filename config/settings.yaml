@@ -17,58 +17,58 @@ anthropic:
   model: claude-3-5-sonnet-20241022
   temperature: 0.3
   
-  # 🎯 CONFIGURAÇÕES ESPECÍFICAS POR STAGE (CONSOLIDADAS)
+  # 🎯 STAGE-SPECIFIC CONFIGURATIONS (CONSOLIDATED)
   stage_specific_configs:
     stage_05_political:
       model: "claude-3-5-haiku-20241022"
       temperature: 0.1
       max_tokens: 3000
       batch_size: 100
-      justification: "Classificação política hierárquica 4 níveis precisa"
+      justification: "Hierarchical political classification 4 levels precision"
       
     stage_08_sentiment:
       model: "claude-3-5-sonnet-20241022"
       temperature: 0.2
       max_tokens: 2200
       batch_size: 15
-      justification: "Contexto político brasileiro com ironia/sarcasmo requer capacidade semântica avançada"
+      justification: "Brazilian political context with irony/sarcasm requires advanced semantic capability"
       
     stage_15_network:
       model: "claude-sonnet-4-20250514"
       temperature: 0.3
       max_tokens: 3500
       batch_size: 10
-      justification: "Padrões de rede política requerem capacidade semântica superior"
+      justification: "Political network patterns require superior semantic capability"
       
     stage_16_qualitative:
       model: "claude-3-5-sonnet-20241022"
       temperature: 0.15
       max_tokens: 3000
       batch_size: 12
-      justification: "Tipologias acadêmicas complexas requerem compreensão contextual superior"
+      justification: "Complex academic typologies require superior contextual understanding"
       
     stage_17_review:
       model: "claude-3-5-sonnet-20241022"
       temperature: 0.25
       max_tokens: 2800
       batch_size: 20
-      justification: "Revisão crítica de pipeline científico requer capacidade analítica avançada"
+      justification: "Critical scientific pipeline review requires advanced analytical capability"
       
     stage_18_topics:
       model: "claude-sonnet-4-20250514"
       temperature: 0.4
       max_tokens: 4000
       batch_size: 8
-      justification: "Interpretação contextual política brasileira requer capacidade superior"
+      justification: "Brazilian political contextual interpretation requires superior capability"
       
     stage_20_validation:
       model: "claude-3-5-haiku-20241022"
       temperature: 0.1
       max_tokens: 2200
       batch_size: 30
-      justification: "Validação final científica requer consistência absoluta e reprodutibilidade"
+      justification: "Final scientific validation requires absolute consistency and reproducibility"
 
-  # 🎯 ESTRATÉGIAS DE FALLBACK INTELIGENTE
+  # 🎯 INTELLIGENT FALLBACK STRATEGIES
   fallback_strategies:
     "claude-sonnet-4-20250514":
       - "claude-3-5-sonnet-20241022"
@@ -78,7 +78,7 @@ anthropic:
     "claude-3-5-haiku-20241022":
       - "claude-3-5-sonnet-20241022"
       
-  # 💰 CONFIGURAÇÃO DE CUSTOS
+  # 💰 COST CONFIGURATION
   cost_optimization:
     monthly_budget_limit: 200.0
     enable_cost_alerts: true
@@ -177,7 +177,7 @@ lda:
   iterations: 1000
   n_topics: 15
   use_anthropic_interpretation: true
-# Configurações de logging removidas - usar config/logging.yaml
+# Logging configurations removed - use config/logging.yaml
 network_analysis:
   community_sample_size: 100
   max_nodes: 500
@@ -214,10 +214,10 @@ processing:
   sample_size: 10000
   timeout: 3600
 project:
-  description: 'Monitor do Discurso Digital - Análise de Discurso Político Brasileiro: 
-    Polarização, Negacionismo e Autoritarismo'
+  description: 'Digital Discourse Monitor - Brazilian Political Discourse Analysis: 
+    Polarization, Denialism and Authoritarianism'
   model_config_version: 5.0.0
-  name: monitor-discurso-digital
+  name: digital-discourse-monitor
   version: 5.0.0
 qualitative:
   confidence_threshold: 0.8

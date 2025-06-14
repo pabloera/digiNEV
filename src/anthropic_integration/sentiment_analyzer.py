@@ -1,15 +1,15 @@
 """
-Sentiment Analyzer - ULTRA OTIMIZADO v3.0
-=========================================
+Sentiment Analyzer - ULTRA OPTIMIZED v3.0
+==========================================
 
-Análise de sentimentos políticos brasileiros com otimizações avançadas:
-- Cache inteligente (-80% análises redundantes)
-- Prompt compacto (-70% tokens)
-- Batch size adaptativo (+300% throughput)
-- Processamento paralelo (-60% tempo)
-- Fallbacks robustos (100% confiabilidade)
+Brazilian political sentiment analysis with advanced optimizations:
+- Intelligent cache (-80% redundant analyses)
+- Compact prompt (-70% tokens)
+- Adaptive batch size (+300% throughput)
+- Parallel processing (-60% time)
+- Robust fallbacks (100% reliability)
 
-Performance: 5x mais rápido, 75% menos custo da API
+Performance: 5x faster, 75% less API cost
 """
 
 import asyncio
@@ -24,78 +24,78 @@ from .base import AnthropicBase
 
 
 class AnthropicSentimentAnalyzer(AnthropicBase):
-    """Analisador de sentimentos ultra-otimizado para contexto político brasileiro"""
+    """Ultra-optimized sentiment analyzer for Brazilian political context"""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        # 🔧 UPGRADE: Usar enhanced model configuration para sentiment analysis
+        # 🔧 UPGRADE: Use enhanced model configuration for sentiment analysis
         super().__init__(config, stage_operation="sentiment_analysis")
         
-        # Sistema de cache inteligente
+        # Intelligent cache system
         self._cache = {}
         self._cache_stats = {'hits': 0, 'misses': 0, 'saved': 0}
         self._cache_limit = 10000
 
     # ========================================================================
-    # MÉTODOS PRINCIPAIS
+    # MAIN METHODS
     # ========================================================================
 
     def analyze_sentiment_ultra_optimized(self, df: pd.DataFrame, text_column: str = 'body_cleaned') -> pd.DataFrame:
         """
-        MÉTODO PRINCIPAL: Análise ultra-otimizada com todas as melhorias
+        MAIN METHOD: Ultra-optimized analysis with all improvements
 
-        Estratégias automáticas:
-        - >50 textos: Cache + Processamento Paralelo
-        - 10-50 textos: Cache + Processamento Otimizado
-        - <10 textos: Processamento Direto
+        Automatic strategies:
+        - >50 texts: Cache + Parallel Processing
+        - 10-50 texts: Cache + Optimized Processing
+        - <10 texts: Direct Processing
         """
         start_time = time.time()
-        self.logger.info(f"🚀 Análise ULTRA-OTIMIZADA: {len(df)} registros")
+        self.logger.info(f"🚀 ULTRA-OPTIMIZED Analysis: {len(df)} records")
 
-        # Extrair textos válidos
+        # Extract valid texts
         texts = df[text_column].dropna().astype(str).tolist()
         if not texts:
-            self.logger.warning("⚠️ Nenhum texto válido encontrado")
+            self.logger.warning("⚠️ No valid text found")
             return df
 
-        # Escolher estratégia baseada no tamanho
+        # Choose strategy based on size
         try:
             if len(texts) > 50:
-                self.logger.info("📊 Estratégia: Cache + Paralelo")
+                self.logger.info("📊 Strategy: Cache + Parallel")
                 results = self._analyze_with_cache_and_parallel(texts)
             elif len(texts) > 10:
-                self.logger.info("📊 Estratégia: Cache + Otimizado")
+                self.logger.info("📊 Strategy: Cache + Optimized")
                 results = self._analyze_with_cache(texts)
             else:
-                self.logger.info("📊 Estratégia: Direto Otimizado")
+                self.logger.info("📊 Strategy: Direct Optimized")
                 results = self._analyze_optimized(texts)
 
         except Exception as e:
-            self.logger.error(f"❌ Erro: {e}")
-            self.logger.info("🔄 Usando fallback de emergência")
+            self.logger.error(f"❌ Error: {e}")
+            self.logger.info("🔄 Using emergency fallback")
             results = self._analyze_emergency_fallback(texts[:50])
 
-        # Aplicar resultados ao DataFrame
+        # Apply results to DataFrame
         self._apply_results_to_dataframe(df, results, text_column)
 
         # Log performance
         elapsed = time.time() - start_time
         hit_rate = self._cache_stats['hits'] / max(1, self._cache_stats['hits'] + self._cache_stats['misses'])
-        self.logger.info(f"✅ Concluído em {elapsed:.2f}s | Cache: {hit_rate:.1%} | {len(texts)/elapsed:.1f} textos/s")
+        self.logger.info(f"✅ Completed in {elapsed:.2f}s | Cache: {hit_rate:.1%} | {len(texts)/elapsed:.1f} texts/s")
 
         return df
 
     def analyze_political_sentiment(self, texts: List[str], batch_size: int = None) -> List[Dict[str, Any]]:
-        """Método de compatibilidade que usa análise com cache"""
+        """Compatibility method that uses cache analysis"""
         if not texts:
             return []
 
-        self.logger.info(f"🚀 Análise: {len(texts)} textos")
+        self.logger.info(f"🚀 Analysis: {len(texts)} texts")
         return self._analyze_with_cache(texts)
 
 
     def _create_optimized_prompt(self, texts: List[str]) -> str:
         """
-        Cria prompt compacto para análise de sentimento (-70% tokens vs original)
+        Create compact prompt for sentiment analysis (-70% tokens vs original)
         
         Formato do JSON esperado:
         - sentiment: classificação principal (negativo|neutro|positivo)  

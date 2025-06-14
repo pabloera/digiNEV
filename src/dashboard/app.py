@@ -1,15 +1,15 @@
 """
-Dashboard Integrado do Monitor do Discurso Digital v5.0.0
-===================================================
+Digital Discourse Monitor Integrated Dashboard v5.0.0
+=====================================================
 
-Dashboard completo com monitoramento em tempo real das 20 etapas do pipeline,
-gráficos de controle de qualidade e visualizações específicas por etapa.
+Complete dashboard with real-time monitoring of 20 pipeline stages,
+quality control charts and stage-specific visualizations.
 
-🎯 v4.9.7: Dashboard atualizado para PIPELINE COMPLETO - Stages 1-20 executados!
-🔍 v4.9.7: Visualizações adicionadas para stages 17-20 (Review, Topics, Search, Validation).
-📊 v4.9.7: Monitoramento de custos API completo ($1.41 total).
-🛠️ v4.9.7: Pipeline Enhanced - 100% funcional com validação final.
-🚨 v4.9.7: Dados reais dos stages finais integrados ao dashboard.
+🎯 v4.9.7: Dashboard updated for COMPLETE PIPELINE - Stages 1-20 executed!
+🔍 v4.9.7: Visualizations added for stages 17-20 (Review, Topics, Search, Validation).
+📊 v4.9.7: Complete API cost monitoring ($1.41 total).
+🛠️ v4.9.7: Enhanced Pipeline - 100% functional with final validation.
+🚨 v4.9.7: Real data from final stages integrated into dashboard.
 """
 
 import json
@@ -28,19 +28,19 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-# Configuração da página
+# Page configuration
 st.set_page_config(
-    page_title="Monitor do Discurso Digital v5.0.0",
+    page_title="Digital Discourse Monitor v5.0.0",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Adicionar src ao path
+# Add src to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / 'src'))
 
-# Importar módulos customizados
+# Import custom modules
 try:
     from dashboard.pipeline_monitor import PipelineMonitor, StageStatus
     from dashboard.pipeline_visualizations import PipelineVisualizations
@@ -48,9 +48,9 @@ try:
     CUSTOM_MODULES_AVAILABLE = True
 except ImportError as e:
     CUSTOM_MODULES_AVAILABLE = False
-    st.error(f"Erro importando módulos customizados: {e}")
+    st.error(f"Error importing custom modules: {e}")
 
-# CSS customizado
+# Custom CSS
 st.markdown("""
 <style>
     .main-header {

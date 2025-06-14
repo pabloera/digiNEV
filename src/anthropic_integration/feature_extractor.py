@@ -1,6 +1,6 @@
 """
-Extrator de Features Avançado via API Anthropic
-Implementa extração completa de features com identificação de padrões e correção de erros.
+Advanced Feature Extractor via Anthropic API
+Implements complete feature extraction with pattern identification and error correction.
 """
 
 import json
@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 class FeatureExtractor(AnthropicBase):
     """
-    Extrator de features avançado usando API Anthropic
+    Advanced feature extractor using Anthropic API
 
-    Capacidades:
-    - Extração inteligente de hashtags, URLs e domínios
-    - Detecção de padrões de comportamento
-    - Classificação automática de conteúdo
-    - Identificação de características específicas do contexto brasileiro
-    - Correção de erros detectados pela própria API
+    Capabilities:
+    - Intelligent extraction of hashtags, URLs and domains
+    - Behavior pattern detection
+    - Automatic content classification
+    - Identification of Brazilian context-specific characteristics
+    - Error correction detected by the API itself
     """
 
     def __init__(self, config: Dict[str, Any] = None):
@@ -35,7 +35,7 @@ class FeatureExtractor(AnthropicBase):
         self.error_handler = APIErrorHandler()
         self.quality_checker = APIQualityChecker(config)
 
-        # Padrões específicos para contexto brasileiro/bolsonarista
+        # Specific patterns for Brazilian/Bolsonarist context
         self.brazilian_patterns = {
             "political_keywords": [
                 "bolsonaro", "lula", "pt", "psl", "pl", "tse", "stf", "governo",
