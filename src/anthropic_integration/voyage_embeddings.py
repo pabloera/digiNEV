@@ -38,6 +38,20 @@ except ImportError:
 
 from .base import AnthropicBase
 
+# ✅ WEEK 2 ADVANCED OPTIMIZATIONS - Unified Embeddings Engine + Smart Claude Cache + Performance Monitor
+try:
+    from ..optimized.unified_embeddings_engine import get_global_unified_engine, EmbeddingRequest
+    from ..optimized.smart_claude_cache import get_global_claude_cache, ClaudeRequest
+    from ..optimized.performance_monitor import get_global_performance_monitor
+    WEEK2_OPTIMIZATIONS_AVAILABLE = True
+except ImportError:
+    WEEK2_OPTIMIZATIONS_AVAILABLE = False
+    get_global_unified_engine = None
+    get_global_claude_cache = None
+    get_global_performance_monitor = None
+    EmbeddingRequest = None
+    ClaudeRequest = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -371,7 +385,75 @@ class VoyageEmbeddingAnalyzer(AnthropicBase):
 
         logger.info(f"🚀 Generating embeddings for {len(texts)} texts with model {self.model_name}")
 
-        # ✅ EMERGENCY CACHE INTEGRATION - Check global cache first
+        # ✅ WEEK 2 UNIFIED EMBEDDINGS ENGINE - Advanced hierarchical cache with L1/L2 levels
+        if WEEK2_OPTIMIZATIONS_AVAILABLE:
+            try:
+                unified_engine = get_global_unified_engine()
+                performance_monitor = get_global_performance_monitor()
+                
+                # Create embedding request for unified engine
+                request = EmbeddingRequest(
+                    texts=texts,
+                    model=self.model_name,
+                    stage_name=cache_key or 'voyage_general',
+                    input_type=input_type
+                )
+                
+                # Process through unified engine with advanced cache
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                
+                engine_result = loop.run_until_complete(
+                    unified_engine.get_embeddings(
+                        request, 
+                        lambda txt_batch, model: self._compute_embeddings_direct(txt_batch, model, input_type=input_type)
+                    )
+                )
+                
+                if engine_result and len(engine_result.embeddings) > 0:
+                    # Record performance metrics
+                    performance_monitor.record_stage_completion(
+                        stage_name=cache_key or 'voyage_embeddings',
+                        records_processed=len(texts),
+                        processing_time=engine_result.total_time,
+                        success_rate=1.0,
+                        api_calls=0 if engine_result.cache_hit else 1,
+                        cost_usd=0.0  # Voyage.ai cost calculation would go here
+                    )
+                    
+                    # Convert to expected format
+                    result = {
+                        'embeddings': engine_result.embeddings.tolist() if hasattr(engine_result.embeddings, 'tolist') else engine_result.embeddings,
+                        'model': engine_result.model,
+                        'embedding_size': len(engine_result.embeddings[0]) if len(engine_result.embeddings) > 0 else 0,
+                        'processing_stats': {
+                            'total_texts': len(texts),
+                            'successful_embeddings': len(engine_result.embeddings),
+                            'failed_embeddings': 0,
+                            'total_tokens': 0,  # Would need to calculate from texts
+                            'batches_processed': 1,
+                            'cache_hit': engine_result.cache_hit,
+                            'total_time': engine_result.total_time,
+                            'cache_level': engine_result.cache_level,
+                            'compression_ratio': engine_result.compression_ratio
+                        },
+                        'timestamp': datetime.now().isoformat(),
+                        'input_type': input_type,
+                        'unified_engine_used': True
+                    }
+                    
+                    cache_status = f"{engine_result.cache_level.upper()}" if engine_result.cache_hit else "COMPUTED"
+                    logger.info(f"🚀 Unified Engine {cache_status}: {len(texts)} texts in {engine_result.total_time:.2f}s")
+                    return result
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Unified engine failed, falling back to emergency cache: {e}")
+        
+        # ✅ EMERGENCY CACHE FALLBACK - Original emergency cache as backup
         if EMERGENCY_CACHE_AVAILABLE:
             try:
                 emergency_cache = get_global_embeddings_cache()

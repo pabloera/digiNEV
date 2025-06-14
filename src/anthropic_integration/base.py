@@ -265,6 +265,20 @@ class AnthropicBase:
             except Exception as e:
                 self.logger.warning(f"Não foi possível inicializar monitor de custos: {e}")
 
+        # ✅ WEEK 2 SMART CLAUDE CACHE INTEGRATION
+        self.smart_claude_cache = None
+        self.performance_monitor = None
+        self.week2_cache_available = False
+        try:
+            from ..optimized.smart_claude_cache import get_global_claude_cache, ClaudeRequest, ClaudeResponse
+            from ..optimized.performance_monitor import get_global_performance_monitor
+            self.smart_claude_cache = get_global_claude_cache()
+            self.performance_monitor = get_global_performance_monitor()
+            self.week2_cache_available = True
+            self.logger.info("🧠 Smart Claude Cache habilitado para semantic caching")
+        except ImportError:
+            self.logger.info("⚠️ Smart Claude Cache não disponível - usando modo padrão")
+
     def get_recommended_model(self, preferred_model: str = None) -> str:
         """
         Obtém modelo recomendado com auto-downgrade se necessário
@@ -311,6 +325,29 @@ class AnthropicBase:
             "claude-3-5-haiku-20241022": ["claude-3-5-sonnet-20241022"]
         }
         return fallback_map.get(model, [])
+    
+    def _calculate_cost_estimate(self, model: str, input_tokens: int, output_tokens: int) -> float:
+        """Calculate cost estimate for API usage"""
+        if model == "claude-sonnet-4-20250514":
+            # Claude Sonnet 4: $3.00 entrada, $15.00 saída (per million tokens)
+            input_cost = (input_tokens / 1_000_000) * 3.00
+            output_cost = (output_tokens / 1_000_000) * 15.00
+            return input_cost + output_cost
+        elif model == "claude-3-5-haiku-20241022":
+            # Claude 3.5 Haiku: $0.25 entrada, $1.25 saída (per million tokens)
+            input_cost = (input_tokens / 1_000_000) * 0.25
+            output_cost = (output_tokens / 1_000_000) * 1.25
+            return input_cost + output_cost
+        elif "sonnet" in model.lower():
+            # Default for Sonnet models
+            input_cost = (input_tokens / 1_000_000) * 3.00
+            output_cost = (output_tokens / 1_000_000) * 15.00
+            return input_cost + output_cost
+        else:
+            # Default for other models
+            input_cost = (input_tokens / 1_000_000) * 0.25
+            output_cost = (output_tokens / 1_000_000) * 1.25
+            return input_cost + output_cost
 
     def create_message(self, prompt: str, stage: str = 'unknown', operation: str = 'general', **kwargs) -> str:
         """
@@ -334,17 +371,95 @@ class AnthropicBase:
 
         # Obter modelo recomendado (com auto-downgrade se necessário)
         model = kwargs.get('model', self.get_recommended_model())
+        max_tokens = kwargs.get('max_tokens', self.max_tokens)
+        temperature = kwargs.get('temperature', self.temperature)
+        
+        # ✅ WEEK 2 SMART CLAUDE CACHE - Check semantic cache first
+        if self.week2_cache_available and self.smart_claude_cache:
+            try:
+                from ..optimized.smart_claude_cache import ClaudeRequest, ClaudeResponse
+                
+                # Create cache request
+                cache_request = ClaudeRequest(
+                    prompt=prompt,
+                    stage=stage,
+                    operation=operation,
+                    model=model,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                
+                # Check cache for similar response
+                cached_response = self.smart_claude_cache.get_response(cache_request)
+                
+                if cached_response:
+                    # Record performance metrics
+                    if self.performance_monitor:
+                        self.performance_monitor.record_stage_completion(
+                            stage_name=f"{stage}_{operation}",
+                            records_processed=1,
+                            processing_time=cached_response.response_time,
+                            success_rate=1.0,
+                            api_calls=0,  # Cache hit = no API call
+                            cost_usd=0.0  # Cache hit = no cost
+                        )
+                    
+                    self.logger.info(f"🧠 Smart Cache {cached_response.cache_level.upper()}: {operation} "
+                                   f"(similarity: {cached_response.semantic_similarity:.2f})")
+                    return cached_response.content
+                    
+            except Exception as e:
+                self.logger.warning(f"⚠️ Smart cache failed, proceeding with API call: {e}")
         
         try:
+            # Make API call
             response = self.client.messages.create(
                 model=model,
-                max_tokens=kwargs.get('max_tokens', self.max_tokens),
-                temperature=kwargs.get('temperature', self.temperature),
+                max_tokens=max_tokens,
+                temperature=temperature,
                 messages=[{
                     "role": "user",
                     "content": prompt
                 }]
             )
+            
+            # Store response in Smart Claude Cache
+            if self.week2_cache_available and self.smart_claude_cache and response.usage:
+                try:
+                    from ..optimized.smart_claude_cache import ClaudeRequest, ClaudeResponse
+                    
+                    # Calculate cost estimate
+                    input_tokens = response.usage.input_tokens
+                    output_tokens = response.usage.output_tokens
+                    cost_estimate = self._calculate_cost_estimate(model, input_tokens, output_tokens)
+                    
+                    # Create cache request and response
+                    cache_request = ClaudeRequest(
+                        prompt=prompt,
+                        stage=stage,
+                        operation=operation,
+                        model=model,
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                    
+                    cache_response = ClaudeResponse(
+                        content=response.content[0].text,
+                        model=model,
+                        stage=stage,
+                        operation=operation,
+                        tokens_used=input_tokens + output_tokens,
+                        cost_usd=cost_estimate,
+                        response_time=0.0,  # Would need timing measurement
+                        confidence_score=1.0,
+                        cache_hit=False
+                    )
+                    
+                    # Store in cache
+                    self.smart_claude_cache.store_response(cache_request, cache_response)
+                    
+                except Exception as e:
+                    self.logger.warning(f"Failed to store response in smart cache: {e}")
 
             # Rastrear custos se monitor disponível
             if self.cost_monitor and response.usage:
@@ -358,6 +473,19 @@ class AnthropicBase:
                         stage=stage,
                         operation=operation
                     )
+                    
+                    # Record performance metrics
+                    if self.performance_monitor:
+                        cost_estimate = self._calculate_cost_estimate(model, input_tokens, output_tokens)
+                        self.performance_monitor.record_stage_completion(
+                            stage_name=f"{stage}_{operation}",
+                            records_processed=1,
+                            processing_time=0.0,  # Would need timing measurement
+                            success_rate=1.0,
+                            api_calls=1,
+                            cost_usd=cost_estimate
+                        )
+                        
                 except Exception as e:
                     self.logger.warning(f"Erro ao registrar custos: {e}")
 
