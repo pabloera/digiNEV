@@ -53,7 +53,7 @@ from .hybrid_search_engine import HybridSearchEngine
 from .content_discovery_engine import ContentDiscoveryEngine
 from .dataset_statistics_generator import DatasetStatisticsGenerator
 
-# Componentes de otimização e performance
+# Optimization and performance components
 from .adaptive_chunking_manager import (
     AdaptiveChunkingManager,
     get_adaptive_chunking_manager,
@@ -148,18 +148,18 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 logger.error(validator.generate_report())
                 # Continue but mark as degraded mode
 
-            # Inicializar classe base primeiro
+            # Initialize base class first
             super().__init__(config, "pipeline_main")
             self.project_root = Path(project_root) if project_root else Path.cwd()
 
-            # Validar configuração
+            # Validate configuration
             if not config:
-                raise ValueError("Configuração é obrigatória para inicializar o pipeline")
+                raise ValueError("Configuration is required to initialize the pipeline")
 
-            # Configurações do pipeline com validação
+            # Pipeline configurations with validation
             self.pipeline_config = self._validate_and_setup_config(config)
 
-            # Estado do pipeline
+            # Pipeline state
             self.pipeline_state = {
                 "start_time": None,
                 "current_stage": None,
@@ -171,25 +171,25 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "initialization_errors": []
             }
 
-            # Inicializar componentes especializados com tratamento de erro
+            # Initialize specialized components with error handling
             initialization_success = self._initialize_components_safely()
 
-            # Flag para habilitar geração de estatísticas
+            # Flag to enable statistics generation
             self.generate_dataset_statistics = config.get('processing', {}).get('generate_statistics', True)
 
             if initialization_success:
-                logger.info("Pipeline Unificado Anthropic inicializado com sucesso")
+                logger.info("Unified Anthropic Pipeline initialized successfully")
             else:
-                logger.warning("Pipeline inicializado com alguns erros - verifique logs")
+                logger.warning("Pipeline initialized with some errors - check logs")
 
         except Exception as e:
-            logger.error(f"Erro crítico na inicialização do pipeline: {e}")
-            # Não re-raise, permitir que pipeline seja criado em modo degradado
+            logger.error(f"Critical error in pipeline initialization: {e}")
+            # Don't re-raise, allow pipeline to be created in degraded mode
             self.pipeline_state = {"initialization_error": str(e)}
             self.pipeline_config = {"error_mode": True}
 
     def _validate_and_setup_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Valida e configura parâmetros do pipeline"""
+        """Validate and configure pipeline parameters"""
         try:
             pipeline_config = {
                 "chunk_size": config.get("processing", {}).get("chunk_size", 10000),
@@ -200,23 +200,23 @@ class UnifiedAnthropicPipeline(AnthropicBase):
                 "enable_validation": True
             }
 
-            # Validar valores críticos
+            # Validate critical values
             if pipeline_config["chunk_size"] <= 0:
                 pipeline_config["chunk_size"] = 10000
-                logger.warning("chunk_size inválido, usando padrão: 10000")
+                logger.warning("Invalid chunk_size, using default: 10000")
 
-            # Verificar se diretórios existem, criar se necessário
+            # Check if directories exist, create if necessary
             for path_key in ["data_path", "output_path"]:
                 path = Path(pipeline_config[path_key])
                 if not path.exists():
                     path.mkdir(parents=True, exist_ok=True)
-                    logger.info(f"Diretório criado: {path}")
+                    logger.info(f"Directory created: {path}")
 
             return pipeline_config
 
         except Exception as e:
-            logger.error(f"Erro ao validar configuração: {e}")
-            # Retornar configuração mínima para modo degradado
+            logger.error(f"Error validating configuration: {e}")
+            # Return minimal configuration for degraded mode
             return {
                 "chunk_size": 10000,
                 "use_anthropic": False,
@@ -228,11 +228,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             }
 
     def _initialize_components_safely(self) -> bool:
-        """Inicializa componentes com tratamento individual de erros"""
+        """Initialize components with individual error handling"""
         success_count = 0
         total_components = 0
 
-        # Lista de componentes para inicializar
+        # List of components to initialize
         component_configs = [
             ("api_integration", lambda: APIPipelineIntegration(self.config, str(self.project_root))),
             ("feature_extractor", lambda: FeatureExtractor(self.config)),
@@ -254,10 +254,10 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("pipeline_reviewer", lambda: SmartPipelineReviewer(self.config)),
             ("pipeline_validator", lambda: CompletePipelineValidator(self.config, str(self.project_root))),
             ("voyage_embeddings", lambda: VoyageEmbeddingAnalyzer(self.config)),
-            # Novos componentes Voyage.ai aprimorados
+            # New enhanced Voyage.ai components
             ("voyage_topic_modeler", lambda: VoyageTopicModeler(self.config)),
             ("voyage_clustering_analyzer", lambda: VoyageClusteringAnalyzer(self.config)),
-            # Novo sistema de busca semântica e inteligência
+            # New semantic search and intelligence system
             ("hybrid_search_engine", lambda: HybridSearchEngine(self.config, self.voyage_embeddings)),
             ("semantic_search_engine", lambda: SemanticSearchEngine(self.config, self.voyage_embeddings)),
             ("intelligent_query_system", lambda: IntelligentQuerySystem(self.config, self.semantic_search_engine)),
@@ -265,11 +265,11 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             ("temporal_evolution_tracker", lambda: TemporalEvolutionTracker(self.config, self.semantic_search_engine)),
             ("analytics_dashboard", lambda: AnalyticsDashboard(self.config, self.semantic_search_engine, self.content_discovery_engine, self.intelligent_query_system)),
             ("dataset_statistics_generator", lambda: DatasetStatisticsGenerator(self.config)),
-            # Novos componentes aprimorados do implementation guide
+            # New enhanced components from implementation guide
             ("statistical_analyzer", lambda: StatisticalAnalyzer(self.config)),
             ("performance_optimizer", lambda: PerformanceOptimizer(self.config)),
 
-            # ✅ NOVOS MANAGERS PARA SOLUÇÕES DE TIMEOUT E PERFORMANCE
+            # ✅ NEW MANAGERS FOR TIMEOUT AND PERFORMANCE SOLUTIONS
             ("adaptive_chunking_manager", lambda: get_adaptive_chunking_manager()),
             ("concurrent_processor", lambda: get_concurrent_processor()),
             ("progressive_timeout_manager", lambda: get_progressive_timeout_manager())
@@ -278,7 +278,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         for component_name, component_factory in component_configs:
             total_components += 1
             try:
-                # Verificar dependências especiais para componentes semânticos
+                # Check special dependencies for semantic components
                 if component_name == "semantic_search_engine":
                     if hasattr(self, 'voyage_embeddings') and self.voyage_embeddings:
                         component = SemanticSearchEngine(self.config, self.voyage_embeddings)

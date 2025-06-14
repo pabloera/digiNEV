@@ -117,14 +117,14 @@ def main():
     print("\n🚀 Iniciando Dashboard Integrado...")
     print("📊 Acesse em: http://localhost:8501")
     print("🎯 Features disponíveis:")
-    print("   - Visualização de resultados do pipeline")
-    print("   - Monitoramento em tempo real")
-    print("   - Análise interativa de dados processados")
-    print("   - Upload e processamento de novos datasets")
-    print("\nPressione Ctrl+C para parar\n")
+    print("   - Pipeline results visualization")
+    print("   - Real-time monitoring")
+    print("   - Interactive analysis of processed data")
+    print("   - Upload and processing of new datasets")
+    print("\nPress Ctrl+C to stop\n")
 
     try:
-        # Executar o dashboard principal com configurações otimizadas
+        # Run main dashboard with optimized configurations
         subprocess.run([
             sys.executable, '-m', 'streamlit', 'run',
             str(project_root / 'src' / 'dashboard' / 'app.py'),
@@ -137,14 +137,14 @@ def main():
             '--theme.secondaryBackgroundColor', '#f0f2f6'
         ])
     except KeyboardInterrupt:
-        print("\n\n✅ Dashboard encerrado")
+        print("\n\n✅ Dashboard terminated")
     except Exception as e:
-        print(f"\n❌ Erro: {e}")
-        print("\n💡 Dicas para resolver problemas:")
-        print("- Verifique se o streamlit está instalado: pip install streamlit")
-        print("- Verifique se as dependências estão instaladas")
-        print("- Execute 'python run_pipeline.py' para gerar dados primeiro")
-        print("- Verifique se as APIs estão configuradas no arquivo .env")
+        print(f"\n❌ Error: {e}")
+        print("\n💡 Tips to resolve issues:")
+        print("- Check if streamlit is installed: pip install streamlit")
+        print("- Check if dependencies are installed")
+        print("- Run 'python run_pipeline.py' to generate data first")
+        print("- Check if APIs are configured in .env file")
 
 
 if __name__ == "__main__":

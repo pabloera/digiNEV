@@ -59,24 +59,24 @@ class FeatureExtractor(AnthropicBase):
         batch_size: int = 50
     ) -> pd.DataFrame:
         """
-        Extrai features abrangentes do dataset usando API
+        Extract comprehensive features from dataset using API
 
         Args:
-            df: DataFrame com os dados
-            text_column: Nome da coluna de texto
-            batch_size: Tamanho do lote para processamento
+            df: DataFrame with data
+            text_column: Name of text column
+            batch_size: Batch size for processing
 
         Returns:
-            DataFrame com features extraídas
+            DataFrame with extracted features
         """
-        logger.info(f"Iniciando extração de features para {len(df)} registros")
+        logger.info(f"Starting feature extraction for {len(df)} records")
 
-        # Fazer backup antes de começar
+        # Create backup before starting
         backup_file = f"data/interim/feature_extraction_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         df.to_csv(backup_file, index=False, sep=';', encoding='utf-8')
-        logger.info(f"Backup criado: {backup_file}")
+        logger.info(f"Backup created: {backup_file}")
 
-        # Processar em lotes
+        # Process in batches
         result_dfs = []
         total_batches = (len(df) + batch_size - 1) // batch_size
 
@@ -84,9 +84,9 @@ class FeatureExtractor(AnthropicBase):
             batch_df = df.iloc[i:i + batch_size].copy()
             batch_num = i // batch_size + 1
 
-            logger.info(f"Processando lote {batch_num}/{total_batches}")
+            logger.info(f"Processing batch {batch_num}/{total_batches}")
 
-            # Usar error handler para processamento com retry
+            # Use error handler for processing with retry
             result = self.error_handler.execute_with_retry(
                 self._process_batch_features,
                 stage="01b_feature_extraction",
@@ -98,14 +98,14 @@ class FeatureExtractor(AnthropicBase):
             if result.success:
                 result_dfs.append(result.data)
             else:
-                logger.error(f"Falha no lote {batch_num}: {result.error.error_message}")
-                # Adicionar lote sem features extras (preservar dados originais)
+                logger.error(f"Batch {batch_num} failed: {result.error.error_message}")
+                # Add batch without extra features (preserve original data)
                 result_dfs.append(batch_df)
 
-        # Combinar resultados
+        # Combine results
         final_df = pd.concat(result_dfs, ignore_index=True)
 
-        # Validação final
+        # Final validation
         validation_result = self._validate_extracted_features(final_df, df)
 
         return final_df
@@ -115,56 +115,56 @@ class FeatureExtractor(AnthropicBase):
         batch_df: pd.DataFrame,
         text_column: str
     ) -> pd.DataFrame:
-        """Processa um lote de dados para extração de features"""
+        """Process a batch of data for feature extraction"""
 
-        # Preparar textos para análise
+        # Prepare texts for analysis
         texts = batch_df[text_column].fillna("").astype(str).tolist()
 
-        # Extrair features básicas primeiro
+        # Extract basic features first
         batch_df = self._extract_basic_features(batch_df, text_column)
 
-        # Usar API para análise avançada
+        # Use API for advanced analysis
         advanced_features = self._extract_advanced_features_api(texts)
 
-        # Integrar features avançadas
+        # Integrate advanced features
         for i, features in enumerate(advanced_features):
             if i < len(batch_df):
                 for key, value in features.items():
-                    # Verificar se a coluna existe, senão criar
+                    # Check if column exists, otherwise create
                     if key not in batch_df.columns:
                         batch_df[key] = None
-                    # Usar .at para assignment mais seguro
+                    # Use .at for safer assignment
                     batch_df.at[batch_df.index[i], key] = value
 
         return batch_df
 
     def _extract_basic_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
         """
-        Extrai features básicas APENAS se não existirem
-        Evita duplicação de features já presentes no dataset
+        Extract basic features ONLY if they don't exist
+        Avoid duplication of features already present in dataset
         """
 
-        # Verificar e extrair hashtags apenas se não existir
+        # Check and extract hashtags only if they don't exist
         if 'hashtag' not in df.columns and 'hashtags' not in df.columns:
             df['hashtags_extracted'] = df[text_column].apply(
                 lambda x: self._extract_hashtags(str(x))
             )
-            logger.info("Hashtags extraídas - coluna não existia")
+            logger.info("Hashtags extracted - column didn't exist")
         else:
-            logger.info("Hashtags já existem no dataset - pulando extração")
+            logger.info("Hashtags already exist in dataset - skipping extraction")
 
-        # Verificar e extrair URLs apenas se não existir
+        # Check and extract URLs only if they don't exist
         if 'url' not in df.columns and 'urls' not in df.columns:
             df['urls_extracted'] = df[text_column].apply(
                 lambda x: self._extract_urls(str(x))
             )
-            logger.info("URLs extraídas - coluna não existia")
+            logger.info("URLs extracted - column didn't exist")
         else:
-            logger.info("URLs já existem no dataset - pulando extração")
+            logger.info("URLs already exist in dataset - skipping extraction")
 
-        # Verificar e extrair domínios apenas se não existir
+        # Check and extract domains only if they don't exist
         if 'domain' not in df.columns and 'domains' not in df.columns:
-            # Usar URLs existentes ou recém-extraídas
+            # Use existing or newly extracted URLs
             url_column = None
             if 'urls_extracted' in df.columns:
                 url_column = 'urls_extracted'
@@ -177,16 +177,16 @@ class FeatureExtractor(AnthropicBase):
                 df['domains_extracted'] = df[url_column].apply(
                     lambda x: self._extract_domains_from_urls(x)
                 )
-                logger.info("Domínios extraídos - coluna não existia")
+                logger.info("Domains extracted - column didn't exist")
         else:
-            logger.info("Domínios já existem no dataset - pulando extração")
+            logger.info("Domains already exist in dataset - skipping extraction")
 
-        # Verificar media_type existente antes de criar flags individuais
+        # Check existing media_type before creating individual flags
         if 'media_type' in df.columns:
-            logger.info("Media_type já existe - usando validação em vez de flags individuais")
-            # Se media_type existe, não criar has_photo, has_video, has_audio
+            logger.info("Media_type already exists - using validation instead of individual flags")
+            # If media_type exists, don't create has_photo, has_video, has_audio
         else:
-            # Criar flags de mídia apenas se media_type não existir
+            # Create media flags only if media_type doesn't exist
             df['has_photo'] = df[text_column].str.contains(
                 r'foto|imagem|jpeg|jpg|png|gif', case=False, na=False
             )
@@ -196,9 +196,9 @@ class FeatureExtractor(AnthropicBase):
             df['has_audio'] = df[text_column].str.contains(
                 r'áudio|audio|mp3|wav|voz', case=False, na=False
             )
-            logger.info("Flags de mídia criadas - media_type não existia")
+            logger.info("Media flags created - media_type didn't exist")
 
-        # Métricas básicas sempre são úteis, mas verificar se já existem
+        # Basic metrics are always useful, but check if they already exist
         if 'text_length' not in df.columns:
             df['text_length'] = df[text_column].str.len()
         if 'word_count' not in df.columns:
@@ -212,9 +212,9 @@ class FeatureExtractor(AnthropicBase):
         return df
 
     def _extract_advanced_features_api(self, texts: List[str]) -> List[Dict[str, Any]]:
-        """Usa API para extrair features avançadas"""
+        """Use API to extract advanced features"""
 
-        prompt = self._build_feature_extraction_prompt(texts[:10])  # Máximo 10 por vez
+        prompt = self._build_feature_extraction_prompt(texts[:10])  # Maximum 10 at a time
 
         try:
             response = self.create_message(
@@ -223,7 +223,7 @@ class FeatureExtractor(AnthropicBase):
                 operation="advanced_analysis"
             )
 
-            # Validar qualidade da resposta
+            # Validate response quality
             validation = self.quality_checker.validate_output_quality(
                 response,
                 expected_format="json",
@@ -232,76 +232,76 @@ class FeatureExtractor(AnthropicBase):
             )
 
             if not validation["valid"]:
-                logger.warning(f"Qualidade da resposta baixa: {validation['issues']}")
+                logger.warning(f"Low response quality: {validation['issues']}")
 
-            # Parse da resposta com método robusto
+            # Parse response with robust method
             parsed_response = self.parse_claude_response_safe(response, ["results"])
             return parsed_response.get("results", [{}] * len(texts))
 
         except Exception as e:
-            logger.error(f"Erro na extração avançada via API: {e}")
+            logger.error(f"Error in advanced extraction via API: {e}")
             return [{}] * len(texts)
 
     def _build_feature_extraction_prompt(self, texts: List[str]) -> str:
-        """Constrói prompt para extração de features"""
+        """Build prompt for feature extraction"""
 
         texts_sample = "\n".join([f"{i+1}. {text[:200]}..." for i, text in enumerate(texts)])
 
         return f"""
-Analise os seguintes textos de mensagens do Telegram brasileiro (contexto político 2019-2023) e extraia features detalhadas.
+Analyze the following Brazilian Telegram messages (political context 2019-2023) and extract detailed features.
 
-TEXTOS:
+TEXTS:
 {texts_sample}
 
-Para cada texto, forneça a análise em formato JSON:
+For each text, provide analysis in JSON format:
 
 {{
   "results": [
     {{
       "text_id": 1,
-      "sentiment_category": "positivo|negativo|neutro",
-      "political_alignment": "bolsonarista|antibolsonarista|neutro|indefinido",
-      "conspiracy_indicators": ["indicador1", "indicador2"],
-      "negacionism_indicators": ["tipo1", "tipo2"],
-      "discourse_type": "informativo|opinativo|mobilizador|atacante|defensivo",
-      "urgency_level": "baixo|medio|alto",
-      "emotional_tone": "raiva|medo|esperança|tristeza|alegria|neutro",
-      "target_entities": ["pessoa", "instituição", "grupo"],
+      "sentiment_category": "positive|negative|neutral",
+      "political_alignment": "bolsonarista|anti_bolsonarista|neutral|undefined",
+      "conspiracy_indicators": ["indicator1", "indicator2"],
+      "negacionism_indicators": ["type1", "type2"],
+      "discourse_type": "informative|opinion|mobilizing|attacking|defensive",
+      "urgency_level": "low|medium|high",
+      "emotional_tone": "anger|fear|hope|sadness|joy|neutral",
+      "target_entities": ["person", "institution", "group"],
       "call_to_action": true/false,
-      "misinformation_risk": "baixo|medio|alto",
-      "coordination_signals": ["sinal1", "sinal2"],
+      "misinformation_risk": "low|medium|high",
+      "coordination_signals": ["signal1", "signal2"],
       "brazilian_context_markers": ["marker1", "marker2"],
-      "quality_issues": ["erro1", "erro2"]
+      "quality_issues": ["error1", "error2"]
     }}
   ]
 }}
 
-INSTRUÇÕES ESPECÍFICAS:
-1. Identifique padrões específicos do contexto político brasileiro
-2. Detecte sinais de coordenação (mensagens similares, timing)
-3. Avalie risco de desinformação baseado em contexto
-4. Identifique problemas de qualidade no próprio texto
-5. Classifique alinhamento político baseado em linguagem e temas
-6. Detecte indicadores de teorias conspiratórias brasileiras
-7. Identifique negacionismo (científico, democrático, etc.)
+SPECIFIC INSTRUCTIONS:
+1. Identify patterns specific to Brazilian political context
+2. Detect coordination signals (similar messages, timing)
+3. Evaluate misinformation risk based on context
+4. Identify quality issues in the text itself
+5. Classify political alignment based on language and themes
+6. Detect indicators of Brazilian conspiracy theories
+7. Identify negationism (scientific, democratic, etc.)
 
-RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
+RESPOND ONLY WITH JSON, NO ADDITIONAL EXPLANATIONS.
 """
 
     def _extract_hashtags(self, text: str) -> List[str]:
-        """Extrai hashtags do texto"""
+        """Extract hashtags from text"""
         hashtag_pattern = r'#\w+'
         hashtags = re.findall(hashtag_pattern, text, re.IGNORECASE)
         return [tag.lower() for tag in hashtags]
 
     def _extract_urls(self, text: str) -> List[str]:
-        """Extrai URLs do texto"""
+        """Extract URLs from text"""
         url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         urls = re.findall(url_pattern, text)
         return urls
 
     def _extract_domains_from_urls(self, urls: List[str]) -> List[str]:
-        """Extrai domínios de lista de URLs"""
+        """Extract domains from list of URLs"""
         domains = []
         for url in urls:
             try:
@@ -314,7 +314,7 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
         return list(set(domains))
 
     def _validate_extracted_features(self, final_df: pd.DataFrame, original_df: pd.DataFrame) -> Dict[str, Any]:
-        """Valida features extraídas"""
+        """Validate extracted features"""
 
         validation_report = {
             "original_rows": len(original_df),
@@ -325,7 +325,7 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             "data_quality_issues": []
         }
 
-        # Análise de valores faltantes nas novas colunas
+        # Analysis of missing values in new columns
         for col in validation_report["new_columns"]:
             if col in final_df.columns:
                 missing_count = final_df[col].isna().sum()
@@ -335,15 +335,15 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
                     "missing_percentage": round(missing_pct, 2)
                 }
 
-        # Identificar problemas de qualidade
+        # Identify quality issues
         if not validation_report["rows_preserved"]:
-            validation_report["data_quality_issues"].append("Número de linhas não preservado")
+            validation_report["data_quality_issues"].append("Number of rows not preserved")
 
         if len(validation_report["new_columns"]) < 5:
-            validation_report["data_quality_issues"].append("Poucas features novas extraídas")
+            validation_report["data_quality_issues"].append("Few new features extracted")
 
-        # Log do relatório
-        logger.info(f"Validação de features concluída: {validation_report}")
+        # Log report
+        logger.info(f"Feature validation completed: {validation_report}")
 
         return validation_report
 
@@ -353,37 +353,37 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
         error_patterns: List[str] = None
     ) -> pd.DataFrame:
         """
-        Corrige erros detectados na extração de features
+        Correct errors detected in feature extraction
 
         Args:
-            df: DataFrame com features extraídas
-            error_patterns: Padrões de erro a corrigir
+            df: DataFrame with extracted features
+            error_patterns: Error patterns to correct
 
         Returns:
-            DataFrame com correções aplicadas
+            DataFrame with corrections applied
         """
-        logger.info("Iniciando correção de erros de extração")
+        logger.info("Starting correction of extraction errors")
 
         corrected_df = df.copy()
         corrections_applied = []
 
-        # Correções básicas
+        # Basic corrections
         corrections_applied.extend(self._fix_basic_extraction_errors(corrected_df))
 
-        # Usar API para correções avançadas se necessário
+        # Use API for advanced corrections if necessary
         if error_patterns:
             api_corrections = self._fix_errors_with_api(corrected_df, error_patterns)
             corrections_applied.extend(api_corrections)
 
-        logger.info(f"Correções aplicadas: {len(corrections_applied)}")
+        logger.info(f"Corrections applied: {len(corrections_applied)}")
 
         return corrected_df
 
     def _fix_basic_extraction_errors(self, df: pd.DataFrame) -> List[str]:
-        """Aplica correções básicas de erros comuns"""
+        """Apply basic corrections for common errors"""
         corrections = []
 
-        # Corrigir hashtags malformadas
+        # Fix malformed hashtags
         if 'hashtags_extracted' in df.columns:
             original_count = df['hashtags_extracted'].apply(len).sum()
             df['hashtags_extracted'] = df['hashtags_extracted'].apply(
@@ -391,9 +391,9 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             )
             new_count = df['hashtags_extracted'].apply(len).sum()
             if new_count != original_count:
-                corrections.append(f"Hashtags corrigidas: {original_count} -> {new_count}")
+                corrections.append(f"Hashtags corrected: {original_count} -> {new_count}")
 
-        # Corrigir URLs inválidas
+        # Fix invalid URLs
         if 'urls_extracted' in df.columns:
             original_count = df['urls_extracted'].apply(len).sum()
             df['urls_extracted'] = df['urls_extracted'].apply(
@@ -401,30 +401,30 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             )
             new_count = df['urls_extracted'].apply(len).sum()
             if new_count != original_count:
-                corrections.append(f"URLs corrigidas: {original_count} -> {new_count}")
+                corrections.append(f"URLs corrected: {original_count} -> {new_count}")
 
-        # Corrigir flags booleanas
+        # Fix boolean flags
         boolean_columns = ['has_photo', 'has_video', 'has_audio', 'has_emoji', 'call_to_action']
         for col in boolean_columns:
             if col in df.columns:
                 original_type = df[col].dtype
                 df[col] = df[col].astype(bool)
                 if original_type != bool:
-                    corrections.append(f"Coluna {col} convertida para boolean")
+                    corrections.append(f"Column {col} converted to boolean")
 
         return corrections
 
     def _fix_errors_with_api(self, df: pd.DataFrame, error_patterns: List[str]) -> List[str]:
-        """Usa API para corrigir erros específicos"""
+        """Use API to correct specific errors"""
         corrections = []
 
-        # Implementar correções específicas via API conforme necessário
-        # Por exemplo, re-análise de textos com problemas detectados
+        # Implement specific corrections via API as needed
+        # For example, re-analysis of texts with detected problems
 
         return corrections
 
     def _is_valid_url(self, url: str) -> bool:
-        """Valida se URL é válida"""
+        """Validate if URL is valid"""
         try:
             from urllib.parse import urlparse
             result = urlparse(url)
@@ -433,9 +433,9 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             return False
 
     def generate_feature_report(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Gera relatório das features extraídas adaptado para estrutura existente"""
+        """Generate report of extracted features adapted to existing structure"""
 
-        # Identificar colunas originais vs. novas features
+        # Identify original columns vs. new features
         original_columns = {
             'datetime', 'body', 'url', 'hashtag', 'channel', 'is_fwrd',
             'mentions', 'sender', 'media_type', 'domain', 'body_cleaned'
@@ -453,7 +453,7 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             "recommendations": []
         }
 
-        # Análise de cobertura das features
+        # Analysis of feature coverage
         for feature in new_feature_columns:
             if feature in df.columns:
                 non_null_count = df[feature].notna().sum()
@@ -463,7 +463,7 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
                     "coverage_percentage": round(coverage, 2)
                 }
 
-        # Análise específica das colunas originais aproveitadas
+        # Specific analysis of original columns utilized
         if 'hashtag' in df.columns:
             hashtag_usage = df['hashtag'].notna().sum()
             report["features_extracted"]["hashtag_analysis"] = {
@@ -485,7 +485,7 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
                 "url_usage_rate": round((url_usage / len(df)) * 100, 2)
             }
 
-        # Análise de qualidade
+        # Quality analysis
         report["data_quality"] = {
             "text_metrics_available": 'text_length' in df.columns,
             "temporal_features_available": 'hour_of_day' in df.columns,
@@ -493,9 +493,9 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
             "sentiment_analysis_available": 'sentiment_category' in df.columns
         }
 
-        # Recomendações baseadas na estrutura
+        # Recommendations based on structure
         if len(new_feature_columns) < 10:
-            report["recommendations"].append("Poucas features novas extraídas - verificar API")
+            report["recommendations"].append("Few new features extracted - check API")
 
         low_coverage_features = [
             feature for feature, data in report["feature_coverage"].items()
@@ -503,10 +503,10 @@ RESPONDA APENAS COM O JSON, SEM EXPLICAÇÕES ADICIONAIS.
         ]
         if low_coverage_features:
             report["recommendations"].append(
-                f"Features com baixa cobertura: {', '.join(low_coverage_features)}"
+                f"Features with low coverage: {', '.join(low_coverage_features)}"
             )
 
         if not report["data_quality"]["political_analysis_available"]:
-            report["recommendations"].append("Análise política não foi extraída com sucesso")
+            report["recommendations"].append("Political analysis was not extracted successfully")
 
         return report

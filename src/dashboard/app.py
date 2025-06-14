@@ -147,10 +147,10 @@ class PipelineDashboardNew:
             self._render_error_page()
             return
 
-        # Carregar dados do pipeline
+        # Load pipeline data
         self.monitor.load_current_session()
 
-        # Menu principal
+        # Main menu
         main_tab = st.session_state.get('main_tab', 'overview')
 
         if main_tab == 'overview':
