@@ -11,7 +11,6 @@ readme = "README.md"
 license = "MIT"
 packages = [{include = "src"}]
 
-[tool.poetry.keywords]
 keywords = ["nlp", "telegram", "political-analysis", "discourse-analysis", "pipeline-optimization", "enterprise-grade", "production-ready"]
 
 [tool.poetry.urls]

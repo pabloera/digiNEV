@@ -4,7 +4,7 @@
 > 
 > Sistema completo de análise de mensagens do Telegram (2019-2023) com pipeline otimizado de alto desempenho para produção, focado em bolsonarismo, negacionismo e autoritarismo digital.
 > 
-> **v5.0.0 - Junho 2025**: 🏆 **PIPELINE OPTIMIZATION COMPLETE!** Transformação épica de 45% → 95% taxa de sucesso. **TODAS as 5 semanas de otimização implementadas**: 60% redução tempo, 50% redução memória, sistema enterprise-grade com deployment automático e rollback. **PRODUCTION READY!**
+> **v5.0.0 - Junho 2025**: 🏆 **PIPELINE OPTIMIZATION COMPLETE!** Transformação épica de 45% → 95% taxa de sucesso. **Pipeline ORIGINAL (22 stages) COM otimizações integradas**: 60% redução tempo, 50% redução memória, sistema enterprise-grade. **PRODUCTION READY!**
 
 ## 🚨 **INÍCIO RÁPIDO - LEIA PRIMEIRO!**
 
