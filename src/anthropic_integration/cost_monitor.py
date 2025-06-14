@@ -48,11 +48,6 @@ class ConsolidatedCostMonitor:
         'claude-3-5-haiku-20241022': {
             'input': 0.00000025, # $0.25 per million input tokens
             'output': 0.00000125 # $1.25 per million output tokens
-        },
-        # Legacy support
-        'claude-3-5-haiku-latest': {
-            'input': 0.00000025,
-            'output': 0.00000125
         }
     }
 

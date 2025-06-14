@@ -93,8 +93,9 @@ class SystemValidator:
         try:
             from anthropic_integration.base import AnthropicBase
             
-            # Testar inicialização sem stage_operation
-            base1 = AnthropicBase()
+            # Testar inicialização sem stage_operation específico (usa configuração padrão)
+            test_config = {'anthropic': {'model': 'claude-3-5-sonnet-20241022'}}
+            base1 = AnthropicBase(config=test_config)
             logger.info(f"✅ AnthropicBase sem stage: {getattr(base1, 'model', 'N/A')}")
             
             # Testar inicialização com stage_operation
