@@ -1,12 +1,12 @@
 """
 UNIFIED ANTHROPIC PIPELINE SYSTEM v5.0.0
 ========================================
-Consolida todas as 22 etapas do pipeline com integração Anthropic centralizada,
-spaCy linguístico e integração completa com dashboard para análise em tempo real.
+Consolidates all 22 pipeline stages with centralized Anthropic integration,
+linguistic spaCy and complete dashboard integration for real-time analysis.
 
-🎯 v5.0.0 PIPELINE OPTIMIZED: Performance otimizada 85-95%, sistema enterprise-grade.
-Pipeline 22 etapas + 5 semanas de otimização + auditoria de código completa.
-Sistema production-ready com gestão automática de recursos e arquitetura consolidada.
+🎯 v5.0.0 PIPELINE OPTIMIZED: 85-95% performance optimization, enterprise-grade system.
+22-stage pipeline + 5 weeks of optimization + complete code audit.
+Production-ready system with automatic resource management and consolidated architecture.
 """
 
 import json
@@ -19,11 +19,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
-# Componentes base do pipeline
+# Base pipeline components
 from .base import AnthropicBase
 from .feature_extractor import FeatureExtractor
 
-# Componentes de validação e limpeza
+# Validation and cleaning components
 from .deduplication_validator import DeduplicationValidator
 from .encoding_validator import EncodingValidator
 from .feature_validator import FeatureValidator
@@ -31,21 +31,21 @@ from .intelligent_text_cleaner import IntelligentTextCleaner
 from .cluster_validator import ClusterValidator
 from .pipeline_validator import CompletePipelineValidator
 
-# Componentes de análise (Anthropic API)
+# Analysis components (Anthropic API)
 from .political_analyzer import PoliticalAnalyzer
 from .qualitative_classifier import QualitativeClassifier
 from .sentiment_analyzer import AnthropicSentimentAnalyzer
 from .smart_pipeline_reviewer import SmartPipelineReviewer
 from .topic_interpreter import TopicInterpreter
 
-# Componentes de busca e embeddings (Voyage.ai)
+# Search and embeddings components (Voyage.ai)
 from .voyage_topic_modeler import VoyageTopicModeler
 from .semantic_search_engine import SemanticSearchEngine
 from .semantic_tfidf_analyzer import SemanticTfidfAnalyzer
 from .voyage_clustering_analyzer import VoyageClusteringAnalyzer
 from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
-# Componentes de análise avançada
+# Advanced analysis components
 from .intelligent_domain_analyzer import IntelligentDomainAnalyzer
 from .intelligent_network_analyzer import IntelligentNetworkAnalyzer
 from .intelligent_query_system import IntelligentQuerySystem
@@ -69,7 +69,7 @@ from .progressive_timeout_manager import (
 from .qualitative_classifier import QualitativeClassifier
 from .semantic_hashtag_analyzer import SemanticHashtagAnalyzer
 
-# Importar novo sistema de busca semântica e inteligência
+# Import new semantic search and intelligence system
 from .semantic_search_engine import SemanticSearchEngine
 from .semantic_tfidf_analyzer import SemanticTfidfAnalyzer
 from .sentiment_analyzer import AnthropicSentimentAnalyzer
@@ -80,10 +80,10 @@ from .topic_interpreter import TopicInterpreter
 from .voyage_clustering_analyzer import VoyageClusteringAnalyzer
 from .voyage_embeddings import VoyageEmbeddingAnalyzer
 
-# Importar novos componentes Voyage.ai aprimorados
+# Import new enhanced Voyage.ai components
 from .voyage_topic_modeler import VoyageTopicModeler
 
-# Importar processador linguístico spaCy
+# Import spaCy linguistic processor
 try:
     from .spacy_nlp_processor import SpacyNLPProcessor
     SPACY_PROCESSOR_AVAILABLE = True
@@ -91,12 +91,12 @@ except ImportError:
     SPACY_PROCESSOR_AVAILABLE = False
     SpacyNLPProcessor = None
 
-# Importar processadores de dados
+# Import data processors
 from src.data.processors.chunk_processor import ChunkProcessor
 
 from .performance_optimizer import PerformanceOptimizer
 
-# Importar novos componentes aprimorados
+# Import new enhanced components
 from .statistical_analyzer import StatisticalAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -104,49 +104,49 @@ logger = logging.getLogger(__name__)
 
 class UnifiedAnthropicPipeline(AnthropicBase):
     """
-    Pipeline unificado com integração Anthropic para todas as 20 etapas
+    Unified pipeline with Anthropic integration for all 20 stages
 
-    Etapas do Pipeline v4.8 (RENUMERADO SEQUENCIALMENTE):
-    01. chunk_processing - Processamento robusto em chunks
-    02. encoding_validation - Validação estrutural e encoding
-    03. deduplication - Deduplicação inteligente
-    04. feature_validation - Validação e enriquecimento de features básicas
-    05. political_analysis - Análise política profunda via API
-    06. text_cleaning - Limpeza inteligente de texto
-    07. linguistic_processing - Processamento linguístico avançado com spaCy ✅ ATIVO 🔤
-    08. sentiment_analysis - Análise de sentimento multidimensional
-    09. topic_modeling - Modelagem de tópicos com interpretação 🚀
-    10. tfidf_extraction - Extração TF-IDF semântica 🚀
-    11. clustering - Clustering com validação automática 🚀
-    12. hashtag_normalization - Normalização e categorização de hashtags
-    13. domain_analysis - Análise completa de domínios e credibilidade
-    14. temporal_analysis - Análise temporal inteligente
-    15. network_analysis - Análise de estrutura de rede e comunidades
-    16. qualitative_analysis - Análise qualitativa com taxonomias
-    17. smart_pipeline_review - Revisão inteligente e reprodutibilidade
-    18. topic_interpretation - Interpretação contextualizada de tópicos
-    19. semantic_search - Busca semântica inteligente e indexação 🚀
-    20. pipeline_validation - Validação final completa do pipeline
+    Pipeline Stages v4.8 (SEQUENTIALLY RENUMBERED):
+    01. chunk_processing - Robust chunk processing
+    02. encoding_validation - Structural and encoding validation
+    03. deduplication - Intelligent deduplication
+    04. feature_validation - Basic feature validation and enrichment
+    05. political_analysis - Deep political analysis via API
+    06. text_cleaning - Intelligent text cleaning
+    07. linguistic_processing - Advanced linguistic processing with spaCy ✅ ACTIVE 🔤
+    08. sentiment_analysis - Multidimensional sentiment analysis
+    09. topic_modeling - Topic modeling with interpretation 🚀
+    10. tfidf_extraction - Semantic TF-IDF extraction 🚀
+    11. clustering - Clustering with automatic validation 🚀
+    12. hashtag_normalization - Hashtag normalization and categorization
+    13. domain_analysis - Complete domain and credibility analysis
+    14. temporal_analysis - Intelligent temporal analysis
+    15. network_analysis - Network structure and community analysis
+    16. qualitative_analysis - Qualitative analysis with taxonomies
+    17. smart_pipeline_review - Intelligent review and reproducibility
+    18. topic_interpretation - Contextualized topic interpretation
+    19. semantic_search - Intelligent semantic search and indexing 🚀
+    20. pipeline_validation - Complete final pipeline validation
     """
 
     def __init__(self, config: Dict[str, Any] = None, project_root: str = None):
         """
-        Inicializa pipeline unificado com tratamento robusto de erros
+        Initialize unified pipeline with robust error handling
 
         Args:
-            config: Configuração do pipeline
-            project_root: Diretório raiz do projeto
+            config: Pipeline configuration
+            project_root: Project root directory
         """
         try:
-            # Validar sistema antes de inicializar
+            # Validate system before initializing
             from .system_validator import SystemValidator
             validator = SystemValidator(project_root)
             system_ok, validation_results = validator.run_full_validation()
 
             if not system_ok and validation_results["overall_status"] == "error":
-                logger.error("Sistema não passou na validação crítica")
+                logger.error("System did not pass critical validation")
                 logger.error(validator.generate_report())
-                # Continuar mas marcar como modo degradado
+                # Continue but mark as degraded mode
 
             # Inicializar classe base primeiro
             super().__init__(config, "pipeline_main")
@@ -344,7 +344,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return success_rate >= 0.8  # Considerar sucesso se 80%+ dos componentes funcionam
 
     def get_pipeline_health(self) -> Dict[str, Any]:
-        """Retorna status de saúde do pipeline"""
+        """Return pipeline health status"""
         try:
             health_report = {
                 "overall_status": "healthy",
@@ -383,7 +383,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             }
 
     def _initialize_components(self):
-        """Inicializa todos os componentes especializados (método legado)"""
+        """Initialize all specialized components (legacy method)"""
 
         self.api_integration = APIPipelineIntegration(self.config, str(self.project_root))
         self.feature_extractor = FeatureExtractor(self.config)
@@ -545,7 +545,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return pipeline_results
 
     def _generate_cost_optimization_summary(self, pipeline_results: Dict[str, Any]) -> Dict[str, Any]:
-        """Gera relatório consolidado de otimização de custos Voyage"""
+        """Generate consolidated Voyage cost optimization report"""
 
         try:
             cost_info = self.voyage_embeddings._calculate_estimated_cost()
@@ -588,7 +588,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             return {"error": str(e)}
 
     def _generate_cost_recommendations(self) -> List[str]:
-        """Gera recomendações de otimização de custos"""
+        """Generate cost optimization recommendations"""
 
         recommendations = []
 
@@ -624,7 +624,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return recommendations
 
     def _execute_stage_with_recovery(self, stage_name: str, dataset_paths: List[str], max_retries: int = 2) -> Dict[str, Any]:
-        """Executa etapa com mecanismo de recuperação de erro"""
+        """Execute stage with error recovery mechanism"""
 
         attempt = 0
         last_error = None
@@ -669,7 +669,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         }
 
     def _attempt_stage_recovery(self, stage_name: str, error: str) -> bool:
-        """Tenta recuperar de erros específicos"""
+        """Attempt to recover from specific errors"""
 
         recovery_strategies = {
             "memory": self._recover_memory_error,
@@ -693,7 +693,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
         return False
 
     def _recover_memory_error(self, stage_name: str) -> bool:
-        """Recupera de erros de memória"""
+        """Recover from memory errors"""
         logger.info(f"Tentando recuperar erro de memória para {stage_name}")
 
         # Reduzir chunk size
@@ -832,7 +832,7 @@ class UnifiedAnthropicPipeline(AnthropicBase):
             return None
 
     def _execute_stage(self, stage_name: str, dataset_paths: List[str]) -> Dict[str, Any]:
-        """Executa uma etapa específica do pipeline"""
+        """Execute a specific pipeline stage"""
 
         self.pipeline_state["current_stage"] = stage_name
         logger.info(f"Executando etapa: {stage_name}")

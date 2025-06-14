@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 """
-MONITOR DO DISCURSO DIGITAL v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM
-================================================================
+DIGITAL DISCOURSE MONITOR v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM
+======================================================================
 
-🏆 PIPELINE OPTIMIZATION COMPLETE! Transformação 45% → 95% taxa de sucesso.
+🏆 PIPELINE OPTIMIZATION COMPLETE! Transformation 45% → 95% success rate.
 
-TODAS as 5 semanas de otimização implementadas e integradas:
-- 🚀 WEEK 1: Emergency cache + performance fixes ATIVO
-- 🔧 WEEK 2: Advanced caching hierárquico (L1/L2) + monitoring ATIVO  
-- ⚡ WEEK 3: Parallelization + streaming + async processing ATIVO
-- 📊 WEEK 4: Advanced monitoring + quality validation + benchmarks ATIVO
-- 🏭 WEEK 5: Production deployment + adaptive memory management ATIVO
+ALL 5 weeks of optimization implemented and integrated:
+- 🚀 WEEK 1: Emergency cache + performance fixes ACTIVE
+- 🔧 WEEK 2: Advanced hierarchical caching (L1/L2) + monitoring ACTIVE  
+- ⚡ WEEK 3: Parallelization + streaming + async processing ACTIVE
+- 📊 WEEK 4: Advanced monitoring + quality validation + benchmarks ACTIVE
+- 🏭 WEEK 5: Production deployment + adaptive memory management ACTIVE
 
-PERFORMANCE ENTERPRISE:
-- ⚡ 60% redução tempo de execução via parallelization
-- 💾 50% redução memória (8GB → 4GB target) via adaptive management
-- 💰 40% redução custos API via smart caching
-- 🚀 Deployment automático com rollback em <30s
+ENTERPRISE PERFORMANCE:
+- ⚡ 60% execution time reduction via parallelization
+- 💾 50% memory reduction (8GB → 4GB target) via adaptive management
+- 💰 40% API cost reduction via smart caching
+- 🚀 Automatic deployment with rollback in <30s
 - 📊 Real-time monitoring + alerting + quality gates
 
 EXECUTION MODES:
-- Standard: Pipeline otimizado com todas as 5 semanas ativas
-- Production: Deployment automático com validation + rollback
-- Testing: Comprehensive validation de todas as otimizações
+- Standard: Optimized pipeline with all 5 weeks active
+- Production: Automatic deployment with validation + rollback
+- Testing: Comprehensive validation of all optimizations
 """
 
 import json
@@ -41,14 +41,14 @@ try:
     from src.utils.performance_config import configure_all_performance
     _performance_results = configure_all_performance()
 except ImportError:
-    print("⚠️  Performance config não encontrado - continuando sem otimizações")
+    print("⚠️  Performance config not found - continuing without optimizations")
     _performance_results = {}
 
 # Add src to path
 src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
-# Configurar logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -60,7 +60,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def load_protection_checklist() -> Dict[str, Any]:
-    """Carrega checklist de proteção de etapas"""
+    """Load stage protection checklist"""
     checklist_file = Path("checkpoints/checklist.json")
     
     if checklist_file.exists():
@@ -78,7 +78,7 @@ def load_protection_checklist() -> Dict[str, Any]:
     return None
 
 def check_stage_protection(stage_id: str, checklist: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Verifica se uma etapa está protegida contra reescrita"""
+    """Check if a stage is protected against overwrite"""
     if not checklist:
         return {'can_overwrite': True, 'reason': 'No protection checklist'}
     
@@ -106,7 +106,7 @@ def check_stage_protection(stage_id: str, checklist: Dict[str, Any] = None) -> D
     return {'can_overwrite': True, 'reason': 'Stage not protected'}
 
 def should_skip_protected_stage(stage_id: str, checklist: Dict[str, Any] = None) -> bool:
-    """Verifica se deve pular uma etapa protegida/completada"""
+    """Check if a protected/completed stage should be skipped"""
     if not checklist:
         return False
     
@@ -123,7 +123,7 @@ def should_skip_protected_stage(stage_id: str, checklist: Dict[str, Any] = None)
     return False
 
 def load_checkpoints() -> Dict[str, Any]:
-    """Carrega estado atual dos checkpoints"""
+    """Load current checkpoints state"""
     checkpoints_file = Path("checkpoints/checkpoints.json")
     
     if checkpoints_file.exists():
@@ -139,7 +139,7 @@ def load_checkpoints() -> Dict[str, Any]:
     return None
 
 def get_resume_point(checkpoints: Dict[str, Any] = None) -> str:
-    """Determina ponto de resumo baseado nos checkpoints"""
+    """Determine resume point based on checkpoints"""
     if not checkpoints:
         return "01_chunk_processing"
     
@@ -150,7 +150,7 @@ def get_resume_point(checkpoints: Dict[str, Any] = None) -> str:
     return resume_from
 
 def should_skip_stage(stage_id: str, checkpoints: Dict[str, Any] = None) -> bool:
-    """Verifica se uma etapa pode ser pulada (já completada)"""
+    """Check if a stage can be skipped (already completed)"""
     if not checkpoints:
         return False
     
@@ -164,7 +164,7 @@ def should_skip_stage(stage_id: str, checkpoints: Dict[str, Any] = None) -> bool
     return False
 
 def load_configuration():
-    """Carrega configuração completa do projeto"""
+    """Load complete project configuration"""
     config_files = [
         'config/settings.yaml',
         'config/anthropic.yaml', 
@@ -180,7 +180,7 @@ def load_configuration():
                 if file_config:
                     config.update(file_config)
     
-    # Configuração default se não encontrar arquivos
+    # Default configuration if no files found
     if not config:
         config = {
             "anthropic": {"enable_api_integration": True},
@@ -197,7 +197,7 @@ def load_configuration():
     return config
 
 def discover_datasets(data_paths: List[str]) -> List[str]:
-    """Descobre todos os datasets disponíveis com validação"""
+    """Discover all available datasets with validation"""
     datasets = []
     
     for data_path in data_paths:
@@ -205,30 +205,30 @@ def discover_datasets(data_paths: List[str]) -> List[str]:
             import glob
             csv_files = glob.glob(os.path.join(data_path, '*.csv'))
             
-            # Validar se os arquivos CSV não estão vazios
+            # Validate that CSV files are not empty
             valid_files = []
             for csv_file in csv_files:
                 try:
                     file_size = os.path.getsize(csv_file)
-                    if file_size > 100:  # Mínimo 100 bytes para ser considerado válido
+                    if file_size > 100:  # Minimum 100 bytes to be considered valid
                         valid_files.append(csv_file)
-                        logger.info(f"Dataset válido encontrado: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
+                        logger.info(f"Valid dataset found: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
                     else:
-                        logger.warning(f"Dataset muito pequeno ignorado: {Path(csv_file).name}")
+                        logger.warning(f"Dataset too small ignored: {Path(csv_file).name}")
                 except Exception as e:
-                    logger.error(f"Erro verificando dataset {csv_file}: {e}")
+                    logger.error(f"Error checking dataset {csv_file}: {e}")
             
             datasets.extend(valid_files)
         else:
-            logger.warning(f"Diretório de dados não encontrado: {data_path}")
+            logger.warning(f"Data directory not found: {data_path}")
     
     if not datasets:
-        logger.error("Nenhum dataset válido encontrado nos diretórios especificados")
+        logger.error("No valid datasets found in specified directories")
     
     return sorted(datasets)
 
 def setup_dashboard_integration(config: Dict[str, Any]):
-    """Configura integração com dashboard"""
+    """Configure dashboard integration"""
     try:
         dashboard_data_dir = Path(config.get('data', {}).get('dashboard_path', 'src/dashboard/data'))
         dashboard_data_dir.mkdir(parents=True, exist_ok=True)
@@ -247,7 +247,7 @@ def setup_dashboard_integration(config: Dict[str, Any]):
         return False
 
 def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any]) -> Dict[str, Any]:
-    """Execução completa do pipeline ORIGINAL (22 stages) COM otimizações v5.0.0 aplicadas"""
+    """Complete execution of ORIGINAL pipeline (22 stages) WITH v5.0.0 optimizations applied"""
     
     start_time = time.time()
     execution_results = {
@@ -261,28 +261,28 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
     }
     
     try:
-        # PASSO 1: Inicializar sistemas de otimização primeiro
-        logger.info("🚀 Inicializando sistemas de otimização v5.0.0...")
+        # STEP 1: Initialize optimization systems first
+        logger.info("🚀 Initializing optimization systems v5.0.0...")
         optimization_status = check_optimization_systems()
         execution_results['optimizations_applied'] = optimization_status
         
         active_optimizations = sum(optimization_status.values())
-        logger.info(f"⚡ Otimizações ativas: {active_optimizations}/5 weeks")
+        logger.info(f"⚡ Active optimizations: {active_optimizations}/5 weeks")
         
-        # PASSO 2: Inicializar pipeline ORIGINAL com otimizações integradas
+        # STEP 2: Initialize ORIGINAL pipeline with integrated optimizations
         from src.anthropic_integration.unified_pipeline import UnifiedAnthropicPipeline
 
         # Create pipeline instance with optimization integration
         pipeline = UnifiedAnthropicPipeline(config, str(Path.cwd()))
-        logger.info("📊 Pipeline ORIGINAL (22 stages) inicializado")
+        logger.info("📊 ORIGINAL Pipeline (22 stages) initialized")
         
-        # PASSO 3: Aplicar camadas de otimização ao pipeline original
+        # STEP 3: Apply optimization layers to original pipeline
         _optimized_pipeline = None
         if optimization_status.get('week1_emergency', False):
             try:
                 from src.optimized.optimized_pipeline import get_global_optimized_pipeline
                 _optimized_pipeline = get_global_optimized_pipeline()
-                logger.info("✅ Week 1-2: Emergency cache + advanced caching APLICADO ao pipeline original")
+                logger.info("✅ Week 1-2: Emergency cache + advanced caching APPLIED to original pipeline")
             except Exception as e:
                 logger.warning(f"⚠️ Week 1-2 optimization not applied: {e}")
         
@@ -293,7 +293,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 from src.optimized.streaming_pipeline import get_global_streaming_pipeline
                 parallel_engine = get_global_parallel_engine()
                 streaming_pipeline = get_global_streaming_pipeline()
-                logger.info("✅ Week 3: Parallelization + streaming APLICADO ao pipeline original")
+                logger.info("✅ Week 3: Parallelization + streaming APPLIED to original pipeline")
             except Exception as e:
                 logger.warning(f"⚠️ Week 3 optimization not applied: {e}")
         
@@ -304,7 +304,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 monitor = get_global_performance_monitor()
                 if monitor:
                     monitor.start_monitoring()
-                    logger.info("✅ Week 4: Real-time monitoring ATIVADO para pipeline original")
+                    logger.info("✅ Week 4: Real-time monitoring ACTIVATED for original pipeline")
             except Exception as e:
                 logger.warning(f"⚠️ Week 4 optimization not applied: {e}")
         
@@ -315,7 +315,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 memory_manager = get_global_memory_manager()
                 if memory_manager:
                     memory_manager.start_adaptive_management()
-                    logger.info("✅ Week 5: Adaptive memory management ATIVADO para pipeline original")
+                    logger.info("✅ Week 5: Adaptive memory management ACTIVATED for original pipeline")
             except Exception as e:
                 logger.warning(f"⚠️ Week 5 optimization not applied: {e}")
         
@@ -345,27 +345,27 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
             '20_pipeline_validation'
         ]
         
-        logger.info(f"🏭 Executando pipeline ORIGINAL: {len(all_stages)} etapas COM otimizações v5.0.0")
+        logger.info(f"🏭 Executing ORIGINAL pipeline: {len(all_stages)} stages WITH v5.0.0 optimizations")
         
-        # Processar cada dataset
-        for dataset_path in datasets[:1]:  # Limitar a 1 dataset para demonstração
+        # Process each dataset
+        for dataset_path in datasets[:1]:  # Limit to 1 dataset for demonstration
             dataset_name = Path(dataset_path).name
-            logger.info(f"📊 Processando dataset: {dataset_name}")
+            logger.info(f"📊 Processing dataset: {dataset_name}")
             
             try:
                 # ✅ CRITICAL: Execute ORIGINAL pipeline (22 stages) WITH optimizations applied
-                logger.info("🔄 Executando pipeline ORIGINAL com todas as otimizações v5.0.0 ativas...")
+                logger.info("🔄 Executing ORIGINAL pipeline with all v5.0.0 optimizations active...")
                 results = pipeline.run_complete_pipeline([dataset_path])
                 
                 if results.get('overall_success', False):
                     execution_results['datasets_processed'].append(dataset_name)
                     execution_results['total_records_processed'] += results.get('total_records', 0)
                     
-                    # Coletar outputs finais
+                    # Collect final outputs
                     if 'final_outputs' in results:
                         execution_results['final_outputs'].extend(results['final_outputs'])
                 
-                # Atualizar progresso das etapas
+                # Update stage progress
                 if 'stage_results' in results:
                     for stage, result in results['stage_results'].items():
                         if stage not in execution_results['stages_completed']:
@@ -377,7 +377,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                         })
                 
             except Exception as e:
-                logger.error(f"Erro processando {dataset_name}: {e}")
+                logger.error(f"Error processing {dataset_name}: {e}")
                 continue
         
         # ✅ STEP 4: Cleanup optimization systems after pipeline execution
@@ -388,7 +388,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 monitor = get_global_performance_monitor()
                 if monitor:
                     monitor.stop_monitoring()
-                    logger.info("✅ Week 4: Real-time monitoring DESATIVADO")
+                    logger.info("✅ Week 4: Real-time monitoring DEACTIVATED")
             
             # Stop memory management if it was started
             if optimization_status.get('week5_production', False):
@@ -396,11 +396,11 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 memory_manager = get_global_memory_manager()
                 if memory_manager:
                     memory_manager.stop_adaptive_management()
-                    logger.info("✅ Week 5: Adaptive memory management DESATIVADO")
+                    logger.info("✅ Week 5: Adaptive memory management DEACTIVATED")
         except Exception as e:
             logger.warning(f"⚠️ Error during optimization cleanup: {e}")
         
-        # Verificar sucesso geral
+        # Check overall success
         execution_results['overall_success'] = len(execution_results['datasets_processed']) > 0
         execution_results['execution_time'] = time.time() - start_time
         execution_results['end_time'] = datetime.now().isoformat()
@@ -414,8 +414,8 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
             'transformation_status': '45% → 95% success rate system ACTIVE'
         }
         
-        logger.info(f"🏆 Pipeline ORIGINAL (22 stages) COM otimizações v5.0.0 finalizado: {execution_results['overall_success']}")
-        logger.info(f"⚡ Otimizações aplicadas: {active_opts}/5 weeks ({(active_opts/5)*100:.0f}%)")
+        logger.info(f"🏆 ORIGINAL Pipeline (22 stages) WITH v5.0.0 optimizations completed: {execution_results['overall_success']}")
+        logger.info(f"⚡ Optimizations applied: {active_opts}/5 weeks ({(active_opts/5)*100:.0f}%)")
         
     except Exception as e:
         logger.error(f"Pipeline execution failed: {e}")
@@ -424,25 +424,25 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
     return execution_results
 
 def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
-    """Integra resultados com dashboard para visualização"""
+    """Integrate results with dashboard for visualization"""
     try:
         dashboard_results_dir = Path(config.get('data', {}).get('dashboard_path', 'src/dashboard/data')) / 'dashboard_results'
         
-        # Salvar resultados para dashboard
+        # Save results for dashboard
         results_file = dashboard_results_dir / f"pipeline_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
         import json
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
         
-        # Copiar outputs finais para dashboard
+        # Copy final outputs to dashboard
         if results.get('final_outputs'):
             for output_file in results['final_outputs']:
                 if os.path.exists(output_file):
                     import shutil
                     dashboard_file = dashboard_results_dir / Path(output_file).name
                     shutil.copy2(output_file, dashboard_file)
-                    logger.info(f"Resultado copiado para dashboard: {dashboard_file}")
+                    logger.info(f"Result copied to dashboard: {dashboard_file}")
         
         logger.info(f"Dashboard integration completed: {results_file}")
         return True
@@ -452,7 +452,7 @@ def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
         return False
 
 def check_optimization_systems():
-    """Verifica e inicializa sistemas de otimização"""
+    """Check and initialize optimization systems"""
     optimization_status = {
         'week1_emergency': False,
         'week2_caching': False,
@@ -497,11 +497,11 @@ def check_optimization_systems():
     return optimization_status
 
 def main():
-    """Entry point para execução do pipeline ORIGINAL (22 stages) COM otimizações v5.0.0"""
+    """Entry point for executing ORIGINAL pipeline (22 stages) WITH v5.0.0 optimizations"""
     
-    print("🏆 MONITOR DO DISCURSO DIGITAL v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM")
+    print("🏆 DIGITAL DISCOURSE MONITOR v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM")
     print("=" * 80)
-    print("📊 EXECUÇÃO: Pipeline ORIGINAL (22 stages) COM Otimizações v5.0.0")
+    print("📊 EXECUTION: ORIGINAL Pipeline (22 stages) WITH v5.0.0 Optimizations")
     print("🚀 PIPELINE OPTIMIZATION COMPLETE! (45% → 95% success rate)")
     print("⚡ ALL 5 WEEKS OF OPTIMIZATION APPLIED TO ORIGINAL PIPELINE!")
     print("=" * 80)
@@ -509,8 +509,8 @@ def main():
     start_time = time.time()
     
     try:
-        # 0. Verificar sistemas de otimização
-        print("🔍 Verificando sistemas de otimização...")
+        # 0. Check optimization systems
+        print("🔍 Checking optimization systems...")
         optimization_status = check_optimization_systems()
         
         active_optimizations = sum(optimization_status.values())
@@ -529,11 +529,11 @@ def main():
         else:
             print("⚠️ BASIC MODE: Limited optimization")
         
-        # 1. Carregar checkpoints e proteção
-        print("\n🔄 Carregando checkpoints...")
+        # 1. Load checkpoints and protection
+        print("\n🔄 Loading checkpoints...")
         checkpoints = load_checkpoints()
         
-        print("🛡️ Carregando proteção de etapas...")
+        print("🛡️ Loading stage protection...")
         protection_checklist = load_protection_checklist()
         
         resume_point = get_resume_point(checkpoints)
@@ -542,26 +542,26 @@ def main():
             completed = checkpoints['execution_summary']['completed_stages']
             total = checkpoints['execution_summary']['total_stages']
             progress = checkpoints['execution_summary']['overall_progress']
-            print(f"📊 Progresso atual: {completed}/{total} etapas ({progress*100:.1f}%)")
-            print(f"🚀 Resumindo a partir de: {resume_point}")
+            print(f"📊 Current progress: {completed}/{total} stages ({progress*100:.1f}%)")
+            print(f"🚀 Resuming from: {resume_point}")
         else:
-            print("🆕 Iniciando pipeline do zero")
+            print("🆕 Starting pipeline from scratch")
         
         # Show protection status
         if protection_checklist:
             stats = protection_checklist['statistics']
-            print(f"🛡️ Proteção: {stats['locked_stages']} etapas bloqueadas, {stats['protected_stages']} protegidas")
+            print(f"🛡️ Protection: {stats['locked_stages']} stages locked, {stats['protected_stages']} protected")
         
-        # 2. Carregar configuração
-        print("📋 Carregando configuração...")
+        # 2. Load configuration
+        print("📋 Loading configuration...")
         config = load_configuration()
         
-        # 3. Configurar dashboard
-        print("🖥️  Configurando integração com dashboard...")
+        # 3. Configure dashboard
+        print("🖥️  Configuring dashboard integration...")
         dashboard_ready = setup_dashboard_integration(config)
         
-        # 4. Descobrir datasets
-        print("📊 Descobrindo datasets...")
+        # 4. Discover datasets
+        print("📊 Discovering datasets...")
         data_paths = [
             config.get('data', {}).get('path', 'data/uploads'),
             'data/DATASETS_FULL',
@@ -570,18 +570,18 @@ def main():
         datasets = discover_datasets(data_paths)
         
         if not datasets:
-            print("❌ Nenhum dataset encontrado!")
+            print("❌ No datasets found!")
             return
         
-        print(f"📁 Datasets encontrados: {len(datasets)}")
+        print(f"📁 Datasets found: {len(datasets)}")
         for i, dataset in enumerate(datasets[:5], 1):
             print(f"   {i}. {Path(dataset).name}")
         if len(datasets) > 5:
-            print(f"   ... e mais {len(datasets) - 5} datasets")
+            print(f"   ... and {len(datasets) - 5} more datasets")
         
-        # 5. Verificar etapas protegidas antes da execução
+        # 5. Check protected stages before execution
         if protection_checklist:
-            print("\n🛡️ Verificando proteção de etapas...")
+            print("\n🛡️ Checking stage protection...")
             protected_count = 0
             locked_count = 0
             
@@ -594,50 +594,50 @@ def main():
                     locked_count += 1
             
             if protected_count > 0:
-                print(f"   ⚠️  {protected_count} etapas serão puladas (protegidas e completadas)")
+                print(f"   ⚠️  {protected_count} stages will be skipped (protected and completed)")
             if locked_count > 0:
-                print(f"   🔒 {locked_count} etapas estão bloqueadas (requer unlock manual)")
+                print(f"   🔒 {locked_count} stages are locked (requires manual unlock)")
         
-        # 6. Executar pipeline completo com proteção
-        print(f"\n🚀 Iniciando execução das etapas (a partir de {resume_point})...")
+        # 6. Execute complete pipeline with protection
+        print(f"\n🚀 Starting stage execution (from {resume_point})...")
         results = run_complete_pipeline_execution(datasets, config)
         
-        # 7. Integrar com dashboard
+        # 7. Integrate with dashboard
         if dashboard_ready:
-            print("🖥️  Integrando resultados com dashboard...")
+            print("🖥️  Integrating results with dashboard...")
             integrate_with_dashboard(results, config)
         
-        # 8. Mostrar resultado final
+        # 8. Show final result
         duration = time.time() - start_time
         
-        print(f"\n{'✅' if results['overall_success'] else '❌'} EXECUÇÃO {'CONCLUÍDA' if results['overall_success'] else 'FALHOU'}")
-        print(f"⏱️  Duração total: {duration:.1f}s")
-        print(f"📊 Datasets processados: {len(results['datasets_processed'])}")
-        print(f"📈 Records processados: {results['total_records_processed']}")
-        print(f"🔧 Etapas executadas: {len(results['stages_completed'])}")
+        print(f"\n{'✅' if results['overall_success'] else '❌'} EXECUTION {'COMPLETED' if results['overall_success'] else 'FAILED'}")
+        print(f"⏱️  Total duration: {duration:.1f}s")
+        print(f"📊 Datasets processed: {len(results['datasets_processed'])}")
+        print(f"📈 Records processed: {results['total_records_processed']}")
+        print(f"🔧 Stages executed: {len(results['stages_completed'])}")
         
-        # 9. Mostrar informações finais de proteção
+        # 9. Show final protection information
         final_checkpoints = load_checkpoints()
         final_protection = load_protection_checklist()
         
         if final_checkpoints:
             final_progress = final_checkpoints['execution_summary']['overall_progress']
-            print(f"📊 Progresso final: {final_progress*100:.1f}%")
+            print(f"📊 Final progress: {final_progress*100:.1f}%")
         
         if final_protection:
             final_stats = final_protection['statistics']
-            print(f"🛡️ Proteção final: {final_stats['locked_stages']} bloqueadas, {final_stats['success_rate']*100:.1f}% taxa de sucesso")
+            print(f"🛡️ Final protection: {final_stats['locked_stages']} locked, {final_stats['success_rate']*100:.1f}% success rate")
         
         if results.get('final_outputs'):
-            print(f"\n📁 Arquivos finais gerados:")
+            print(f"\n📁 Final files generated:")
             for output in results['final_outputs']:
                 print(f"   - {output}")
         
-        print(f"\n🖥️  Dashboard: Execute 'python src/dashboard/start_dashboard.py' para visualizar")
+        print(f"\n🖥️  Dashboard: Execute 'python src/dashboard/start_dashboard.py' to visualize")
         print("=" * 75)
         
     except Exception as e:
-        print(f"❌ ERRO CRÍTICO: {e}")
+        print(f"❌ CRITICAL ERROR: {e}")
         import traceback
         traceback.print_exc()
 

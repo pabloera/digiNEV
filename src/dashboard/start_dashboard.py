@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-DASHBOARD BOLSONARISMO v5.0.0 - INTEGRADO COM PIPELINE + PERFORMANCE OPTIMIZED
-=======================================================================
-Script para iniciar dashboard integrado com monitoramento em tempo real
-do pipeline e visualização completa dos resultados.
+DIGITAL DISCOURSE MONITOR DASHBOARD v5.0.0 - INTEGRATED WITH PIPELINE + PERFORMANCE OPTIMIZED
+=============================================================================================
+Script to start integrated dashboard with real-time pipeline monitoring
+and complete results visualization.
 
-🚀 v5.0.0: Dashboard otimizado com performance 85-95% melhor + arquitetura consolidada.
-💾 v5.0.0: Gestão automática de memória + regex pré-compilados + cache unificado.
-📊 v5.0.0: Monitoramento enterprise-grade + limpeza automática de recursos.
-📊 v4.9.5: Separadores CSV padronizados com `;` em todos os 22 stages.
+🚀 v5.0.0: Optimized dashboard with 85-95% better performance + consolidated architecture.
+💾 v5.0.0: Automatic memory management + pre-compiled regex + unified cache.
+📊 v5.0.0: Enterprise-grade monitoring + automatic resource cleanup.
+📊 v4.9.5: Standardized CSV separators with `;` in all 22 stages.
 """
 
 import os
@@ -18,27 +18,27 @@ import threading
 import time
 from pathlib import Path
 
-# Configurar PYTHONPATH
+# Configure PYTHONPATH
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / 'src'))
 
-# Configurar variáveis de ambiente
+# Configure environment variables
 os.environ['STREAMLIT_TELEMETRY_OPTOUT'] = '1'
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
 
 
 def setup_dashboard_environment():
-    """Configurar ambiente do dashboard"""
-    # Criar diretório .streamlit se não existir
+    """Configure dashboard environment"""
+    # Create .streamlit directory if it doesn't exist
     streamlit_dir = Path.home() / '.streamlit'
     streamlit_dir.mkdir(exist_ok=True)
 
-    # Criar arquivo de configuração para pular email
+    # Create configuration file to skip email
     config_file = streamlit_dir / 'credentials.toml'
     with open(config_file, 'w') as f:
         f.write('[general]\nemail = ""\n')
 
-    # Garantir que diretórios do dashboard existem
+    # Ensure dashboard directories exist
     dashboard_dirs = [
         project_root / 'src' / 'dashboard' / 'data',
         project_root / 'src' / 'dashboard' / 'data' / 'uploads',

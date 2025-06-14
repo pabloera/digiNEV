@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - BOLSONARISMO v5.0.0
-===============================================
+MAIN PIPELINE CONTROLLER - DIGITAL DISCOURSE MONITOR v5.0.0
+============================================================
 
-Controlador principal do pipeline com checkpoints e recuperação automática.
-Integra com o sistema unificado de anthropic_integration.
-Pipeline completo: 22 etapas + Dashboard 100% funcional com correções críticas.
+Main pipeline controller with checkpoints and automatic recovery.
+Integrates with the unified anthropic_integration system.
+Complete pipeline: 22 stages + 100% functional Dashboard with critical fixes.
 
-🎯 PIPELINE v5.0.0: Performance otimizada, sistema enterprise-grade completo.
-🏛️ POLITICAL v4.9.8: 4 níveis políticos funcionais, 2 clusters semânticos.
-🔤 SPACY v4.9.5: Stage 07 pt_core_news_lg com 57 entidades brasileiras.
-🚨 BUGS FIXED: Deduplicação + configuração + separadores CSV resolvidos.
+🎯 PIPELINE v5.0.0: Optimized performance, complete enterprise-grade system.
+🏛️ POLITICAL v4.9.8: 4 functional political levels, 2 semantic clusters.
+🔤 SPACY v4.9.5: Stage 07 pt_core_news_lg with 57 Brazilian entities.
+🚨 BUGS FIXED: Deduplication + configuration + CSV separators resolved.
 """
 
 import json
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 class PipelineController:
-    """Controlador principal do pipeline com sistema de checkpoints"""
+    """Main pipeline controller with checkpoint system"""
 
     def __init__(self, base_path: str = None):
         self.base_path = Path(base_path or Path.cwd())

@@ -1,24 +1,24 @@
 """
-PoliticalAnalyzer Enhanced v5.0.0 - IMPLEMENTAÇÃO FINAL CONSOLIDADA
-==================================================================
+PoliticalAnalyzer Enhanced v5.0.0 - FINAL CONSOLIDATED IMPLEMENTATION
+====================================================================
 
-ANTHROPIC-NATIVE IMPLEMENTATION com todos os padrões oficiais:
+ANTHROPIC-NATIVE IMPLEMENTATION with all official standards:
 ✅ XML Structured Prompting (Ticket Routing Guide)
 ✅ claude-3-5-haiku-20241022 (Classification Optimized)
 ✅ Hierarchical Brazilian Political Taxonomy (3 levels)
 ✅ Concurrent Batch Processing (5x parallel)
-✅ RAG Integration com Enhanced Examples
+✅ RAG Integration with Enhanced Examples
 ✅ Pydantic Schema Validation (Enterprise Quality)
 ✅ Comprehensive Logging & Versioning
 ✅ Intelligent Token Control & Truncation
 ✅ Multi-Level Fallback Strategies
 ✅ A/B Experiment Control System
 
-PERFORMANCE: 90% tempo redução (14h → 45-90min), 95% confiabilidade
-COMPLIANCE: 100% padrões oficiais Anthropic implementados
-QUALITY: Enterprise-grade com observabilidade completa
+PERFORMANCE: 90% time reduction (14h → 45-90min), 95% reliability
+COMPLIANCE: 100% official Anthropic standards implemented
+QUALITY: Enterprise-grade with complete observability
 
-Substitui implementação anterior mantendo 100% compatibilidade pipeline.
+Replaces previous implementation while maintaining 100% pipeline compatibility.
 """
 
 import asyncio
@@ -60,13 +60,13 @@ logger = logging.getLogger(__name__)
 
 
 class PoliticalLevel(str, Enum):
-    """Enum para níveis políticos válidos"""
+    """Enum for valid political levels"""
     POLITICO = "político"
     NAO_POLITICO = "não-político"
 
 
 class PoliticalAlignment(str, Enum):
-    """Enum para alinhamentos políticos válidos"""
+    """Enum for valid political alignments"""
     BOLSONARISTA = "bolsonarista"
     ANTIBOLSONARISTA = "antibolsonarista"
     NEUTRO = "neutro"
@@ -74,7 +74,7 @@ class PoliticalAlignment(str, Enum):
 
 
 class PoliticalClassificationSchema(BaseModel):
-    """Schema Pydantic para validação estruturada de classificação política"""
+    """Pydantic schema for structured political classification validation"""
     political_level: PoliticalLevel
     alignment: PoliticalAlignment
     reasoning: str = Field(min_length=10, max_length=500)
@@ -85,7 +85,7 @@ class PoliticalClassificationSchema(BaseModel):
     @validator('reasoning')
     def reasoning_must_be_meaningful(cls, v):
         if not v or v.strip() == "":
-            raise ValueError('Reasoning não pode estar vazio')
+            raise ValueError('Reasoning cannot be empty')
         return v.strip()
 
     @validator('conspiracy_indicators', 'negacionism_indicators')
@@ -94,7 +94,7 @@ class PoliticalClassificationSchema(BaseModel):
 
 
 class PromptLogEntry(BaseModel):
-    """Schema para logging de prompts e respostas"""
+    """Schema for logging prompts and responses"""
     session_id: str
     batch_id: str
     timestamp: datetime
@@ -112,7 +112,7 @@ class PromptLogEntry(BaseModel):
 
 @dataclass
 class PoliticalClassificationResult:
-    """Resultado estruturado da classificação política"""
+    """Structured result for political classification"""
     political_level: str
     alignment: str
     reasoning: str
@@ -127,7 +127,7 @@ class PoliticalClassificationResult:
             self.negacionism_indicators = []
 
     def to_schema(self) -> PoliticalClassificationSchema:
-        """Converter para schema Pydantic para validação"""
+        """Convert to Pydantic schema for validation"""
         return PoliticalClassificationSchema(
             political_level=PoliticalLevel(self.political_level),
             alignment=PoliticalAlignment(self.alignment),
@@ -140,25 +140,25 @@ class PoliticalClassificationResult:
 
 class PoliticalAnalyzer(AnthropicBase):
     """
-    Analisador Político Otimizado - ANTHROPIC NATIVE
+    Optimized Political Analyzer - ANTHROPIC NATIVE
 
-    OTIMIZAÇÕES IMPLEMENTADAS:
-    ✅ Modelo claude-3-5-haiku-20241022 para classificação rápida
-    ✅ Batch size otimizado: 10 → 100 registros
-    ✅ Processamento concorrente com semáforo
-    ✅ Smart filtering usando features existentes
-    ✅ Prompting XML estruturado conforme guia Anthropic
-    ✅ Classificação hierárquica (político → alinhamento → detalhes)
-    ✅ RAG com exemplos políticos brasileiros
-    ✅ Cache unificado baseado em hash_id
-    ✅ Consolidação de funções (8 → 3 funções principais)
-    ✅ Regex patterns pré-compilados para performance
+    IMPLEMENTED OPTIMIZATIONS:
+    ✅ Model claude-3-5-haiku-20241022 for fast classification
+    ✅ Optimized batch size: 10 → 100 records
+    ✅ Concurrent processing with semaphore
+    ✅ Smart filtering using existing features
+    ✅ Structured XML prompting per Anthropic guide
+    ✅ Hierarchical classification (political → alignment → details)
+    ✅ RAG with Brazilian political examples
+    ✅ Unified cache based on hash_id
+    ✅ Function consolidation (8 → 3 main functions)
+    ✅ Pre-compiled regex patterns for performance
     """
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
-        # Pré-compilar regex patterns para melhor performance
+        # Pre-compile regex patterns for better performance
         import re
         political_keywords = [
             'bolsonaro', 'lula', 'pt', 'psl', 'pl', 'psol', 'psdb', 'mdb',
@@ -168,13 +168,13 @@ class PoliticalAnalyzer(AnthropicBase):
             'fascista', 'democracia', 'ditadura', 'golpe', 'impeachment', 'corrupção'
         ]
         
-        # Compilar pattern uma vez para reutilização
+        # Compile pattern once for reuse
         self._political_pattern = re.compile(
             '|'.join(re.escape(kw) for kw in political_keywords), 
             re.IGNORECASE
         )
         
-        logger.info("🚀 PoliticalAnalyzer inicializado com regex patterns pré-compilados")
+        logger.info("🚀 PoliticalAnalyzer initialized with pre-compiled regex patterns")
 
         # TASK-023 v5.0.0: Load configuration from centralized files instead of hardcoded values
         if CONFIG_LOADER_AVAILABLE:
@@ -186,24 +186,24 @@ class PoliticalAnalyzer(AnthropicBase):
             self.confidence_threshold = get_model_setting("anthropic", "confidence_threshold", 0.7)
             self.max_concurrent_batches = get_config_value("api_limits.processing.max_batch_size", 5)
             
-            logger.info(f"✅ TASK-023: Configurações carregadas do ConfigurationLoader - Modelo: {self.model}")
+            logger.info(f"✅ TASK-023: Configuration loaded from ConfigurationLoader - Model: {self.model}")
         else:
-            # CONFIGURAÇÃO ENHANCED se não carregada (fallback)
+            # ENHANCED CONFIGURATION if not loaded (fallback)
             if not hasattr(self, 'enhanced_config') or not self.enhanced_config:
-                self.model = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: Modelo mais capaz para política
+                self.model = "claude-3-5-sonnet-20241022"  # 🔧 UPGRADE: More capable model for political analysis
                 self.max_tokens = 4000
                 self.temperature = 0.1  # Low for consistent classification
-                self.batch_size = 100  # OTIMIZADO: 10 → 100 (90% redução de API calls)
+                self.batch_size = 100  # OPTIMIZED: 10 → 100 (90% reduction in API calls)
                 self.confidence_threshold = 0.7
             else:
-                # Usar configuração enhanced carregada
+                # Use loaded enhanced configuration
                 self.batch_size = self.enhanced_config.get('batch_size', 100)
             self.max_concurrent_batches = 5
             
-            logger.warning("⚠️ TASK-023: ConfigurationLoader não disponível, usando valores padrão")
+            logger.warning("⚠️ TASK-023: ConfigurationLoader not available, using default values")
         self.semaphore = asyncio.Semaphore(self.max_concurrent_batches)
 
-        # CACHE UNIFICADO
+        # UNIFIED CACHE
         self.unified_cache = {}
 
         # ERROR HANDLING
@@ -246,19 +246,19 @@ class PoliticalAnalyzer(AnthropicBase):
             "early_stop_confidence_threshold": 0.7   # NEW: Threshold for early stopping
         }
 
-        # CONFIGURAÇÕES MANTIDAS PARA COMPATIBILIDADE
+        # CONFIGURATIONS MAINTAINED FOR COMPATIBILITY
         self.confidence_threshold = 0.7
-        self.analysis_cache = self.unified_cache  # Alias para compatibilidade
+        self.analysis_cache = self.unified_cache  # Alias for compatibility
 
-        # TAXONOMIA POLÍTICA BRASILEIRA HIERÁRQUICA
+        # HIERARCHICAL BRAZILIAN POLITICAL TAXONOMY
         self.political_taxonomy = self._load_brazilian_taxonomy()
 
-        # ENHANCED EXAMPLES PARA RAG
+        # ENHANCED EXAMPLES FOR RAG
         self.political_examples = self._load_enhanced_political_examples()
         self.example_embeddings = {}  # Cache for similarity search
 
-        logger.info("✅ PoliticalAnalyzer OTIMIZADO inicializado com claude-3-5-haiku-20241022")
-        logger.info(f"📊 Configuração: batch_size={self.batch_size}, concurrent={self.max_concurrent_batches}")
+        logger.info("✅ PoliticalAnalyzer OPTIMIZED initialized with claude-3-5-haiku-20241022")
+        logger.info(f"📊 Configuration: batch_size={self.batch_size}, concurrent={self.max_concurrent_batches}")
 
     def analyze_political_discourse(
         self,
@@ -267,72 +267,72 @@ class PoliticalAnalyzer(AnthropicBase):
         batch_size: Optional[int] = None
     ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """
-        FUNÇÃO PRINCIPAL OTIMIZADA - Análise política usando padrões Anthropic
+        MAIN OPTIMIZED FUNCTION - Political analysis using Anthropic patterns
 
-        OTIMIZAÇÕES IMPLEMENTADAS:
-        - Smart filtering usando features existentes (reduz dataset 60-70%)
-        - Bulk processing com batches de 100 registros
-        - Processamento concorrente (5 batches paralelos)
-        - Prompting XML estruturado
-        - Cache unificado eficiente
+        IMPLEMENTED OPTIMIZATIONS:
+        - Smart filtering using existing features (reduces dataset 60-70%)
+        - Bulk processing with 100-record batches
+        - Concurrent processing (5 parallel batches)
+        - Structured XML prompting
+        - Efficient unified cache
 
         Args:
-            df: DataFrame com dados pré-processados (features validadas)
-            text_column: Coluna de texto para análise
-            batch_size: Opcional, usa configuração otimizada se None
+            df: DataFrame with pre-processed data (validated features)
+            text_column: Text column for analysis
+            batch_size: Optional, uses optimized configuration if None
 
         Returns:
-            Tuple com DataFrame enriquecido e relatório
+            Tuple with enriched DataFrame and report
         """
-        logger.info(f"🏛️ Iniciando análise política OTIMIZADA para {len(df)} registros")
+        logger.info(f"🏛️ Starting OPTIMIZED political analysis for {len(df)} records")
 
-        # USAR BATCH SIZE OTIMIZADO
+        # USE OPTIMIZED BATCH SIZE
         if batch_size is None:
             batch_size = self.batch_size
 
-        # VALIDAÇÃO RÁPIDA
+        # QUICK VALIDATION
         if text_column not in df.columns:
             text_column = self._find_text_column(df)
 
-        # BACKUP RÁPIDO (compatibilidade)
+        # QUICK BACKUP (compatibility)
         self._create_backup(df)
 
-        # STEP 1: SMART FILTERING usando features já computadas
+        # STEP 1: SMART FILTERING using already computed features
         filtered_df = self._smart_filter_political_relevance(df, text_column)
         reduction_pct = (1 - len(filtered_df) / len(df)) * 100
-        logger.info(f"🎯 Smart filtering: {len(df)} → {len(filtered_df)} registros ({reduction_pct:.1f}% redução)")
+        logger.info(f"🎯 Smart filtering: {len(df)} → {len(filtered_df)} records ({reduction_pct:.1f}% reduction)")
 
-        # STEP 2: BULK ANALYSIS usando processamento concorrente
+        # STEP 2: BULK ANALYSIS using concurrent processing
         if len(filtered_df) > 0:
             results_df = asyncio.run(self._bulk_political_analysis_concurrent(filtered_df, text_column))
         else:
             results_df = self._create_empty_results_df(df)
 
-        # STEP 3: MERGE RESULTS com DataFrame original
+        # STEP 3: MERGE RESULTS with original DataFrame
         enriched_df = self._merge_political_results(df, results_df)
 
-        # STEP 4: ANÁLISE LÉXICA COMPLEMENTAR (compatibilidade)
+        # STEP 4: COMPLEMENTARY LEXICAL ANALYSIS (compatibility)
         lexicon_results = self._analyze_with_lexicon(enriched_df, text_column)
 
-        # STEP 5: RELATÓRIO FINAL
+        # STEP 5: FINAL REPORT
         report = self._generate_optimized_report(enriched_df, len(filtered_df), lexicon_results)
 
-        logger.info("✅ Análise política OTIMIZADA concluída")
+        logger.info("✅ OPTIMIZED political analysis completed")
         return enriched_df, report
 
     def _smart_filter_political_relevance(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
         """
-        SMART FILTERING usando features já computadas do pipeline
+        SMART FILTERING using already computed pipeline features
 
-        APROVEITA:
+        LEVERAGES:
         - duplicate_frequency (skip mega-duplicates)
-        - text_length (skip muito curtos/longos)
-        - is_very_short (feature já computada)
-        - body_cleaned (texto já processado)
-        - channel patterns para relevância política
+        - text_length (skip too short/long)
+        - is_very_short (already computed feature)
+        - body_cleaned (already processed text)
+        - channel patterns for political relevance
         """
 
-        # CONDIÇÕES USANDO FEATURES EXISTENTES
+        # CONDITIONS USING EXISTING FEATURES
         conditions = [
             df['duplicate_frequency'] <= 100,  # Skip mega-duplicates (spam)
             ~df.get('is_very_short', pd.Series([False] * len(df), index=df.index)),   # Skip micro-content
@@ -340,7 +340,7 @@ class PoliticalAnalyzer(AnthropicBase):
             df.get('text_length', 0) >= 20     # Minimum meaningful length
         ]
 
-        # FILTRO POLÍTICO POR KEYWORDS
+        # POLITICAL FILTER BY KEYWORDS
         political_keywords = [
             'bolsonaro', 'lula', 'presidente', 'governo', 'política', 'eleição',
             'direita', 'esquerda', 'pt', 'psl', 'urna', 'voto', 'congresso',
@@ -349,11 +349,11 @@ class PoliticalAnalyzer(AnthropicBase):
         ]
 
         text_lower = df[text_column].fillna('').str.lower()
-        # Usar pattern pré-compilado para melhor performance
+        # Use pre-compiled pattern for better performance
         political_content = text_lower.apply(lambda x: bool(self._political_pattern.search(x)) if pd.notna(x) else False)
         conditions.append(political_content)
 
-        # COMBINAR TODAS AS CONDIÇÕES
+        # COMBINE ALL CONDITIONS
         final_condition = conditions[0]
         for condition in conditions[1:]:
             final_condition &= condition
@@ -362,41 +362,41 @@ class PoliticalAnalyzer(AnthropicBase):
 
     async def _bulk_political_analysis_concurrent(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
         """
-        BULK ANALYSIS com processamento concorrente Anthropic-style
+        BULK ANALYSIS with concurrent Anthropic-style processing
 
-        OTIMIZAÇÕES:
-        - Batches de 100 registros (vs 10 anterior)
-        - 5 batches processados simultaneamente
-        - Semáforo para controle de concorrência
-        - Error handling robusto por batch
+        OPTIMIZATIONS:
+        - Batches of 100 records (vs 10 previous)
+        - 5 batches processed simultaneously
+        - Semaphore for concurrency control
+        - Robust error handling per batch
         """
 
         if len(df) == 0:
             return self._create_empty_results_df(df)
 
-        # PREPARAR BATCHES OTIMIZADOS
+        # PREPARE OPTIMIZED BATCHES
         batches = self._prepare_optimized_batches(df, text_column)
         total_batches = len(batches)
-        logger.info(f"📦 Preparados {total_batches} batches (vs {len(df)//10} anteriormente)")
+        logger.info(f"📦 Prepared {total_batches} batches (vs {len(df)//10} previously)")
 
-        # PROCESSAMENTO CONCORRENTE
+        # CONCURRENT PROCESSING
         try:
             batch_results = await asyncio.gather(
                 *[self._process_batch_async(i, batch) for i, batch in enumerate(batches)],
                 return_exceptions=True
             )
         except Exception as e:
-            logger.error(f"❌ Erro no processamento concorrente: {e}")
+            logger.error(f"❌ Error in concurrent processing: {e}")
             return self._create_empty_results_df(df)
 
-        # CONSOLIDAR RESULTADOS
+        # CONSOLIDATE RESULTS
         all_results = []
         successful_batches = 0
 
         for i, batch_result in enumerate(batch_results):
             if isinstance(batch_result, Exception):
-                logger.error(f"❌ Erro no batch {i+1}: {batch_result}")
-                # Adicionar resultados vazios para este batch
+                logger.error(f"❌ Error in batch {i+1}: {batch_result}")
+                # Add empty results for this batch
                 batch_size = len(batches[i]['texts'])
                 all_results.extend([self._create_empty_result() for _ in range(batch_size)])
             else:
@@ -404,13 +404,13 @@ class PoliticalAnalyzer(AnthropicBase):
                     all_results.extend(batch_result)
                 successful_batches += 1
 
-        logger.info(f"✅ Processamento concluído: {successful_batches}/{total_batches} batches bem-sucedidos")
+        logger.info(f"✅ Processing completed: {successful_batches}/{total_batches} successful batches")
 
-        # CONVERTER PARA DATAFRAME
+        # CONVERT TO DATAFRAME
         return self._results_to_dataframe(all_results, df.index)
 
     def _prepare_optimized_batches(self, df: pd.DataFrame, text_column: str) -> List[Dict]:
-        """Preparar batches otimizados com metadata contextual"""
+        """Prepare optimized batches with contextual metadata"""
 
         batches = []
         for i in range(0, len(df), self.batch_size):
@@ -426,7 +426,7 @@ class PoliticalAnalyzer(AnthropicBase):
         return batches
 
     def _extract_batch_metadata(self, batch_df: pd.DataFrame) -> Dict:
-        """Extrair metadata contextual para melhor classificação"""
+        """Extract contextual metadata for better classification"""
         return {
             'channels': batch_df.get('channel', pd.Series([''] * len(batch_df), index=batch_df.index)).fillna('').tolist(),
             'dates': batch_df.get('datetime', pd.Series([''] * len(batch_df), index=batch_df.index)).fillna('').tolist(),
@@ -437,15 +437,15 @@ class PoliticalAnalyzer(AnthropicBase):
 
     async def _process_batch_async(self, batch_num: int, batch_data: Dict) -> List[PoliticalClassificationResult]:
         """
-        PROCESSAR BATCH individual de forma assíncrona com ENHANCED LOGGING
+        PROCESS individual BATCH asynchronously with ENHANCED LOGGING
 
-        FLUXO OTIMIZADO APRIMORADO:
-        1. Token control e truncamento inteligente
-        2. Check cache unificado
-        3. Create prompt XML estruturado com few-shot enhanced
-        4. API call assíncrona com fallback strategies
-        5. Parse XML response com validação Pydantic
-        6. Logging completo e cache results
+        ENHANCED OPTIMIZED FLOW:
+        1. Token control and intelligent truncation
+        2. Check unified cache
+        3. Create structured XML prompt with enhanced few-shot
+        4. Asynchronous API call with fallback strategies
+        5. Parse XML response with Pydantic validation
+        6. Complete logging and cache results
         """
 
         async with self.semaphore:
@@ -453,28 +453,28 @@ class PoliticalAnalyzer(AnthropicBase):
             start_time = datetime.now()
 
             try:
-                logger.info(f"🔄 Processando {batch_id} com {len(batch_data['texts'])} registros")
+                logger.info(f"🔄 Processing {batch_id} with {len(batch_data['texts'])} records")
 
-                # 1. TOKEN CONTROL - Verificar e truncar se necessário
+                # 1. TOKEN CONTROL - Check and truncate if necessary
                 batch_data = self._apply_token_control(batch_data)
 
                 # 2. CHECK CACHE FIRST
                 cached_results = self._check_batch_cache(batch_data['texts'])
                 if cached_results:
-                    logger.info(f"💾 Cache hit para {batch_id}")
+                    logger.info(f"💾 Cache hit for {batch_id}")
                     return cached_results
 
                 # 3. CREATE ENHANCED PROMPT
                 prompt = self._create_enhanced_anthropic_prompt(batch_data)
                 prompt_tokens = self._count_tokens(prompt)
 
-                # 4. API CALL COM FALLBACK STRATEGIES
+                # 4. API CALL WITH FALLBACK STRATEGIES
                 response = await self._anthropic_api_call_with_fallback(prompt, batch_id)
 
-                # 5. PARSE COM VALIDAÇÃO PYDANTIC
+                # 5. PARSE WITH PYDANTIC VALIDATION
                 results = self._parse_anthropic_xml_response(response, len(batch_data['texts']))
 
-                # 6. LOGGING COMPLETO
+                # 6. COMPLETE LOGGING
                 processing_time = (datetime.now() - start_time).total_seconds()
                 self._log_batch_processing_sync(batch_id, batch_data, prompt, prompt_tokens,
                                                response, results, processing_time, True)
@@ -482,12 +482,12 @@ class PoliticalAnalyzer(AnthropicBase):
                 # 7. CACHE RESULTS
                 self._cache_batch_results(batch_data['texts'], results)
 
-                logger.info(f"✅ {batch_id} processado com sucesso em {processing_time:.2f}s")
+                logger.info(f"✅ {batch_id} processed successfully in {processing_time:.2f}s")
                 return results
 
             except Exception as e:
                 processing_time = (datetime.now() - start_time).total_seconds()
-                logger.error(f"❌ Erro no {batch_id}: {e}")
+                logger.error(f"❌ Error in {batch_id}: {e}")
 
                 # LOG ERROR
                 self._log_batch_processing_sync(batch_id, batch_data, "", 0, "", [], processing_time, False, str(e))
@@ -495,7 +495,7 @@ class PoliticalAnalyzer(AnthropicBase):
                 return self._create_empty_batch_results(len(batch_data['texts']))
 
     def _apply_token_control(self, batch_data: Dict) -> Dict:
-        """CONTROLE DE TOKENS com truncamento inteligente"""
+        """TOKEN CONTROL with intelligent truncation"""
 
         texts = batch_data['texts']
         truncated_texts = []
@@ -586,10 +586,10 @@ informativo: Deslegitimação Mídia|Promoção Fontes Alternativas|Discussão G
 </level4>"""
 
         prompt = f"""<instructions>
-Você é um sistema especializado de classificação política brasileira para mensagens do Telegram.
-Período de análise: 2019-2023 (governo Bolsonaro e transição).
-Classifique as {len(texts)} mensagens usando taxonomia hierárquica de {"4 níveis" if level4_enabled else "3 níveis"}.{early_stopping_instructions}
-Retorne APENAS XML estruturado sem texto adicional.
+You are a specialized Brazilian political classification system for Telegram messages.
+Analysis period: 2019-2023 (Bolsonaro government and transition).
+Classify the {len(texts)} messages using hierarchical taxonomy of {"4 levels" if level4_enabled else "3 levels"}.{early_stopping_instructions}
+Return ONLY structured XML without additional text.
 </instructions>
 
 <taxonomy>
@@ -765,7 +765,7 @@ Analise cada mensagem considerando:
     def _log_batch_processing_sync(self, batch_id: str, batch_data: Dict, prompt: str,
                                   prompt_tokens: int, response: str, results: List,
                                   processing_time: float, success: bool, error_message: Optional[str] = None):
-        """LOGGING SIMPLIFICADO de processamento de batch"""
+        """SIMPLIFIED LOGGING of batch processing"""
 
         try:
             log_data = {
@@ -783,11 +783,11 @@ Analise cada mensagem considerando:
                 "results_count": len(results) if results else 0
             }
 
-            # Log básico
+            # Basic log
             if success:
-                logger.info(f"📊 {batch_id}: {log_data['results_count']} resultados em {processing_time:.2f}s")
+                logger.info(f"📊 {batch_id}: {log_data['results_count']} results in {processing_time:.2f}s")
             else:
-                logger.error(f"❌ {batch_id}: Falhou em {processing_time:.2f}s - {error_message}")
+                logger.error(f"❌ {batch_id}: Failed in {processing_time:.2f}s - {error_message}")
 
             # Save simplified log (as dict instead of Pydantic model)
             if not hasattr(self, 'prompt_logs'):
@@ -795,10 +795,10 @@ Analise cada mensagem considerando:
             self.prompt_logs.append(log_data)
 
         except Exception as e:
-            logger.error(f"❌ Erro no logging: {e}")
+            logger.error(f"❌ Error in logging: {e}")
 
     def _sync_anthropic_call(self, prompt: str, batch_id: str, model: str) -> str:
-        """Chamada síncrona para API Anthropic com configuração otimizada"""
+        """Synchronous call to Anthropic API with optimized configuration"""
 
         try:
             result = self.error_handler.execute_with_retry(
@@ -823,13 +823,13 @@ Analise cada mensagem considerando:
 
     def _parse_anthropic_xml_response(self, response: str, expected_count: int) -> List[PoliticalClassificationResult]:
         """
-        PARSER XML otimizado para resposta estruturada da Anthropic
+        Optimized XML PARSER for Anthropic structured response
 
-        ROBUSTO:
-        - Extrai XML de resposta mixed
-        - Fallback para estrutura mínima
-        - Garante número correto de resultados
-        - Error handling granular
+        ROBUST:
+        - Extracts XML from mixed response
+        - Fallback to minimal structure
+        - Ensures correct number of results
+        - Granular error handling
         """
 
         try:
@@ -842,9 +842,9 @@ Analise cada mensagem considerando:
             results = []
             for message_elem in root.findall('.//message'):
                 # Parse basic fields
-                political_level = self._get_xml_text(message_elem, 'political_level', 'não-político')
-                alignment = self._get_xml_text(message_elem, 'alignment', 'indefinido')
-                reasoning = self._get_xml_text(message_elem, 'reasoning', 'Análise automática')
+                political_level = self._get_xml_text(message_elem, 'political_level', 'non-political')
+                alignment = self._get_xml_text(message_elem, 'alignment', 'undefined')
+                reasoning = self._get_xml_text(message_elem, 'reasoning', 'Automatic analysis')
                 confidence = float(self._get_xml_text(message_elem, 'confidence', '0.5'))
 
                 # Parse Level 3 and 4 if available
