@@ -18,6 +18,15 @@ checkpoints/*.json
 data/**/*.json
 **/temp_*.json
 *.log
+
+# Production cleanup ignores
+cache/
+temp/
+test_*/
+benchmark_results/
+deployment_backups/
+performance_reports/
+.DS_Store
 *.tmp
 *.swp
 *.egg-info/
@@ -54,4 +63,5 @@ data/interim/*.csv
 test_backups/
 e2e_test_backups/
 src/dashboard/data/uploads/
-
+src/dashboard/data/dashboard_results
+cache/claude_api_production/responses
