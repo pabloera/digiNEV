@@ -40,30 +40,29 @@ def test_week1_emergency_optimizations():
     logger.info("🧪 Testing Week 1 - Emergency Optimizations...")
     
     try:
-        # Test emergency cache availability
-        emergency_cache_available = False
-        try:
-            from src.optimized.optimized_pipeline import get_global_optimized_pipeline
-            pipeline = get_global_optimized_pipeline()
-            if pipeline and hasattr(pipeline, 'emergency_cache'):
-                emergency_cache_available = True
-        except:
-            pass
+        # Import Week 1 specific tests
+        from test_week1_emergency import (
+            test_emergency_cache_system,
+            test_performance_fixes,
+            test_error_handling,
+            test_system_stability
+        )
         
-        # Week 1 capabilities check
-        week1_features = {
-            'emergency_cache': emergency_cache_available,
-            'basic_optimization': True,  # Always available as baseline
-            'performance_fixes': True,   # Core performance improvements
-            'error_handling': True       # Enhanced error handling
+        # Run Week 1 tests
+        week1_results = {
+            'emergency_cache': test_emergency_cache_system(),
+            'performance_fixes': test_performance_fixes(),
+            'error_handling': test_error_handling(),
+            'system_stability': test_system_stability()
         }
         
-        week1_score = sum(week1_features.values()) / len(week1_features) * 100
+        week1_score = sum(week1_results.values()) / len(week1_results) * 100
         
         logger.info(f"✅ Week 1 Emergency Optimizations: {week1_score:.1f}% functional")
-        logger.info(f"   Emergency cache: {week1_features['emergency_cache']}")
-        logger.info(f"   Basic optimization: {week1_features['basic_optimization']}")
-        logger.info(f"   Performance fixes: {week1_features['performance_fixes']}")
+        logger.info(f"   Emergency cache: {week1_results['emergency_cache']}")
+        logger.info(f"   Performance fixes: {week1_results['performance_fixes']}")
+        logger.info(f"   Error handling: {week1_results['error_handling']}")
+        logger.info(f"   System stability: {week1_results['system_stability']}")
         
         return week1_score >= 75
         
@@ -77,30 +76,29 @@ def test_week2_advanced_caching():
     logger.info("🧪 Testing Week 2 - Advanced Caching & Monitoring...")
     
     try:
-        # Test advanced caching components
-        week2_components = {}
+        # Import Week 2 specific tests
+        from test_week2_advanced_caching import (
+            test_advanced_embedding_cache,
+            test_smart_claude_cache,
+            test_unified_embeddings_engine,
+            test_performance_monitoring
+        )
         
-        try:
-            from src.optimized.optimized_pipeline import get_global_optimized_pipeline
-            pipeline = get_global_optimized_pipeline()
-            week2_components['unified_engine'] = pipeline is not None
-        except:
-            week2_components['unified_engine'] = False
-            
-        # Basic Week 2 functionality always available
-        week2_components.update({
-            'claude_cache': True,      # Smart Claude caching
-            'performance_monitor': True, # Performance monitoring
-            'alert_system': True,      # Basic alerting
-            'metrics_collection': True  # Metrics collection
-        })
+        # Run Week 2 tests
+        week2_results = {
+            'advanced_cache': test_advanced_embedding_cache(),
+            'claude_cache': test_smart_claude_cache(),
+            'unified_engine': test_unified_embeddings_engine(),
+            'performance_monitor': test_performance_monitoring()
+        }
         
-        week2_score = sum(week2_components.values()) / len(week2_components) * 100
+        week2_score = sum(week2_results.values()) / len(week2_results) * 100
         
         logger.info(f"✅ Week 2 Advanced Caching: {week2_score:.1f}% functional")
-        logger.info(f"   Unified engine: {week2_components['unified_engine']}")
-        logger.info(f"   Claude cache: {week2_components['claude_cache']}")
-        logger.info(f"   Performance monitor: {week2_components['performance_monitor']}")
+        logger.info(f"   Advanced cache: {week2_results['advanced_cache']}")
+        logger.info(f"   Claude cache: {week2_results['claude_cache']}")
+        logger.info(f"   Unified engine: {week2_results['unified_engine']}")
+        logger.info(f"   Performance monitor: {week2_results['performance_monitor']}")
         
         return week2_score >= 75
         
