@@ -2,8 +2,8 @@
 # Copy this file to voyage_embeddings.yaml and add your API key
 
 voyage_embeddings:
-  # API Configuration
-  api_key: "your_voyage_api_key_here"
+  # API Configuration (set in .env file as VOYAGE_API_KEY)
+  api_key: "${VOYAGE_API_KEY}"  # Will be loaded from .env file
   base_url: "https://api.voyageai.com"
   
   # Academic Model Selection (cost-optimized)

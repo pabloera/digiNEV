@@ -180,7 +180,7 @@ def test_config():
         'anthropic': {
             'enable_api_integration': False,  # Disable for testing
             'api_key': 'test_key',
-            'model': 'claude-3-haiku-20240307',
+            'model': 'claude-3-5-haiku-20241022',
             'max_tokens': 1000,
             'batch_size': 10
         },

@@ -84,7 +84,7 @@ class TestAnthropicIntegration:
         
         # Should track token usage
         cost_monitor.track_request(
-            model="claude-3-haiku-20240307",
+            model="claude-3-5-haiku-20241022",
             input_tokens=100,
             output_tokens=50
         )

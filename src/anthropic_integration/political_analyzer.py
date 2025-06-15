@@ -209,7 +209,7 @@ class PoliticalAnalyzer(AnthropicBase):
         self.max_message_tokens = 800  # Per message limit
 
         # FALLBACK STRATEGIES
-        self.fallback_models = ["claude-3-5-haiku-20241022", "claude-3-haiku-20240307"]
+        self.fallback_models = ["claude-3-5-haiku-20241022", "claude-3-5-haiku-20241022"]
         self.current_model_index = 0
         self.max_retries = 3
         self.backoff_factor = 2

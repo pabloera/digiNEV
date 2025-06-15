@@ -1,7 +1,7 @@
 
 anthropic:
   enable_api_integration: false
-  model: claude-3-haiku-20240307
+  model: claude-3-5-haiku-20241022
 
 processing:
   chunk_size: 1000

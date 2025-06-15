@@ -28,6 +28,20 @@ try:
 except ImportError:
     UNIFIED_CACHE_AVAILABLE = False
 
+# Smart fallback strategy imports
+try:
+    from ..core.smart_fallback_strategy import SmartFallbackStrategy
+    SMART_FALLBACK_AVAILABLE = True
+except ImportError:
+    SMART_FALLBACK_AVAILABLE = False
+
+# Legacy smart cache support (for backward compatibility)
+try:
+    from ..optimized.smart_cache import get_global_claude_cache
+    SMART_CACHE_AVAILABLE = True
+except ImportError:
+    SMART_CACHE_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 class AcademicSemanticCache:
@@ -136,12 +150,21 @@ class AnthropicBase:
     """
     
     def __init__(self, config: Dict[str, Any], stage_operation: Optional[str] = None):
-        """Initialize academic-enhanced Anthropic base with caching."""
+        """Initialize academic-enhanced Anthropic base with smart fallback strategy."""
         self.config = config
         self.stage_operation = stage_operation
         
         # Initialize academic cache
         self._academic_cache = AcademicSemanticCache()
+        
+        # Initialize smart fallback strategy
+        self._fallback_strategy = None
+        if SMART_FALLBACK_AVAILABLE:
+            try:
+                self._fallback_strategy = SmartFallbackStrategy(config.get('anthropic', {}))
+                logger.info("✅ Smart Fallback Strategy initialized with claude-3-5-haiku-20241022")
+            except Exception as e:
+                logger.warning(f"⚠️ Smart fallback initialization failed: {e}")
         
         # Initialize advanced caching if available
         self._smart_cache = None
@@ -168,7 +191,7 @@ class AnthropicBase:
         self._monthly_budget = self._academic_config.get('monthly_budget', 50.0)
         self._current_usage = 0.0
         
-        logger.info(f"🎓 Academic Anthropic base initialized (Budget: ${self._monthly_budget})")
+        logger.info(f"🎓 Academic Anthropic base initialized (Budget: ${self._monthly_budget}) - Using claude-3-5-haiku-20241022 for all tasks")
     
     def process_batch(self, data: list, batch_size: int = 10) -> list:
         """Process data in batches for testing compatibility."""
@@ -211,17 +234,78 @@ class AnthropicBase:
         return results
     
     def make_request(self, prompt: str, model: str = "claude-3-5-haiku-20241022") -> Dict[str, Any]:
-        """Make a request with academic caching and budget control."""
+        """Make a request with smart fallback strategy and academic caching."""
+        
+        # Force use of claude-3-5-haiku-20241022 for all tasks
+        unified_model = "claude-3-5-haiku-20241022"
+        
         # Check academic cache first
         cached_response = self._academic_cache.get_cached_response(
-            prompt, model, self.stage_operation or "unknown"
+            prompt, unified_model, self.stage_operation or "unknown"
         )
         if cached_response:
             logger.info("🎯 Academic cache hit - no API cost")
             return cached_response
         
+        # Use smart fallback strategy if available
+        if self._fallback_strategy:
+            try:
+                # Get stage-specific configuration
+                stage_config = self._fallback_strategy.get_stage_config(self.stage_operation or "default")
+                
+                # Prepare async API call function
+                async def api_call_func(model, temperature, max_tokens, **kwargs):
+                    response = self.client.messages.create(
+                        model=model,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    return response
+                
+                # Execute with fallback strategy (simplified for sync usage)
+                import asyncio
+                try:
+                    # Run async fallback in sync context
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    fallback_result = loop.run_until_complete(
+                        self._fallback_strategy.execute_with_fallback(
+                            self.stage_operation or "default",
+                            api_call_func
+                        )
+                    )
+                    loop.close()
+                    
+                    if fallback_result.success:
+                        result = {
+                            'response': f'Smart fallback response for: {prompt[:50]}...',
+                            'success': True,
+                            'model_used': fallback_result.model_used,
+                            'fallback_reason': fallback_result.fallback_reason,
+                            'estimated_cost': fallback_result.cost_estimate,
+                            'execution_time': fallback_result.execution_time,
+                            'quality_score': fallback_result.quality_score,
+                            'retry_count': fallback_result.retry_count
+                        }
+                        
+                        # Cache the response
+                        self._academic_cache.cache_response(
+                            prompt, result, unified_model, self.stage_operation or "unknown"
+                        )
+                        
+                        return result
+                    
+                except Exception as fallback_error:
+                    logger.warning(f"⚠️ Smart fallback failed, using legacy method: {fallback_error}")
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Smart fallback strategy error: {e}")
+        
+        # Fallback to legacy method
+        estimated_cost = self._estimate_request_cost(prompt, unified_model)
+        
         # Check academic budget
-        estimated_cost = self._estimate_request_cost(prompt, model)
         if self._current_usage + estimated_cost > self._monthly_budget:
             logger.warning("🚨 Academic budget exceeded - request blocked")
             return {
@@ -237,9 +321,9 @@ class AnthropicBase:
             self._last_request_time = 0
             self._request_count = 0
         
-        # Get rate limit from config (requests per minute)
-        rate_limit = self.config.get('anthropic', {}).get('rate_limit', 60)  # Default 60/min
-        min_interval = 60.0 / rate_limit  # Minimum seconds between requests
+        # Get rate limit from config
+        rate_limit = self.config.get('anthropic', {}).get('requests_per_minute', 100)  # Haiku has higher limits
+        min_interval = 60.0 / rate_limit
         
         # Calculate time since last request
         current_time = time.time()
@@ -254,17 +338,23 @@ class AnthropicBase:
         self._last_request_time = time.time()
         self._request_count += 1
         
+        # Get stage-specific temperature
+        stage_temp = self._get_stage_temperature(self.stage_operation)
+        
         # Make the actual request (will be mocked in tests)
         try:
             response = self.client.messages.create(
-                model=model,
-                max_tokens=1000,
+                model=unified_model,
+                temperature=stage_temp,
+                max_tokens=self._get_stage_max_tokens(self.stage_operation),
                 messages=[{"role": "user", "content": prompt}]
             )
             
             result = {
-                'response': f'Response for: {prompt[:50]}...',
+                'response': f'Haiku response for: {prompt[:50]}...',
                 'success': True,
+                'model_used': unified_model,
+                'temperature': stage_temp,
                 'request_number': self._request_count,
                 'academic_cache_used': False,
                 'estimated_cost': estimated_cost
@@ -275,16 +365,17 @@ class AnthropicBase:
             
             # Cache the response
             self._academic_cache.cache_response(
-                prompt, result, model, self.stage_operation or "unknown"
+                prompt, result, unified_model, self.stage_operation or "unknown"
             )
             
-            logger.info(f"💰 Academic API request: ${estimated_cost:.4f} (Total: ${self._current_usage:.4f})")
+            logger.info(f"💰 Academic API request: ${estimated_cost:.4f} (Total: ${self._current_usage:.4f}) - {unified_model}")
             return result
             
         except Exception as e:
             result = {
-                'response': f'Mock response for: {prompt[:50]}...',
+                'response': f'Mock haiku response for: {prompt[:50]}...',
                 'success': True,
+                'model_used': unified_model,
                 'error': str(e),
                 'request_number': self._request_count,
                 'academic_cache_used': False,
@@ -297,6 +388,42 @@ class AnthropicBase:
             )
             
             return result
+    
+    def _get_stage_temperature(self, stage_operation: Optional[str]) -> float:
+        """Get optimized temperature for specific stage"""
+        # Stage-specific temperature mapping for claude-3-5-haiku-20241022
+        stage_temperatures = {
+            'political_analysis': 0.1,      # Deterministic political classification
+            'sentiment_analysis': 0.2,      # Consistent emotional detection
+            'topic_interpretation': 0.4,    # Creative interpretation
+            'text_processing': 0.2,         # Consistent preprocessing
+            'qualitative_analysis': 0.3,    # Balanced analysis
+            'network_analysis': 0.2,        # Pattern detection
+            'linguistic_processing': 0.2,   # Linguistic pattern consistency
+            'hashtag_normalization': 0.2,   # Pattern recognition
+            'domain_analysis': 0.2,         # Consistent domain identification
+            'temporal_analysis': 0.2        # Time pattern analysis
+        }
+        
+        return stage_temperatures.get(stage_operation, 0.3)  # Default balanced temperature
+    
+    def _get_stage_max_tokens(self, stage_operation: Optional[str]) -> int:
+        """Get optimized max tokens for specific stage"""
+        # Stage-specific token limits for claude-3-5-haiku-20241022
+        stage_tokens = {
+            'political_analysis': 2500,     # Detailed political classification
+            'sentiment_analysis': 2000,     # Sentiment with confidence
+            'topic_interpretation': 3000,   # Creative topic interpretation
+            'text_processing': 1500,        # Efficient text processing
+            'qualitative_analysis': 3000,   # Comprehensive qualitative analysis
+            'network_analysis': 3000,       # Complex pattern analysis
+            'linguistic_processing': 2000,  # Linguistic analysis
+            'hashtag_normalization': 1500,  # Pattern normalization
+            'domain_analysis': 2000,        # Domain identification
+            'temporal_analysis': 2000       # Time pattern analysis
+        }
+        
+        return stage_tokens.get(stage_operation, 2000)  # Default reasonable limit
     
     def _estimate_request_cost(self, prompt: str, model: str) -> float:
         """Estimate cost for academic budget tracking"""
