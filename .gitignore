@@ -1,68 +1,133 @@
+# ================================================================
+# digiNEV v5.0.0 - GitIgnore Configuration for Academic Research
+# ================================================================
+
+# ===================
+# Python Environment
+# ===================
 .venv/
 __pycache__/
 *.py[cod]
 *.so
 .mypy_cache/
-.env
-.envrc
-
-# Poetry files - TRACKED IN REPO
-# poetry.lock    ✅ dependency versions
-# poetry.toml    ✅ Poetry settings  
-# pyproject.toml ✅ project configuration
-# .vscode/settings.json ✅ IDE integration
-
-# Temporary files only
-logs/*.json
-checkpoints/*.json
-data/**/*.json
-**/temp_*.json
-*.log
-
-# Production cleanup ignores
-cache/
-temp/
-test_*/
-benchmark_results/
-deployment_backups/
-performance_reports/
-.DS_Store
-*.tmp
-*.swp
 *.egg-info/
 build/
 dist/
-.csv/
 
-# Sensitive files
+# ===================
+# Environment & Secrets
+# ===================
+.env
+.envrc
 *.key
 *.pem
 secrets/
 
-# Data files
-data/DATASETS_FULL/
-data/uploads/*.csv
-data/interim/
-logs/
-checkpoints/
-
-# Dashboard temp files
-src/dashboard/data/uploads/
-src/dashboard/temp/
-
-# IDE files
+# ===================
+# IDE & Editor Files
+# ===================
+.vscode/
+.github/
 .idea/
 *.sublime-*
+*.vscode
 .DS_Store
 Thumbs.db
-# Large data files
+*.tmp
+*.swp
+
+# ===================
+# Development Tools
+# ===================
+.pytest_cache/
+.coverage
+.tox/
+.coverage.*
+coverage.xml
+nosetests.xml
+
+# ===================
+# Academic Research Data
+# ===================
+# Large datasets (academic research)
+data/DATASETS_FULL/
+data/uploads/
+data/interim/
 *.csv
-pipeline_outputs/*.csv
-data/uploads/*.csv
-data/interim/*.csv
+# Exclude all CSV files (datasets, exports, temporary files)
+**/*.csv
+
+# ===================
+# Pipeline & Cache Files
+# ===================
+cache/
+temp/
+logs/
+checkpoints/
+pipeline_outputs/
+benchmark_results/
+deployment_backups/
+performance_reports/
+
+# ===================
+# Dashboard & Web Files
+# ===================
+src/dashboard/data/uploads/
+src/dashboard/temp/
+src/dashboard/data/dashboard_results/
+node_modules/
+npm-debug.log*
+
+# ===================
+# Backup & Archive Files
+# ===================
+backup/
+archive/
 test_backups/
 e2e_test_backups/
-src/dashboard/data/uploads/
-src/dashboard/data/dashboard_results
-cache/claude_api_production/responsesconfig/voyage_embeddings.yaml
+# Backup file extensions (prevent large file commits)
+*.backup
+*.bak
+*.backup.*
+*.bak.*
+*_backup
+*_backup.*
+*.old
+*.orig
+*.save
+*.swp
+*.swo
+*~
+
+# ===================
+# Configuration Files (API Keys)
+# ===================
 config/anthropic.yaml
+config/voyage_embeddings.yaml
+# Keep example files for documentation
+!config/*.example
+!config/*.template
+
+# ===================
+# Temporary & Log Files
+# ===================
+*.log
+logs/*.json
+checkpoints/*.json
+data/**/*.json
+**/temp_*.json
+test_*/
+
+# ===================
+# Operating System Files
+# ===================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===================
+# Poetry files - TRACKED IN REPO
+# ===================
+# poetry.lock    ✅ dependency versions
+# poetry.toml    ✅ Poetry settings  
+# pyproject.toml ✅ project configuration

@@ -128,6 +128,37 @@ def configure_all_performance():
     return results
 
 
+def configure_performance_settings():
+    """
+    Factory function for performance settings configuration
+    Expected by test suite - returns configuration dictionary
+    """
+    try:
+        import multiprocessing
+        import numexpr
+        
+        # Apply all performance configurations
+        results = configure_all_performance()
+        
+        # Return configuration details for validation
+        config = {
+            'numexpr_threads': numexpr.nthreads if 'numexpr' in globals() else 0,
+            'cpu_cores': multiprocessing.cpu_count(),
+            'optimizations_applied': results,
+            'status': 'configured' if any(results.values()) else 'failed'
+        }
+        
+        return config
+        
+    except Exception as e:
+        logger.error(f"❌ Performance configuration failed: {e}")
+        return {
+            'status': 'failed',
+            'error': str(e),
+            'numexpr_threads': 0
+        }
+
+
 # Aplicar configurações automaticamente na importação
 if __name__ != "__main__":
     configure_all_performance()

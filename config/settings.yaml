@@ -1,87 +1,12 @@
-# =============================================================================
-# SETTINGS - Monitor do Discurso Digital v5.0.0
-# =============================================================================
-# Configuração principal simplificada com referências a outros arquivos
-# Este arquivo substitui o antigo settings.yaml monolítico
 
-# =============================================================================
-# CONFIGURAÇÃO DE AMBIENTE
-# =============================================================================
-environment:
-  # Definir ambiente via variável BOLSONARISMO_ENV
-  # Valores: development | production | testing
-  current: "${BOLSONARISMO_ENV:-development}"
-  
-# =============================================================================
-# INCLUDES - HIERARQUIA DE CONFIGURAÇÃO
-# =============================================================================
-includes:
-  # Configuração base do sistema
-  base: "master.yaml"
-  
-  # Configurações específicas por componente
-  api_limits: "api_limits.yaml"
-  logging: "logging.yaml"
-  processing: "processing.yaml"
-  timeout_management: "timeout_management.yaml"
-  paths: "paths.yaml"
-  network: "network.yaml"
-  
-  # Dados específicos
-  political_lexicon: "brazilian_political_lexicon.yaml"
-  
-  # Templates para APIs (devem ser copiados para uso)
-  templates:
-    anthropic: "anthropic.yaml.template"
-    voyage: "voyage_embeddings.yaml.template"
-  
-  # Configuração específica por ambiente
-  environment_config: "environments/${BOLSONARISMO_ENV:-development}.yaml"
+anthropic:
+  enable_api_integration: false
+  model: claude-3-5-haiku-20241022
 
-# =============================================================================
-# OVERRIDES GLOBAIS
-# =============================================================================
-# Estas configurações sobrescrevem as definidas nos arquivos incluídos
+processing:
+  chunk_size: 1000
+  encoding: utf-8
 
-project:
-  name: "monitor-discurso-digital"
-  version: "5.0.0"
-  pipeline_stages: 22
-  optimization_weeks: 5
-  production_ready: true
-
-# Configurações que podem ser sobrescritas por ambiente
-defaults:
-  # Modelo padrão (pode ser sobrescrito por ambiente específico)
-  default_model: "claude-3-5-haiku-20241022"
-  
-  # Configurações de segurança
-  security:
-    validate_inputs: true
-    sanitize_outputs: true
-    enable_rate_limiting: true
-  
-  # Configurações de performance base
-  performance:
-    enable_caching: true
-    parallel_processing: false  # Pode ser habilitado em produção
-    memory_management: "adaptive"
-
-# =============================================================================
-# CONFIGURAÇÃO DE PRECEDÊNCIA
-# =============================================================================
-# Ordem de precedência (maior prioridade primeiro):
-# 1. Variáveis de ambiente (ANTHROPIC_API_KEY, etc.)
-# 2. environment_config (environments/production.yaml, etc.)
-# 3. settings.yaml (este arquivo) - overrides globais
-# 4. Arquivos específicos (api_limits.yaml, processing.yaml, etc.)
-# 5. master.yaml (configuração base)
-
-precedence_info:
-  description: "Sistema hierárquico de configuração com precedência clara"
-  order:
-    - "Environment Variables (highest)"
-    - "Environment-specific config files"
-    - "settings.yaml overrides" 
-    - "Component-specific config files"
-    - "master.yaml base configuration (lowest)"
+data:
+  path: data/uploads
+  interim_path: data/interim

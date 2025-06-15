@@ -1,15 +1,7 @@
 """
-Digital Discourse Monitor Integrated Dashboard v5.0.0
-=====================================================
-
-Complete dashboard with real-time monitoring of 20 pipeline stages,
-quality control charts and stage-specific visualizations.
-
-🎯 v4.9.7: Dashboard updated for COMPLETE PIPELINE - Stages 1-20 executed!
-🔍 v4.9.7: Visualizations added for stages 17-20 (Review, Topics, Search, Validation).
-📊 v4.9.7: Complete API cost monitoring ($1.41 total).
-🛠️ v4.9.7: Enhanced Pipeline - 100% functional with final validation.
-🚨 v4.9.7: Real data from final stages integrated into dashboard.
+digiNEV Research Dashboard Application: Comprehensive visualization system for Brazilian political discourse analysis
+Function: Interactive Streamlit dashboard with real-time monitoring, quality control, and research-focused data visualization
+Usage: Social scientists explore analysis results through web interface - displays political patterns, sentiment trends, and violence indicators
 """
 
 import json

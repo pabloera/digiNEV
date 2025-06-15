@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import yaml
@@ -84,11 +84,18 @@ class ProgressiveTimeoutManager:
     ✅ Monitoramento e otimização contínua
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_or_path: Union[str, Dict[str, Any], None] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        # Carregar configurações
-        self.config = self._load_config(config_path)
+        # Handle both config dict and path string for backward compatibility
+        if isinstance(config_or_path, dict):
+            # Config dict passed (from tests)
+            self.config = config_or_path.get('timeout_management', {})
+            if not self.config:
+                self.config = self._get_default_config()
+        else:
+            # Path string passed (legacy)
+            self.config = self._load_config(config_or_path)
 
         # Estado interno
         self.stage_profiles: Dict[str, StageTimeoutProfile] = {}
@@ -165,6 +172,72 @@ class ProgressiveTimeoutManager:
             self.stage_profiles[stage_name] = profile
 
         self.logger.info(f"📊 Inicializados {len(self.stage_profiles)} perfis de stage")
+
+    def get_current_timeout(self, stage_name: str = "default") -> int:
+        """
+        Get current timeout for a stage (for testing).
+        
+        Args:
+            stage_name: Name of the stage
+            
+        Returns:
+            Current timeout in seconds
+        """
+        with self.lock:
+            if stage_name in self.stage_profiles:
+                return self.stage_profiles[stage_name].current_timeout
+            else:
+                # Return default timeout from config
+                default_timeouts = self.config.get('stage_timeouts', {})
+                return default_timeouts.get(stage_name, 300)  # 5 minutes default
+
+    def on_request_failed(self, stage_name: str = "default") -> None:
+        """
+        Handle request failure by increasing timeout (for testing).
+        
+        Args:
+            stage_name: Name of the stage that failed
+        """
+        with self.lock:
+            if stage_name in self.stage_profiles:
+                profile = self.stage_profiles[stage_name]
+                # Increase timeout by escalation factor
+                new_timeout = int(profile.current_timeout * profile.escalation_factor)
+                profile.current_timeout = min(new_timeout, profile.max_timeout)
+                self.logger.info(f"🔄 Timeout increased for {stage_name}: {profile.current_timeout}s")
+            else:
+                # Create a default profile for this stage if it doesn't exist
+                # Get current timeout without lock (avoid deadlock)
+                default_timeouts = self.config.get('stage_timeouts', {})
+                current_timeout = default_timeouts.get(stage_name, 300)  # 5 minutes default
+                escalated_timeout = int(current_timeout * 1.5)  # 50% increase
+                
+                # Create and store the profile
+                profile = StageTimeoutProfile(
+                    stage_name=stage_name,
+                    base_timeout=current_timeout,
+                    current_timeout=escalated_timeout,
+                    max_timeout=1800,  # 30 minutes max
+                    min_timeout=120,   # 2 minutes min
+                    escalation_factor=1.5,
+                    recommended_timeout=escalated_timeout
+                )
+                self.stage_profiles[stage_name] = profile
+                self.logger.info(f"🔄 Created profile and increased timeout for {stage_name}: {escalated_timeout}s")
+
+    def on_request_success(self, stage_name: str = "default") -> None:
+        """
+        Handle request success by resetting timeout (for testing).
+        
+        Args:
+            stage_name: Name of the stage that succeeded
+        """
+        with self.lock:
+            if stage_name in self.stage_profiles:
+                profile = self.stage_profiles[stage_name]
+                # Reset timeout to base timeout
+                profile.current_timeout = profile.base_timeout
+                self.logger.info(f"✅ Timeout reset for {stage_name}: {profile.current_timeout}s")
 
     def get_timeout_for_stage(self, stage_name: str, data_size: int = 0,
                              attempt_number: int = 1) -> int:

@@ -852,3 +852,102 @@ REGRAS:
         df = df.reset_index(drop=True)
 
         return df
+    
+    # TDD Phase 3 Methods - Standard validation interface
+    def validate_encoding(self, file_path: str) -> Dict[str, Any]:
+        """
+        TDD interface: Validate encoding for a file.
+        
+        Args:
+            file_path: Path to file to validate
+            
+        Returns:
+            Dict with validation results
+        """
+        try:
+            # Use existing detection method
+            detection_result = self.detect_encoding_with_chardet(file_path)
+            
+            # Format for TDD interface
+            result = {
+                'file_path': file_path,
+                'detected_encoding': detection_result.get('recommended_encoding', 'unknown'),
+                'is_valid': detection_result.get('confidence_score', 0) > 0.5,
+                'confidence': detection_result.get('confidence_score', 0),
+                'validation_timestamp': datetime.now().isoformat()
+            }
+            
+            # Check for corruption patterns
+            if detection_result.get('encoding_issues'):
+                result['corruption_detected'] = True
+                result['encoding_issues'] = detection_result['encoding_issues']
+            else:
+                result['corruption_detected'] = False
+            
+            logger.info(f"🔍 TDD Encoding validation: {result['detected_encoding']} (valid: {result['is_valid']})")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"TDD encoding validation error: {e}")
+            return {
+                'file_path': file_path,
+                'detected_encoding': 'unknown',
+                'is_valid': False,
+                'error': str(e),
+                'validation_timestamp': datetime.now().isoformat()
+            }
+    
+    def detect_encoding(self, file_path: str) -> Dict[str, Any]:
+        """TDD interface alias for validate_encoding."""
+        return self.validate_encoding(file_path)
+    
+    def suggest_encoding_fix(self, corrupted_text: str) -> Dict[str, Any]:
+        """
+        TDD interface: Suggest fixes for corrupted text.
+        
+        Args:
+            corrupted_text: Text with potential encoding issues
+            
+        Returns:
+            Dict with suggested fixes
+        """
+        result = {
+            'original_text': corrupted_text,
+            'suggested_fix': corrupted_text,
+            'confidence': 'low',
+            'changes_made': [],
+            'corruption_patterns_found': []
+        }
+        
+        try:
+            # Check for known encoding patterns
+            fixed_text = corrupted_text
+            changes = []
+            patterns_found = []
+            
+            # Apply known pattern fixes
+            for pattern_type, patterns in self.encoding_patterns.items():
+                for bad_char, good_char in patterns.items():
+                    if bad_char in fixed_text:
+                        fixed_text = fixed_text.replace(bad_char, good_char)
+                        changes.append(f"'{bad_char}' -> '{good_char}'")
+                        patterns_found.append(pattern_type)
+            
+            # Determine confidence based on fixes made
+            if changes:
+                result['suggested_fix'] = fixed_text
+                result['changes_made'] = changes
+                result['corruption_patterns_found'] = list(set(patterns_found))
+                
+                # Higher confidence if we found known patterns
+                if len(changes) > 0:
+                    result['confidence'] = 'high' if len(changes) >= 3 else 'medium'
+            
+            logger.debug(f"💡 TDD encoding fix suggestion: {len(changes)} changes suggested")
+            
+        except Exception as e:
+            logger.error(f"TDD encoding fix suggestion error: {e}")
+            result['error'] = str(e)
+        
+        return result
