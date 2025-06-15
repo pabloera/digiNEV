@@ -694,6 +694,48 @@ class AdaptiveMemoryManager:
             recommendations.append(f"Excellent memory optimization: {self.memory_savings_mb:.0f}MB total savings achieved")
         
         return recommendations
+    
+    def optimize_memory(self) -> Dict[str, Any]:
+        """Optimize memory for test compatibility."""
+        memory_info = psutil.Process().memory_info()
+        current_memory_gb = memory_info.rss / (1024**3)
+        
+        # Perform optimization
+        self._optimize_pandas_memory()
+        self._optimize_data_structures()
+        self.gc_optimizer.run_aggressive_gc()
+        
+        # Calculate savings
+        new_memory_info = psutil.Process().memory_info()
+        new_memory_gb = new_memory_info.rss / (1024**3)
+        savings_mb = (current_memory_gb - new_memory_gb) * 1024
+        
+        self.optimizations_performed += 1
+        self.memory_savings_mb += max(0, savings_mb)
+        
+        return {
+            'memory_before_gb': current_memory_gb,
+            'memory_after_gb': new_memory_gb,
+            'savings_mb': max(0, savings_mb),
+            'optimizations_performed': self.optimizations_performed
+        }
+    
+    def manage(self) -> Dict[str, Any]:
+        """Manage memory for test compatibility."""
+        return self.get_management_summary()
+    
+    def get_memory_usage(self) -> Dict[str, Any]:
+        """Get current memory usage for test compatibility."""
+        memory_info = psutil.Process().memory_info()
+        return {
+            'current_memory_gb': memory_info.rss / (1024**3),
+            'target_memory_gb': self.target_memory_gb,
+            'memory_utilization': (memory_info.rss / (1024**3)) / self.target_memory_gb
+        }
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get memory stats for test compatibility."""
+        return self.get_management_summary()
 
 # Factory functions
 def create_production_memory_manager() -> AdaptiveMemoryManager:

@@ -5,6 +5,7 @@ Tests data validation, cleaning, encoding, deduplication, and feature extraction
 These tests define expected behavior for data processing stages.
 """
 
+import json
 import os
 import tempfile
 from pathlib import Path

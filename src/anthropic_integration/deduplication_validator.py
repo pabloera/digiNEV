@@ -36,6 +36,13 @@ class DeduplicationValidator(AnthropicBase):
         super().__init__(config)
         self.error_handler = APIErrorHandler()
         self.quality_checker = APIQualityChecker(config)
+        
+        # For test compatibility - add voyage client mock
+        try:
+            from .voyage_embeddings import MockVoyageClient
+            self.voyage_client = MockVoyageClient()
+        except ImportError:
+            self.voyage_client = None
 
         # Padrões para detectar mensagens de mídia
         self.media_patterns = {

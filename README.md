@@ -120,7 +120,9 @@ print('🎉 Sistema pronto para uso!')
 "
 ```
 
-### 🚀 **Quick Start - PRODUCTION READY**
+## 🚀 **USAGE - PRODUCTION READY**
+
+### **Quick Start**
 ```bash
 # 1. Setup completo com Poetry (RECOMENDADO)
 cp config/anthropic.yaml.template config/anthropic.yaml

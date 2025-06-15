@@ -50,16 +50,23 @@ class ConsolidatedCostMonitor:
         }
     }
 
-    def __init__(self, project_dir: Path, config: Dict[str, Any] = None):
+    def __init__(self, project_dir_or_config, config: Dict[str, Any] = None):
         """
         Inicializa o monitor consolidado de custos
 
         Args:
-            project_dir: Diretório base do projeto
+            project_dir_or_config: Diretório base do projeto ou config dict (para testes)
             config: Configuração de custos (opcional)
         """
-        self.project_dir = Path(project_dir)
-        self.config = config or {}
+        # Handle both config dict and path for backward compatibility
+        if isinstance(project_dir_or_config, dict):
+            # Config dict passed (from tests)
+            self.config = project_dir_or_config
+            self.project_dir = Path.cwd()
+        else:
+            # Path passed (legacy)
+            self.project_dir = Path(project_dir_or_config)
+            self.config = config or {}
         
         # Configuração de diretórios
         self.logs_dir = self.project_dir / 'logs'
@@ -463,6 +470,46 @@ class ConsolidatedCostMonitor:
 
         return report
 
+    def track_request(self, model: str, input_tokens: int, output_tokens: int) -> None:
+        """
+        Track API request for testing compatibility.
+        
+        Args:
+            model: Model name
+            input_tokens: Number of input tokens
+            output_tokens: Number of output tokens
+        """
+        self.record_usage(model, input_tokens, output_tokens, stage='test', operation='track_request')
+
+    def get_total_cost(self) -> float:
+        """
+        Get total cost for testing compatibility.
+        
+        Returns:
+            Total cost in USD
+        """
+        return self.cost_data.get('total_cost', 0.0)
+
+    def get_usage_summary(self) -> Dict[str, Any]:
+        """
+        Get usage summary for testing compatibility.
+        
+        Returns:
+            Usage summary dict with total_requests field
+        """
+        summary = self.get_summary()
+        
+        # Add total_requests and total_tokens fields for test compatibility
+        total_requests = 0
+        total_tokens = 0
+        for model_data in summary.get('by_model', {}).values():
+            total_requests += model_data.get('requests', 0)
+            total_tokens += model_data.get('input_tokens', 0) + model_data.get('output_tokens', 0)
+        
+        summary['total_requests'] = total_requests
+        summary['total_tokens'] = total_tokens
+        return summary
+
 # Instância singleton para compatibilidade
 _consolidated_monitor = None
 
@@ -493,3 +540,6 @@ def get_enhanced_cost_monitor(project_root: Path, config: Dict[str, Any] = None)
     Alias para compatibilidade com sistema enhanced
     """
     return get_cost_monitor(project_root, config)
+
+# Alias para compatibilidade com testes
+CostMonitor = ConsolidatedCostMonitor

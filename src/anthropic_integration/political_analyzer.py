@@ -1453,11 +1453,21 @@ Analise cada mensagem considerando:
             # Create simplified prompt for TDD interface
             prompt = self._create_tdd_political_prompt(texts)
             
-            # Make API call using existing infrastructure
-            response = self._sync_anthropic_call(prompt)
+            # Make API call using the client (will be mocked in tests)
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Extract response text
+            if hasattr(response, 'content') and response.content:
+                response_text = response.content[0].text
+            else:
+                response_text = ""
             
             # Parse response
-            parsed = self._parse_tdd_response(response, len(texts))
+            parsed = self._parse_tdd_response(response_text, len(texts))
             
             return parsed
             
@@ -1497,8 +1507,18 @@ Retorne JSON com classificação, alinhamento e confiança:
             import json
             parsed = json.loads(response)
             
-            if isinstance(parsed, dict) and "results" in parsed:
-                results = parsed["results"]
+            # Handle both formats: {"results": [...]} and {"0": {...}, "1": {...}}
+            if isinstance(parsed, dict):
+                results = []
+                
+                if "results" in parsed:
+                    # Standard format with "results" array
+                    results = parsed["results"]
+                else:
+                    # Test format with numbered keys "0", "1", etc.
+                    for i in range(expected_count):
+                        if str(i) in parsed:
+                            results.append(parsed[str(i)])
                 
                 # Ensure all results have required fields
                 formatted_results = []

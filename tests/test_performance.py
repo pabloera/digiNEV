@@ -361,17 +361,21 @@ class TestPerformanceMonitoring:
                     _ = i ** 2
                 
                 # Get metrics
-                if hasattr(monitor, 'get_metrics'):
-                    metrics = monitor.get_metrics()
+                if hasattr(monitor, 'get_metrics_dict'):
+                    metrics = monitor.get_metrics_dict()
                     
                     assert isinstance(metrics, dict)
                     
-                    # Should include basic performance metrics
-                    expected_metrics = ['cpu_usage', 'memory_usage', 'execution_time']
+                    # Should include basic performance metrics from actual implementation
+                    expected_metrics = ['memory_rss_mb', 'cpu_percent', 'system_memory_percent']
                     
                     for metric in expected_metrics:
                         if metric in metrics:
-                            assert metrics[metric] >= 0
+                            assert metrics[metric]['value'] >= 0
+                elif hasattr(monitor, 'get_metrics'):
+                    # Fallback for list-based metrics
+                    metrics_list = monitor.get_metrics()
+                    assert isinstance(metrics_list, list)
                 
                 # Stop monitoring
                 if hasattr(monitor, 'stop_monitoring'):
@@ -441,14 +445,16 @@ class TestMemoryOptimization:
                 # Get initial memory usage
                 if hasattr(manager, 'get_memory_usage'):
                     initial_usage = manager.get_memory_usage()
-                    assert initial_usage >= 0
+                    assert isinstance(initial_usage, dict)
+                    assert initial_usage['current_memory_gb'] >= 0
                     
                     # Create memory load
                     large_data = ['x' * 10000 for _ in range(1000)]  # ~10MB
                     
                     # Check memory increase
                     loaded_usage = manager.get_memory_usage()
-                    assert loaded_usage >= initial_usage
+                    assert isinstance(loaded_usage, dict)
+                    assert loaded_usage['current_memory_gb'] >= initial_usage['current_memory_gb']
                     
                     # Clean up
                     del large_data

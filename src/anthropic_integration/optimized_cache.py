@@ -32,9 +32,24 @@ class OptimizedCache:
     - Cache statistics
     """
 
-    def __init__(self, cache_dir: Union[str, Path], max_memory_mb: int = 512,
+    def __init__(self, cache_dir_or_config: Union[str, Path, Dict[str, Any]], max_memory_mb: int = 512,
                  compression_level: int = 6, ttl_hours: int = 24):
-        self.cache_dir = Path(cache_dir)
+        # Handle both config dict and path string for backward compatibility
+        if isinstance(cache_dir_or_config, dict):
+            # Config dict passed (from tests)
+            self.config = cache_dir_or_config
+            # Use a default cache directory for tests
+            self.cache_dir = Path.cwd() / 'cache' / 'test_cache'
+            # Extract cache settings from config if available
+            cache_config = self.config.get('cache', {})
+            max_memory_mb = cache_config.get('max_memory_mb', max_memory_mb)
+            compression_level = cache_config.get('compression_level', compression_level)
+            ttl_hours = cache_config.get('ttl_hours', ttl_hours)
+        else:
+            # Path passed (legacy)
+            self.config = {}
+            self.cache_dir = Path(cache_dir_or_config)
+        
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         self.max_memory_bytes = max_memory_mb * 1024 * 1024
@@ -59,7 +74,7 @@ class OptimizedCache:
             'evictions': 0
         }
 
-        logger.info(f"OptimizedCache initialized: {cache_dir}, max_memory={max_memory_mb}MB")
+        logger.info(f"OptimizedCache initialized: {self.cache_dir}, max_memory={max_memory_mb}MB")
 
     def _generate_key(self, key: str) -> str:
         """Generate standardized cache key"""
@@ -169,6 +184,19 @@ class OptimizedCache:
         except Exception as e:
             logger.error(f"Error storing in cache: {e}")
             return False
+
+    def set(self, key: str, data: Any) -> bool:
+        """
+        Store data in cache (test compatibility method).
+        
+        Args:
+            key: Cache key
+            data: Data to store
+            
+        Returns:
+            Success status
+        """
+        return self.put(key, data)
 
     def get(self, key: str) -> Optional[Any]:
         """

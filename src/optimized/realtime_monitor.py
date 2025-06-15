@@ -209,6 +209,31 @@ class MetricsCollector:
             pass
         
         return metrics
+    
+    def get_metrics_dict(self) -> Dict[str, Any]:
+        """Returns metrics as a dictionary for test compatibility."""
+        metrics_list = self.get_metrics()
+        metrics_dict = {}
+        
+        for metric in metrics_list:
+            metrics_dict[metric.name] = {
+                'value': metric.value,
+                'unit': metric.unit,
+                'timestamp': metric.timestamp,
+                'metadata': metric.metadata
+            }
+        
+        # Also include current system metrics for immediate testing
+        current_metrics = self.collect_current_metrics()
+        for metric in current_metrics:
+            metrics_dict[metric.name] = {
+                'value': metric.value,
+                'unit': metric.unit,
+                'timestamp': metric.timestamp,
+                'metadata': metric.metadata
+            }
+        
+        return metrics_dict
 
 class AlertSystem:
     """Sistema de alertas baseado em thresholds"""
@@ -639,6 +664,14 @@ class PerformanceMonitor:
         }
         
         return summary
+    
+    def get_metrics(self, count: int = None) -> List[MetricValue]:
+        """Get recent metrics for test compatibility."""
+        return self.metrics_collector.get_metrics(count)
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get current stats for test compatibility."""
+        return self.get_current_status()
     
     def _summarize_stages(self) -> Dict[str, Any]:
         """Sumariza performance dos stages"""
