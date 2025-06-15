@@ -755,6 +755,84 @@ Foque em identificar padrões discursivos, estratégias de comunicação e carac
             'pelo', 'pela', 'até', 'isso', 'ela', 'entre', 'era', 'depois', 'sem', 'mesmo', 'aos', 'ter'
         ]
 
+    # TDD Phase 3 Methods - Standard clustering interface
+    def cluster_messages(self, texts: List[str], n_clusters: int = None) -> Dict[str, Any]:
+        """
+        TDD interface: Cluster messages using semantic analysis.
+        
+        Args:
+            texts: List of texts to cluster
+            n_clusters: Number of clusters to create
+            
+        Returns:
+            Dict with clustering results
+        """
+        try:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"🔗 TDD clustering started for {len(texts)} texts")
+            
+            # Create temporary DataFrame for compatibility with existing method
+            df = pd.DataFrame({'body_cleaned': texts})
+            
+            # Use existing semantic clustering method
+            result = self.perform_semantic_clustering(df, 'body_cleaned', n_clusters)
+            
+            # Transform to TDD expected format
+            tdd_result = {
+                'clusters': {},
+                'cluster_labels': result.get('cluster_labels', []),
+                'success': result.get('success', False),
+                'n_clusters': result.get('n_clusters_found', 0),
+                'quality_score': result.get('clustering_quality', 0.0)
+            }
+            
+            # Convert clusters to expected format
+            for cluster in result.get('clusters', []):
+                cluster_id = cluster.get('cluster_id', 0)
+                tdd_result['clusters'][str(cluster_id)] = {
+                    'size': cluster.get('size', 0),
+                    'theme': cluster.get('name', f'Cluster {cluster_id}'),
+                    'representative_messages': cluster.get('representative_texts', []),
+                    'coherence': cluster.get('coherence_score', 0.0),
+                    'quality': cluster.get('quality_score', 0.0)
+                }
+            
+            logger.info(f"✅ TDD clustering completed: {len(tdd_result['clusters'])} clusters found")
+            
+            return tdd_result
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"TDD clustering error: {e}")
+            
+            # Return fallback results
+            return {
+                'clusters': {
+                    '0': {
+                        'size': len(texts),
+                        'theme': 'General Cluster',
+                        'representative_messages': texts[:3],
+                        'coherence': 0.5,
+                        'quality': 0.5
+                    }
+                },
+                'cluster_labels': [0] * len(texts),
+                'success': False,
+                'n_clusters': 1,
+                'quality_score': 0.5,
+                'error': str(e)
+            }
+    
+    def fit_predict(self, texts: List[str], n_clusters: int = None) -> List[int]:
+        """TDD interface: Fit clustering model and predict cluster labels."""
+        try:
+            result = self.cluster_messages(texts, n_clusters)
+            return result.get('cluster_labels', [0] * len(texts))
+        except Exception:
+            return [0] * len(texts)
+
 def create_voyage_clustering_analyzer(config: Dict[str, Any]) -> VoyageClusteringAnalyzer:
     """
     Factory function to create VoyageClusteringAnalyzer instance

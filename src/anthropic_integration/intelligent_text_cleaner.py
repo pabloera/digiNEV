@@ -7,6 +7,7 @@ utilizando a API Anthropic para limpeza contextual de texto em português brasil
 
 import logging
 import re
+import unicodedata
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -1213,3 +1214,140 @@ Responda APENAS com o texto corrigido:
             recommendations.append("Processo de limpeza executado com êxito - nenhuma ação adicional necessária")
 
         return recommendations
+    
+    # TDD Phase 3 Methods - Standard cleaning interface
+    def clean_text_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        TDD interface: Clean text data in DataFrame.
+        
+        Args:
+            df: DataFrame with text data to clean
+            
+        Returns:
+            DataFrame with cleaned text
+        """
+        try:
+            logger.info(f"🧹 TDD text cleaning started for {len(df)} records")
+            
+            # Make a copy to avoid modifying original
+            result_df = df.copy()
+            
+            # Detect main text column
+            text_column = self._detect_text_column(result_df)
+            
+            if text_column not in result_df.columns:
+                logger.warning(f"Text column '{text_column}' not found, creating default")
+                if 'body' in result_df.columns:
+                    text_column = 'body'
+                else:
+                    # Return original if no suitable text column
+                    return result_df
+            
+            # Apply basic cleaning suitable for TDD tests
+            cleaned_texts = []
+            for text in result_df[text_column].fillna(''):
+                cleaned_text = self._basic_text_clean(str(text))
+                cleaned_texts.append(cleaned_text)
+            
+            # Update the DataFrame
+            result_df[text_column] = cleaned_texts
+            
+            logger.info(f"✅ TDD text cleaning completed for {len(result_df)} records")
+            return result_df
+            
+        except Exception as e:
+            logger.error(f"TDD text cleaning error: {e}")
+            # Return original data on error
+            return df.copy()
+    
+    def clean(self, df: pd.DataFrame) -> pd.DataFrame:
+        """TDD interface alias for clean_text_data."""
+        return self.clean_text_data(df)
+    
+    def _basic_text_clean(self, text: str) -> str:
+        """
+        Basic text cleaning for TDD interface.
+        Focuses on essential cleaning while preserving important content.
+        """
+        if not text or len(text.strip()) == 0:
+            return text
+        
+        cleaned = text
+        
+        # Step 1: Fix encoding issues (remove common corruption patterns)
+        encoding_fixes = {
+            'Ã§Ã£': 'ção',
+            'Ã¡': 'á',
+            'Ã©': 'é', 
+            'Ã­': 'í',
+            'Ã³': 'ó',
+            'Ãº': 'ú',
+            'Ã§': 'ç',
+            'Ã ': 'à',
+            'Ã¢': 'â',
+            'Ãª': 'ê',
+            'Ã´': 'ô',
+            'Ã»': 'û'
+        }
+        
+        for bad_pattern, good_pattern in encoding_fixes.items():
+            cleaned = cleaned.replace(bad_pattern, good_pattern)
+        
+        # Step 2: Normalize whitespace
+        import re
+        cleaned = re.sub(r'\s+', ' ', cleaned)
+        cleaned = cleaned.strip()
+        
+        # Step 3: Remove control characters but preserve structure
+        cleaned = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', cleaned)
+        
+        # Step 4: Basic formatting cleanup (preserve hashtags, mentions, important elements)
+        # Remove excessive punctuation but preserve normal punctuation
+        cleaned = re.sub(r'[.!?]{3,}', '...', cleaned)
+        
+        # Step 5: Handle case normalization carefully (preserve proper nouns)
+        # Don't auto-lowercase everything to preserve political entities
+        
+        # Step 6: Remove telegram artifacts while preserving content
+        telegram_artifacts = [
+            r'\[foto\]', r'\[vídeo\]', r'\[áudio\]', r'\[documento\]',
+            r'\[sticker\]', r'\[poll\]', r'\[location\]'
+        ]
+        
+        for artifact in telegram_artifacts:
+            cleaned = re.sub(artifact, '', cleaned, flags=re.IGNORECASE)
+        
+        # Final whitespace normalization
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # Ensure we don't return empty string if original had content
+        if len(text.strip()) > 0 and len(cleaned.strip()) == 0:
+            # Fallback to ultra-conservative cleaning
+            cleaned = re.sub(r'\s+', ' ', text).strip()
+        
+        return cleaned
+    
+    def _check_critical_terms_lost(self, original: str, cleaned: str) -> List[str]:
+        """
+        Check if critical political/contextual terms were lost during cleaning.
+        Used by both existing methods and TDD interface.
+        """
+        critical_terms = [
+            'bolsonaro', 'lula', 'stf', 'supremo', 'tribunal', 'federal',
+            'covid', 'vacina', 'pandemia', 'lockdown', 'quarentena',
+            'eleição', 'urna', 'voto', 'democracia', 'ditadura',
+            'direita', 'esquerda', 'conservador', 'liberal',
+            'fake news', 'mídia', 'imprensa', 'jornalismo',
+            'constituição', 'congresso', 'senado', 'câmara',
+            'ministério', 'governo', 'estado', 'união'
+        ]
+        
+        lost_terms = []
+        original_lower = original.lower()
+        cleaned_lower = cleaned.lower()
+        
+        for term in critical_terms:
+            if term in original_lower and term not in cleaned_lower:
+                lost_terms.append(term)
+        
+        return lost_terms

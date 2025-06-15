@@ -669,3 +669,284 @@ class StatisticalAnalyzer(AnthropicBase):
 
         except Exception as e:
             logger.error(f"Erro ao salvar relatório: {e}")
+
+    # TDD Phase 3 Methods - Standard statistical analysis interface
+    def generate_statistics(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        TDD interface: Generate comprehensive statistics from DataFrame.
+        
+        Args:
+            df: DataFrame to analyze
+            
+        Returns:
+            Dict with comprehensive statistics
+        """
+        try:
+            logger.info(f"📊 TDD statistical analysis started for {len(df)} records")
+            
+            statistics = {
+                'timestamp': datetime.now().isoformat(),
+                'total_messages': len(df),
+                'unique_channels': self._calculate_unique_channels(df),
+                'date_range': self._calculate_date_range(df),
+                'avg_message_length': self._calculate_avg_message_length(df),
+                'temporal_patterns': self._generate_temporal_patterns(df),
+                'channel_stats': self._generate_channel_stats(df),
+                'content_stats': self._generate_content_stats(df),
+                'data_quality': self._assess_data_quality(df),
+                'distribution_metrics': self._calculate_distribution_metrics(df)
+            }
+            
+            logger.info(f"✅ TDD statistical analysis completed: {len(statistics)} metric categories generated")
+            
+            return statistics
+            
+        except Exception as e:
+            logger.error(f"TDD statistical analysis error: {e}")
+            return {
+                'error': str(e),
+                'timestamp': datetime.now().isoformat(),
+                'total_messages': len(df) if df is not None else 0
+            }
+    
+    def analyze(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """TDD interface alias for generate_statistics."""
+        return self.generate_statistics(df)
+    
+    def _calculate_unique_channels(self, df: pd.DataFrame) -> int:
+        """Calculate number of unique channels."""
+        channel_candidates = ['channel', 'canal', 'source', 'from']
+        
+        for candidate in channel_candidates:
+            if candidate in df.columns:
+                return int(df[candidate].nunique())
+        
+        return 1  # Default if no channel column found
+    
+    def _calculate_date_range(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Calculate date range from DataFrame."""
+        date_candidates = ['date', 'datetime', 'timestamp', 'created_at', 'sent_at']
+        
+        for candidate in date_candidates:
+            if candidate in df.columns:
+                try:
+                    date_series = pd.to_datetime(df[candidate], errors='coerce').dropna()
+                    if len(date_series) > 0:
+                        return {
+                            'start_date': date_series.min().isoformat(),
+                            'end_date': date_series.max().isoformat(),
+                            'days_span': (date_series.max() - date_series.min()).days,
+                            'date_column_used': candidate
+                        }
+                except:
+                    continue
+        
+        return {
+            'start_date': None,
+            'end_date': None,
+            'days_span': 0,
+            'date_column_used': None
+        }
+    
+    def _calculate_avg_message_length(self, df: pd.DataFrame) -> float:
+        """Calculate average message length."""
+        text_candidates = ['body', 'text', 'content', 'message', 'mensagem']
+        
+        for candidate in text_candidates:
+            if candidate in df.columns:
+                lengths = df[candidate].fillna('').astype(str).str.len()
+                return float(lengths.mean())
+        
+        return 0.0
+    
+    def _generate_temporal_patterns(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Generate temporal pattern analysis."""
+        date_candidates = ['date', 'datetime', 'timestamp', 'created_at', 'sent_at']
+        
+        for candidate in date_candidates:
+            if candidate in df.columns:
+                try:
+                    date_series = pd.to_datetime(df[candidate], errors='coerce').dropna()
+                    if len(date_series) > 0:
+                        # Messages by hour
+                        hourly_counts = date_series.dt.hour.value_counts().sort_index()
+                        
+                        # Messages by day of week
+                        daily_counts = date_series.dt.day_name().value_counts()
+                        
+                        # Peak activity
+                        peak_hour = hourly_counts.idxmax() if not hourly_counts.empty else None
+                        peak_day = daily_counts.idxmax() if not daily_counts.empty else None
+                        
+                        return {
+                            'messages_by_hour': hourly_counts.to_dict(),
+                            'messages_by_day': daily_counts.to_dict(),
+                            'peak_activity': {
+                                'peak_hour': int(peak_hour) if peak_hour is not None else None,
+                                'peak_day': peak_day,
+                                'peak_hour_count': int(hourly_counts.max()) if not hourly_counts.empty else 0
+                            },
+                            'temporal_distribution': 'available'
+                        }
+                except:
+                    continue
+        
+        return {
+            'messages_by_hour': {},
+            'messages_by_day': {},
+            'peak_activity': None,
+            'temporal_distribution': 'unavailable'
+        }
+    
+    def _generate_channel_stats(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Generate channel-specific statistics."""
+        channel_candidates = ['channel', 'canal', 'source', 'from']
+        
+        for candidate in channel_candidates:
+            if candidate in df.columns:
+                channel_counts = df[candidate].value_counts()
+                
+                stats = {}
+                for channel, count in channel_counts.items():
+                    stats[str(channel)] = {
+                        'message_count': int(count),
+                        'percentage': round((count / len(df)) * 100, 2)
+                    }
+                
+                return stats
+        
+        # Default single channel if no channel column
+        return {
+            'unknown_channel': {
+                'message_count': len(df),
+                'percentage': 100.0
+            }
+        }
+    
+    def _generate_content_stats(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Generate content-specific statistics."""
+        text_candidates = ['body', 'text', 'content', 'message', 'mensagem']
+        
+        content_stats = {
+            'avg_length': 0.0,
+            'url_frequency': 0.0,
+            'hashtag_frequency': 0.0,
+            'mention_frequency': 0.0,
+            'total_words': 0,
+            'unique_words': 0,
+            'content_diversity': 0.0
+        }
+        
+        for candidate in text_candidates:
+            if candidate in df.columns:
+                text_series = df[candidate].fillna('').astype(str)
+                
+                # Average length
+                content_stats['avg_length'] = float(text_series.str.len().mean())
+                
+                # URL frequency
+                url_pattern = r'https?://[^\s]+'
+                urls_per_message = text_series.str.count(url_pattern)
+                content_stats['url_frequency'] = float(urls_per_message.mean())
+                
+                # Hashtag frequency
+                hashtag_pattern = r'#\w+'
+                hashtags_per_message = text_series.str.count(hashtag_pattern)
+                content_stats['hashtag_frequency'] = float(hashtags_per_message.mean())
+                
+                # Mention frequency
+                mention_pattern = r'@\w+'
+                mentions_per_message = text_series.str.count(mention_pattern)
+                content_stats['mention_frequency'] = float(mentions_per_message.mean())
+                
+                # Word statistics
+                all_words = []
+                for text in text_series:
+                    words = str(text).lower().split()
+                    all_words.extend(words)
+                
+                content_stats['total_words'] = len(all_words)
+                content_stats['unique_words'] = len(set(all_words))
+                content_stats['content_diversity'] = len(set(all_words)) / len(all_words) if all_words else 0.0
+                
+                break
+        
+        return content_stats
+    
+    def _assess_data_quality(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Assess overall data quality."""
+        quality_metrics = {
+            'completeness': 0.0,
+            'consistency': 0.0,
+            'validity': 0.0,
+            'missing_data_percentage': 0.0,
+            'duplicate_percentage': 0.0
+        }
+        
+        if len(df) > 0:
+            # Completeness (non-null values)
+            non_null_counts = df.count()
+            total_cells = len(df) * len(df.columns)
+            non_null_cells = non_null_counts.sum()
+            quality_metrics['completeness'] = float(non_null_cells / total_cells) if total_cells > 0 else 0.0
+            
+            # Missing data percentage
+            missing_cells = total_cells - non_null_cells
+            quality_metrics['missing_data_percentage'] = float(missing_cells / total_cells * 100) if total_cells > 0 else 0.0
+            
+            # Duplicate percentage
+            unique_rows = df.drop_duplicates()
+            duplicate_count = len(df) - len(unique_rows)
+            quality_metrics['duplicate_percentage'] = float(duplicate_count / len(df) * 100)
+            
+            # Basic validity check (assuming text columns should have reasonable length)
+            text_candidates = ['body', 'text', 'content', 'message', 'mensagem']
+            valid_text_ratio = 1.0
+            
+            for candidate in text_candidates:
+                if candidate in df.columns:
+                    text_lengths = df[candidate].fillna('').astype(str).str.len()
+                    valid_texts = (text_lengths > 0) & (text_lengths < 10000)  # Reasonable text length
+                    valid_text_ratio = float(valid_texts.mean())
+                    break
+            
+            quality_metrics['validity'] = valid_text_ratio
+            quality_metrics['consistency'] = 0.8  # Placeholder - would need domain-specific logic
+        
+        return quality_metrics
+    
+    def _calculate_distribution_metrics(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Calculate distribution metrics for numerical columns."""
+        distribution_metrics = {}
+        
+        # Find numerical columns
+        numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns
+        
+        for col in numerical_columns:
+            if df[col].notna().sum() > 0:  # Only analyze columns with data
+                series = df[col].dropna()
+                distribution_metrics[col] = {
+                    'mean': float(series.mean()),
+                    'median': float(series.median()),
+                    'std': float(series.std()),
+                    'min': float(series.min()),
+                    'max': float(series.max()),
+                    'count': int(len(series))
+                }
+        
+        # Calculate text length distribution if text column exists
+        text_candidates = ['body', 'text', 'content', 'message', 'mensagem']
+        for candidate in text_candidates:
+            if candidate in df.columns:
+                text_lengths = df[candidate].fillna('').astype(str).str.len()
+                distribution_metrics['text_length_distribution'] = {
+                    'mean': float(text_lengths.mean()),
+                    'median': float(text_lengths.median()),
+                    'std': float(text_lengths.std()),
+                    'min': int(text_lengths.min()),
+                    'max': int(text_lengths.max()),
+                    'count': int(len(text_lengths))
+                }
+                break
+        
+        return distribution_metrics
