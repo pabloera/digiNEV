@@ -16,8 +16,10 @@ import pandas as pd
 try:
     from ..core.unified_cache_framework import get_academic_cache
     UNIFIED_CACHE_AVAILABLE = True
+    EMERGENCY_CACHE_AVAILABLE = True  # Unified cache includes emergency caching
 except ImportError:
     UNIFIED_CACHE_AVAILABLE = False
+    EMERGENCY_CACHE_AVAILABLE = False
     
 # Academic cost monitoring
 try:
