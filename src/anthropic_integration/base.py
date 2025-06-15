@@ -12,10 +12,12 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Import stub for testing - will be replaced with real Anthropic in production
+# Import real Anthropic client with fallback for TDD
 try:
     from anthropic import Anthropic
+    ANTHROPIC_AVAILABLE = True
 except ImportError:
+    ANTHROPIC_AVAILABLE = False
     # Fallback for TDD environment
     class Anthropic:
         def __init__(self, api_key: str = None):
@@ -27,6 +29,13 @@ try:
     UNIFIED_CACHE_AVAILABLE = True
 except ImportError:
     UNIFIED_CACHE_AVAILABLE = False
+
+# Smart cache imports
+try:
+    from ..core.smart_cache import get_global_claude_cache
+    SMART_CACHE_AVAILABLE = True
+except ImportError:
+    SMART_CACHE_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -152,13 +161,30 @@ class AnthropicBase:
             except Exception as e:
                 logger.warning(f"⚠️ Week 2 smart cache initialization failed: {e}")
         
-        # Initialize Anthropic client (mock or real)
-        api_key = config.get('anthropic', {}).get('api_key', 'test_key')
-        try:
-            self._client = Anthropic(api_key=api_key)
-        except Exception:
-            # Fallback to mock for testing
+        # Initialize Anthropic client (real API when available)
+        anthropic_config = config.get('anthropic', {})
+        api_key = anthropic_config.get('api_key', 'test_key')
+        
+        # Support environment variable substitution
+        if api_key.startswith('${') and api_key.endswith('}'):
+            import os
+            env_var = api_key[2:-1]
+            api_key = os.getenv(env_var)
+        
+        # Try to initialize real client
+        if ANTHROPIC_AVAILABLE and api_key and api_key != 'test_key' and api_key != 'your_anthropic_api_key_here':
+            try:
+                self._client = Anthropic(api_key=api_key)
+                self.real_client = True
+                logger.info("✅ Anthropic real client initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Anthropic client: {e}")
+                self._client = MockAnthropicClient()
+                self.real_client = False
+        else:
+            # Fallback to mock for testing/TDD
             self._client = MockAnthropicClient()
+            self.real_client = False
         
         # For backward compatibility
         self.client = self._client
@@ -254,21 +280,53 @@ class AnthropicBase:
         self._last_request_time = time.time()
         self._request_count += 1
         
-        # Make the actual request (will be mocked in tests)
+        # Make the actual request (real API when available)
         try:
-            response = self.client.messages.create(
-                model=model,
-                max_tokens=1000,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            result = {
-                'response': f'Response for: {prompt[:50]}...',
-                'success': True,
-                'request_number': self._request_count,
-                'academic_cache_used': False,
-                'estimated_cost': estimated_cost
-            }
+            if self.real_client:
+                # Use real Anthropic API
+                response = self.client.messages.create(
+                    model=model,
+                    max_tokens=1000,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                
+                # Extract response content based on response structure
+                if hasattr(response, 'content') and response.content:
+                    content = response.content[0].text if response.content else 'No content'
+                    result = {
+                        'response': content,
+                        'success': True,
+                        'request_number': self._request_count,
+                        'academic_cache_used': False,
+                        'estimated_cost': estimated_cost,
+                        'real_api_used': True
+                    }
+                    logger.info(f"✅ Real Anthropic API response: {len(content)} chars")
+                else:
+                    result = {
+                        'response': f'Response for: {prompt[:50]}...',
+                        'success': True,
+                        'request_number': self._request_count,
+                        'academic_cache_used': False,
+                        'estimated_cost': estimated_cost,
+                        'real_api_used': True
+                    }
+            else:
+                # Use mock client for testing
+                response = self.client.messages.create(
+                    model=model,
+                    max_tokens=1000,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                
+                result = {
+                    'response': f'Mock response for: {prompt[:50]}...',
+                    'success': True,
+                    'request_number': self._request_count,
+                    'academic_cache_used': False,
+                    'estimated_cost': estimated_cost,
+                    'real_api_used': False
+                }
             
             # Update academic budget
             self._current_usage += estimated_cost
@@ -297,6 +355,26 @@ class AnthropicBase:
             )
             
             return result
+    
+    def create_message(self, prompt: str, stage: str = "", operation: str = "", temperature: float = 0.3, **kwargs) -> str:
+        """Create message using make_request - compatibility wrapper for AI interpretation methods."""
+        result = self.make_request(prompt, kwargs.get('model', 'claude-3-5-haiku-20241022'))
+        return result.get('response', '')
+    
+    def parse_json_response(self, response: str) -> Dict[str, Any]:
+        """Parse JSON response with fallback for malformed JSON."""
+        try:
+            import json
+            return json.loads(response)
+        except (json.JSONDecodeError, ValueError):
+            # Return default structure if parsing fails
+            return {
+                'name': 'Análise indisponível',
+                'description': 'Erro no processamento da resposta',
+                'political_category': 'neutro',
+                'keywords': [],
+                'radicalization_level': 0
+            }
     
     def _estimate_request_cost(self, prompt: str, model: str) -> float:
         """Estimate cost for academic budget tracking"""
