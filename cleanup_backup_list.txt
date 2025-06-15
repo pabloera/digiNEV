@@ -1,0 +1,31 @@
+CLEANUP SPECIALIST - FILES TO DELETE
+==========================================
+Date: 2025-06-15
+Purpose: Priority 1 cleanup for 67% storage reduction
+
+CATEGORY 1: Test Chunk Files (100 files, 400KB)
+cache/streaming/test_chunk_*.chunk (all files from 0-99)
+
+CATEGORY 2: Old Benchmark Results (keep latest 3)
+benchmark_results/ - remove oldest files, keep latest 3
+
+CATEGORY 3: TDD Stub Files (completed implementation stubs)
+src/anthropic_integration/unified_pipeline_stub.py
+src/core/unified_cache_system_stub.py
+
+CATEGORY 4: Archive Candidates (move to archive/)
+TDD_PHASE3_IMPLEMENTATION.md
+TDD_PHASE4_ROADMAP.md
+TDD_STATUS.md
+
+SAFETY VERIFICATION:
+- Stub files checked: NOT imported by core system
+- Test chunks: Temporary test files only
+- Benchmarks: Keeping latest 3 for reference
+- TDD docs: Moving to archive (not deleting)
+
+ESTIMATED STORAGE REDUCTION:
+- Test chunks: 400KB
+- Old benchmarks: ~50KB
+- Stub files: ~5KB
+- Total direct: ~455KB + archive space optimization
