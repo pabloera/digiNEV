@@ -1,0 +1,103 @@
+# Academic Research Optimizations Configuration
+# Week 3-4 Consolidation for Social Science Research
+#
+# This configuration is optimized for academic research into Brazilian authoritarianism
+# and violence, prioritizing research quality and accessibility over enterprise complexity.
+
+academic:
+  # Academic Budget Management (Week 2)
+  monthly_budget: 50.0  # USD per month for academic research
+  cost_alerts: true
+  budget_warnings:
+    warning_threshold: 80  # Warn at 80% of budget
+    critical_threshold: 95 # Critical alert at 95%
+  
+  # Academic Parallel Processing (Week 3)
+  parallel_processing:
+    enabled: true
+    max_thread_workers: 4      # Modest threading for academic computers
+    max_process_workers: 2     # Conservative process count
+    memory_limit_mb: 3072      # 3GB memory limit for academic use
+    cpu_threshold: 75.0        # Keep CPU usage reasonable
+    
+    # Stages eligible for parallel processing
+    parallel_stages:
+      - "07_linguistic_processing"   # spaCy NLP processing
+      - "09_topic_modeling"         # Voyage.ai topic modeling
+      - "10_tfidf_extraction"       # TF-IDF with semantic analysis
+      - "11_clustering"             # Multi-algorithm clustering
+      - "12_hashtag_normalization"  # Hashtag processing
+      - "13_domain_analysis"        # Domain analysis
+      - "14_temporal_analysis"      # Temporal pattern analysis
+  
+  # Academic Streaming Configuration (Week 3)
+  streaming:
+    enabled: true
+    chunk_size: 500             # Smaller chunks for academic datasets
+    max_chunks_in_memory: 3     # Conservative memory usage
+    compression_enabled: true   # Save storage space
+    lazy_loading: true          # Load data as needed
+    memory_threshold_mb: 3072   # Match parallel processing limit
+  
+  # Academic Monitoring (Week 4)
+  monitoring:
+    enabled: true
+    real_time_monitoring: true
+    quality_validation: true
+    performance_tracking: true
+    alert_levels:
+      memory_usage: 75          # Alert if memory usage > 75%
+      processing_time: 300      # Alert if stage takes > 5 minutes
+      error_rate: 10           # Alert if error rate > 10%
+  
+  # Portuguese Language Optimization
+  portuguese_optimization: true
+  brazilian_political_context: true
+  
+  # Research Quality Settings
+  research_quality:
+    data_integrity_checks: true
+    reproducibility_tracking: true
+    academic_validation: true
+    error_resilience: high
+    fallback_strategies: enabled
+  
+  # Academic Computing Environment
+  computing_environment:
+    target_system: "academic_laptop"  # Optimize for typical academic hardware
+    assume_limited_resources: true
+    prioritize_stability: true
+    enable_graceful_degradation: true
+
+# Week 3-4 Performance Targets for Academic Research
+performance_targets:
+  time_reduction: 60           # Target 60% time reduction
+  memory_efficiency: 50        # Target 50% memory reduction
+  cost_optimization: 40        # Target 40% cost reduction
+  research_quality_score: 95   # Maintain 95%+ research quality
+  
+  # Academic-appropriate thresholds
+  acceptable_processing_time:
+    small_dataset: 300         # 5 minutes for small datasets
+    medium_dataset: 900        # 15 minutes for medium datasets  
+    large_dataset: 1800        # 30 minutes for large datasets
+
+# Integration Settings
+integration:
+  week1_emergency_cache: true
+  week2_smart_caching: true
+  week3_parallel_processing: true
+  week3_streaming_pipeline: true
+  week4_monitoring: true
+  
+  # Fallback behavior if optimizations fail
+  fallback_mode: "basic_sequential"
+  maintain_compatibility: true
+  log_optimization_status: true
+
+# Academic Documentation
+documentation:
+  generate_academic_reports: true
+  include_performance_metrics: true
+  research_methodology_notes: true
+  social_science_context: true

@@ -5,6 +5,7 @@ __pycache__/
 .mypy_cache/
 .env
 .envrc
+.vscode
 
 # Poetry files - TRACKED IN REPO
 # poetry.lock    ✅ dependency versions

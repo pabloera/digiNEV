@@ -1,9 +1,7 @@
 """
-Pipeline Visualizations v4.9.1 - Visualizações por Etapa do Pipeline
-====================================================================
-
-Módulo de visualizações específicas para cada uma das 22 etapas do pipeline,
-incluindo gráficos de controle, métricas de qualidade e monitoramento em tempo real.
+digiNEV Visualization Components: Research-focused charts and graphs for Brazilian political discourse analysis
+Function: Stage-specific visualizations, quality control charts, and monitoring displays for 22-stage pipeline analysis
+Usage: Social scientists view analysis results through dashboard - generates charts for political patterns, trends, and discourse metrics
 """
 
 from dataclasses import dataclass

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Dashboard startup script for Digital Discourse Monitor.
-
-Launches the web dashboard with pipeline monitoring and data visualization.
+digiNEV Research Dashboard: Interactive web interface for visualizing Brazilian political discourse analysis results
+Function: Streamlit-based dashboard displaying pipeline results, political patterns, and discourse trends for social scientists
+Usage: Researchers access via browser after running analysis - execute `poetry run python src/dashboard/start_dashboard.py`
 """
 
 import os

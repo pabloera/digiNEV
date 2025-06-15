@@ -1,0 +1,40 @@
+# Anthropic API Configuration for Academic Research
+# Copy this file to anthropic.yaml and add your API key
+
+anthropic:
+  # API Configuration
+  api_key: "your_anthropic_api_key_here"
+  base_url: "https://api.anthropic.com"
+  
+  # Academic Model Selection (cost-optimized)
+  primary_model: "claude-3-5-haiku-20241022"  # Most economical for academic use
+  fallback_models:
+    - "claude-3-5-sonnet-20241022"
+    - "claude-3-haiku-20240307"
+  
+  # Academic Research Settings
+  enable_api_integration: true
+  academic_mode: true
+  
+  # Budget Controls
+  monthly_budget_usd: 50.0
+  cost_tracking: true
+  auto_downgrade: true  # Switch to cheaper models when budget low
+  
+  # Portuguese Research Optimization
+  portuguese_optimization: true
+  brazilian_political_analysis: true
+  
+  # Rate Limiting (academic-friendly)
+  requests_per_minute: 30
+  max_concurrent_requests: 3
+  
+  # Timeout Settings
+  request_timeout: 120
+  max_retries: 3
+  retry_delay: 2.0
+  
+  # Academic Features
+  research_mode: true
+  preserve_original_categories: true
+  enable_confidence_scoring: true
