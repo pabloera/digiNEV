@@ -21,12 +21,12 @@ except ImportError:
         def __init__(self, api_key: str = None):
             self.messages = MockMessages()
 
-# Academic optimization imports
+# Unified cache framework imports
 try:
-    from ..optimized.smart_claude_cache import get_global_claude_cache
-    SMART_CACHE_AVAILABLE = True
+    from ..core.unified_cache_framework import get_academic_cache
+    UNIFIED_CACHE_AVAILABLE = True
 except ImportError:
-    SMART_CACHE_AVAILABLE = False
+    UNIFIED_CACHE_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 

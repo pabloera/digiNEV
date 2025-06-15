@@ -12,12 +12,12 @@ from typing import Dict, List, Any, Optional, Tuple
 from functools import wraps
 import pandas as pd
 
-# Academic-focused cache integration
+# Unified cache framework integration
 try:
-    from ..optimized.emergency_embeddings import get_global_embeddings_cache
-    EMERGENCY_CACHE_AVAILABLE = True
+    from ..core.unified_cache_framework import get_academic_cache
+    UNIFIED_CACHE_AVAILABLE = True
 except ImportError:
-    EMERGENCY_CACHE_AVAILABLE = False
+    UNIFIED_CACHE_AVAILABLE = False
     
 # Academic cost monitoring
 try:
