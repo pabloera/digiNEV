@@ -1,15 +1,7 @@
 """
-Sentiment Analyzer - ULTRA OPTIMIZED v3.0
-==========================================
-
-Brazilian political sentiment analysis with advanced optimizations:
-- Intelligent cache (-80% redundant analyses)
-- Compact prompt (-70% tokens)
-- Adaptive batch size (+300% throughput)
-- Parallel processing (-60% time)
-- Robust fallbacks (100% reliability)
-
-Performance: 5x faster, 75% less API cost
+digiNEV Sentiment Analyzer: Optimized emotional analysis for Brazilian political discourse with violence detection
+Function: Ultra-fast sentiment classification with political context awareness and cache optimization for research efficiency
+Usage: Social scientists access automated sentiment analysis - detects aggression, polarization, and emotional patterns in political messages
 """
 
 import asyncio

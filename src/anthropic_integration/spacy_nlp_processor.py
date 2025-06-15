@@ -1,8 +1,7 @@
 """
-Portuguese NLP processing using spaCy pt_core_news_lg model.
-
-Provides linguistic analysis including tokenization, named entity recognition,
-morphological analysis, and Brazilian political entity detection.
+digiNEV Linguistic Processor: Advanced Portuguese NLP analysis using spaCy for Brazilian political discourse research
+Function: Comprehensive linguistic analysis including entity recognition, tokenization, and political figure identification
+Usage: Social scientists benefit from automated linguistic features - extracts named entities, POS tags, and Brazilian political figures
 """
 
 import json

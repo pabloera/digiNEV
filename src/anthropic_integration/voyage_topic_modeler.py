@@ -1,9 +1,7 @@
 """
-Voyage-Enhanced Topic Modeling for Political Discourse Analysis
-========================================================
-
-Advanced topic modeling using Voyage.ai embeddings combined with traditional LDA
-and Anthropic AI interpretation for Brazilian political content.
+digiNEV Topic Modeler: Semantic topic discovery using Voyage.ai embeddings for Brazilian political discourse themes
+Function: Advanced topic modeling combining embeddings with LDA and AI interpretation for thematic analysis
+Usage: Social scientists discover hidden discourse themes - automatically identifies political topics and authoritarianism patterns
 """
 
 import json

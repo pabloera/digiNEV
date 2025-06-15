@@ -1,6 +1,7 @@
 """
-Minimal Voyage embeddings implementation for TDD Phase 3.
-Implements basic embedding structure without full dependencies.
+digiNEV Vector Embeddings: Voyage.ai semantic embeddings interface for Portuguese political discourse analysis
+Function: High-quality text embeddings optimized for Brazilian Portuguese with academic budget management and caching
+Usage: Social scientists access advanced semantic similarity - enables clustering, search, and topic modeling for discourse research
 """
 
 from typing import List, Dict, Any, Optional

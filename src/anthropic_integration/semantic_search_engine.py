@@ -1,6 +1,7 @@
 """
-Advanced Semantic Search & Intelligence Engine
-Provides intelligent content discovery and natural language querying for the political discourse dataset
+digiNEV Semantic Search: Intelligent content discovery engine for Brazilian political discourse research queries
+Function: Natural language search with context-aware results for finding specific discourse patterns and political content
+Usage: Social scientists query the dataset naturally - search for "authoritarian discourse" or "violence rhetoric" with semantic understanding
 """
 
 import json

@@ -1,0 +1,58 @@
+{
+  "test_suite_name": "Quality Regression Test Suite",
+  "total_tests": 7,
+  "passed_tests": 4,
+  "failed_tests": 3,
+  "overall_score": 52.0,
+  "summary": {
+    "category_summaries": {
+      "data_integrity": {
+        "total_tests": 1,
+        "passed_tests": 1,
+        "average_score": 94.0,
+        "total_execution_time": 0.012798070907592773
+      },
+      "consistency": {
+        "total_tests": 3,
+        "passed_tests": 1,
+        "average_score": 31.666666666666668,
+        "total_execution_time": 0.00016999244689941406
+      },
+      "performance": {
+        "total_tests": 1,
+        "passed_tests": 0,
+        "average_score": 0.0,
+        "total_execution_time": 1.6689300537109375e-06
+      },
+      "optimization": {
+        "total_tests": 3,
+        "passed_tests": 3,
+        "average_score": 90.0,
+        "total_execution_time": 2.0000011920928955
+      }
+    },
+    "overall_statistics": {
+      "average_score": 52.0,
+      "median_score": 85.0,
+      "score_std": 45.1315537385668,
+      "total_execution_time": 2.012969732284546,
+      "average_test_time": 0.28756710461207796
+    },
+    "quality_assessment": "poor",
+    "critical_failures": [
+      "deterministic_execution",
+      "cache_correctness",
+      "performance_regression"
+    ]
+  },
+  "recommendations": [
+    "Address 3 failed test(s) before production deployment",
+    "Review caching implementation for correctness",
+    "Optimize performance bottlenecks identified in regression testing",
+    "Overall quality score below 80% - extensive testing and fixes needed before production"
+  ],
+  "timestamp": "2025-06-15T08:45:11.306163",
+  "test_results": [
+    {
+      "test_name": "data_integrity_input",
+      "passed": 

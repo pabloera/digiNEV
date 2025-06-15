@@ -1,8 +1,7 @@
 """
-Brazilian political discourse analyzer using Anthropic Claude API.
-
-Classifies text into political categories using hierarchical taxonomy
-and XML-structured prompts for reliable political analysis.
+digiNEV Political Classifier: AI-powered Brazilian political discourse categorization using Claude API
+Function: Hierarchical political taxonomy classification with violence/authoritarianism detection for research analysis
+Usage: Social scientists access automated political categorization - identifies right/left spectrum and authoritarian patterns in discourse
 """
 
 import asyncio

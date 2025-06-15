@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Digital Discourse Monitor - Main pipeline execution script.
-
-Orchestrates the complete analysis pipeline with optimizations for performance,
-memory usage, and cost efficiency. Supports multiple execution modes.
+digiNEV Pipeline Executor: Academic tool for analyzing Brazilian political discourse patterns
+Function: Main execution script for 22-stage analysis pipeline with enterprise-grade optimizations
+Usage: Researchers execute `poetry run python run_pipeline.py` to process Telegram messages for violence/authoritarianism studies
 """
 
 import json
