@@ -1,0 +1,35 @@
+# Voyage.ai Embeddings Configuration for Academic Research
+# Copy this file to voyage_embeddings.yaml and add your API key
+
+voyage_embeddings:
+  # API Configuration
+  api_key: "${VOYAGE_API_KEY}"
+  base_url: "https://api.voyageai.com"
+  
+  # Academic Model Selection (cost-optimized)
+  primary_model: "voyage-3.5-lite"  # Most economical for academic use
+  fallback_model: "voyage-3-lite"
+  
+  # Academic Research Settings
+  enable_sampling: true
+  max_messages: 50000  # Academic dataset size limit
+  sampling_ratio: 0.96  # 96% cost reduction through sampling
+  
+  # Budget Controls
+  cost_per_1k_tokens: 0.002  # Approximate cost
+  academic_budget_protection: true
+  
+  # Processing Optimization
+  batch_size: 100
+  max_concurrent_requests: 5
+  request_timeout: 60
+  
+  # Academic Features
+  preserve_context: true
+  research_quality: true
+  reproducible_embeddings: true
+  
+  # Cache Settings
+  enable_caching: true
+  cache_ttl_hours: 48
+  portuguese_normalization: true

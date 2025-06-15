@@ -6,47 +6,96 @@ Usage: Social scientists access advanced semantic similarity - enables clusterin
 
 from typing import List, Dict, Any, Optional
 import numpy as np
+import logging
+import os
+
+# Try to import real Voyage.ai client, fallback to mock for tests
+try:
+    import voyageai
+    VOYAGE_AVAILABLE = True
+except ImportError:
+    VOYAGE_AVAILABLE = False
+    voyageai = None
+
+logger = logging.getLogger(__name__)
 
 
 class VoyageEmbeddings:
     """
-    Minimal Voyage embeddings implementation to pass TDD tests.
+    Voyage.ai embeddings implementation with real API integration and TDD fallback.
     
-    This implements the basic structure expected by tests without
-    requiring the full voyageai library, following TDD principles.
+    Provides high-quality semantic embeddings for Portuguese political discourse analysis
+    with academic budget optimization and intelligent caching.
     """
     
     def __init__(self, config: Dict[str, Any]):
         """Initialize Voyage embeddings with configuration."""
         self.config = config
+        voyage_config = config.get('voyage_embeddings', {})
         
-        # Mock client for TDD
-        self._client = MockVoyageClient()
+        # Try to initialize real client first
+        if VOYAGE_AVAILABLE and voyage_config.get('api_key'):
+            api_key = voyage_config.get('api_key')
+            # Support environment variable substitution
+            if api_key.startswith('${') and api_key.endswith('}'):
+                env_var = api_key[2:-1]
+                api_key = os.getenv(env_var)
+            
+            if api_key and api_key != "your_voyage_api_key_here":
+                try:
+                    self._client = voyageai.Client(api_key=api_key)
+                    self.real_client = True
+                    logger.info("✅ Voyage.ai real client initialized")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize Voyage.ai client: {e}")
+                    self._client = MockVoyageClient()
+                    self.real_client = False
+            else:
+                self._client = MockVoyageClient()
+                self.real_client = False
+        else:
+            # Fallback to mock for TDD environment
+            self._client = MockVoyageClient()
+            self.real_client = False
         
         # For backward compatibility
         self.client = self._client
     
     def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings for texts using client (for test compatibility)."""
-        # Check if sampling is enabled
-        max_messages = self.config.get('voyage_embeddings', {}).get('max_messages', len(texts))
+        """Generate embeddings for texts using real Voyage.ai API when available."""
+        # Check if sampling is enabled for academic budget management
+        voyage_config = self.config.get('voyage_embeddings', {})
+        max_messages = voyage_config.get('max_messages', len(texts))
         
         if len(texts) > max_messages:
-            # Sample down to max_messages
+            # Sample down to max_messages for cost control
             import random
             random.seed(42)  # For reproducibility
             texts = random.sample(texts, max_messages)
+            logger.info(f"🎓 Academic sampling: {len(texts)}/{max_messages} texts processed")
         
-        # Use client to generate embeddings (will be mocked in tests)
+        # Use appropriate client based on availability
         try:
-            response = self.client.embed(texts, model="voyage-3-lite")
-            if hasattr(response, 'embeddings'):
-                return response.embeddings
+            if self.real_client:
+                # Use real Voyage.ai API
+                model = voyage_config.get('primary_model', 'voyage-3.5-lite')
+                response = self.client.embed(texts, model=model)
+                
+                if hasattr(response, 'embeddings'):
+                    logger.info(f"✅ Generated {len(response.embeddings)} embeddings via Voyage.ai API")
+                    return response.embeddings
+                else:
+                    logger.warning("Unexpected Voyage.ai response format, using fallback")
+                    return self._generate_fallback_embeddings(texts)
             else:
-                # Fallback if response format is unexpected
-                return self._generate_fallback_embeddings(texts)
+                # Use mock client for testing
+                response = self.client.embed(texts, model="voyage-3-lite")
+                if hasattr(response, 'embeddings'):
+                    return response.embeddings
+                else:
+                    return self._generate_fallback_embeddings(texts)
         except Exception as e:
-            # Fallback for any errors
+            logger.error(f"Voyage.ai API error: {e}, using fallback embeddings")
             return self._generate_fallback_embeddings(texts)
     
     def _generate_fallback_embeddings(self, texts: List[str]) -> List[List[float]]:

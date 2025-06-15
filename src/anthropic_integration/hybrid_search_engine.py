@@ -337,7 +337,7 @@ class HybridSearchEngine(AnthropicBase):
         Returns:
             List of search results
         """
-        if not self.faiss_index or not self.tfidf_matrix:
+        if not self.faiss_index or self.tfidf_matrix is None:
             raise ValueError("Search index not built. Call build_index() first.")
 
         start_time = time.time()
