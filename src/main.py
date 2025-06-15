@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 """
-MAIN PIPELINE CONTROLLER - DIGITAL DISCOURSE MONITOR v5.0.0
-============================================================
-
-Main pipeline controller with checkpoints and automatic recovery.
-Integrates with the unified anthropic_integration system.
-Complete pipeline: 22 stages + 100% functional Dashboard with critical fixes.
-
-🎯 PIPELINE v5.0.0: Optimized performance, complete enterprise-grade system.
-🏛️ POLITICAL v4.9.8: 4 functional political levels, 2 semantic clusters.
-🔤 SPACY v4.9.5: Stage 07 pt_core_news_lg with 57 Brazilian entities.
-🚨 BUGS FIXED: Deduplication + configuration + CSV separators resolved.
+digiNEV Pipeline Controller: Advanced stage-by-stage execution with checkpoint recovery for Brazilian discourse analysis
+Function: Selective stage execution with automatic recovery for social scientists studying political violence patterns
+Usage: Researchers use for debugging individual pipeline stages - normally use run_pipeline.py for complete analysis
 """
 
 import json

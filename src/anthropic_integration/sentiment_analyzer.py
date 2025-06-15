@@ -1,15 +1,7 @@
 """
-Sentiment Analyzer - ULTRA OPTIMIZED v3.0
-==========================================
-
-Brazilian political sentiment analysis with advanced optimizations:
-- Intelligent cache (-80% redundant analyses)
-- Compact prompt (-70% tokens)
-- Adaptive batch size (+300% throughput)
-- Parallel processing (-60% time)
-- Robust fallbacks (100% reliability)
-
-Performance: 5x faster, 75% less API cost
+digiNEV Sentiment Analyzer: Optimized emotional analysis for Brazilian political discourse with violence detection
+Function: Ultra-fast sentiment classification with political context awareness and cache optimization for research efficiency
+Usage: Social scientists access automated sentiment analysis - detects aggression, polarization, and emotional patterns in political messages
 """
 
 import asyncio
@@ -26,8 +18,10 @@ class AnthropicSentimentAnalyzer(AnthropicBase):
     """Ultra-optimized sentiment analyzer for Brazilian political context"""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        # 🔧 UPGRADE: Use enhanced model configuration for sentiment analysis
-        super().__init__(config, stage_operation="sentiment_analysis")
+        # Provide default config if none provided
+        if config is None:
+            config = {}
+        super().__init__(config)
         
         # Intelligent cache system
         self._cache = {}
@@ -404,3 +398,155 @@ JSON: {{"surface": "literal", "implicit": "entrelinhas", "irony": ["marker1"], "
 
         response = self.create_message(prompt, temperature=0.3)
         return self.parse_claude_response_safe(response, ["results"])
+
+    # TDD Phase 3 Methods - Standard sentiment analysis interface
+    def analyze_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
+        """
+        TDD interface: Analyze sentiment for a batch of texts.
+        
+        Args:
+            texts: List of texts to analyze
+            
+        Returns:
+            List of sentiment analysis results
+        """
+        try:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"💭 TDD sentiment analysis started for {len(texts)} texts")
+            
+            results = []
+            
+            # Process in smaller batches for reliability
+            batch_size = min(10, len(texts))
+            
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+                batch_results = self._analyze_batch_tdd(batch)
+                results.extend(batch_results)
+            
+            logger.info(f"✅ TDD sentiment analysis completed: {len(results)} results generated")
+            
+            return results
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"TDD sentiment analysis error: {e}")
+            
+            # Return fallback results
+            return [
+                {
+                    'sentiment': 'neutral',
+                    'confidence': 0.5,
+                    'emotion': 'unknown',
+                    'error': str(e)
+                }
+                for _ in texts
+            ]
+    
+    def analyze(self, texts: List[str]) -> List[Dict[str, Any]]:
+        """TDD interface alias for analyze_batch."""
+        return self.analyze_batch(texts)
+    
+    def _analyze_batch_tdd(self, texts: List[str]) -> List[Dict[str, Any]]:
+        """Internal method for TDD batch analysis."""
+        try:
+            # Create simplified prompt for TDD interface
+            prompt = self._create_tdd_sentiment_prompt(texts)
+            
+            # Make API call
+            response = self.create_message(prompt, temperature=0.3)
+            
+            # Parse response
+            parsed = self.parse_claude_response_safe(response, ["results"])
+            
+            if isinstance(parsed, dict) and "results" in parsed:
+                results = parsed["results"]
+                
+                # Ensure all results have required fields
+                formatted_results = []
+                for i, result in enumerate(results):
+                    if isinstance(result, dict):
+                        formatted_results.append({
+                            'sentiment': result.get('sentiment', 'neutral'),
+                            'confidence': float(result.get('confidence', 0.5)),
+                            'emotion': result.get('emotion', 'unknown'),
+                            'text_id': i
+                        })
+                    else:
+                        formatted_results.append({
+                            'sentiment': 'neutral',
+                            'confidence': 0.5,
+                            'emotion': 'unknown',
+                            'text_id': i
+                        })
+                
+                return formatted_results
+            
+            # Fallback if parsing fails
+            return self._create_fallback_results(texts)
+            
+        except Exception as e:
+            # Return fallback results on any error
+            return self._create_fallback_results(texts)
+    
+    def _create_tdd_sentiment_prompt(self, texts: List[str]) -> str:
+        """Create optimized prompt for TDD sentiment analysis."""
+        texts_json = []
+        for i, text in enumerate(texts):
+            texts_json.append({
+                "id": i,
+                "text": str(text)[:200]  # Truncate for efficiency
+            })
+        
+        prompt = f"""Analise o sentimento dos textos brasileiros de Telegram:
+
+TEXTOS:
+{texts_json}
+
+Retorne JSON com sentimentos (positive/negative/neutral), confiança (0-1) e emoção:
+
+{{"results": [{{"sentiment": "positive", "confidence": 0.9, "emotion": "joy"}}, {{"sentiment": "negative", "confidence": 0.8, "emotion": "anger"}}]}}"""
+        
+        return prompt
+    
+    def _create_fallback_results(self, texts: List[str]) -> List[Dict[str, Any]]:
+        """Create fallback results using simple heuristics."""
+        results = []
+        
+        for i, text in enumerate(texts):
+            text_str = str(text).lower()
+            
+            # Simple sentiment heuristics
+            positive_words = ['bom', 'ótimo', 'excelente', 'feliz', 'alegre', 'amor', '❤️', '😊', '👏']
+            negative_words = ['ruim', 'péssimo', 'terrível', 'triste', 'raiva', 'ódio', '😢', '😡', 'revoltante']
+            
+            positive_count = sum(1 for word in positive_words if word in text_str)
+            negative_count = sum(1 for word in negative_words if word in text_str)
+            
+            if positive_count > negative_count:
+                sentiment = 'positive'
+                confidence = min(0.8, 0.5 + positive_count * 0.1)
+                emotion = 'joy'
+            elif negative_count > positive_count:
+                sentiment = 'negative'
+                confidence = min(0.8, 0.5 + negative_count * 0.1)
+                emotion = 'anger' if '!!!' in text_str else 'sadness'
+            else:
+                sentiment = 'neutral'
+                confidence = 0.6
+                emotion = 'neutral'
+            
+            results.append({
+                'sentiment': sentiment,
+                'confidence': confidence,
+                'emotion': emotion,
+                'text_id': i,
+                'method': 'fallback_heuristic'
+            })
+        
+        return results
+
+# TDD compatibility alias
+SentimentAnalyzer = AnthropicSentimentAnalyzer

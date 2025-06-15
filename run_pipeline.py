@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Digital Discourse Monitor - Main pipeline execution script.
-
-Orchestrates the complete analysis pipeline with optimizations for performance,
-memory usage, and cost efficiency. Supports multiple execution modes.
+digiNEV Pipeline Executor: Academic tool for analyzing Brazilian political discourse patterns
+Function: Main execution script for 22-stage analysis pipeline with enterprise-grade optimizations
+Usage: Researchers execute `poetry run python run_pipeline.py` to process Telegram messages for violence/authoritarianism studies
 """
 
 import json
@@ -16,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
+import pandas as pd
 
 # Configure performance optimizations FIRST (before any imports)
 try:
@@ -191,11 +191,21 @@ def discover_datasets(data_paths: List[str]) -> List[str]:
             for csv_file in csv_files:
                 try:
                     file_size = os.path.getsize(csv_file)
-                    if file_size > 100:  # Minimum 100 bytes to be considered valid
-                        valid_files.append(csv_file)
-                        logger.info(f"Valid dataset found: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
+                    # Try to read as CSV to validate structure
+                    if file_size > 0:
+                        try:
+                            df = pd.read_csv(csv_file)
+                            if len(df) > 0 and not df.empty:
+                                valid_files.append(csv_file)
+                                logger.info(f"Valid dataset found: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
+                            else:
+                                logger.warning(f"Dataset too small ignored: {Path(csv_file).name}")
+                        except pd.errors.EmptyDataError:
+                            logger.warning(f"Empty CSV file ignored: {Path(csv_file).name}")
+                        except Exception as e:
+                            logger.warning(f"Invalid CSV file ignored: {Path(csv_file).name}: {e}")
                     else:
-                        logger.warning(f"Dataset too small ignored: {Path(csv_file).name}")
+                        logger.warning(f"Empty file ignored: {Path(csv_file).name}")
                 except Exception as e:
                     logger.error(f"Error checking dataset {csv_file}: {e}")
             

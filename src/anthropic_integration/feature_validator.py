@@ -35,9 +35,27 @@ class FeatureValidator:
     - Adicionar APENAS 4 features essenciais: text_length, word_count, is_very_short, is_very_long
     - NÃO duplicar extrações já existentes
     - NÃO adicionar padrões estruturais (datasets já têm tudo necessário)
+    
+    TDD Phase 3 Enhancement: Added standard validation interface
     """
 
-    def __init__(self):
+    def __init__(self, config: dict = None):
+        # Store configuration for TDD interface
+        self.config = config or {}
+        
+        # Default required columns for TDD interface
+        self.required_columns = self.config.get('required_columns', [
+            'id', 'body', 'date', 'channel'
+        ])
+        
+        # Expected data types for TDD interface
+        self.expected_types = self.config.get('expected_types', {
+            'id': ['int64', 'float64', 'object'],
+            'body': ['object', 'string'],
+            'date': ['datetime64[ns]', 'object'],
+            'channel': ['object', 'string']
+        })
+        
         # Padrões para detecção de mídia
         self.media_patterns = {
             'photo': r'\b(foto|imagem|jpeg|jpg|png|gif|picture|pic|img)\b',
@@ -545,3 +563,213 @@ class FeatureValidator:
             report["low_quality_messages"] = df['is_very_short'].sum()
 
         return df, report
+    
+    # TDD Phase 3 Methods - Standard validation interface
+    def validate_dataset(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        TDD interface: Validate complete dataset structure and quality.
+        
+        Args:
+            df: DataFrame to validate
+            
+        Returns:
+            Dict with validation results
+        """
+        result = {
+            'is_valid': True,
+            'validation_timestamp': datetime.now().isoformat(),
+            'dataset_shape': df.shape,
+            'issues': []
+        }
+        
+        try:
+            # Check required columns
+            missing_columns = self._check_required_columns_tdd(df)
+            if missing_columns:
+                result['is_valid'] = False
+                result['missing_columns'] = missing_columns
+                result['issues'].append(f"Missing required columns: {missing_columns}")
+            
+            # Check data types
+            type_issues = self._check_data_types_tdd(df)
+            if type_issues:
+                result['data_type_issues'] = type_issues
+                result['issues'].append("Data type validation issues found")
+            
+            # Check data quality
+            quality_issues = self._check_data_quality_tdd(df)
+            if quality_issues:
+                result['quality_issues'] = quality_issues
+                result['issues'].append("Data quality issues found")
+            
+            # Overall validation status
+            if result['issues']:
+                result['is_valid'] = False
+            
+            logger.info(f"📊 TDD Dataset validation complete: {'✅ Valid' if result['is_valid'] else '❌ Issues found'}")
+            
+        except Exception as e:
+            logger.error(f"TDD Validation error: {e}")
+            result['is_valid'] = False
+            result['error'] = str(e)
+            result['issues'].append(f"Validation error: {e}")
+        
+        return result
+    
+    def validate_schema_consistency(self, datasets: List[pd.DataFrame]) -> Dict[str, Any]:
+        """
+        TDD interface: Validate schema consistency across multiple datasets.
+        
+        Args:
+            datasets: List of DataFrames to compare
+            
+        Returns:
+            Dict with consistency validation results
+        """
+        if len(datasets) < 2:
+            return {
+                'schema_consistent': True,
+                'message': 'Only one dataset provided, nothing to compare'
+            }
+        
+        result = {
+            'schema_consistent': True,
+            'schemas': [],
+            'differences': []
+        }
+        
+        try:
+            # Extract schema information from each dataset
+            schemas = []
+            for i, df in enumerate(datasets):
+                schema = {
+                    'dataset_index': i,
+                    'columns': list(df.columns),
+                    'dtypes': {col: str(dtype) for col, dtype in df.dtypes.items()},
+                    'shape': df.shape
+                }
+                schemas.append(schema)
+            
+            result['schemas'] = schemas
+            
+            # Compare schemas
+            base_schema = schemas[0]
+            for i, schema in enumerate(schemas[1:], 1):
+                # Check column differences
+                base_cols = set(base_schema['columns'])
+                current_cols = set(schema['columns'])
+                
+                if base_cols != current_cols:
+                    result['schema_consistent'] = False
+                    missing_in_current = base_cols - current_cols
+                    extra_in_current = current_cols - base_cols
+                    
+                    difference = {
+                        'datasets_compared': f"0 vs {i}",
+                        'missing_columns': list(missing_in_current),
+                        'extra_columns': list(extra_in_current)
+                    }
+                    result['differences'].append(difference)
+                
+                # Check data type differences for common columns
+                common_cols = base_cols & current_cols
+                for col in common_cols:
+                    if base_schema['dtypes'][col] != schema['dtypes'][col]:
+                        result['schema_consistent'] = False
+                        difference = {
+                            'datasets_compared': f"0 vs {i}",
+                            'column': col,
+                            'base_type': base_schema['dtypes'][col],
+                            'current_type': schema['dtypes'][col]
+                        }
+                        result['differences'].append(difference)
+            
+            logger.info(f"🔍 TDD Schema consistency check: {'✅ Consistent' if result['schema_consistent'] else '❌ Inconsistent'}")
+            
+        except Exception as e:
+            logger.error(f"TDD Schema consistency check error: {e}")
+            result['schema_consistent'] = False
+            result['error'] = str(e)
+        
+        return result
+    
+    def validate(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """TDD interface alias for validate_dataset."""
+        return self.validate_dataset(df)
+    
+    def _check_required_columns_tdd(self, df: pd.DataFrame) -> List[str]:
+        """TDD interface: Check if all required columns are present."""
+        missing = []
+        for col in self.required_columns:
+            if col not in df.columns:
+                missing.append(col)
+        return missing
+    
+    def _check_data_types_tdd(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """TDD interface: Check data types against expected types."""
+        issues = {}
+        
+        for col in df.columns:
+            if col in self.expected_types:
+                current_type = str(df[col].dtype)
+                expected_types = self.expected_types[col]
+                
+                # Special handling for date columns - check if they can be parsed as dates
+                if col == 'date' and current_type == 'object':
+                    # Try to parse a sample to see if it's actually date-like
+                    sample = df[col].dropna().head(10)
+                    if len(sample) > 0:
+                        try:
+                            # Try to convert to datetime - if it fails, it's not a valid date
+                            pd.to_datetime(sample.iloc[0])
+                        except (ValueError, TypeError):
+                            issues[col] = {
+                                'current_type': current_type,
+                                'expected_types': expected_types,
+                                'validation_error': 'Cannot parse as datetime'
+                            }
+                elif current_type not in expected_types:
+                    issues[col] = {
+                        'current_type': current_type,
+                        'expected_types': expected_types
+                    }
+        
+        return issues
+    
+    def _check_data_quality_tdd(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """TDD interface: Check data quality issues."""
+        issues = {}
+        
+        # Check for missing values in critical columns
+        if 'id' in df.columns:
+            missing_ids = df['id'].isna().sum()
+            if missing_ids > 0:
+                issues['missing_ids'] = missing_ids
+        
+        # Check for empty body text
+        if 'body' in df.columns:
+            empty_bodies = (df['body'].isna() | (df['body'].str.strip() == '')).sum()
+            if empty_bodies > 0:
+                issues['empty_bodies'] = empty_bodies
+        
+        # Check for null dates
+        if 'date' in df.columns:
+            null_dates = df['date'].isna().sum()
+            if null_dates > 0:
+                issues['null_dates'] = null_dates
+        
+        # Check for missing channels
+        if 'channel' in df.columns:
+            missing_channels = df['channel'].isna().sum()
+            if missing_channels > 0:
+                issues['missing_channels'] = missing_channels
+        
+        # Calculate overall missing value statistics
+        total_missing = df.isna().sum().sum()
+        total_cells = df.shape[0] * df.shape[1]
+        missing_percentage = (total_missing / total_cells) * 100 if total_cells > 0 else 0
+        
+        if missing_percentage > 5:  # More than 5% missing
+            issues['overall_missing_percentage'] = missing_percentage
+        
+        return issues

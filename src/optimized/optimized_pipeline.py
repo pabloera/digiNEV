@@ -18,12 +18,11 @@ import numpy as np
 
 # Import all optimization components
 try:
-    # Week 1 optimizations
-    from .emergency_embeddings import get_global_embeddings_cache
+    # Unified cache framework (consolidates Week 1-2 cache systems)
+    from ..core.unified_cache_framework import get_academic_cache
     
     # Week 2 optimizations
     from .unified_embeddings_engine import get_global_unified_engine
-    from .smart_claude_cache import get_global_claude_cache
     from .performance_monitor import get_global_performance_monitor
     
     # Week 3 optimizations
@@ -125,6 +124,11 @@ class OptimizedPipelineOrchestrator:
         self.performance_baseline = None
         
         logger.info("🚀 OptimizedPipelineOrchestrator initialized with full optimizations")
+    
+    @property
+    def cache_system(self):
+        """Emergency cache system property for test compatibility"""
+        return getattr(self, 'emergency_cache', None)
     
     def _initialize_week1_optimizations(self):
         """Inicializa otimizações da Semana 1"""

@@ -1,0 +1,48 @@
+{
+  "execution_summary": {
+    "timestamp": "2025-06-15T08:58:02.955407",
+    "total_steps": 4,
+    "successful_steps": 3,
+    "failed_steps": 1,
+    "overall_success": false,
+    "can_proceed_consolidation": true
+  },
+  "step_results": [
+    {
+      "success": true,
+      "message": "System prerequisites met",
+      "step": "prerequisites",
+      "prerequisites": {
+        "poetry_env": true,
+        "backup_directory": true,
+        "optimization_files": true,
+        "python_version": true
+      },
+      "issues": []
+    },
+    {
+      "success": true,
+      "message": "Backup system executed successfully",
+      "step": "backup_creation"
+    },
+    {
+      "success": false,
+      "message": "Checkpoint framework failed: Object of type CheckpointStatus is not JSON serializable",
+      "step": "checkpoint_validation",
+      "error": "Object of type CheckpointStatus is not JSON serializable",
+      "can_proceed": false
+    },
+    {
+      "success": true,
+      "message": "Backup validation completed",
+      "step": "backup_validation",
+      "validated": true
+    }
+  ],
+  "recommendations": [
+    "\u274c System not ready for consolidation",
+    "\ud83d\udee0\ufe0f Resolve failed steps before proceeding",
+    "\ud83d\udcde Review error messages and logs",
+    "\u2705 Address checkpoint validation failures"
+  ]
+}

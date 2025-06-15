@@ -509,3 +509,275 @@ RESPOND ONLY WITH JSON, NO ADDITIONAL EXPLANATIONS.
             report["recommendations"].append("Political analysis was not extracted successfully")
 
         return report
+
+    # TDD Phase 3 Methods - Standard feature extraction interface
+    def extract_features(self, df: pd.DataFrame, text_column: str = None) -> pd.DataFrame:
+        """
+        TDD interface: Extract comprehensive features from DataFrame.
+        
+        Args:
+            df: DataFrame to process
+            text_column: Text column name (auto-detected if None)
+            
+        Returns:
+            DataFrame with extracted features
+        """
+        try:
+            logger.info(f"🔧 TDD feature extraction started for {len(df)} records")
+            
+            # Auto-detect text column if not provided
+            if text_column is None:
+                text_column = self._detect_text_column(df)
+            
+            if text_column not in df.columns:
+                logger.error(f"Text column '{text_column}' not found in DataFrame")
+                return df.copy()
+            
+            result_df = df.copy()
+            
+            # Extract basic text features
+            result_df = self._extract_basic_text_features(result_df, text_column)
+            
+            # Extract URL features
+            result_df = self._extract_url_features(result_df, text_column)
+            
+            # Extract hashtag features
+            result_df = self._extract_hashtag_features(result_df, text_column)
+            
+            # Extract mention features
+            result_df = self._extract_mention_features(result_df, text_column)
+            
+            # Extract sentiment features
+            result_df = self._extract_sentiment_features(result_df, text_column)
+            
+            # Extract political features
+            result_df = self._extract_political_features(result_df, text_column)
+            
+            features_added = len(result_df.columns) - len(df.columns)
+            logger.info(f"✅ TDD feature extraction completed: {features_added} features added")
+            
+            return result_df
+            
+        except Exception as e:
+            logger.error(f"TDD feature extraction error: {e}")
+            return df.copy()
+    
+    def extract(self, df: pd.DataFrame) -> pd.DataFrame:
+        """TDD interface alias for extract_features."""
+        return self.extract_features(df)
+    
+    def _detect_text_column(self, df: pd.DataFrame) -> str:
+        """Detect text column automatically."""
+        text_candidates = ['body', 'text', 'content', 'message', 'mensagem']
+        
+        for candidate in text_candidates:
+            if candidate in df.columns:
+                # Check if column has text content
+                non_empty = df[candidate].dropna().astype(str).str.len().gt(0).sum()
+                if non_empty > len(df) * 0.1:  # At least 10% with content
+                    return candidate
+        
+        # Fallback to first object column
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                return col
+        
+        return 'body'  # Final fallback
+    
+    def _extract_basic_text_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract basic text features."""
+        try:
+            # Text length
+            df['text_length'] = df[text_column].fillna('').astype(str).str.len()
+            
+            # Word count
+            df['word_count'] = df[text_column].fillna('').astype(str).str.split().str.len()
+            
+            # Character count (excluding spaces)
+            df['char_count'] = df[text_column].fillna('').astype(str).str.replace(' ', '').str.len()
+            
+            # Sentence count (approximate)
+            df['sentence_count'] = df[text_column].fillna('').astype(str).str.count(r'[.!?]+') + 1
+            
+            # Uppercase ratio
+            df['uppercase_ratio'] = df[text_column].fillna('').astype(str).apply(
+                lambda x: sum(c.isupper() for c in x) / len(x) if len(x) > 0 else 0
+            )
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting basic text features: {e}")
+            return df
+    
+    def _extract_url_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract URL-related features."""
+        try:
+            import re
+            url_pattern = r'https?://[^\s]+'
+            
+            # Extract URLs
+            df['urls'] = df[text_column].fillna('').astype(str).apply(
+                lambda x: re.findall(url_pattern, x)
+            )
+            
+            # URL count
+            df['url_count'] = df['urls'].apply(len)
+            
+            # Has URLs boolean
+            df['has_urls'] = df['url_count'] > 0
+            
+            # Extract domains
+            df['domains'] = df['urls'].apply(
+                lambda urls: [self._extract_domain(url) for url in urls] if urls else []
+            )
+            
+            # Domain count
+            df['domain_count'] = df['domains'].apply(len)
+            
+            # Unique domain count
+            df['unique_domain_count'] = df['domains'].apply(lambda x: len(set(x)) if x else 0)
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting URL features: {e}")
+            return df
+    
+    def _extract_hashtag_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract hashtag-related features."""
+        try:
+            import re
+            hashtag_pattern = r'#\w+'
+            
+            # Extract hashtags
+            df['hashtags'] = df[text_column].fillna('').astype(str).apply(
+                lambda x: re.findall(hashtag_pattern, x.lower())
+            )
+            
+            # Hashtag count
+            df['hashtag_count'] = df['hashtags'].apply(len)
+            
+            # Has hashtags boolean
+            df['has_hashtags'] = df['hashtag_count'] > 0
+            
+            # Unique hashtag count
+            df['unique_hashtag_count'] = df['hashtags'].apply(lambda x: len(set(x)) if x else 0)
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting hashtag features: {e}")
+            return df
+    
+    def _extract_mention_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract mention-related features."""
+        try:
+            import re
+            mention_pattern = r'@\w+'
+            
+            # Extract mentions
+            mentions_list = df[text_column].fillna('').astype(str).apply(
+                lambda x: re.findall(mention_pattern, x.lower())
+            )
+            df['mentions'] = mentions_list.apply(lambda x: x if x else None)
+            
+            # Mention count
+            df['mention_count'] = mentions_list.apply(len)
+            
+            # Has mentions boolean
+            df['has_mentions'] = df['mention_count'] > 0
+            
+            # Unique mention count
+            df['unique_mention_count'] = df['mentions'].apply(lambda x: len(set(x)) if x else 0)
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting mention features: {e}")
+            return df
+    
+    def _extract_sentiment_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract sentiment-related features."""
+        try:
+            # Exclamation count
+            df['exclamation_count'] = df[text_column].fillna('').astype(str).str.count('!')
+            
+            # Question count
+            df['question_count'] = df[text_column].fillna('').astype(str).str.count(r'\?')
+            
+            # Caps ratio (percentage of text in caps)
+            df['caps_ratio'] = df[text_column].fillna('').astype(str).apply(
+                lambda x: sum(c.isupper() for c in x if c.isalpha()) / len([c for c in x if c.isalpha()]) if any(c.isalpha() for c in x) else 0
+            )
+            
+            # Repeated chars (!!!!, ????, etc.)
+            df['repeated_chars'] = df[text_column].fillna('').astype(str).str.count(r'(.)\1{2,}')
+            
+            # Positive/negative words (simple heuristic)
+            positive_words = ['bom', 'ótimo', 'excelente', 'maravilhoso', 'feliz', 'alegre', 'perfeito']
+            negative_words = ['ruim', 'péssimo', 'terrível', 'horrível', 'triste', 'revoltante', 'inaceitável']
+            
+            df['positive_word_count'] = df[text_column].fillna('').astype(str).str.lower().apply(
+                lambda x: sum(word in x for word in positive_words)
+            )
+            
+            df['negative_word_count'] = df[text_column].fillna('').astype(str).str.lower().apply(
+                lambda x: sum(word in x for word in negative_words)
+            )
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting sentiment features: {e}")
+            return df
+    
+    def _extract_political_features(self, df: pd.DataFrame, text_column: str) -> pd.DataFrame:
+        """Extract political discourse features."""
+        try:
+            # Political entities (simplified)
+            political_entities = ['bolsonaro', 'lula', 'pt', 'psl', 'stf', 'tse', 'congresso', 'governo']
+            
+            df['political_entities'] = df[text_column].fillna('').astype(str).str.lower().apply(
+                lambda x: [entity for entity in political_entities if entity in x]
+            )
+            
+            df['political_entity_count'] = df['political_entities'].apply(len)
+            
+            # Discourse markers
+            conspiracy_markers = ['fake news', 'mídia', 'manipulação', 'verdade', 'acordem']
+            authoritarian_markers = ['ordem', 'disciplina', 'autoridade', 'controle']
+            
+            df['conspiracy_markers'] = df[text_column].fillna('').astype(str).str.lower().apply(
+                lambda x: sum(marker in x for marker in conspiracy_markers)
+            )
+            
+            df['authoritarian_markers'] = df[text_column].fillna('').astype(str).str.lower().apply(
+                lambda x: sum(marker in x for marker in authoritarian_markers)
+            )
+            
+            # Discourse markers list
+            df['discourse_markers'] = df.apply(
+                lambda row: (['conspiracy'] if row['conspiracy_markers'] > 0 else []) + 
+                           (['authoritarian'] if row['authoritarian_markers'] > 0 else []),
+                axis=1
+            )
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error extracting political features: {e}")
+            return df
+    
+    def _extract_domain(self, url: str) -> str:
+        """Extract domain from URL."""
+        try:
+            import re
+            match = re.search(r'https?://([^/]+)', url)
+            if match:
+                domain = match.group(1)
+                # Remove www. prefix
+                return domain.replace('www.', '')
+            return ''
+        except:
+            return ''
