@@ -85,8 +85,19 @@ backup/
 archive/
 test_backups/
 e2e_test_backups/
+# Backup file extensions (prevent large file commits)
 *.backup
 *.bak
+*.backup.*
+*.bak.*
+*_backup
+*_backup.*
+*.old
+*.orig
+*.save
+*.swp
+*.swo
+*~
 
 # ===================
 # Configuration Files (API Keys)
