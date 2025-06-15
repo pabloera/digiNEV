@@ -41,7 +41,7 @@ This is an **academic research tool** for social scientists studying violence an
 
 **✅ WEEK 1-2 INTEGRATION FOR ACADEMICS:**
 - **40% API cost reduction** through intelligent caching optimized for research workflows
-- **Portuguese text optimization** for Brazilian political discourse analysis
+- **Brazilian Portuguese text optimization** for Brazilian Telegram political discourse analysis
 - **Academic budget controls** with $50/month default for research sustainability
 - **Simplified configuration** removes enterprise complexity for researchers
 - **Research data integrity** preservation throughout optimization process
@@ -72,11 +72,11 @@ This is an **academic research tool** for social scientists studying violence an
 - Auto-downgrade to cheaper models when needed
 - Academic usage statistics and cost optimization reports
 
-**🇧🇷 Portuguese Research Optimization:**
+**🇧🇷 Brazilian Portuguese Research Optimization:**
 - Brazilian political entity recognition
-- Social media text normalization
-- Academic research quality controls
-- Data integrity preservation for citation
+- Brazilian Portuguese text normalization for Telegram discourse
+- Academic research quality controls for Brazilian political analysis
+- Data integrity preservation for citation of Brazilian content
 
 ### 📊 **ACADEMIC PERFORMANCE METRICS:**
 - **Cost Reduction**: 40% through Week 1-2 optimizations
@@ -89,7 +89,7 @@ This is an **academic research tool** for social scientists studying violence an
 - ✅ **15/15 optimization tests passed** (100% success rate across all weeks)
 - ✅ **Research functionality preserved and enhanced** 
 - ✅ **Cost optimization validation confirmed** (40% API cost reduction)
-- ✅ **Portuguese analysis optimization verified** (Brazilian political taxonomy preserved)
+- ✅ **Brazilian Portuguese analysis optimization verified** (Brazilian political taxonomy preserved)
 - ✅ **Academic budget controls tested and working** ($50/month budget with auto-protection)
 
 ### 📊 **CONSOLIDATION VALIDATION RESULTS**
@@ -112,7 +112,7 @@ Overall Success Rate: 100.0% (15/15 tests passing)
 ✅ Research Features: Yes (4 core features operational)
 ✅ Memory Requirements: 4GB target achieved (50% reduction from 8GB)
 ✅ Cost Management: $50/month with auto-protection
-✅ Portuguese Categories: Preserved for research authenticity
+✅ Brazilian Political Categories: Preserved for research authenticity
 ```
 
 **Performance Metrics Achieved:**
@@ -158,7 +158,7 @@ poetry run python run_pipeline.py
 
 **Academic Configuration Highlights:**
 - **Emergency cache**: 48h TTL for research consistency
-- **Smart cache**: Portuguese political term normalization
+- **Smart cache**: Brazilian Portuguese political term normalization
 - **Budget**: $50/month with auto-protection
 - **Models**: claude-3-5-haiku-20241022 (most economical)
 - **Voyage.ai**: voyage-3.5-lite with 96% sampling for cost control
@@ -214,8 +214,8 @@ src/
 
 ### 2. Language Standards
 - **Documentation**: English for technical docs and code comments
-- **Analysis categories**: Portuguese for political/sentiment categories (research validity)
-- **Variable names**: English for code, Portuguese preserved in analysis outputs
+- **Analysis categories**: Brazilian Portuguese for political/sentiment categories (research validity)
+- **Variable names**: English for code, Brazilian Portuguese preserved in analysis outputs
 
 ### 3. File Management
 - **Always use Poetry**: `poetry run python [command]`
@@ -223,7 +223,7 @@ src/
 - **Documentation**: Keep README.md and CLAUDE.md organized and current
 
 ### 4. Research Data Integrity
-- **Portuguese analysis categories**: Never translate political categories to English
+- **Brazilian Portuguese analysis categories**: Never translate Brazilian political categories to English
 - **Reproducibility**: Maintain consistent model versions
 - **Validation**: Ensure research reliability through quality checks
 

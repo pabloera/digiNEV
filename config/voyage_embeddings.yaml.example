@@ -32,4 +32,4 @@ voyage_embeddings:
   # Cache Settings
   enable_caching: true
   cache_ttl_hours: 48
-  portuguese_normalization: true
+  brazilian_portuguese_normalization: true

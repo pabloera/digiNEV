@@ -46,9 +46,9 @@ poetry run python src/dashboard/start_dashboard.py
 The system analyzes messages through comprehensive stages:
 
 1. **Data Processing** (Stages 1-4): Chunking, encoding, deduplication, validation
-2. **Political Analysis** (Stage 5): Hierarchical Brazilian political categorization
+2. **Political Analysis** (Stage 5): Hierarchical Brazilian political categorization using Brazilian Portuguese terminology
 3. **Text Cleaning** (Stage 6): Intelligent content preservation
-4. **Linguistic Analysis** (Stage 7): Portuguese NLP with spaCy
+4. **Linguistic Analysis** (Stage 7): Brazilian Portuguese NLP with spaCy
 5. **Sentiment Analysis** (Stage 8): Political context-aware sentiment
 6. **Topic Modeling** (Stage 9): Semantic topic discovery
 7. **Content Analysis** (Stages 10-14): TF-IDF, clustering, hashtags, domains, temporal

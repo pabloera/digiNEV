@@ -64,8 +64,8 @@ anthropic:
     critical: 0.9  # 90%
     emergency: 0.95  # 95%
   
-  # Portuguese Research Optimization
-  portuguese_optimization: true
+  # Brazilian Portuguese Research Optimization
+  brazilian_portuguese_optimization: true
   brazilian_political_analysis: true
   preserve_original_categories: true
   

@@ -132,9 +132,9 @@ class CacheBackend(ABC):
 class HashKeyGenerator(CacheKeyGenerator):
     """Hash-based key generation for content-dependent caching"""
     
-    def __init__(self, algorithm: str = "md5", include_portuguese_normalization: bool = True):
+    def __init__(self, algorithm: str = "md5", include_brazilian_portuguese_normalization: bool = True):
         self.algorithm = algorithm
-        self.include_portuguese_normalization = include_portuguese_normalization
+        self.include_brazilian_portuguese_normalization = include_brazilian_portuguese_normalization
     
     def generate_key(self, *args, **kwargs) -> str:
         """Generate hash-based cache key"""
@@ -145,8 +145,8 @@ class HashKeyGenerator(CacheKeyGenerator):
         for arg in args:
             if isinstance(arg, (list, tuple)):
                 # Handle text lists (common for embeddings)
-                if self.include_portuguese_normalization:
-                    normalized_texts = [self._normalize_portuguese_text(str(item)) for item in arg]
+                if self.include_brazilian_portuguese_normalization:
+                    normalized_texts = [self._normalize_brazilian_portuguese_text(str(item)) for item in arg]
                     content_parts.extend(sorted(normalized_texts))
                 else:
                     content_parts.extend([str(item) for item in arg])
@@ -168,8 +168,8 @@ class HashKeyGenerator(CacheKeyGenerator):
         else:
             raise ValueError(f"Unsupported hash algorithm: {self.algorithm}")
     
-    def _normalize_portuguese_text(self, text: str) -> str:
-        """Normalize Portuguese text for better cache hits in Brazilian research"""
+    def _normalize_brazilian_portuguese_text(self, text: str) -> str:
+        """Normalize Brazilian Portuguese text for better cache hits in Brazilian political research"""
         if not isinstance(text, str):
             return str(text)
         
@@ -508,12 +508,12 @@ class UnifiedCacheFramework:
                  memory_backend_mb: float = 200.0,
                  disk_backend_mb: float = 800.0,
                  default_ttl_hours: int = 24,
-                 enable_portuguese_optimization: bool = True,
+                 enable_brazilian_portuguese_optimization: bool = True,
                  academic_mode: bool = True):
         
         self.cache_dir = cache_dir
         self.default_ttl_hours = default_ttl_hours
-        self.enable_portuguese_optimization = enable_portuguese_optimization
+        self.enable_brazilian_portuguese_optimization = enable_brazilian_portuguese_optimization
         self.academic_mode = academic_mode
         
         # Initialize backends
@@ -531,7 +531,7 @@ class UnifiedCacheFramework:
         # Initialize key generators
         self.hash_generator = HashKeyGenerator(
             algorithm="md5",
-            include_portuguese_normalization=enable_portuguese_optimization
+            include_brazilian_portuguese_normalization=enable_brazilian_portuguese_optimization
         )
         
         self.direct_generator = DirectKeyGenerator()
@@ -548,7 +548,7 @@ class UnifiedCacheFramework:
         logger.info(f"📁 Cache directory: {cache_dir}")
         logger.info(f"🧠 Memory limit: {memory_backend_mb}MB")
         logger.info(f"💾 Disk limit: {disk_backend_mb}MB")
-        logger.info(f"🇧🇷 Portuguese optimization: {enable_portuguese_optimization}")
+        logger.info(f"🇧🇷 Brazilian Portuguese optimization: {enable_brazilian_portuguese_optimization}")
     
     def get(self, *args, key_type: str = "hash", **kwargs) -> Optional[Any]:
         """
@@ -646,7 +646,7 @@ class UnifiedCacheFramework:
             metadata={
                 'cost_saved_usd': cost_saved_usd,
                 'compute_time_saved': compute_time_saved,
-                'portuguese_optimized': self.enable_portuguese_optimization,
+                'brazilian_portuguese_optimized': self.enable_brazilian_portuguese_optimization,
                 'academic_mode': self.academic_mode
             }
         )
