@@ -1,0 +1,124 @@
+# =============================================================================
+# PRODUCTION ENVIRONMENT - Monitor do Discurso Digital v5.0.0
+# =============================================================================
+# Configurações otimizadas para ambiente de produção com máxima qualidade
+
+environment:
+  name: "production"
+  version: "5.0.0"
+  description: "Ambiente de produção com processamento completo e qualidade máxima"
+
+# =============================================================================
+# OVERRIDES PARA PRODUÇÃO
+# =============================================================================
+
+# Modelos de máxima qualidade para produção
+models:
+  anthropic:
+    default_model: "claude-3-5-sonnet-20241022"  # Qualidade superior
+    enhanced_model: "claude-sonnet-4-20250514"   # Para stages críticos
+    
+    # Rate limits de produção
+    rate_limits:
+      requests_per_minute: 50
+      tokens_per_minute: 50000
+      max_retries: 5
+      backoff_factor: 2.0
+      
+    # Configurações específicas de produção por stage
+    stage_specific_configs:
+      stage_05_political:
+        model: "claude-3-5-sonnet-20241022"  # Qualidade para análise política
+      stage_15_network:
+        model: "claude-sonnet-4-20250514"    # Máxima qualidade para network
+      stage_18_topics:
+        model: "claude-sonnet-4-20250514"    # Máxima qualidade para interpretação
+
+  voyage:
+    batch_size: 128  # Otimizado para throughput de produção
+    cache_enabled: true
+    cache_expiry_days: 30
+
+# Processamento completo para produção
+processing:
+  memory:
+    target_usage_gb: 4.0
+    max_usage_gb: 8.0
+    adaptive_memory_management: true
+    
+  # Dados completos para produção
+  data_sampling:
+    enable_sampling: false  # Processamento completo em produção
+    max_records: null       # Sem limite de registros
+    
+  # Processamento otimizado
+  performance:
+    enable_parallel_processing: true
+    max_workers: 4
+    chunk_size: 100
+    enable_caching: true
+    enable_optimization_layers: true
+
+# Logs otimizados para produção
+logging:
+  level: "INFO"
+  console_output: false   # Apenas logs estruturados em produção
+  file_output: true
+  enable_stage_timing: true
+  enable_memory_tracking: true
+  
+  # Logs estruturados para produção
+  production_settings:
+    log_format: "json"
+    log_rotation: true
+    max_log_files: 10
+    compress_old_logs: true
+
+# Configurações de custo para produção
+cost_optimization:
+  monthly_budget_limit: 200.0
+  enable_cost_alerts: true
+  cost_alert_threshold: 0.8
+  
+  # Otimizações de custo inteligentes
+  intelligent_cost_management:
+    enable_adaptive_sampling: true
+    cost_performance_balance: "quality"  # quality | speed | cost
+
+# Timeouts robustos para produção
+timeouts:
+  api_request_timeout: 60
+  stage_timeout_minutes: 30
+  total_pipeline_timeout_minutes: 480  # 8 horas para datasets grandes
+  
+  # Recovery settings para produção
+  recovery:
+    auto_retry_failed_stages: true
+    max_retry_attempts: 3
+    checkpoint_frequency: "after_each_stage"
+
+# Configurações específicas de produção
+production:
+  # Qualidade máxima
+  quality_settings:
+    enable_validation_stages: true
+    enable_quality_checks: true
+    minimum_confidence_threshold: 0.8
+    
+  # Backup e recovery
+  backup_settings:
+    enable_automatic_backup: true
+    backup_frequency: "daily"
+    retain_backups_days: 30
+    
+  # Monitoramento
+  monitoring:
+    enable_performance_monitoring: true
+    enable_health_checks: true
+    enable_alerts: true
+    
+  # Deployment
+  deployment:
+    enable_deployment_validation: true
+    enable_rollback_capability: true
+    deployment_environment: "production"

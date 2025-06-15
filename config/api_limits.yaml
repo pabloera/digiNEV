@@ -31,7 +31,7 @@ api_limits:
   voyage:
     # Model settings
     default_model: "voyage-3.5-lite"
-    fallback_model: "voyage-large-2"
+    fallback_model: "voyage-3.5-lite"
     
     # Processing limits
     batch_size: 128

@@ -64,4 +64,5 @@ test_backups/
 e2e_test_backups/
 src/dashboard/data/uploads/
 src/dashboard/data/dashboard_results
-cache/claude_api_production/responses
+cache/claude_api_production/responsesconfig/voyage_embeddings.yaml
+config/anthropic.yaml

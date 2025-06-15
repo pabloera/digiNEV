@@ -1,0 +1,128 @@
+# =============================================================================
+# TESTING ENVIRONMENT - Monitor do Discurso Digital v5.0.0
+# =============================================================================
+# Configurações otimizadas para testes automatizados e CI/CD
+
+environment:
+  name: "testing"
+  version: "5.0.0"
+  description: "Ambiente de testes com dados controlados e validação rigorosa"
+
+# =============================================================================
+# OVERRIDES PARA TESTING
+# =============================================================================
+
+# Modelos consistentes para testes reproduzíveis
+models:
+  anthropic:
+    default_model: "claude-3-5-haiku-20241022"  # Mais rápido e consistente
+    fallback_model: "claude-3-5-haiku-20241022"
+    
+    # Configurações específicas para testes
+    temperature: 0.0  # Determinístico para testes
+    
+    # Rate limits conservadores para testes
+    rate_limits:
+      requests_per_minute: 10
+      tokens_per_minute: 10000
+      max_retries: 2
+      backoff_factor: 1.5
+
+  voyage:
+    batch_size: 16  # Pequeno para testes rápidos
+    cache_enabled: false  # Desabilitado para testes limpos
+    
+# Processamento mínimo para testes
+processing:
+  memory:
+    target_usage_gb: 1.0  # Mínimo para CI/CD
+    max_usage_gb: 2.0
+    
+  # Dados controlados para testes
+  data_sampling:
+    enable_sampling: true
+    max_records: 100  # Apenas 100 registros para testes
+    sampling_strategy: "deterministic"  # Sempre os mesmos dados
+    
+  # Processamento simplificado
+  performance:
+    enable_parallel_processing: false  # Determinístico para testes
+    chunk_size: 10
+    enable_caching: false
+
+# Logs específicos para testes
+logging:
+  level: "WARNING"  # Apenas erros e warnings
+  console_output: true
+  file_output: false  # Não criar arquivos em testes
+  enable_stage_timing: true
+  enable_memory_tracking: false
+  
+  # Configurações específicas para CI/CD
+  testing_settings:
+    capture_test_logs: true
+    log_assertions: true
+    verbose_failures: true
+
+# Configurações de custo para testes
+cost_optimization:
+  monthly_budget_limit: 10.0  # Limite muito baixo para testes
+  enable_cost_alerts: false   # Desabilitado em testes
+  
+  # Usar mocks quando possível
+  mock_settings:
+    enable_api_mocking: true
+    mock_expensive_operations: true
+
+# Timeouts rápidos para testes
+timeouts:
+  api_request_timeout: 10
+  stage_timeout_minutes: 2
+  total_pipeline_timeout_minutes: 10
+
+# Configurações específicas de testing
+testing:
+  # Validação rigorosa
+  validation_settings:
+    strict_validation: true
+    fail_on_warnings: true
+    enable_regression_tests: true
+    
+  # Dados de teste controlados
+  test_data:
+    use_fixed_dataset: true
+    test_dataset_path: "test_dataset.csv"
+    enable_data_validation: true
+    
+  # Configurações de CI/CD
+  ci_cd_settings:
+    enable_parallel_testing: false
+    capture_coverage: true
+    generate_reports: true
+    
+  # Mocking e stubs
+  mocking:
+    mock_external_apis: true
+    mock_file_operations: false
+    mock_expensive_computations: true
+    
+  # Asserções de qualidade
+  quality_assertions:
+    minimum_test_coverage: 0.8
+    maximum_execution_time_seconds: 600  # 10 minutos máximo
+    memory_leak_detection: true
+    
+  # Configurações específicas para diferentes tipos de teste
+  test_types:
+    unit_tests:
+      enable_mocking: true
+      isolated_execution: true
+      
+    integration_tests:
+      enable_real_apis: false
+      use_test_database: true
+      
+    end_to_end_tests:
+      enable_real_apis: true
+      use_minimal_dataset: true
+      validate_outputs: true

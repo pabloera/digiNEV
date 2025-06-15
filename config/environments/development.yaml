@@ -1,0 +1,88 @@
+# =============================================================================
+# DEVELOPMENT ENVIRONMENT - Monitor do Discurso Digital v5.0.0
+# =============================================================================
+# Configurações otimizadas para desenvolvimento local e testes rápidos
+
+environment:
+  name: "development"
+  version: "5.0.0"
+  description: "Ambiente de desenvolvimento com dados reduzidos e logs verbosos"
+
+# =============================================================================
+# OVERRIDES PARA DESENVOLVIMENTO
+# =============================================================================
+
+# Modelos mais rápidos e baratos para desenvolvimento
+models:
+  anthropic:
+    default_model: "claude-3-5-haiku-20241022"  # Mais rápido para dev
+    fallback_model: "claude-3-5-haiku-20241022"
+    
+    # Rate limits reduzidos para desenvolvimento
+    rate_limits:
+      requests_per_minute: 20
+      tokens_per_minute: 20000
+      max_retries: 2
+      backoff_factor: 1.5
+
+  voyage:
+    batch_size: 32  # Reduzido para desenvolvimento mais rápido
+    cache_enabled: true
+    cache_expiry_days: 7  # Cache mais curto em dev
+
+# Processamento reduzido para desenvolvimento
+processing:
+  memory:
+    target_usage_gb: 2.0  # Reduzido para máquinas de desenvolvimento
+    max_usage_gb: 4.0
+    
+  # Dados reduzidos para testes rápidos
+  data_sampling:
+    enable_sampling: true
+    max_records: 1000  # Apenas 1K registros para desenvolvimento
+    sampling_strategy: "random"
+    
+  # Processamento mais rápido
+  performance:
+    enable_parallel_processing: false  # Desabilitado para debugging
+    chunk_size: 50
+    enable_caching: true
+
+# Logs mais verbosos para desenvolvimento
+logging:
+  level: "DEBUG"
+  console_output: true
+  file_output: true
+  enable_stage_timing: true
+  enable_memory_tracking: true
+  
+  # Logs específicos para debugging
+  debug_settings:
+    log_api_requests: true
+    log_data_transformations: true
+    log_performance_metrics: true
+
+# Configurações de custo relaxadas para desenvolvimento
+cost_optimization:
+  monthly_budget_limit: 50.0  # Limite reduzido para desenvolvimento
+  enable_cost_alerts: true
+  cost_alert_threshold: 0.5  # Alerta aos 50% do budget
+
+# Timeouts reduzidos para feedback rápido
+timeouts:
+  api_request_timeout: 30
+  stage_timeout_minutes: 5
+  total_pipeline_timeout_minutes: 30
+
+# Configurações específicas de desenvolvimento
+development:
+  # Habilitar features experimentais
+  enable_experimental_features: true
+  
+  # Debugging específico
+  debug_mode: true
+  verbose_error_messages: true
+  
+  # Arquivos de teste
+  test_dataset_path: "test_dataset.csv"
+  enable_mock_apis: false  # Se true, usar dados mock em vez de APIs reais
