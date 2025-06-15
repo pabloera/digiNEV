@@ -51,11 +51,11 @@ nosetests.xml
 # ===================
 # Large datasets (academic research)
 data/DATASETS_FULL/
-data/uploads/*.csv
+data/uploads/
 data/interim/
 *.csv
-!sample_*.csv
-!test_*.csv
+# Exclude all CSV files (datasets, exports, temporary files)
+**/*.csv
 
 # ===================
 # Pipeline & Cache Files
