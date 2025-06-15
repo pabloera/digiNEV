@@ -168,8 +168,11 @@ class AnthropicBase:
         # Support environment variable substitution
         if api_key.startswith('${') and api_key.endswith('}'):
             import os
+            from dotenv import load_dotenv
+            load_dotenv(override=True)  # Force reload environment variables
             env_var = api_key[2:-1]
             api_key = os.getenv(env_var)
+            logger.info(f"🔑 Environment variable {env_var} resolved: {'✅ Set' if api_key else '❌ Missing'}")
         
         # Try to initialize real client
         if ANTHROPIC_AVAILABLE and api_key and api_key != 'test_key' and api_key != 'your_anthropic_api_key_here':

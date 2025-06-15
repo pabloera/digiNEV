@@ -695,20 +695,20 @@ class UnifiedAnthropicPipeline:
     def _simulate_api_call(self, stage_id: str, df: pd.DataFrame):
         """Simulate API call for testing purposes."""
         try:
-            # Import fresh to ensure test mocking is captured
-            from src.anthropic_integration.base import Anthropic
-            client = Anthropic(api_key=self.config.get('anthropic', {}).get('api_key', 'test_key'))
-            
-            # Make API call - this should be captured by test mocks
-            response = client.messages.create(
-                model="claude-3-5-haiku-20241022",
-                max_tokens=100,
-                messages=[{
-                    "role": "user", 
-                    "content": f"Analyze {len(df)} records for {stage_id}"
-                }]
-            )
-            logger.debug(f"API call completed for {stage_id}")
+            # Use the already initialized client instead of creating a new one
+            if hasattr(self, 'api_client') and self.api_client and hasattr(self, 'real_client') and self.real_client:
+                # Make API call using the correctly initialized client
+                response = self.api_client.messages.create(
+                    model="claude-3-5-haiku-20241022",
+                    max_tokens=100,
+                    messages=[{
+                        "role": "user", 
+                        "content": f"Analyze {len(df)} records for {stage_id}"
+                    }]
+                )
+                logger.debug(f"API call completed for {stage_id}")
+            else:
+                logger.warning(f"API client not available for {stage_id}")
         except Exception as e:
             logger.warning(f"API call failed for {stage_id}: {e}")
     

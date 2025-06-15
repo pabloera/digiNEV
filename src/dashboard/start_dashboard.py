@@ -86,7 +86,7 @@ def monitor_pipeline_results():
 def main():
     """Função principal para iniciar dashboard integrado"""
 
-    print("🎯 DASHBOARD BOLSONARISMO v4.6 - PIPELINE INTEGRADO")
+    print("🎯 digiNEV DASHBOARD v5.0.0 - PROFESSIONAL MULTI-PAGE INTERFACE")
     print("=" * 60)
 
     # 1. Configurar ambiente
@@ -106,18 +106,19 @@ def main():
     # 4. Executar dashboard
     print("\n🚀 Iniciando Dashboard Integrado...")
     print("📊 Acesse em: http://localhost:8501")
-    print("🎯 Features disponíveis:")
-    print("   - Pipeline results visualization")
-    print("   - Real-time monitoring")
-    print("   - Interactive analysis of processed data")
-    print("   - Upload and processing of new datasets")
+    print("🎯 Professional Features Available:")
+    print("   - 🏠 Executive Summary Dashboard")
+    print("   - 🔄 Real-time Pipeline Monitoring")
+    print("   - 📊 Advanced Research Analytics")
+    print("   - 🔧 Quality Control & Validation")
+    print("   - 💰 Cost & Performance Monitoring")
     print("\nPress Ctrl+C to stop\n")
 
     try:
-        # Run main dashboard with optimized configurations
+        # Run professional multi-page dashboard
         subprocess.run([
             sys.executable, '-m', 'streamlit', 'run',
-            str(project_root / 'src' / 'dashboard' / 'app.py'),
+            str(project_root / 'src' / 'dashboard' / 'pages' / '1_🏠_Home.py'),
             '--server.port', '8501',
             '--server.address', 'localhost',
             '--browser.gatherUsageStats', 'false',
