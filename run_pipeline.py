@@ -17,6 +17,10 @@ from typing import Any, Dict, List
 import yaml
 import pandas as pd
 
+# Load environment variables FIRST
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 # Configure performance optimizations FIRST (before any imports)
 try:
     from src.utils.performance_config import configure_all_performance
@@ -490,12 +494,21 @@ def check_optimization_systems():
 def main():
     """Entry point for executing ORIGINAL pipeline (22 stages) WITH v5.0.0 optimizations"""
     
+    # Parse command line arguments
+    import argparse
+    parser = argparse.ArgumentParser(description='digiNEV v5.0.0 Pipeline Executor')
+    parser.add_argument('--dataset', type=str, help='Specific dataset file to process')
+    args = parser.parse_args()
+    
     print("🏆 DIGITAL DISCOURSE MONITOR v5.0.0 - ENTERPRISE-GRADE PRODUCTION SYSTEM")
     print("=" * 80)
     print("📊 EXECUTION: ORIGINAL Pipeline (22 stages) WITH v5.0.0 Optimizations")
     print("🚀 PIPELINE OPTIMIZATION COMPLETE! (45% → 95% success rate)")
     print("⚡ ALL 5 WEEKS OF OPTIMIZATION APPLIED TO ORIGINAL PIPELINE!")
     print("=" * 80)
+    
+    if args.dataset:
+        print(f"📁 Specific dataset requested: {args.dataset}")
     
     start_time = time.time()
     
@@ -551,18 +564,28 @@ def main():
         print("🖥️  Configuring dashboard integration...")
         dashboard_ready = setup_dashboard_integration(config)
         
-        # 4. Discover datasets
-        print("📊 Discovering datasets...")
-        data_paths = [
-            config.get('data', {}).get('path', 'data/uploads'),
-            'data/DATASETS_FULL',
-            'data/uploads'
-        ]
-        datasets = discover_datasets(data_paths)
-        
-        if not datasets:
-            print("❌ No datasets found!")
-            return
+        # 4. Discover or select specific dataset
+        if args.dataset:
+            print(f"📊 Using specified dataset: {args.dataset}")
+            dataset_path = Path(args.dataset)
+            if dataset_path.exists():
+                datasets = [str(dataset_path)]
+                print(f"✅ Dataset found: {dataset_path.name}")
+            else:
+                print(f"❌ Specified dataset not found: {args.dataset}")
+                return
+        else:
+            print("📊 Discovering datasets...")
+            data_paths = [
+                config.get('data', {}).get('path', 'data/uploads'),
+                'data/DATASETS_FULL',
+                'data/uploads'
+            ]
+            datasets = discover_datasets(data_paths)
+            
+            if not datasets:
+                print("❌ No datasets found!")
+                return
         
         print(f"📁 Datasets found: {len(datasets)}")
         for i, dataset in enumerate(datasets[:5], 1):
