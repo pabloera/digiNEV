@@ -24,9 +24,10 @@ class AnthropicBase:
     requiring the full anthropic library, following TDD principles.
     """
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], stage_operation: Optional[str] = None):
         """Initialize Anthropic base with configuration."""
         self.config = config
+        self.stage_operation = stage_operation
         
         # Initialize Anthropic client (mock or real)
         api_key = config.get('anthropic', {}).get('api_key', 'test_key')
@@ -159,3 +160,45 @@ class MockContent:
             'confidence': 0.8,
             'processed': True
         })
+
+
+class EnhancedConfigLoader:
+    """Enhanced configuration loader for backward compatibility."""
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+    
+    def get_stage_config(self, stage_operation: str) -> Dict[str, Any]:
+        """Get configuration for specific stage operation."""
+        return self.config.get('stages', {}).get(stage_operation, {})
+    
+    def get_model_for_operation(self, operation: str) -> str:
+        """Get model configuration for operation."""
+        return self.config.get('anthropic', {}).get('model', 'claude-3-5-haiku-20241022')
+
+
+def get_enhanced_config_loader(config: Dict[str, Any] = None) -> EnhancedConfigLoader:
+    """Factory function to create enhanced config loader."""
+    if config is None:
+        config = {
+            'anthropic': {
+                'model': 'claude-3-5-haiku-20241022',
+                'api_key': 'test_key'
+            },
+            'stages': {}
+        }
+    return EnhancedConfigLoader(config)
+
+
+def load_operation_config(operation: str, config: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Load configuration for specific operation."""
+    if config is None:
+        config = {
+            'anthropic': {
+                'model': 'claude-3-5-haiku-20241022',
+                'api_key': 'test_key'
+            }
+        }
+    
+    # Return operation-specific config or default
+    return config.get('operations', {}).get(operation, config)
