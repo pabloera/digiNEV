@@ -1,12 +1,14 @@
-# Digital Discourse Monitor v5.0.0
+# digiNEV- Digital Discourse Monitor
+# Núcelo de Estudos da Violência - Universidade de São Paulo
+
 
 > **Brazilian Political Discourse Analysis for Social Science Research**
 > 
-> Automated analysis system for Telegram messages (2019-2023) focused on political discourse, denialism, and digital authoritarianism. Designed for academic research centers studying violence and authoritarianism in Brazilian society.
+> Automated analysis system for Telegram messages (2019-2023) focused on political discourse, denialism, and digital authoritarianism. Designed for academic purposes
 
 ## 🎓 Research Context
 
-This tool was developed for **social scientists** and **researchers** studying:
+This tool has been developed for social media studies on:
 - Political communication and digital authoritarianism
 - Denial discourse and conspiracy theories
 - Violence legitimization in digital spaces
