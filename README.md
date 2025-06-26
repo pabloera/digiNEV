@@ -1,5 +1,4 @@
 # digiNEV- Digital Discourse Monitor
-# Núcelo de Estudos da Violência - Universidade de São Paulo
 
 
 > **Brazilian Political Discourse Analysis for Social Science Research**
