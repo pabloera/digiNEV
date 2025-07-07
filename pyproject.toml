@@ -69,7 +69,7 @@ anthropic = ">=0.40.0,<0.50.0"
 python-dotenv = ">=1.0.0,<2.0.0"
 
 # Dashboard dependencies
-dash = ">=2.14.0,<3.0.0"
+dash = ">=2.14.0,<4.0.0"
 plotly = ">=5.17.0,<6.0.0"
 dash-bootstrap-components = ">=1.5.0,<2.0.0"
 dash-core-components = ">=2.0.0,<3.0.0"
