@@ -105,7 +105,7 @@ def main():
 
     # 4. Executar dashboard
     print("\n🚀 Iniciando Dashboard Integrado...")
-    print("📊 Acesse em: http://localhost:8501")
+    print("📊 Acesse em: http://localhost:5000")
     print("🎯 Features disponíveis:")
     print("   - Pipeline results visualization")
     print("   - Real-time monitoring")
@@ -118,10 +118,13 @@ def main():
         subprocess.run([
             sys.executable, '-m', 'streamlit', 'run',
             str(project_root / 'src' / 'dashboard' / 'app.py'),
-            '--server.port', '8501',
-            '--server.address', 'localhost',
+            '--server.port', '5000',
+            '--server.address', '0.0.0.0',
+            '--server.allowRunOnSave', 'true',
             '--browser.gatherUsageStats', 'false',
             '--server.headless', 'true',
+            '--server.enableCORS', 'false',
+            '--server.enableXsrfProtection', 'false',
             '--theme.primaryColor', '#1f77b4',
             '--theme.backgroundColor', '#ffffff',
             '--theme.secondaryBackgroundColor', '#f0f2f6'
