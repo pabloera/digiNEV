@@ -1,0 +1,41 @@
+Plano de Implementação para Aprimoramento da Ferramenta digiNEV
+Este documento descreve o plano de ação para implementar as recomendações do "Relatório de Análise de Falhas e Riscos", com o objetivo de aumentar a robustez e a resiliência da ferramenta.
+
+Fase 1: Validação de Configuração e Esquemas (Em Andamento)
+Objetivo: Garantir que o sistema nunca inicie com uma configuração inválida, "falhando rapidamente" com mensagens de erro claras. Isso elimina a causa raiz de muitos erros de tempo de execução.
+
+[x] Adicionar Pydantic às dependências do projeto. (Concluído)
+
+[x] Criar modelos de validação para todos os arquivos de configuração. (Concluído - src/common/config_models.py)
+
+[x] Integrar a validação ao carregador de configuração (config_loader.py). (Concluído)
+
+Próximo Passo: Refatorar os módulos que consomem a configuração para utilizarem os novos modelos tipados, garantindo segurança de tipos em toda a aplicação.
+
+Fase 2: "Gatekeeper" de Validação de Dados (A Fazer)
+Objetivo: Criar um estágio inicial no pipeline para validar, limpar e padronizar os dados de entrada. Isso garante que os estágios de processamento subsequentes sempre recebam dados em um formato conhecido e confiável.
+
+A Fazer:
+
+[ ] Desenvolver um módulo src/data/data_validator.py.
+
+[ ] Definir um esquema (Schema) para os dados de entrada esperados (colunas, tipos de dados, etc.).
+
+[ ] Implementar a lógica para validar codificação de arquivos (encoding), delimitadores e integridade estrutural.
+
+[ ] Integrar o Data Validator como o primeiro passo obrigatório no PipelineExecutor.
+
+[ ] Criar um diretório de "quarentena" para mover arquivos que falharam na validação, com logs detalhados do motivo da falha.
+
+Fase 3: Implementação do Padrão "Circuit Breaker" (A Fazer)
+Objetivo: Aumentar a resiliência do sistema a falhas temporárias em serviços externos (APIs da Anthropic e Voyage).
+
+A Fazer:
+
+[ ] Adicionar uma biblioteca de Circuit Breaker (ex: pybreaker) às dependências.
+
+[ ] Refatorar o src/anthropic_integration/api_error_handler.py para encapsular as chamadas de API dentro de um Circuit Breaker.
+
+[ ] Configurar os limiares do Circuit Breaker (número de falhas para abrir, tempo de reset) no arquivo network.yaml.
+
+[ ] Garantir que o sistema lide de forma elegante com um "circuito aberto", pausando as tarefas que dependem da API e registrando logs claros.

@@ -68,3 +68,23 @@ network:
     max_overflow: 10
     timeout: 30
     recycle: 3600
+
+# Circuit Breaker Configuration (Fase 3 do Plano de Aprimoramento)
+circuit_breaker:
+  anthropic:
+    failure_threshold: 5
+    recovery_timeout: 60.0
+    success_threshold: 3
+    call_timeout: 30.0
+    
+  voyage:
+    failure_threshold: 3
+    recovery_timeout: 45.0
+    success_threshold: 2
+    call_timeout: 25.0
+    
+  default:
+    failure_threshold: 4
+    recovery_timeout: 50.0
+    success_threshold: 2
+    call_timeout: 20.0

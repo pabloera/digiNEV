@@ -1,0 +1,93 @@
+# ... existing code ...
+import yaml
+from pathlib import Path
+import logging
+from typing import Dict, Any
+
+from pydantic import ValidationError
+from src.common.config_models import MasterConfig
+
+logger = logging.getLogger(__name__)
+
+def load_config(config_dir: Path, master_config_file: str = "master.yaml") -> MasterConfig:
+    """
+    Carrega, mescla e valida as configurações de múltiplos arquivos YAML.
+
+    A função começa carregando o arquivo mestre (master.yaml), que aponta
+    para os outros arquivos de configuração. Em seguida, carrega cada um
+    desses arquivos, mescla tudo em um único dicionário e o valida
+    usando o modelo Pydantic MasterConfig.
+
+    Args:
+        config_dir: O diretório base onde os arquivos de configuração estão localizados.
+        master_config_file: O nome do arquivo de configuração principal.
+
+    Returns:
+        Uma instância de MasterConfig contendo toda a configuração validada.
+
+    Raises:
+        FileNotFoundError: Se um arquivo de configuração não for encontrado.
+        ValidationError: Se os dados de configuração não corresponderem ao schema.
+        ValueError: Se houver um erro ao parsear o YAML.
+    """
+    try:
+        master_path = config_dir / master_config_file
+        if not master_path.is_file():
+            raise FileNotFoundError(f"Arquivo de configuração mestre não encontrado em: {master_path}")
+
+        with open(master_path, 'r', encoding='utf-8') as f:
+            master_config = yaml.safe_load(f)
+            if not master_config:
+                raise ValueError(f"Arquivo de configuração mestre está vazio ou malformado: {master_path}")
+
+        # Dicionário para armazenar a configuração final
+        final_config: Dict[str, Any] = {}
+
+        # Itera sobre as chaves do arquivo mestre (ex: 'core', 'paths')
+        # e carrega os arquivos correspondentes.
+        for key, filename in master_config.get('config_files', {}).items():
+            file_path = config_dir / filename
+            if not file_path.is_file():
+                raise FileNotFoundError(f"Arquivo de configuração '{filename}' referenciado em '{master_config_file}' não foi encontrado em: {file_path}")
+            
+            with open(file_path, 'r', encoding='utf-8') as f:
+                config_data = yaml.safe_load(f)
+                if config_data:
+                    final_config[key] = config_data
+                else:
+                    logger.warning(f"Arquivo de configuração '{filename}' está vazio.")
+        
+        # Validação com Pydantic
+        logger.info("Validando a estrutura da configuração...")
+        validated_config = MasterConfig(**final_config)
+        logger.info("Configuração carregada e validada com sucesso.")
+        
+        return validated_config
+
+    except FileNotFoundError as e:
+        logger.error(f"Erro de arquivo: {e}")
+        raise
+    except yaml.YAMLError as e:
+        logger.error(f"Erro ao parsear o YAML: {e}")
+        raise ValueError(f"Erro de sintaxe no arquivo YAML: {e}") from e
+    except ValidationError as e:
+        logger.error(f"Erro de validação na configuração: {e}")
+        # Idealmente, formatar o erro para ser mais legível
+        # logger.error(e.json())
+        raise
+    except Exception as e:
+        logger.error(f"Um erro inesperado ocorreu ao carregar a configuração: {e}")
+        raise
+
+# Exemplo de como usar (pode ser chamado a partir do main.py)
+# if __name__ == '__main__':
+#     try:
+#         # Supondo que o script seja executado da raiz do projeto
+#         CONFIG_PATH = Path(__file__).parent.parent.parent / "config"
+#         config = load_config(CONFIG_PATH)
+#         print("Configuração validada:")
+#         print(f"  Modo do Pipeline: {config.core.pipeline_mode}")
+#         print(f"  Timeout de Rede: {config.network.default_timeout}")
+#         print(f"  Diretório de Dados: {config.paths.data_dir}")
+#     except (FileNotFoundError, ValueError, ValidationError) as e:
+#         print(f"\nFalha ao inicializar. Corrija os erros de configuração acima.")

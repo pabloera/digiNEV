@@ -1,6 +1,7 @@
 """
 Framework de Tratamento de Erros para API Integration
 Implementa sistema de retry automático e escalação para usuário conforme especificado.
+Inclui Circuit Breaker para resiliência (Fase 3 do Plano de Aprimoramento).
 """
 
 import json
@@ -13,6 +14,10 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .base import AnthropicBase
+from .circuit_breaker import (
+    CircuitBreaker, CircuitBreakerConfig, CircuitBreakerOpenException,
+    get_circuit_breaker_manager, create_api_circuit_breaker, setup_circuit_breakers_from_config
+)
 
 logger = logging.getLogger(__name__)
 
