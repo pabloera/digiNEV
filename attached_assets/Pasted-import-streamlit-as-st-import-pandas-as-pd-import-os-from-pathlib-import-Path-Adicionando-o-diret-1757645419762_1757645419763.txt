@@ -1,0 +1,107 @@
+import streamlit as st
+import pandas as pd
+import os
+from pathlib import Path
+
+# Adicionando o diretório raiz ao path para importações
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+
+from src.dashboard.visualizations import (
+    plot_statistical_comparison,
+    plot_sentiment_distribution,
+    plot_topic_clusters,
+    plot_semantic_search_results
+)
+from src.common.config_loader import load_config
+from src.common.config_models import MasterConfig
+
+# --- Configuração da Página ---
+st.set_page_config(
+    page_title="digiNEV | Painel de Análise de Dados",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.title("Painel de Resultados da Análise de Dados")
+st.markdown("Resultados gerados pelo pipeline de processamento do `digiNEV`.")
+
+# --- Carregamento da Configuração ---
+@st.cache_resource
+def get_paths() -> Path:
+    """Carrega o objeto de configuração e retorna o diretório de saída."""
+    try:
+        # Assumindo que o script é executado da raiz do projeto ao usar 'streamlit run'
+        project_root = Path(__file__).resolve().parents[2]
+        config_dir = project_root / "config"
+        config = load_config(config_dir)
+        # Retorna o caminho absoluto para o diretório de saída
+        return project_root / config.paths.output_dir
+    except Exception as e:
+        st.error(f"Erro ao carregar a configuração: {e}")
+        st.stop()
+        return None
+
+OUTPUT_DIR = get_paths()
+
+# --- Funções de Carregamento de Dados ---
+@st.cache_data
+def load_data(file_name: str) -> pd.DataFrame | None:
+    """Carrega um arquivo CSV do diretório de saída."""
+    try:
+        path = OUTPUT_DIR / file_name
+        if not path.exists():
+            st.warning(f"Arquivo de resultado não encontrado: `{file_name}`. Execute o pipeline para gerá-lo.")
+            return None
+        return pd.read_csv(path)
+    except Exception as e:
+        st.error(f"Não foi possível carregar o arquivo '{file_name}': {e}")
+        return None
+
+# --- Interface do Dashboard ---
+st.sidebar.header("Etapas do Pipeline")
+
+# Carregando os datasets
+df_initial = load_data("dataset_initial.csv")
+df_cleaned = load_data("dataset_cleaned.csv")
+df_statistical = load_data("statistical_analysis.csv")
+df_sentiment = load_data("sentiment_analysis.csv")
+df_topics = load_data("topic_modeling.csv")
+df_semantic_search = load_data("semantic_search_results.csv")
+
+
+# 1. Análise Estatística
+st.header("1. Análise Estatística: Antes e Depois da Limpeza")
+if df_initial is not None and df_cleaned is not None:
+    st.markdown("Comparação das estatísticas descritivas do dataset original versus o dataset após as etapas de pré-processamento e limpeza.")
+    fig = plot_statistical_comparison(df_initial, df_cleaned)
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("Dados da análise estatística não disponíveis.")
+
+# 2. Análise de Sentimento
+st.header("2. Análise de Sentimento")
+if df_sentiment is not None:
+    st.markdown("Distribuição dos sentimentos (positivo, negativo, neutro) identificados no corpus.")
+    fig = plot_sentiment_distribution(df_sentiment)
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("Dados da análise de sentimento não disponíveis.")
+
+# 3. Modelagem de Tópicos
+st.header("3. Modelagem de Tópicos (Clustering)")
+if df_topics is not None:
+    st.markdown("Visualização dos clusters de tópicos identificados. Cada ponto representa um documento, colorido pelo seu tópico principal.")
+    fig = plot_topic_clusters(df_topics)
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("Dados da modelagem de tópicos não disponíveis.")
+    
+# 4. Busca Semântica
+st.header("4. Resultados da Busca Semântica")
+if df_semantic_search is not None:
+    st.markdown("Apresentação dos resultados mais relevantes encontrados pela busca semântica, com base em uma consulta de exemplo.")
+    table_fig = plot_semantic_search_results(df_semantic_search)
+    st.plotly_chart(table_fig, use_container_width=True)
+else:
+    st.info("Resultados da busca semântica não disponíveis.")

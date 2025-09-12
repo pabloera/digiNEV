@@ -1,0 +1,96 @@
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+def plot_statistical_comparison(df_initial: pd.DataFrame, df_cleaned: pd.DataFrame):
+    """
+    Gera um gráfico de barras comparando estatísticas básicas antes e depois da limpeza.
+    """
+    stats = {
+        "Antes da Limpeza": {
+            "Número de Documentos": len(df_initial),
+            "Tamanho Médio (caracteres)": df_initial['text'].str.len().mean(),
+        },
+        "Depois da Limpeza": {
+            "Número de Documentos": len(df_cleaned),
+            "Tamanho Médio (caracteres)": df_cleaned['cleaned_text'].str.len().mean(),
+        }
+    }
+    df_stats = pd.DataFrame(stats).T.reset_index().rename(columns={"index": "Estado"})
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=df_stats["Estado"],
+        y=df_stats["Número de Documentos"],
+        name="Número de Documentos",
+        marker_color='indianred'
+    ))
+    
+    # Adicionando um segundo eixo Y para a outra métrica
+    # fig.add_trace(go.Bar(
+    #     x=df_stats["Estado"],
+    #     y=df_stats["Tamanho Médio (caracteres)"],
+    #     name="Tamanho Médio (caracteres)",
+    #     marker_color='lightsalmon',
+    #     yaxis='y2'
+    # ))
+
+    fig.update_layout(
+        title_text="Comparativo do Dataset",
+        barmode='group',
+        # yaxis2=dict(title='Tamanho Médio (caracteres)', overlaying='y', side='right'),
+        yaxis=dict(title='Contagem'),
+        legend=dict(x=0, y=1.1, orientation='h')
+    )
+    return fig
+
+def plot_sentiment_distribution(df_sentiment: pd.DataFrame):
+    """
+    Gera um gráfico de pizza com a distribuição de sentimentos.
+    """
+    sentiment_counts = df_sentiment['sentiment'].value_counts()
+    fig = px.pie(
+        values=sentiment_counts.values, 
+        names=sentiment_counts.index, 
+        title="Distribuição de Sentimentos",
+        color_discrete_sequence=px.colors.sequential.RdBu
+    )
+    return fig
+
+def plot_topic_clusters(df_topics: pd.DataFrame):
+    """
+    Gera um scatter plot 2D para visualizar os clusters de tópicos.
+    Requer colunas 'embedding_2d_x', 'embedding_2d_y' e 'topic'.
+    """
+    if not all(col in df_topics.columns for col in ['embedding_2d_x', 'embedding_2d_y', 'topic']):
+        return go.Figure().update_layout(title="Dados de embedding 2D não encontrados para plotar clusters.")
+
+    df_topics['topic'] = df_topics['topic'].astype(str) # Garante que os tópicos sejam tratados como categorias
+    fig = px.scatter(
+        df_topics,
+        x='embedding_2d_x',
+        y='embedding_2d_y',
+        color='topic',
+        title="Visualização dos Clusters de Tópicos",
+        hover_data={'text': True, 'topic': True}
+    )
+    fig.update_layout(legend_title_text='Tópico')
+    return fig
+
+def plot_semantic_search_results(df_results: pd.DataFrame):
+    """
+    Exibe os resultados da busca semântica em formato de tabela.
+    """
+    if 'similarity_score' in df_results.columns:
+        df_results['similarity_score'] = df_results['similarity_score'].round(4)
+
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(df_results.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[df_results[col] for col in df_results.columns],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    fig.update_layout(title_text="Top Resultados da Busca Semântica")
+    return fig
