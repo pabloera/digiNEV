@@ -10,10 +10,6 @@ packages = ["poetry"]
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 43323
-externalPort = 3000
-
 [workflows]
 runButton = "Project"
 

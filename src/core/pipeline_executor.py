@@ -63,6 +63,9 @@ class PipelineExecutor:
         self.protection_checklist = None
         self.datasets = []
         
+        # Data Validator (Fase 2) - Gatekeeper como Stage 0
+        self._setup_data_validator()
+        
     def _load_configuration(self) -> Dict[str, Any]:
         """Load unified configuration using the config loader"""
         try:
@@ -102,6 +105,19 @@ class PipelineExecutor:
             },
             "voyage_embeddings": {"enable_sampling": True, "max_messages": 50000}
         }
+        
+    def _setup_data_validator(self):
+        """Configura Data Validator (Fase 2) como Gatekeeper"""
+        try:
+            from .data_validation_integration import DataValidationStage
+            self.data_validator = DataValidationStage(self.config)
+            self.logger.info("✅ Data Validator configurado como Stage 0 (Gatekeeper)")
+        except ImportError as e:
+            self.logger.warning(f"⚠️ Data Validator não disponível: {e}")
+            self.data_validator = None
+        except Exception as e:
+            self.logger.error(f"❌ Erro ao configurar Data Validator: {e}")
+            self.data_validator = None
     
     def load_checkpoints(self) -> Optional[Dict[str, Any]]:
         """Load current checkpoint state"""
@@ -276,6 +292,34 @@ class PipelineExecutor:
             
             if not datasets:
                 raise ValueError("No valid datasets found for processing")
+            
+            # STAGE 0: Data Validation (Gatekeeper) - Fase 2 do Plano de Aprimoramento
+            if self.data_validator and start_from != "skip_validation":
+                self.logger.info("🔍 STAGE 0: Data Validation (Gatekeeper)")
+                self.logger.info("=" * 50)
+                
+                try:
+                    validation_result = self.data_validator.execute(datasets)
+                    
+                    # Usar apenas datasets válidos
+                    valid_datasets = validation_result['valid_datasets']
+                    
+                    if not valid_datasets:
+                        raise ValueError("Nenhum dataset válido encontrado após validação (Stage 0)")
+                    
+                    # Atualizar lista de datasets para usar apenas os válidos
+                    datasets = valid_datasets
+                    
+                    # Registrar resultado da validação
+                    results['stages_completed']['00_data_validation'] = validation_result
+                    
+                    self.logger.info(f"✅ Stage 0 concluído: {len(valid_datasets)} datasets válidos")
+                    
+                except Exception as e:
+                    self.logger.error(f"❌ Stage 0 (Data Validation) falhou: {e}")
+                    raise ValueError(f"Pipeline interrompido na validação de dados: {e}")
+            else:
+                self.logger.warning("⚠️ Data Validator não configurado - prosseguindo sem validação")
             
             # Setup dashboard
             dashboard_ready = self.setup_dashboard_integration()

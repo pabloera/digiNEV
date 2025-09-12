@@ -37,8 +37,25 @@ class NetworkAPIConfig(BaseModel):
     anthropic: Dict[str, Any] = {}
     voyage: Dict[str, Any] = {}
 
+class CircuitBreakerServiceConfig(BaseModel):
+    """Schema para configuração de um serviço no Circuit Breaker."""
+    failure_threshold: int = 5
+    recovery_timeout: float = 60.0
+    success_threshold: int = 3
+    call_timeout: float = 30.0
+
+class CircuitBreakerConfig(BaseModel):
+    """Schema para configuração do Circuit Breaker."""
+    anthropic: CircuitBreakerServiceConfig = CircuitBreakerServiceConfig()
+    voyage: CircuitBreakerServiceConfig = CircuitBreakerServiceConfig()
+    default: CircuitBreakerServiceConfig = CircuitBreakerServiceConfig()
+
 class NetworkConfig(BaseModel):
     """Schema para a configuração de rede (network.yaml)."""
+    network: Dict[str, Any] = {}
+    circuit_breaker: CircuitBreakerConfig = CircuitBreakerConfig()
+    
+    # Backward compatibility - manter campos existentes
     dashboard: NetworkDashboardConfig = NetworkDashboardConfig()
     apis: NetworkAPIConfig = NetworkAPIConfig()
     development: Dict[str, Any] = {}

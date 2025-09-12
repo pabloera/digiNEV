@@ -75,6 +75,10 @@ class APIErrorHandler:
         # Configurações de retry
         self.max_retries = 2
         self.retry_delay = 1.0  # segundos entre tentativas
+        
+        # Circuit Breakers para APIs (Fase 3)
+        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self._setup_circuit_breakers()
 
         # Padrões para detectar alucinações e inconsistências
         self.hallucination_patterns = [
@@ -93,6 +97,31 @@ class APIErrorHandler:
             "não bate com",
             "diferente do esperado"
         ]
+        
+    def _setup_circuit_breakers(self):
+        """Configura Circuit Breakers para APIs"""
+        try:
+            from ..common.config_loader import get_config_loader
+            
+            config_loader = get_config_loader()
+            network_config = config_loader.get_network_config()
+            
+            # Configurar Circuit Breakers a partir da configuração
+            self.circuit_breakers = setup_circuit_breakers_from_config(network_config)
+            
+            logger.info(f"Circuit Breakers configurados: {list(self.circuit_breakers.keys())}")
+            
+        except Exception as e:
+            logger.warning(f"Falha ao configurar Circuit Breakers: {e}")
+            logger.warning("Continuando sem Circuit Breaker - sistema pode ser menos resiliente")
+            
+    def _get_circuit_breaker(self, api_name: str) -> Optional[CircuitBreaker]:
+        """Obtém Circuit Breaker para uma API específica"""
+        breaker = self.circuit_breakers.get(api_name)
+        if not breaker:
+            # Usar breaker padrão se disponível
+            breaker = self.circuit_breakers.get('default')
+        return breaker
 
     def load_error_history(self):
         """Carrega histórico de erros do arquivo de log"""
@@ -145,16 +174,18 @@ class APIErrorHandler:
         operation_func: Callable,
         stage: str,
         operation: str,
+        api_name: str = "default",
         *args,
         **kwargs
     ) -> APIOperationResult:
         """
-        Executa operação com sistema de retry automático
+        Executa operação com sistema de retry automático e Circuit Breaker
 
         Args:
             operation_func: Função a ser executada
             stage: Etapa do pipeline
             operation: Nome da operação
+            api_name: Nome da API (para Circuit Breaker)
             *args, **kwargs: Argumentos para a função
 
         Returns:
@@ -162,12 +193,30 @@ class APIErrorHandler:
         """
         start_time = time.time()
         last_error = None
+        
+        # Obter Circuit Breaker para esta API
+        circuit_breaker = self._get_circuit_breaker(api_name)
+        if circuit_breaker:
+            logger.debug(f"Usando Circuit Breaker '{api_name}' para operação '{operation}'")
+        else:
+            logger.debug(f"Circuit Breaker não encontrado para '{api_name}', executando sem proteção")
 
         for attempt in range(self.max_retries + 1):
             try:
                 logger.info(f"Tentativa {attempt + 1}/{self.max_retries + 1} - {stage}.{operation}")
 
-                result = operation_func(*args, **kwargs)
+                # Executar operação com Circuit Breaker se disponível
+                if circuit_breaker:
+                    try:
+                        result = circuit_breaker.call(operation_func, *args, **kwargs)
+                    except CircuitBreakerOpenException as e:
+                        # Circuit Breaker está aberto - falha rápida
+                        logger.warning(f"Circuit Breaker aberto para {api_name}: {e}")
+                        raise Exception(f"Serviço {api_name} temporariamente indisponível (Circuit Breaker aberto). "
+                                      f"Tente novamente em {e.retry_after:.1f} segundos.")
+                else:
+                    # Execução sem Circuit Breaker
+                    result = operation_func(*args, **kwargs)
 
                 # Verificar se resultado indica alucinação ou inconsistência
                 if isinstance(result, str):
@@ -201,10 +250,9 @@ class APIErrorHandler:
                 logger.warning(f"Erro na tentativa {attempt + 1}: {e}")
 
                 if attempt < self.max_retries:
-                    logger.info(f"Aguardando {self.retry_delay}s antes da próxima tentativa...")
-                    time.sleep(self.retry_delay)
-                    # Aumentar delay exponencialmente
-                    self.retry_delay *= 1.5
+                    current_delay = self.retry_delay * (1.5 ** attempt)  # Não modificar self.retry_delay globalmente
+                    logger.info(f"Aguardando {current_delay:.1f}s antes da próxima tentativa...")
+                    time.sleep(current_delay)
                 else:
                     # Todas as tentativas falharam
                     self.errors.append(last_error)

@@ -9,8 +9,8 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Any
 
-from src.data.data_validator import DataValidator, ValidationResult
-from src.common.config_loader import get_config_loader
+from ..data.data_validator import DataValidator, ValidationResult
+from ..common.config_loader import get_config_loader
 
 logger = logging.getLogger(__name__)
 
