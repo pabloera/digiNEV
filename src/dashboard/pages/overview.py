@@ -9,6 +9,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import Optional
+import os
+from pathlib import Path
 
 def render_overview_page(data_loader):
     """Renderiza a página de visão geral"""
@@ -18,6 +20,160 @@ def render_overview_page(data_loader):
     if not data_loader:
         st.error("Sistema de dados não disponível")
         return
+    
+    # Seção de Upload de Arquivo
+    st.subheader("📁 Carregar Dados")
+    
+    # Configurar tamanho máximo para arquivos grandes
+    st.markdown("""
+    <div style="background-color: #f0f2f6; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <b>💡 Instruções:</b><br>
+        • Selecione um arquivo CSV com os dados do Telegram para análise<br>
+        • Suporte para arquivos grandes (até 200MB)<br>
+        • O arquivo será processado automaticamente após o upload
+    </div>
+    """, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader(
+        "Escolha um arquivo CSV",
+        type=['csv'],
+        help="Faça upload do arquivo CSV com dados do Telegram para análise",
+        key="csv_uploader"
+    )
+    
+    # Processar arquivo carregado
+    uploaded_data = None
+    if uploaded_file is not None:
+        try:
+            # Mostrar informações do arquivo
+            file_size = uploaded_file.size / (1024 * 1024)  # MB
+            st.info(f"📄 **Arquivo**: {uploaded_file.name} ({file_size:.2f} MB)")
+            
+            # Carregar dados com progress bar
+            with st.spinner("Carregando dados..."):
+                # Ler CSV com encoding automático
+                try:
+                    uploaded_data = pd.read_csv(uploaded_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        uploaded_file.seek(0)  # Reset file pointer
+                        uploaded_data = pd.read_csv(uploaded_file, encoding='latin-1')
+                    except:
+                        uploaded_file.seek(0)
+                        uploaded_data = pd.read_csv(uploaded_file, encoding='cp1252')
+            
+            if uploaded_data is not None and not uploaded_data.empty:
+                st.success(f"✅ **Dados carregados com sucesso!** {len(uploaded_data):,} registros, {len(uploaded_data.columns)} colunas")
+                
+                # Salvar arquivo na pasta de dados
+                data_path = data_loader.data_dir / "uploaded_data"
+                data_path.mkdir(exist_ok=True)
+                
+                # Salvar como CSV principal
+                output_file = data_path / f"telegram_data_{uploaded_file.name}"
+                uploaded_data.to_csv(output_file, index=False)
+                st.info(f"💾 Dados salvos em: {output_file.name}")
+                
+                # Preview dos dados
+                with st.expander("👀 Preview dos Dados"):
+                    st.dataframe(uploaded_data.head(100), use_container_width=True)
+                    
+                    # Informações das colunas
+                    st.write("**Colunas disponíveis:**")
+                    col_info = []
+                    for col in uploaded_data.columns:
+                        col_type = str(uploaded_data[col].dtype)
+                        non_null = uploaded_data[col].notna().sum()
+                        col_info.append({
+                            'Coluna': col,
+                            'Tipo': col_type,
+                            'Valores Válidos': f"{non_null:,}/{len(uploaded_data):,}"
+                        })
+                    
+                    st.dataframe(pd.DataFrame(col_info), use_container_width=True)
+                
+                # Opções de ação
+                st.markdown("---")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    if st.button("🚀 Iniciar Pipeline de Análise", type="primary"):
+                        st.info("⚠️ Para executar o pipeline completo, use o script `run_pipeline.py` no terminal")
+                        st.code("python run_pipeline.py", language="bash")
+                
+                with col2:
+                    if st.button("📊 Análise Rápida"):
+                        st.session_state.quick_analysis_data = uploaded_data
+                        st.rerun()
+                
+                with col3:
+                    if st.button("💾 Salvar como Dataset Principal"):
+                        main_data_file = data_loader.data_dir / "telegram_data.csv"
+                        uploaded_data.to_csv(main_data_file, index=False)
+                        st.success(f"✅ Dataset salvo como principal: {main_data_file.name}")
+                        
+        except Exception as e:
+            st.error(f"❌ Erro ao processar arquivo: {str(e)}")
+            st.info("Verifique se o arquivo é um CSV válido com encoding UTF-8, Latin-1 ou CP1252")
+    
+    # Análise rápida dos dados carregados
+    if 'quick_analysis_data' in st.session_state:
+        st.markdown("---")
+        st.subheader("⚡ Análise Rápida")
+        
+        quick_data = st.session_state.quick_analysis_data
+        
+        # Estatísticas básicas
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total de Registros", f"{len(quick_data):,}")
+        
+        with col2:
+            st.metric("Colunas", len(quick_data.columns))
+        
+        with col3:
+            # Tentar detectar coluna de texto
+            text_cols = [col for col in quick_data.columns if 'text' in col.lower() or 'message' in col.lower() or 'content' in col.lower()]
+            if text_cols:
+                avg_length = quick_data[text_cols[0]].astype(str).str.len().mean()
+                st.metric("Comprimento Médio do Texto", f"{avg_length:.0f}")
+            else:
+                st.metric("Colunas de Texto", "Não detectadas")
+        
+        with col4:
+            # Tentar detectar coluna de data
+            date_cols = [col for col in quick_data.columns if 'date' in col.lower() or 'time' in col.lower()]
+            if date_cols:
+                try:
+                    date_range = pd.to_datetime(quick_data[date_cols[0]], errors='coerce')
+                    days_range = (date_range.max() - date_range.min()).days
+                    st.metric("Período (dias)", f"{days_range:,}")
+                except:
+                    st.metric("Período", "Não calculado")
+            else:
+                st.metric("Colunas de Data", "Não detectadas")
+        
+        # Distribuição básica
+        if text_cols:
+            st.subheader("📈 Distribuição do Comprimento das Mensagens")
+            text_lengths = quick_data[text_cols[0]].astype(str).str.len()
+            
+            import plotly.express as px
+            fig = px.histogram(
+                x=text_lengths,
+                nbins=50,
+                title="Distribuição do Comprimento das Mensagens",
+                labels={'x': 'Comprimento do Texto', 'y': 'Frequência'}
+            )
+            fig.update_layout(height=400)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        if st.button("🗑️ Limpar Análise Rápida"):
+            del st.session_state.quick_analysis_data
+            st.rerun()
+    
+    st.markdown("---")
     
     # Carregar dados essenciais
     data_types = ['dataset_stats', 'political_analysis', 'sentiment_analysis', 'topic_modeling']

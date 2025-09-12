@@ -31,6 +31,10 @@ The dashboard is automatically available via the Replit web preview. The system 
 - Added `src/dashboard/__init__.py` to fix import issues
 - Set up workflow for dashboard auto-restart
 - Configured deployment settings for production use
+- **2025-09-12**: Implementado sistema de upload de arquivos CSV na página inicial
+- Suporte para arquivos grandes (até 200MB) com múltiplos encodings
+- Análise rápida automática dos dados carregados
+- Integração com sistema de dados existente
 
 ## User Preferences
 - Uses Poetry for dependency management
