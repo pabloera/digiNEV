@@ -502,70 +502,123 @@ class UnifiedAnthropicPipeline:
         stage_results = {}
         current_data = df.copy()
         
-        # Define parallel-eligible stages for academic processing
+        # Define parallel-eligible stages for optimized academic processing
         parallel_stages = {
             '07_linguistic_processing': ProcessingType.CPU_BOUND,
-            '09_topic_modeling': ProcessingType.MIXED,
-            '10_tfidf_extraction': ProcessingType.CPU_BOUND,
-            '11_clustering': ProcessingType.CPU_BOUND,
-            '12_hashtag_normalization': ProcessingType.CPU_BOUND,
-            '13_domain_analysis': ProcessingType.IO_BOUND,
-            '14_temporal_analysis': ProcessingType.CPU_BOUND
+            '08_5_hashtag_normalization': ProcessingType.CPU_BOUND,  # Updated position
+            '09_topic_modeling': ProcessingType.MIXED,               # Voyage.ai block
+            '10_tfidf_extraction': ProcessingType.CPU_BOUND,         # Voyage.ai block 
+            '11_clustering': ProcessingType.CPU_BOUND,               # Voyage.ai block
+            '12_domain_analysis': ProcessingType.IO_BOUND,           # Renumbered
+            '13_temporal_analysis': ProcessingType.CPU_BOUND         # Renumbered
         }
         
-        for stage_id in self._stages:
-            start_time = time.time()
+        # Process stages with special handling for Voyage.ai parallel block
+        i = 0
+        while i < len(self._stages):
+            stage_id = self._stages[i]
             
-            try:
-                # Academic monitoring: Track stage start
-                if self._academic_monitor:
-                    self._academic_monitor.log_stage_start(stage_id)
+            # Check if we're at the Voyage.ai parallel block
+            if stage_id == '09_topic_modeling' and self.parallel_engine is not None and len(current_data) > 100:
+                # Execute Voyage.ai parallel block (09-11) simultaneously
+                logger.info("🚀 Executing Voyage.ai parallel block: topic_modeling, tfidf_extraction, clustering")
+                parallel_block_start = time.time()
                 
-                # Determine if stage should use parallel processing
-                use_parallel = (
-                    self.parallel_engine is not None and 
-                    stage_id in parallel_stages and 
-                    len(current_data) > 100  # Minimum size for parallel processing
-                )
-                
-                if use_parallel:
-                    logger.info(f"🔄 Academic parallel processing: {stage_id}")
-                    stage_result = self._execute_stage_parallel(stage_id, current_data, dataset_name, parallel_stages[stage_id])
-                else:
-                    # Standard academic processing
-                    stage_result = self._execute_stage(stage_id, current_data, dataset_name)
-                
-                execution_time = time.time() - start_time
-                
-                # Academic performance tracking
-                self.performance_tracker.record_stage_execution(
-                    stage_id, execution_time, 
-                    was_parallelized=use_parallel,
-                    memory_used=stage_result.get('memory_used_mb', 0.0)
-                )
-                
-                # Academic monitoring: Track completion
-                if self._academic_monitor:
-                    self._academic_monitor.log_stage_completion(stage_id, execution_time)
-                
-                stage_results[stage_id] = stage_result
-                
-                if not stage_result.get('success', False):
-                    logger.warning(f"🚨 Academic stage {stage_id} failed for {dataset_name}")
-                else:
-                    # Update current_data for next stage (basic implementation)
-                    if stage_result.get('processed_data') is not None:
-                        current_data = stage_result['processed_data']
+                try:
+                    # Execute all three Voyage.ai stages in parallel
+                    voyage_results = self._execute_voyage_parallel_block(current_data, dataset_name)
                     
-                    logger.info(f"✅ Academic stage {stage_id} completed in {execution_time:.2f}s")
+                    parallel_block_time = time.time() - parallel_block_start
+                    logger.info(f"🎯 Voyage.ai parallel block completed in {parallel_block_time:.2f}s")
                     
-            except Exception as e:
-                execution_time = time.time() - start_time
-                logger.error(f"❌ Academic stage {stage_id} error: {e}")
+                    # Add all results from parallel block
+                    for stage_id_parallel, result in voyage_results.items():
+                        stage_results[stage_id_parallel] = result
+                        
+                        # Track individual stage performance
+                        self.performance_tracker.record_stage_execution(
+                            stage_id_parallel, parallel_block_time / 3,  # Approximate time per stage
+                            was_parallelized=True,
+                            memory_used=result.get('memory_used_mb', 0.0)
+                        )
+                        
+                        # Academic monitoring for each stage
+                        if self._academic_monitor:
+                            self._academic_monitor.log_stage_completion(stage_id_parallel, parallel_block_time / 3)
+                    
+                    # Skip to after the parallel block (jump over stages 10 and 11)
+                    i += 3  # Move past 09, 10, 11
+                    
+                    # Update current_data with result from clustering (last stage)
+                    if voyage_results.get('11_clustering', {}).get('processed_data') is not None:
+                        current_data = voyage_results['11_clustering']['processed_data']
+                    
+                except Exception as e:
+                    logger.error(f"❌ Voyage.ai parallel block failed: {e}")
+                    # Fall back to sequential execution for the block
+                    for parallel_stage_id in self._voyage_parallel_block:
+                        stage_result = self._execute_stage(parallel_stage_id, current_data, dataset_name)
+                        stage_results[parallel_stage_id] = stage_result
+                        if stage_result.get('processed_data') is not None:
+                            current_data = stage_result['processed_data']
+                    i += 3
                 
-                # Academic monitoring: Track error
-                if self._academic_monitor:
-                    self._academic_monitor.log_stage_error(stage_id, str(e))
+            else:
+                # Regular stage processing (sequential or individual parallel)
+                start_time = time.time()
+                
+                try:
+                    # Academic monitoring: Track stage start
+                    if self._academic_monitor:
+                        self._academic_monitor.log_stage_start(stage_id)
+                    
+                    # Determine if stage should use parallel processing
+                    use_parallel = (
+                        self.parallel_engine is not None and 
+                        stage_id in parallel_stages and 
+                        len(current_data) > 100  # Minimum size for parallel processing
+                    )
+                    
+                    if use_parallel:
+                        logger.info(f"🔄 Academic parallel processing: {stage_id}")
+                        stage_result = self._execute_stage_parallel(stage_id, current_data, dataset_name, parallel_stages[stage_id])
+                    else:
+                        # Standard academic processing
+                        stage_result = self._execute_stage(stage_id, current_data, dataset_name)
+                    
+                    execution_time = time.time() - start_time
+                    
+                    # Academic performance tracking
+                    self.performance_tracker.record_stage_execution(
+                        stage_id, execution_time, 
+                        was_parallelized=use_parallel,
+                        memory_used=stage_result.get('memory_used_mb', 0.0)
+                    )
+                    
+                    # Academic monitoring: Track completion
+                    if self._academic_monitor:
+                        self._academic_monitor.log_stage_completion(stage_id, execution_time)
+                    
+                    stage_results[stage_id] = stage_result
+                    
+                    if not stage_result.get('success', False):
+                        logger.warning(f"🚨 Academic stage {stage_id} failed for {dataset_name}")
+                    else:
+                        # Update current_data for next stage (basic implementation)
+                        if stage_result.get('processed_data') is not None:
+                            current_data = stage_result['processed_data']
+                        
+                        logger.info(f"✅ Academic stage {stage_id} completed in {execution_time:.2f}s")
+                        
+                except Exception as e:
+                    execution_time = time.time() - start_time
+                    logger.error(f"❌ Academic stage {stage_id} error: {e}")
+                    
+                    # Academic monitoring: Track error
+                    if self._academic_monitor:
+                        self._academic_monitor.log_stage_error(stage_id, str(e))
+                
+                i += 1  # Move to next stage
                 
                 stage_results[stage_id] = {
                     'success': False,
@@ -579,6 +632,110 @@ class UnifiedAnthropicPipeline:
         stage_results['academic_performance_summary'] = academic_report
         
         return stage_results
+    
+    def _execute_voyage_parallel_block(self, df: pd.DataFrame, dataset_name: str) -> Dict[str, Dict[str, Any]]:
+        """Execute Voyage.ai stages (09-11) in true parallel - Phase 1 Strategic Optimization."""
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+        
+        logger.info("🚀 Strategic Optimization: Executing Voyage.ai parallel block")
+        
+        results = {}
+        errors = {}
+        
+        # Define the three stages to execute in parallel
+        voyage_stages = {
+            '09_topic_modeling': 'Topic Modeling (Voyage.ai)',
+            '10_tfidf_extraction': 'TF-IDF Extraction (Voyage.ai)', 
+            '11_clustering': 'Clustering (Voyage.ai)'
+        }
+        
+        def execute_single_voyage_stage(stage_id: str, stage_name: str, data: pd.DataFrame):
+            """Execute a single Voyage.ai stage with error handling."""
+            try:
+                logger.info(f"🔄 Parallel execution: {stage_name}")
+                
+                # Simulate stage execution with proper structure
+                stage_result = self._execute_stage(stage_id, data, dataset_name)
+                
+                # Add metadata for parallel execution
+                stage_result['parallel_execution'] = True
+                stage_result['parallel_block'] = 'voyage_ai'
+                
+                logger.info(f"✅ Parallel stage completed: {stage_name}")
+                return stage_id, stage_result
+                
+            except Exception as e:
+                logger.error(f"❌ Parallel stage failed: {stage_name} - {e}")
+                return stage_id, {
+                    'success': False,
+                    'error': str(e),
+                    'parallel_execution': True,
+                    'parallel_block': 'voyage_ai'
+                }
+        
+        try:
+            # Execute all three stages concurrently
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                # Submit all tasks
+                future_to_stage = {
+                    executor.submit(execute_single_voyage_stage, stage_id, stage_name, df.copy()): stage_id
+                    for stage_id, stage_name in voyage_stages.items()
+                }
+                
+                # Collect results as they complete
+                for future in as_completed(future_to_stage):
+                    stage_id = future_to_stage[future]
+                    try:
+                        returned_stage_id, result = future.result()
+                        results[returned_stage_id] = result
+                        logger.info(f"📊 Parallel result collected: {returned_stage_id}")
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Future execution failed for {stage_id}: {e}")
+                        results[stage_id] = {
+                            'success': False,
+                            'error': str(e),
+                            'parallel_execution': True,
+                            'parallel_block': 'voyage_ai'
+                        }
+            
+            # Verify all stages completed
+            expected_stages = set(voyage_stages.keys())
+            completed_stages = set(results.keys())
+            
+            if expected_stages != completed_stages:
+                missing_stages = expected_stages - completed_stages
+                logger.warning(f"⚠️ Missing parallel results: {missing_stages}")
+                
+                # Add missing stages with error status
+                for missing_stage in missing_stages:
+                    results[missing_stage] = {
+                        'success': False,
+                        'error': 'Stage not completed in parallel block',
+                        'parallel_execution': True,
+                        'parallel_block': 'voyage_ai'
+                    }
+            
+            successful_stages = [stage_id for stage_id, result in results.items() if result.get('success', False)]
+            logger.info(f"🎯 Voyage.ai parallel block results: {len(successful_stages)}/{len(voyage_stages)} successful")
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"❌ Voyage.ai parallel block execution failed: {e}")
+            
+            # Return error results for all stages
+            error_results = {}
+            for stage_id in voyage_stages.keys():
+                error_results[stage_id] = {
+                    'success': False,
+                    'error': f'Parallel block failed: {e}',
+                    'parallel_execution': True,
+                    'parallel_block': 'voyage_ai'
+                }
+            
+            return error_results
     
     def _execute_stage(self, stage_id: str, df: pd.DataFrame, dataset_name: str) -> Dict[str, Any]:
         """Execute individual stage (minimal implementation)."""
