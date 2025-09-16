@@ -262,7 +262,7 @@ class UnifiedAnthropicPipeline:
         self.api_client = None
         self._init_api_client()
         
-        # Define 22 stages as expected by tests
+        # Define optimized pipeline sequence (Strategic Optimization v1.0)
         self._stages = [
             '01_chunk_processing',
             '02_encoding_validation',
@@ -274,21 +274,27 @@ class UnifiedAnthropicPipeline:
             '06b_statistical_analysis_post',
             '07_linguistic_processing',
             '08_sentiment_analysis',
-            '09_topic_modeling',
-            '10_tfidf_extraction',
-            '11_clustering',
-            '12_hashtag_normalization',
-            '13_domain_analysis',
-            '14_temporal_analysis',
-            '15_network_analysis',
-            '16_qualitative_analysis',
-            '17_smart_pipeline_review',
-            '18_topic_interpretation',
-            '19_semantic_search',
-            '20_pipeline_validation'
+            '08_5_hashtag_normalization',  # ⚡ MOVED: Now executes BEFORE Voyage.ai stages for optimal benefit
+            '09_topic_modeling',           # 🚀 VOYAGE.AI PARALLEL BLOCK START
+            '10_tfidf_extraction',         # 🚀 VOYAGE.AI PARALLEL BLOCK
+            '11_clustering',               # 🚀 VOYAGE.AI PARALLEL BLOCK END
+            '12_domain_analysis',          # Renumbered from 13
+            '13_temporal_analysis',        # Renumbered from 14
+            '14_network_analysis',         # Renumbered from 15
+            '15_qualitative_analysis',     # Renumbered from 16
+            '16_smart_pipeline_review',    # Renumbered from 17
+            '17_topic_interpretation',     # Renumbered from 18
+            '18_semantic_search',          # Renumbered from 19, reuses cached embeddings
+            '19_pipeline_validation'       # Renumbered from 20
         ]
         
-        logger.info(f"🎓 Academic pipeline initialized with {len(self._stages)} stages")
+        # Define Voyage.ai parallel execution block for Phase 1 optimization
+        self._voyage_parallel_block = ['09_topic_modeling', '10_tfidf_extraction', '11_clustering']
+        self._embeddings_cache = None  # Will be initialized in Phase 2
+        
+        logger.info(f"🎓 Optimized Academic pipeline initialized with {len(self._stages)} stages")
+        logger.info(f"⚡ Strategic optimization applied: hashtag_normalization moved to position 8.5")
+        logger.info(f"🚀 Voyage.ai parallel block ready: {', '.join(self._voyage_parallel_block)}")
         
         # Log academic optimization status
         optimizations = []

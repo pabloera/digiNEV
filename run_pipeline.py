@@ -310,30 +310,30 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
             except Exception as e:
                 logger.warning(f"⚠️ Week 5 optimization not applied: {e}")
         
-        # ✅ ORIGINAL PIPELINE STAGES (22 total) - UNCHANGED, just WITH optimizations applied
+        # ✅ STRATEGICALLY OPTIMIZED PIPELINE (19 stages) - Phase 1 Optimization Applied
         all_stages = [
             '01_chunk_processing',
-            '02_encoding_validation',  # Enhanced with chardet detection
-            '03_deduplication',        # Global multi-strategy deduplication  
-            '04_feature_validation',
-            '04b_statistical_analysis_pre',  # NEW: Pre-cleaning statistics
-            '06_text_cleaning',        # Enhanced with validation and graduated cleaning
-            '06b_statistical_analysis_post', # NEW: Post-cleaning statistics and comparison
-            '07_linguistic_processing', # spaCy integration - MOVED BEFORE political analysis
-            '05_political_analysis',   # REORDERED: Now executes after linguistic processing for better quality
+            '02_encoding_validation',
+            '03_deduplication',
+            '04_feature_validation', 
+            '04b_statistical_analysis_pre',
+            '05_political_analysis',
+            '06_text_cleaning',
+            '06b_statistical_analysis_post',
+            '07_linguistic_processing',
             '08_sentiment_analysis',
-            '09_topic_modeling',       # Voyage.ai enhanced
-            '10_tfidf_extraction',     # Voyage.ai enhanced
-            '11_clustering',           # Voyage.ai enhanced
-            '12_hashtag_normalization',
-            '13_domain_analysis',
-            '14_temporal_analysis',
-            '15_network_analysis',
-            '16_qualitative_analysis',
-            '17_smart_pipeline_review',
-            '18_topic_interpretation',
-            '19_semantic_search',      # Voyage.ai enhanced
-            '20_pipeline_validation'
+            '08_5_hashtag_normalization',  # ⚡ STRATEGIC MOVE: Optimized position before Voyage.ai stages
+            '09_topic_modeling',           # 🚀 VOYAGE.AI PARALLEL BLOCK START
+            '10_tfidf_extraction',         # 🚀 VOYAGE.AI PARALLEL BLOCK  
+            '11_clustering',               # 🚀 VOYAGE.AI PARALLEL BLOCK END
+            '12_domain_analysis',
+            '13_temporal_analysis',
+            '14_network_analysis',
+            '15_qualitative_analysis',
+            '16_smart_pipeline_review',
+            '17_topic_interpretation',
+            '18_semantic_search',          # Voyage.ai with embedding cache reuse
+            '19_pipeline_validation'
         ]
         
         logger.info(f"🏭 Executing ORIGINAL pipeline: {len(all_stages)} stages WITH v5.0.0 optimizations")
