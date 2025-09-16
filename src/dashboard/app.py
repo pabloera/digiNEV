@@ -181,6 +181,44 @@ class DigiNEVDashboard:
             
             st.markdown('</div>', unsafe_allow_html=True)
     
+    def _render_layer_indicator(self, current_page: str):
+        """Exibe indicador visual da camada ativa - FASE 3 Strategic Optimization"""
+        
+        layer_mapping = {
+            # Camada 1: Principal
+            'overview': ('🎯', 'CAMADA 1: PRINCIPAL', '#1f77b4'),
+            'sentiment': ('🎯', 'CAMADA 1: PRINCIPAL', '#1f77b4'), 
+            'topics': ('🎯', 'CAMADA 1: PRINCIPAL', '#1f77b4'),
+            'clustering': ('🎯', 'CAMADA 1: PRINCIPAL', '#1f77b4'),
+            
+            # Camada 2: Complementar
+            'political': ('📈', 'CAMADA 2: COMPLEMENTAR', '#ff7f0e'),
+            'network': ('📈', 'CAMADA 2: COMPLEMENTAR', '#ff7f0e'),
+            'temporal': ('📈', 'CAMADA 2: COMPLEMENTAR', '#ff7f0e'),
+            'quality': ('📈', 'CAMADA 2: COMPLEMENTAR', '#ff7f0e'),
+            
+            # Camada 3: Ferramentas
+            'upload': ('🛠️', 'CAMADA 3: FERRAMENTAS', '#2ca02c'),
+            'pipeline': ('🛠️', 'CAMADA 3: FERRAMENTAS', '#2ca02c'),
+            'search': ('🛠️', 'CAMADA 3: FERRAMENTAS', '#2ca02c'),
+            'exports': ('🛠️', 'CAMADA 3: FERRAMENTAS', '#2ca02c'),
+        }
+        
+        if current_page in layer_mapping:
+            icon, layer_name, color = layer_mapping[current_page]
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(90deg, {color}20 0%, {color}10 100%);
+                border-left: 4px solid {color};
+                padding: 0.5rem 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 5px;
+            ">
+                <strong>{icon} {layer_name}</strong>
+                <br><small>Dashboard Estrategicamente Otimizado v3.0</small>
+            </div>
+            """, unsafe_allow_html=True)
+    
     def _render_main_content(self):
         """Renderiza conteúdo otimizado em 3 camadas - FASE 3 Strategic Optimization"""
         current_page = st.session_state.current_page
