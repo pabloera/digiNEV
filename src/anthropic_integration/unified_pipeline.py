@@ -451,7 +451,7 @@ class UnifiedAnthropicPipeline:
                 
                 # Load dataset
                 try:
-                    df = pd.read_csv(dataset_path)
+                    df = pd.read_csv(dataset_path, sep=';')
                     record_count = len(df)
                     
                     if record_count == 0:
