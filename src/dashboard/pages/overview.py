@@ -53,14 +53,14 @@ def render_overview_page(data_loader):
             with st.spinner("Carregando dados..."):
                 # Ler CSV com encoding automático
                 try:
-                    uploaded_data = pd.read_csv(uploaded_file, encoding='utf-8')
+                    uploaded_data = pd.read_csv(uploaded_file, encoding='utf-8', low_memory=False)
                 except UnicodeDecodeError:
                     try:
                         uploaded_file.seek(0)  # Reset file pointer
-                        uploaded_data = pd.read_csv(uploaded_file, encoding='latin-1')
+                        uploaded_data = pd.read_csv(uploaded_file, encoding='latin-1', low_memory=False)
                     except:
                         uploaded_file.seek(0)
-                        uploaded_data = pd.read_csv(uploaded_file, encoding='cp1252')
+                        uploaded_data = pd.read_csv(uploaded_file, encoding='cp1252', low_memory=False)
             
             if uploaded_data is not None and not uploaded_data.empty:
                 st.success(f"✅ **Dados carregados com sucesso!** {len(uploaded_data):,} registros, {len(uploaded_data.columns)} colunas")

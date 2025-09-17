@@ -195,7 +195,7 @@ class PipelineInterface:
             else:
                 return ""
         
-        styled_df = df.style.applymap(style_status, subset=['Status'])
+        styled_df = df.style.map(style_status, subset=['Status'])
         st.dataframe(styled_df, use_container_width=True, height=400)
         
         # Mostrar etapa atual em destaque

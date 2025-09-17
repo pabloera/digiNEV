@@ -659,15 +659,16 @@ class UnifiedAnthropicPipeline:
                     # Academic monitoring: Track error
                     if self._academic_monitor:
                         self._academic_monitor.log_stage_error(stage_id, str(e))
+                    
+                    # Create error result within exception scope
+                    stage_results[stage_id] = {
+                        'success': False,
+                        'error': str(e),
+                        'records_processed': 0,
+                        'execution_time': execution_time
+                    }
                 
                 i += 1  # Move to next stage
-                
-                stage_results[stage_id] = {
-                    'success': False,
-                    'error': str(e),
-                    'records_processed': 0,
-                    'execution_time': execution_time
-                }
         
         # Generate academic performance report
         academic_report = self.performance_tracker.get_academic_report()
