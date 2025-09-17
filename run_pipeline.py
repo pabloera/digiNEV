@@ -419,12 +419,29 @@ def integrate_with_dashboard(results: Dict[str, Any], config: Dict[str, Any]):
     try:
         dashboard_results_dir = Path(config.get('data', {}).get('dashboard_path', 'src/dashboard/data')) / 'dashboard_results'
         
-        # Save results for dashboard
+        # Save results for dashboard (JSON format)
         results_file = dashboard_results_dir / f"pipeline_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
         import json
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
+        
+        # 🚀 HYBRID SOLUTION: Generate CSV files for dashboard compatibility
+        try:
+            from src.utils.hybrid_output_generator import HybridOutputGenerator
+            
+            logger.info("🔄 Generating CSV files for dashboard integration...")
+            project_root = Path.cwd()
+            generator = HybridOutputGenerator(project_root)
+            csv_results = generator.generate_all_dashboard_csvs()
+            
+            successful_csvs = sum(1 for success in csv_results.values() if success)
+            total_csvs = len(csv_results)
+            logger.info(f"✅ Hybrid integration completed: {successful_csvs}/{total_csvs} CSVs generated")
+            
+        except Exception as csv_error:
+            logger.warning(f"CSV generation failed but JSON integration successful: {csv_error}")
+            # Continue execution - JSON integration still works
         
         # Copy final outputs to dashboard
         if results.get('final_outputs'):
