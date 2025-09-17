@@ -226,7 +226,7 @@ class DigiNEVDashboard:
     def _render_overview_page(self):
         """Renderiza a página de visão geral"""
         try:
-            from dashboard.pages.overview import render_overview_page
+            from dashboard.views.overview import render_overview_page
             render_overview_page(self.data_loader)
         except ImportError:
             self._render_fallback_overview()
@@ -234,34 +234,34 @@ class DigiNEVDashboard:
     def _render_political_page(self):
         """Renderiza a página de análise política"""
         try:
-            from dashboard.pages.political_analysis import render_political_page
+            from dashboard.views.political_analysis import render_political_page
             render_political_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Análise Política", "🏛️")
+            self._render_fallback_page("Análise Política", "")
     
     def _render_sentiment_page(self):
         """Renderiza a página de análise de sentimento"""
         try:
-            from dashboard.pages.sentiment_analysis import render_sentiment_page
+            from dashboard.views.sentiment_analysis import render_sentiment_page
             render_sentiment_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Análise de Sentimento", "💭")
+            self._render_fallback_page("Análise de Sentimento", "")
     
     def _render_topics_page(self):
         """Renderiza a página de modelagem de tópicos"""
         try:
-            from dashboard.pages.topic_modeling import render_topics_page
+            from dashboard.views.topic_modeling import render_topics_page
             render_topics_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Modelagem de Tópicos", "🎨")
+            self._render_fallback_page("Modelagem de Tópicos", "")
     
     def _render_search_page(self):
         """Renderiza a página de busca semântica"""
         try:
-            from dashboard.pages.semantic_search import render_search_page
+            from dashboard.views.semantic_search import render_search_page
             render_search_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Busca Semântica", "🔍")
+            self._render_fallback_page("Busca Semântica", "")
     
     # Páginas essenciais mantidas - todas as outras removidas para simplicidade
     
