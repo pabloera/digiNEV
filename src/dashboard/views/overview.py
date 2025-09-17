@@ -98,25 +98,9 @@ def render_overview_page(data_loader):
                 # Seção do Pipeline de Análise Completa
                 st.markdown("### 🚀 **Pipeline de Análise Completa**")
                 
-                # Importar componentes do pipeline
-                try:
-                    from dashboard.utils.pipeline_runner import get_pipeline_runner
-                    from dashboard.components.pipeline_ui import create_pipeline_interface
-                    
-                    # Obter instância do pipeline runner
-                    pipeline_runner = get_pipeline_runner()
-                    
-                    # Criar interface do pipeline
-                    pipeline_interface = create_pipeline_interface(pipeline_runner)
-                    
-                    # Renderizar interface completa
-                    pipeline_interface.render_complete_interface()
-                    
-                except Exception as e:
-                    st.error(f"❌ Erro ao carregar interface do pipeline: {str(e)}")
-                    # Redirecionar para página principal  
-                    st.info("📌 **Para executar o pipeline completo, use a página inicial (Geral → Home)**")
-                    st.info("⚠️ Alternativamente, execute via terminal: `python run_pipeline.py`")
+                st.info("📌 **Para executar o pipeline completo, use a página inicial: Geral → Home**")
+                st.info("⚠️ Alternativamente, execute via terminal:")
+                st.code("python -m src.core.pipeline_cli run", language="bash")
                 
                 st.markdown("---")
                 
