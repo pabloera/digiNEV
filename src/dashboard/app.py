@@ -6,6 +6,7 @@ Usage: Interface web para cientistas sociais explorarem padrões, sentimentos e 
 
 import streamlit as st
 import sys
+import time
 from pathlib import Path
 
 # Configuração da página
@@ -547,31 +548,48 @@ class DigiNEVDashboard:
                 )
             
             with col_exec:
-                if st.button("Executar Pipeline", type="primary", use_container_width=True):
-                    st.info("Pipeline iniciado...")
+                # 🚀 CORREÇÃO: Conectar ao sistema real de pipeline
+                from src.dashboard.utils.pipeline_runner import get_pipeline_runner
+                
+                pipeline_runner = get_pipeline_runner()
+                is_running = pipeline_runner.is_running()
+                
+                if not is_running:
+                    if st.button("🚀 Executar Pipeline", type="primary", use_container_width=True):
+                        if pipeline_runner.start_pipeline():
+                            st.success("✅ Pipeline iniciado com sucesso!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Erro ao iniciar pipeline")
+                else:
+                    if st.button("⏹️ Parar Pipeline", type="secondary", use_container_width=True):
+                        if pipeline_runner.stop_pipeline():
+                            st.success("Pipeline interrompido")
+                            st.rerun()
             
-            # Barra de progresso abaixo dos dois
+            # Barra de progresso REAL baseada no PipelineRunner
             st.markdown("#### Progresso do Processamento")
             
-            # Verificar progresso real
-            pipeline_dir = self.project_root / "pipeline_outputs"
-            expected_steps = 20  # Total de etapas
-            completed_steps = 0
+            progress_obj = pipeline_runner.get_progress()
+            completion_pct = pipeline_runner.get_completion_percentage()
+            current_stage_name = pipeline_runner.get_current_stage_name()
             
-            if pipeline_dir.exists():
-                completed_steps = len(list(pipeline_dir.glob("*.csv")))
+            # Barra de progresso real
+            progress_bar = st.progress(completion_pct / 100.0)
+            st.markdown(f"**{completion_pct:.1f}% concluído** - {current_stage_name}")
             
-            progress = completed_steps / expected_steps if expected_steps > 0 else 0
-            st.progress(progress, text=f"Etapa {completed_steps}/{expected_steps}")
-            
-            if completed_steps > 0 and completed_steps < expected_steps:
-                remaining = expected_steps - completed_steps
-                est_time = remaining * 1.5  # 1.5 min por etapa
-                st.info(f"Tempo estimado: {est_time:.0f} minutos")
-            elif completed_steps == expected_steps:
-                st.success("Pipeline concluído!")
+            # Status baseado na execução real
+            if progress_obj.status.value == "running":
+                st.info(f"⚡ Executando... Etapa atual: {current_stage_name}")
+                # Auto-refresh durante execução
+                time.sleep(2)
+                st.rerun()
+            elif progress_obj.status.value == "completed":
+                st.success("🎉 Pipeline concluído com sucesso!")
+            elif progress_obj.status.value == "error":
+                st.error(f"❌ Erro na execução: {progress_obj.error_message or 'Erro desconhecido'}")
             else:
-                st.info("Aguardando execução do pipeline")
+                st.info("⏳ Aguardando execução do pipeline")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
@@ -692,8 +710,21 @@ class DigiNEVDashboard:
             )
         
         with col2:
-            if st.button("🔄 Executar Pipeline", type="primary", use_container_width=True):
-                st.info("Pipeline iniciado em background...")
+            # 🚀 CORREÇÃO: Usar mesmo sistema real de pipeline do home  
+            from src.dashboard.utils.pipeline_runner import get_pipeline_runner
+            
+            pipeline_runner = get_pipeline_runner()
+            is_running = pipeline_runner.is_running()
+            
+            if not is_running:
+                if st.button("🔄 Executar Pipeline", type="primary", use_container_width=True):
+                    if pipeline_runner.start_pipeline():
+                        st.success("✅ Pipeline iniciado com sucesso!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Erro ao iniciar pipeline")
+            else:
+                st.button("⏹️ Pipeline Executando...", type="secondary", use_container_width=True, disabled=True)
         
         # 2. INFORMAÇÕES BÁSICAS DO DATASET
         st.markdown("### 2. Informações do Dataset")
