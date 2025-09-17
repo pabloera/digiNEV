@@ -94,19 +94,42 @@ def render_overview_page(data_loader):
                 
                 # Opções de ação
                 st.markdown("---")
-                col1, col2, col3 = st.columns(3)
                 
-                with col1:
+                # Seção do Pipeline de Análise Completa
+                st.markdown("### 🚀 **Pipeline de Análise Completa**")
+                
+                # Importar componentes do pipeline
+                try:
+                    from dashboard.utils.pipeline_runner import get_pipeline_runner
+                    from dashboard.components.pipeline_ui import create_pipeline_interface
+                    
+                    # Obter instância do pipeline runner
+                    pipeline_runner = get_pipeline_runner()
+                    
+                    # Criar interface do pipeline
+                    pipeline_interface = create_pipeline_interface(pipeline_runner)
+                    
+                    # Renderizar interface completa
+                    pipeline_interface.render_complete_interface()
+                    
+                except Exception as e:
+                    st.error(f"❌ Erro ao carregar interface do pipeline: {str(e)}")
+                    # Fallback para o botão simples
                     if st.button("🚀 Iniciar Pipeline de Análise", type="primary"):
                         st.info("⚠️ Para executar o pipeline completo, use o script `run_pipeline.py` no terminal")
                         st.code("python run_pipeline.py", language="bash")
                 
-                with col2:
+                st.markdown("---")
+                
+                # Opções adicionais
+                col1, col2 = st.columns(2)
+                
+                with col1:
                     if st.button("📊 Análise Rápida"):
                         st.session_state.quick_analysis_data = uploaded_data
                         st.rerun()
                 
-                with col3:
+                with col2:
                     if st.button("💾 Salvar como Dataset Principal"):
                         main_data_file = data_loader.data_dir / "telegram_data.csv"
                         uploaded_data.to_csv(main_data_file, index=False)
