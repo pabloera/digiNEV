@@ -20,6 +20,15 @@ try:
 except ImportError:
     UNIFIED_CACHE_AVAILABLE = False
     EMERGENCY_CACHE_AVAILABLE = False
+
+# Emergency embeddings cache integration
+try:
+    from ..optimized.emergency_embeddings import get_global_embeddings_cache
+    EMBEDDINGS_CACHE_AVAILABLE = True
+except ImportError:
+    EMBEDDINGS_CACHE_AVAILABLE = False
+    def get_global_embeddings_cache():
+        return None
     
 # Academic cost monitoring
 try:
@@ -37,20 +46,36 @@ try:
     VERIFIABLE_METRICS_AVAILABLE = True
 except ImportError:
     VERIFIABLE_METRICS_AVAILABLE = False
+    def initialize_metrics_system(project_root, session_id=None):
+        return None
+    def get_global_metrics_system(project_root=None, session_id=None):
+        return None
 
 # Week 3-4 Academic Optimizations
 try:
     from ..optimized.parallel_engine import (
-        get_global_parallel_engine, ParallelConfig, StageDefinition, 
-        ProcessingType, StageStatus
+        get_global_parallel_engine as _get_parallel_engine, 
+        ParallelConfig as _ParallelConfig, 
+        StageDefinition as _StageDefinition, 
+        ProcessingType as _ProcessingType, 
+        StageStatus as _StageStatus
     )
     from ..optimized.streaming_pipeline import (
-        StreamConfig, AdaptiveChunkManager
+        StreamConfig as _StreamConfig, AdaptiveChunkManager
     )
     from ..optimized.realtime_monitor import (
-        get_global_realtime_monitor, AlertLevel
+        get_global_realtime_monitor as _get_realtime_monitor, AlertLevel
     )
     WEEK34_OPTIMIZATIONS_AVAILABLE = True
+    
+    # Use optimized versions
+    get_global_parallel_engine = _get_parallel_engine
+    get_global_realtime_monitor = _get_realtime_monitor
+    ParallelConfig = _ParallelConfig
+    StageDefinition = _StageDefinition
+    ProcessingType = _ProcessingType
+    StageStatus = _StageStatus
+    StreamConfig = _StreamConfig
 except ImportError:
     WEEK34_OPTIMIZATIONS_AVAILABLE = False
     # Create fallback classes for academic compatibility
@@ -68,17 +93,33 @@ except ImportError:
         COMPLETED = "completed"
         FAILED = "failed"
     
-    # Fallback functions
+    # Fallback functions - create mock engine with required methods
+    class MockParallelEngine:
+        def execute_stage_parallel(self, *args, **kwargs):
+            return None
+        
+        def get(self, key, default=None):
+            return default
+    
     def get_global_parallel_engine(config=None):
-        return None
+        return MockParallelEngine()
     
     def get_global_realtime_monitor():
         return None
     
     class ParallelConfig:
         def __init__(self, **kwargs):
+            # Set default values for required attributes
+            self.max_thread_workers = kwargs.get('max_thread_workers', 4)
+            self.max_process_workers = kwargs.get('max_process_workers', 2)
+            self.chunk_size = kwargs.get('chunk_size', 1000)
+            self.memory_threshold_mb = kwargs.get('memory_threshold_mb', 512)
+            self.compression_enabled = kwargs.get('compression_enabled', False)
+            self.lazy_loading = kwargs.get('lazy_loading', True)
+            # Set any additional kwargs
             for key, value in kwargs.items():
-                setattr(self, key, value)
+                if not hasattr(self, key):
+                    setattr(self, key, value)
     
     class StageDefinition:
         def __init__(self, **kwargs):
@@ -87,8 +128,15 @@ except ImportError:
     
     class StreamConfig:
         def __init__(self, **kwargs):
+            # Set default values for required attributes
+            self.chunk_size = kwargs.get('chunk_size', 1000)
+            self.memory_threshold_mb = kwargs.get('memory_threshold_mb', 512)
+            self.compression_enabled = kwargs.get('compression_enabled', False)
+            self.lazy_loading = kwargs.get('lazy_loading', True)
+            # Set any additional kwargs
             for key, value in kwargs.items():
-                setattr(self, key, value)
+                if not hasattr(self, key):
+                    setattr(self, key, value)
 
 # System monitoring for academic resource management
 try:
@@ -96,6 +144,17 @@ try:
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
+    # Create mock psutil for compatibility
+    class MockPsutil:
+        def virtual_memory(self):
+            class MockMemory:
+                percent = 50.0
+            return MockMemory()
+        
+        def cpu_percent(self):
+            return 50.0
+    
+    psutil = MockPsutil()
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +338,7 @@ class UnifiedAnthropicPipeline:
                 self.metrics_system = None
         else:
             logger.info("ℹ️ Verifiable metrics system not available")
+            self.metrics_system = None
         
         # Initialize all optimizations
         self._init_academic_optimizations()
@@ -318,6 +378,9 @@ class UnifiedAnthropicPipeline:
         
         # Phase 2: Initialize embeddings cache system
         self._embeddings_cache = self._init_embeddings_cache()
+        
+        # Ensure psutil is available
+        self._ensure_psutil_availability()
         self._cache_stats = {
             'cache_hits': 0,
             'cache_misses': 0,
@@ -1066,6 +1129,21 @@ class UnifiedAnthropicPipeline:
         else:
             # Regular stage execution
             return self._execute_stage(stage_id, df, dataset_name)
+    
+    def _ensure_psutil_availability(self) -> None:
+        """Ensure psutil availability and apply conservative defaults if unavailable"""
+        if PSUTIL_AVAILABLE:
+            return
+        logger.warning("⚠️ psutil not available; using conservative defaults")
+        if getattr(self, 'parallel_engine', None) and hasattr(self.parallel_engine, 'config'):
+            cfg = self.parallel_engine.config
+            cfg.max_thread_workers = min(getattr(cfg, 'max_thread_workers', 4), 2)
+            cfg.max_process_workers = min(getattr(cfg, 'max_process_workers', 1), 1)
+            cfg.memory_threshold_mb = min(getattr(cfg, 'memory_threshold_mb', 512), 512)
+    
+    def _ensure_psutil(self) -> None:
+        """Compatibility alias for _ensure_psutil_availability"""
+        self._ensure_psutil_availability()
     
     def _init_embeddings_cache(self) -> Optional[Dict[str, Any]]:
         """Initialize persistent embeddings cache - Phase 2 Strategic Optimization."""
