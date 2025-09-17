@@ -19,6 +19,11 @@ st.set_page_config(
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / 'src'))
 
+# Importar fonte condensada
+st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+""")
+
 # CSS customizado - Paleta profissional minimalista
 st.markdown("""
 <style>
@@ -136,13 +141,31 @@ st.markdown("""
         box-shadow: none;
     }
     
-    /* Menu dropdown principal */
+    /* Menu dropdown principal - estilização melhorada */
     .main-nav {
         background: var(--primary-blue);
-        padding: 0.8rem 0;
+        padding: 1rem;
         margin-bottom: 1.5rem;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(27, 54, 93, 0.15);
+    }
+    
+    /* Estilizar selectboxes do Streamlit */
+    .stSelectbox > div > div {
+        background: var(--primary-blue);
+        color: var(--white);
+        border-radius: 6px;
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: 600;
+    }
+    
+    .stSelectbox > div > div > div {
+        color: var(--white);
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+    
+    .stSelectbox > div > div[aria-expanded="true"] {
+        background: rgba(27, 54, 93, 0.9) !important;
     }
     
     .nav-dropdown {
@@ -235,8 +258,12 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff10" points="0,0 1000,300 1000,1000 0,700"/></svg>');
-        background-size: cover;
+        background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                    linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), 
+                    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
+        background-size: 30px 30px;
+        background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
     }
     
     .hero-content {
@@ -305,67 +332,117 @@ class DigiNEVDashboard:
         """, unsafe_allow_html=True)
     
     def _render_main_nav(self):
-        """Menu principal com dropdown - 5 opções"""
+        """Menu principal com dropdown corrigido - 5 opções"""
         st.markdown('<div class="main-nav">', unsafe_allow_html=True)
         
         col1, col2, col3, col4, col5 = st.columns(5)
         
-        # 1. GERAL (home/overview)
+        # 1. GERAL (home/overview) - com navegação corrigida
         with col1:
             geral_options = ["Home", "Informações", "Amostra", "Estrutura"]
-            geral_selected = st.selectbox("Geral", geral_options, key="nav_geral", label_visibility="collapsed")
-            if geral_selected == "Home":
-                st.session_state.current_page = 'geral_home'
-            elif geral_selected == "Informações":
-                st.session_state.current_page = 'geral_info'
-            elif geral_selected == "Amostra":
-                st.session_state.current_page = 'geral_amostra'
-            elif geral_selected == "Estrutura":
-                st.session_state.current_page = 'geral_estrutura'
+            
+            # Determinar índice atual baseado na página
+            geral_index = 0
+            if st.session_state.current_page == 'geral_info':
+                geral_index = 1
+            elif st.session_state.current_page == 'geral_amostra':
+                geral_index = 2
+            elif st.session_state.current_page == 'geral_estrutura':
+                geral_index = 3
+            
+            geral_selected = st.selectbox("Geral", geral_options, index=geral_index, key="nav_geral")
+            
+            # Só atualizar se mudou
+            if geral_selected != geral_options[geral_index]:
+                if geral_selected == "Home":
+                    st.session_state.current_page = 'geral_home'
+                elif geral_selected == "Informações":
+                    st.session_state.current_page = 'geral_info'
+                elif geral_selected == "Amostra":
+                    st.session_state.current_page = 'geral_amostra'
+                elif geral_selected == "Estrutura":
+                    st.session_state.current_page = 'geral_estrutura'
+                st.rerun()
         
         # 2. CENÁRIO
         with col2:
             cenario_options = ["Temporal", "Domínios", "Hashtags"]
-            cenario_selected = st.selectbox("Cenário", cenario_options, key="nav_cenario", label_visibility="collapsed")
-            if cenario_selected == "Temporal":
-                st.session_state.current_page = 'temporal'
-            elif cenario_selected == "Domínios":
-                st.session_state.current_page = 'domains'
-            elif cenario_selected == "Hashtags":
-                st.session_state.current_page = 'hashtags'
+            cenario_index = 0
+            if st.session_state.current_page == 'domains':
+                cenario_index = 1
+            elif st.session_state.current_page == 'hashtags':
+                cenario_index = 2
+            
+            cenario_selected = st.selectbox("Cenário", cenario_options, index=cenario_index, key="nav_cenario")
+            
+            if cenario_selected != cenario_options[cenario_index]:
+                if cenario_selected == "Temporal":
+                    st.session_state.current_page = 'temporal'
+                elif cenario_selected == "Domínios":
+                    st.session_state.current_page = 'domains'
+                elif cenario_selected == "Hashtags":
+                    st.session_state.current_page = 'hashtags'
+                st.rerun()
         
         # 3. TEMÁTICAS
         with col3:
             tematicas_options = ["Modeling", "TF-IDF", "Clustering"]
-            tematicas_selected = st.selectbox("Temáticas", tematicas_options, key="nav_tematicas", label_visibility="collapsed")
-            if tematicas_selected == "Modeling":
-                st.session_state.current_page = 'modeling'
-            elif tematicas_selected == "TF-IDF":
-                st.session_state.current_page = 'tfidf'
-            elif tematicas_selected == "Clustering":
-                st.session_state.current_page = 'clustering'
+            tematicas_index = 0
+            if st.session_state.current_page == 'tfidf':
+                tematicas_index = 1
+            elif st.session_state.current_page == 'clustering':
+                tematicas_index = 2
+            
+            tematicas_selected = st.selectbox("Temáticas", tematicas_options, index=tematicas_index, key="nav_tematicas")
+            
+            if tematicas_selected != tematicas_options[tematicas_index]:
+                if tematicas_selected == "Modeling":
+                    st.session_state.current_page = 'modeling'
+                elif tematicas_selected == "TF-IDF":
+                    st.session_state.current_page = 'tfidf'
+                elif tematicas_selected == "Clustering":
+                    st.session_state.current_page = 'clustering'
+                st.rerun()
         
         # 4. DISCURSOS
         with col4:
             discursos_options = ["Sentimentos", "Política", "Redes"]
-            discursos_selected = st.selectbox("Discursos", discursos_options, key="nav_discursos", label_visibility="collapsed")
-            if discursos_selected == "Sentimentos":
-                st.session_state.current_page = 'sentiment'
-            elif discursos_selected == "Política":
-                st.session_state.current_page = 'political'
-            elif discursos_selected == "Redes":
-                st.session_state.current_page = 'networks'
+            discursos_index = 0
+            if st.session_state.current_page == 'political':
+                discursos_index = 1
+            elif st.session_state.current_page == 'networks':
+                discursos_index = 2
+            
+            discursos_selected = st.selectbox("Discursos", discursos_options, index=discursos_index, key="nav_discursos")
+            
+            if discursos_selected != discursos_options[discursos_index]:
+                if discursos_selected == "Sentimentos":
+                    st.session_state.current_page = 'sentiment'
+                elif discursos_selected == "Política":
+                    st.session_state.current_page = 'political'
+                elif discursos_selected == "Redes":
+                    st.session_state.current_page = 'networks'
+                st.rerun()
         
-        # 5. SIGNIFICADOS
+        # 5. SIGNIFICADOS  
         with col5:
             significados_options = ["Tópicos", "Qualitativa", "Semântica"]
-            significados_selected = st.selectbox("Significados", significados_options, key="nav_significados", label_visibility="collapsed")
-            if significados_selected == "Tópicos":
-                st.session_state.current_page = 'topics'
-            elif significados_selected == "Qualitativa":
-                st.session_state.current_page = 'qualitative'
-            elif significados_selected == "Semântica":
-                st.session_state.current_page = 'semantic'
+            significados_index = 0
+            if st.session_state.current_page == 'qualitative':
+                significados_index = 1
+            elif st.session_state.current_page == 'semantic':
+                significados_index = 2
+            
+            significados_selected = st.selectbox("Significados", significados_options, index=significados_index, key="nav_significados")
+            
+            if significados_selected != significados_options[significados_index]:
+                if significados_selected == "Tópicos":
+                    st.session_state.current_page = 'topics'
+                elif significados_selected == "Qualitativa":
+                    st.session_state.current_page = 'qualitative'  
+                elif significados_selected == "Semântica":
+                    st.session_state.current_page = 'semantic'
+                st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
     
