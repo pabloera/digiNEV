@@ -43,7 +43,7 @@ class DataLoader:
             'network_metrics': '15_network_metrics.csv',
             'qualitative_coding': '16_qualitative_coding.csv',
             'semantic_search_index': '19_semantic_search_index.csv',
-            'validation_report': '20_validation_report.json'
+            'validation_report': '20_validation_report.csv'
         }
     
     def get_data_status(self) -> Dict[str, Any]:
