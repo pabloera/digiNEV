@@ -114,10 +114,9 @@ def render_overview_page(data_loader):
                     
                 except Exception as e:
                     st.error(f"❌ Erro ao carregar interface do pipeline: {str(e)}")
-                    # Fallback para o botão simples
-                    if st.button("🚀 Iniciar Pipeline de Análise", type="primary"):
-                        st.info("⚠️ Para executar o pipeline completo, use o script `run_pipeline.py` no terminal")
-                        st.code("python run_pipeline.py", language="bash")
+                    # Redirecionar para página principal  
+                    st.info("📌 **Para executar o pipeline completo, use a página inicial (Geral → Home)**")
+                    st.info("⚠️ Alternativamente, execute via terminal: `python run_pipeline.py`")
                 
                 st.markdown("---")
                 
