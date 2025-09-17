@@ -526,17 +526,7 @@ class DigiNEVDashboard:
             st.info("Execute o pipeline para gerar dados de análise.")
     
     def _render_geral_home(self):
-        """Home com hero photo e layout compacto central"""
-        
-        # Hero section
-        st.markdown("""
-        <div class="hero-section">
-            <div class="hero-content">
-                <h2>Análise de Discurso Digital Brasileiro</h2>
-                <p>Sistema integrado para processamento e análise de dados políticos do Telegram</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        """Home com layout compacto central"""
         
         # Layout compacto central - 3 colunas para centralizar
         col_left, col_center, col_right = st.columns([1, 2, 1])
