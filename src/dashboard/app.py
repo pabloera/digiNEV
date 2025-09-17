@@ -38,10 +38,11 @@ st.markdown("""
     
     .main-header {
         background: var(--primary-blue);
-        padding: 1rem 0;
+        padding: 0.5rem 0;
         color: var(--white);
         text-align: center;
         margin: 0;
+        margin-top: -1rem;
         width: 100vw;
         margin-left: calc(-50vw + 50%);
         border-bottom: 3px solid var(--accent-orange);
@@ -120,7 +121,7 @@ st.markdown("""
     
     /* Compactar o layout geral */
     .main .block-container {
-        padding-top: 0.5rem;
+        padding-top: 0rem;
         padding-bottom: 0.5rem;
         max-width: 95%;
     }
