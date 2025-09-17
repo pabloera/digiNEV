@@ -151,9 +151,17 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Fonte sóbria global */
-    .main-content {
+    /* Fonte sóbria global - aplicada corretamente */
+    .stApp, body, html {
         font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    /* Indicador visual do menu ativo */
+    .active-nav-indicator {
+        color: var(--primary-blue);
+        font-weight: 600;
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 4px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -194,11 +202,12 @@ class DigiNEVDashboard:
         """, unsafe_allow_html=True)
     
     def _render_top_nav(self):
-        """Renderiza menu horizontal minimalista"""
+        """Renderiza menu horizontal minimalista com estado ativo"""
         st.markdown('<div class="horizontal-nav">', unsafe_allow_html=True)
         
-        # Menu horizontal com 5 botões
+        # Menu horizontal com 5 botões e indicador de estado ativo
         col1, col2, col3, col4, col5 = st.columns(5)
+        current = st.session_state.current_page
         
         nav_items = [
             ('overview', 'Visão Geral', col1),
@@ -210,9 +219,13 @@ class DigiNEVDashboard:
         
         for page_key, page_name, col in nav_items:
             with col:
-                if st.button(page_name, key=f"hnav_{page_key}", use_container_width=True):
-                    st.session_state.current_page = page_key
-                    st.rerun()
+                # Indicador visual do botão ativo
+                if current == page_key:
+                    st.markdown(f'<p class="active-nav-indicator">{page_name}</p>', unsafe_allow_html=True)
+                else:
+                    if st.button(page_name, key=f"hnav_{page_key}", use_container_width=True):
+                        st.session_state.current_page = page_key
+                        st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
     
@@ -280,7 +293,7 @@ class DigiNEVDashboard:
             from dashboard.views.political_analysis import render_political_page
             render_political_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Análise Política", "")
+            self._render_fallback_page("Análise Política")
     
     def _render_sentiment_page(self):
         """Renderiza a página de análise de sentimento"""
@@ -288,7 +301,7 @@ class DigiNEVDashboard:
             from dashboard.views.sentiment_analysis import render_sentiment_page
             render_sentiment_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Análise de Sentimento", "")
+            self._render_fallback_page("Análise de Sentimento")
     
     def _render_topics_page(self):
         """Renderiza a página de modelagem de tópicos"""
@@ -296,7 +309,7 @@ class DigiNEVDashboard:
             from dashboard.views.topic_modeling import render_topics_page
             render_topics_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Modelagem de Tópicos", "")
+            self._render_fallback_page("Modelagem de Tópicos")
     
     def _render_search_page(self):
         """Renderiza a página de busca semântica"""
@@ -304,11 +317,11 @@ class DigiNEVDashboard:
             from dashboard.views.semantic_search import render_search_page
             render_search_page(self.data_loader)
         except ImportError:
-            self._render_fallback_page("Busca Semântica", "")
+            self._render_fallback_page("Busca Semântica")
     
     # Páginas essenciais mantidas - todas as outras removidas para simplicidade
     
-    def _render_fallback_page(self, title: str, icon: str):
+    def _render_fallback_page(self, title: str):
         """Página genérica simplificada"""
         st.info(f"Execute o pipeline para gerar dados de {title.lower()}.")
 
