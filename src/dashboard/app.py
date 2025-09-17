@@ -20,10 +20,6 @@ st.set_page_config(
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / 'src'))
 
-# Importar fonte condensada
-st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-""")
 
 # CSS customizado - Paleta profissional minimalista
 st.markdown("""
