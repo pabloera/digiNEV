@@ -33,18 +33,22 @@ st.markdown("""
     
     .main-header {
         background: var(--primary-blue);
-        padding: 2rem;
+        padding: 1rem 0;
         color: var(--white);
-        text-align: left;
-        margin-bottom: 2rem;
-        border-left: 4px solid var(--accent-orange);
+        text-align: center;
+        margin: 0;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        border-bottom: 3px solid var(--accent-orange);
     }
     
     .main-header h1 {
         margin: 0;
-        font-size: 1.8rem;
-        font-weight: 600;
+        font-size: 2.2rem;
+        font-weight: 700;
         color: var(--white);
+        font-family: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+        letter-spacing: 1px;
     }
     
     .main-header p {
@@ -97,14 +101,27 @@ st.markdown("""
         background: var(--white);
         color: var(--primary-blue);
         border: 1px solid var(--primary-blue);
-        border-radius: 4px;
-        font-weight: 500;
+        border-radius: 6px;
+        font-weight: 600;
+        font-family: 'Roboto Condensed', sans-serif;
         transition: all 0.2s ease;
+        padding: 0.5rem 1rem;
     }
     
     .stButton > button:hover {
         background: var(--primary-blue);
         color: var(--white);
+    }
+    
+    /* Compactar o layout geral */
+    .main .block-container {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        max-width: 95%;
+    }
+    
+    .stMarkdown {
+        margin-bottom: 0.5rem;
     }
     
     /* Sidebar limpa */
@@ -119,12 +136,54 @@ st.markdown("""
         box-shadow: none;
     }
     
-    /* Menu horizontal minimalista */
-    .horizontal-nav {
-        background: var(--white);
-        border-bottom: 1px solid #e2e8f0;
-        padding: 1rem 0;
-        margin-bottom: 2rem;
+    /* Menu dropdown principal */
+    .main-nav {
+        background: var(--primary-blue);
+        padding: 0.8rem 0;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(27, 54, 93, 0.15);
+    }
+    
+    .nav-dropdown {
+        background: var(--primary-blue);
+        color: var(--white);
+        border: none;
+        padding: 0.6rem 1.2rem;
+        margin: 0 0.3rem;
+        border-radius: 6px;
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-dropdown:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .dropdown-content {
+        background: rgba(27, 54, 93, 0.8);
+        border-radius: 6px;
+        margin-top: 0.3rem;
+        padding: 0.5rem 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dropdown-item {
+        background: transparent;
+        color: var(--white);
+        border: none;
+        padding: 0.5rem 1rem;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-family: 'Roboto Condensed', sans-serif;
+        transition: background 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.1);
     }
     
     .nav-button {
@@ -151,17 +210,59 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Fonte sóbria global - aplicada corretamente */
+    /* Fonte condensada global - menos altura, mais largura */
     .stApp, body, html {
-        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        font-family: 'Roboto Condensed', 'Arial Narrow', 'Liberation Sans Narrow', 'Helvetica Neue Condensed', 'Arial', sans-serif;
+        font-stretch: condensed;
     }
     
-    /* Indicador visual do menu ativo */
-    .active-nav-indicator {
-        color: var(--primary-blue);
-        font-weight: 600;
-        border-bottom: 2px solid var(--primary-blue);
-        padding-bottom: 4px;
+    /* Hero section na home */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, rgba(27, 54, 93, 0.8) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff10" points="0,0 1000,300 1000,1000 0,700"/></svg>');
+        background-size: cover;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .compact-section {
+        background: var(--white);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Rodapé */
+    .footer {
+        background: var(--light-gray);
+        padding: 1rem;
+        margin-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--neutral-gray);
+        font-family: 'Roboto Condensed', sans-serif;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -173,9 +274,9 @@ class DigiNEVDashboard:
         """Inicializa o dashboard"""
         self.project_root = project_root
         
-        # Inicializar estado da sessão
+        # Inicializar estado da sessão - começar na home
         if 'current_page' not in st.session_state:
-            st.session_state.current_page = 'overview'
+            st.session_state.current_page = 'geral_home'
         
         # Importar utilitários
         try:
@@ -188,92 +289,94 @@ class DigiNEVDashboard:
     def run(self):
         """Executa o dashboard principal"""
         self._render_header()
-        self._render_top_nav()
-        self._render_sidebar()
+        self._render_main_nav()
         self._render_main_content()
+        self._render_footer()
     
     def _render_header(self):
-        """Renderiza o cabeçalho principal - minimalista e profissional"""
+        """Cabeçalho alargado e rente à moldura"""
         st.markdown("""
         <div class="main-header">
-            <h1>digiNEV | Monitor do Discurso Digital</h1>
-            <p>Análise de Dados Políticos Brasileiros</p>
+            <div class="hero-content">
+                <h1>digiNEV | Monitor do Discurso Digital</h1>
+                <p>Análise de Dados Políticos Brasileiros</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
-    def _render_top_nav(self):
-        """Renderiza menu temático organizado em grupos"""
+    def _render_main_nav(self):
+        """Menu principal com dropdown - 5 opções"""
+        st.markdown('<div class="main-nav">', unsafe_allow_html=True)
         
-        # Botão de Visão Geral sempre visível
-        if st.button("📊 VISÃO GERAL", key="overview_main", type="primary", use_container_width=True):
-            st.session_state.current_page = 'overview'
-            st.rerun()
+        col1, col2, col3, col4, col5 = st.columns(5)
         
-        st.markdown("---")
-        
-        # Grupos temáticos organizados
-        col1, col2, col3, col4 = st.columns(4)
-        
+        # 1. GERAL (home/overview)
         with col1:
-            st.markdown("### 🕐 CENÁRIO")
-            if st.button("Temporal (14)", key="temporal_14"):
-                st.session_state.current_page = 'temporal'
-                st.rerun()
-            if st.button("Domínios (13)", key="domains_13"):
-                st.session_state.current_page = 'domains'
-                st.rerun()
-            if st.button("Hashtags (12)", key="hashtags_12"):
-                st.session_state.current_page = 'hashtags'
-                st.rerun()
+            geral_options = ["Home", "Informações", "Amostra", "Estrutura"]
+            geral_selected = st.selectbox("Geral", geral_options, key="nav_geral", label_visibility="collapsed")
+            if geral_selected == "Home":
+                st.session_state.current_page = 'geral_home'
+            elif geral_selected == "Informações":
+                st.session_state.current_page = 'geral_info'
+            elif geral_selected == "Amostra":
+                st.session_state.current_page = 'geral_amostra'
+            elif geral_selected == "Estrutura":
+                st.session_state.current_page = 'geral_estrutura'
         
+        # 2. CENÁRIO
         with col2:
-            st.markdown("### 🎯 TEMÁTICAS")
-            if st.button("Modeling (09)", key="modeling_09"):
-                st.session_state.current_page = 'modeling'
-                st.rerun()
-            if st.button("TF-IDF (10)", key="tfidf_10"):
-                st.session_state.current_page = 'tfidf'
-                st.rerun()
-            if st.button("Clustering (11)", key="clustering_11"):
-                st.session_state.current_page = 'clustering'
-                st.rerun()
+            cenario_options = ["Temporal", "Domínios", "Hashtags"]
+            cenario_selected = st.selectbox("Cenário", cenario_options, key="nav_cenario", label_visibility="collapsed")
+            if cenario_selected == "Temporal":
+                st.session_state.current_page = 'temporal'
+            elif cenario_selected == "Domínios":
+                st.session_state.current_page = 'domains'
+            elif cenario_selected == "Hashtags":
+                st.session_state.current_page = 'hashtags'
         
+        # 3. TEMÁTICAS
         with col3:
-            st.markdown("### 💬 DISCURSOS")
-            if st.button("Sentimentos (08)", key="sentiment_08"):
-                st.session_state.current_page = 'sentiment'
-                st.rerun()
-            if st.button("Política (05)", key="political_05"):
-                st.session_state.current_page = 'political'
-                st.rerun()
-            if st.button("Redes (15)", key="networks_15"):
-                st.session_state.current_page = 'networks'
-                st.rerun()
+            tematicas_options = ["Modeling", "TF-IDF", "Clustering"]
+            tematicas_selected = st.selectbox("Temáticas", tematicas_options, key="nav_tematicas", label_visibility="collapsed")
+            if tematicas_selected == "Modeling":
+                st.session_state.current_page = 'modeling'
+            elif tematicas_selected == "TF-IDF":
+                st.session_state.current_page = 'tfidf'
+            elif tematicas_selected == "Clustering":
+                st.session_state.current_page = 'clustering'
         
+        # 4. DISCURSOS
         with col4:
-            st.markdown("### 🧠 SIGNIFICADOS")
-            if st.button("Tópicos (18)", key="topics_18"):
-                st.session_state.current_page = 'topics'
-                st.rerun()
-            if st.button("Qualitativa (16)", key="qualitative_16"):
-                st.session_state.current_page = 'qualitative'
-                st.rerun()
-            if st.button("Semântica (19)", key="semantic_19"):
-                st.session_state.current_page = 'semantic'
-                st.rerun()
+            discursos_options = ["Sentimentos", "Política", "Redes"]
+            discursos_selected = st.selectbox("Discursos", discursos_options, key="nav_discursos", label_visibility="collapsed")
+            if discursos_selected == "Sentimentos":
+                st.session_state.current_page = 'sentiment'
+            elif discursos_selected == "Política":
+                st.session_state.current_page = 'political'
+            elif discursos_selected == "Redes":
+                st.session_state.current_page = 'networks'
         
-        st.markdown("---")
+        # 5. SIGNIFICADOS
+        with col5:
+            significados_options = ["Tópicos", "Qualitativa", "Semântica"]
+            significados_selected = st.selectbox("Significados", significados_options, key="nav_significados", label_visibility="collapsed")
+            if significados_selected == "Tópicos":
+                st.session_state.current_page = 'topics'
+            elif significados_selected == "Qualitativa":
+                st.session_state.current_page = 'qualitative'
+            elif significados_selected == "Semântica":
+                st.session_state.current_page = 'semantic'
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    def _render_sidebar(self):
-        """Sidebar apenas com status - sem navegação"""
-        with st.sidebar:
-            st.markdown("### Status do Sistema")
-            if self.data_loader:
-                try:
-                    status = self.data_loader.get_data_status()
-                    st.markdown(f"**Arquivos:** {status.get('available_files', 0)}")
-                except:
-                    st.markdown("**Sistema:** Ativo")
+    def _render_footer(self):
+        """Rodapé com informações de criação"""
+        st.markdown("""
+        <div class="footer">
+            <p><strong>digiNEV Monitor</strong> | Desenvolvido em 2024 para Análise de Discurso Digital Brasileiro</p>
+            <p>Sistema de monitoramento e análise de dados políticos | Universidade Federal do Rio Grande do Sul</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     def _render_page_indicator(self, current_page: str):
         """Renderiza indicador minimalista da página atual"""
@@ -296,9 +399,15 @@ class DigiNEVDashboard:
         self._render_page_indicator(current_page)
         
         try:
-            # Página principal
-            if current_page == 'overview':
-                self._render_overview_page()
+            # GERAL - Páginas do dropdown Geral
+            if current_page == 'geral_home':
+                self._render_geral_home()
+            elif current_page == 'geral_info':
+                self._render_geral_info()
+            elif current_page == 'geral_amostra':
+                self._render_geral_amostra()
+            elif current_page == 'geral_estrutura':
+                self._render_geral_estrutura()
             
             # CENÁRIO
             elif current_page == 'temporal':
@@ -333,11 +442,171 @@ class DigiNEVDashboard:
                 self._render_analysis_page("Análise Semântica", 19)
             
             else:
-                self._render_overview_page()  # Fallback
+                self._render_geral_home()  # Fallback para home
                 
         except Exception as e:
             st.error(f"Erro ao carregar página: {e}")
             st.info("Execute o pipeline para gerar dados de análise.")
+    
+    def _render_geral_home(self):
+        """Home com hero photo e layout compacto central"""
+        
+        # Hero section
+        st.markdown("""
+        <div class="hero-section">
+            <div class="hero-content">
+                <h2>Análise de Discurso Digital Brasileiro</h2>
+                <p>Sistema integrado para processamento e análise de dados políticos do Telegram</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Layout compacto central - 3 colunas para centralizar
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+        
+        with col_center:
+            # Caixa de carregamento central
+            st.markdown('<div class="compact-section">', unsafe_allow_html=True)
+            st.markdown("#### Carregamento de Dataset")
+            
+            col_upload, col_exec = st.columns([2, 1])
+            with col_upload:
+                uploaded_file = st.file_uploader(
+                    "Selecionar arquivo CSV", 
+                    type=['csv'],
+                    help="Dados do Telegram com texto, data e metadados",
+                    label_visibility="collapsed"
+                )
+            
+            with col_exec:
+                if st.button("Executar Pipeline", type="primary", use_container_width=True):
+                    st.info("Pipeline iniciado...")
+            
+            # Barra de progresso abaixo dos dois
+            st.markdown("#### Progresso do Processamento")
+            
+            # Verificar progresso real
+            pipeline_dir = self.project_root / "pipeline_outputs"
+            expected_steps = 20  # Total de etapas
+            completed_steps = 0
+            
+            if pipeline_dir.exists():
+                completed_steps = len(list(pipeline_dir.glob("*.csv")))
+            
+            progress = completed_steps / expected_steps if expected_steps > 0 else 0
+            st.progress(progress, text=f"Etapa {completed_steps}/{expected_steps}")
+            
+            if completed_steps > 0 and completed_steps < expected_steps:
+                remaining = expected_steps - completed_steps
+                est_time = remaining * 1.5  # 1.5 min por etapa
+                st.info(f"Tempo estimado: {est_time:.0f} minutos")
+            elif completed_steps == expected_steps:
+                st.success("Pipeline concluído!")
+            else:
+                st.info("Aguardando execução do pipeline")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+    
+    def _render_geral_info(self):
+        """Informações gerais do dataset"""
+        st.markdown("### Informações do Dataset")
+        
+        try:
+            import pandas as pd
+            dataset_path = self.project_root / "data" / "telegram_data.csv"
+            
+            if dataset_path.exists():
+                df = pd.read_csv(dataset_path, nrows=1000)
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Total de Mensagens", f"{len(df):,}")
+                
+                with col2:
+                    # Tentar detectar coluna de data
+                    date_cols = [col for col in df.columns if any(word in col.lower() for word in ['date', 'data', 'timestamp', 'time'])]
+                    if date_cols:
+                        try:
+                            date_col = date_cols[0]
+                            df[date_col] = pd.to_datetime(df[date_col])
+                            min_date = df[date_col].min().strftime('%Y-%m-%d')
+                            max_date = df[date_col].max().strftime('%Y-%m-%d')
+                            st.metric("Período", f"{min_date} a {max_date}")
+                        except:
+                            st.metric("Período", "Não identificado")
+                    else:
+                        st.metric("Período", "Sem coluna de data")
+                
+                with col3:
+                    st.metric("Colunas", len(df.columns))
+                
+                with col4:
+                    processed_files = len(list((self.project_root / "pipeline_outputs").glob("*.csv")))
+                    st.metric("Etapas Processadas", processed_files)
+                    
+            else:
+                st.warning("Dataset não encontrado. Carregue um arquivo CSV.")
+                
+        except Exception as e:
+            st.error(f"Erro: {e}")
+    
+    def _render_geral_amostra(self):
+        """Amostra dos dados"""
+        st.markdown("### Amostra do Dataset")
+        
+        try:
+            import pandas as pd
+            dataset_path = self.project_root / "data" / "telegram_data.csv"
+            
+            if dataset_path.exists():
+                df = pd.read_csv(dataset_path, nrows=50)  # Primeiras 50 linhas
+                st.dataframe(df, use_container_width=True, height=600)
+                
+                st.info(f"Exibindo {len(df)} registros do dataset")
+            else:
+                st.warning("Dataset não encontrado.")
+                
+        except Exception as e:
+            st.error(f"Erro ao carregar amostra: {e}")
+    
+    def _render_geral_estrutura(self):
+        """Estrutura do dataset - colunas e tipos"""
+        st.markdown("### Estrutura do Dataset")
+        
+        try:
+            import pandas as pd
+            dataset_path = self.project_root / "data" / "telegram_data.csv"
+            
+            if dataset_path.exists():
+                df = pd.read_csv(dataset_path, nrows=1000)
+                
+                # Criar tabela de informações das colunas
+                cols_info = []
+                for col in df.columns:
+                    dtype = str(df[col].dtype)
+                    non_null = df[col].count()
+                    null_count = df[col].isnull().sum()
+                    unique_vals = df[col].nunique()
+                    
+                    cols_info.append({
+                        'Coluna': col,
+                        'Tipo': dtype,
+                        'Não-Nulos': f"{non_null:,}",
+                        'Nulos': f"{null_count:,}",
+                        'Únicos': f"{unique_vals:,}",
+                        'Completude': f"{(non_null/len(df)*100):.1f}%"
+                    })
+                
+                structure_df = pd.DataFrame(cols_info)
+                st.dataframe(structure_df, use_container_width=True, height=500)
+                
+                st.info(f"Dataset com {len(df.columns)} colunas analisadas")
+            else:
+                st.warning("Dataset não encontrado.")
+                
+        except Exception as e:
+            st.error(f"Erro ao analisar estrutura: {e}")
     
     def _render_overview_page(self):
         """Renderiza página de visão geral reformulada"""
