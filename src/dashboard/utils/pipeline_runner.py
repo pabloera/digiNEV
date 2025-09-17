@@ -206,14 +206,9 @@ class DashboardPipelineRunner:
             self._notify_progress_update()
             self._notify_log_update("🚀 Iniciando execução do pipeline digiNEV...")
             
-            # Preparar comando
-            script_path = self.project_root / "run_pipeline.py"
-            if not script_path.exists():
-                raise FileNotFoundError(f"Script não encontrado: {script_path}")
-            
-            # Comando para executar o pipeline (usar sys.executable para robustez)
+            # 🚀 CORREÇÃO: Usar CLI wrapper unificado
             import sys
-            cmd = [sys.executable, str(script_path)]
+            cmd = [sys.executable, "-m", "src.core.pipeline_cli", "run"]
             
             self._notify_log_update(f"📋 Executando comando: {' '.join(cmd)}")
             self._notify_log_update(f"📁 Diretório de trabalho: {self.project_root}")

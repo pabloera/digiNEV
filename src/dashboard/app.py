@@ -577,6 +577,16 @@ class DigiNEVDashboard:
             completion_pct = pipeline_runner.get_completion_percentage()
             current_stage_name = pipeline_runner.get_current_stage_name()
             
+            # Verificar se arquivo foi carregado
+            if uploaded_file is not None:
+                # Salvar arquivo temporariamente
+                temp_path = Path("data/uploads") / uploaded_file.name
+                temp_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(temp_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                st.success(f"✅ Arquivo carregado: {uploaded_file.name}")
+                st.info("👆 Agora clique em 'Executar Pipeline' para processar os dados")
+            
             # Barra de progresso real
             progress_bar = st.progress(completion_pct / 100.0)
             st.markdown(f"**{completion_pct:.1f}% concluído** - {current_stage_name}")
