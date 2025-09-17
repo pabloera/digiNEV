@@ -11,9 +11,8 @@ from pathlib import Path
 # Configuração da página
 st.set_page_config(
     page_title="digiNEV | Análise de Discurso Digital",
-    page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Adicionar src ao path
@@ -119,6 +118,43 @@ st.markdown("""
         border: none;
         box-shadow: none;
     }
+    
+    /* Menu horizontal minimalista */
+    .horizontal-nav {
+        background: var(--white);
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .nav-button {
+        background: transparent;
+        border: none;
+        color: var(--neutral-gray);
+        font-weight: 500;
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        padding: 0.75rem 1.5rem;
+        margin: 0 0.25rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-button:hover {
+        color: var(--primary-blue);
+        border-bottom-color: var(--accent-orange);
+    }
+    
+    .nav-button.active {
+        color: var(--primary-blue);
+        border-bottom-color: var(--primary-blue);
+        font-weight: 600;
+    }
+    
+    /* Fonte sóbria global */
+    .main-content {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -144,6 +180,7 @@ class DigiNEVDashboard:
     def run(self):
         """Executa o dashboard principal"""
         self._render_header()
+        self._render_top_nav()
         self._render_sidebar()
         self._render_main_content()
     
@@ -156,33 +193,39 @@ class DigiNEVDashboard:
         </div>
         """, unsafe_allow_html=True)
     
-    def _render_sidebar(self):
-        """Renderiza navegação minimalista e profissional"""
-        with st.sidebar:
-            st.markdown("### Navegação")
-            
-            # Menu principal simplificado - apenas 5 páginas essenciais
-            main_pages = {
-                'overview': 'Visão Geral',
-                'sentiment': 'Análise de Sentimento', 
-                'topics': 'Tópicos',
-                'political': 'Análise Política',
-                'search': 'Busca'
-            }
-            
-            for page_key, page_name in main_pages.items():
-                if st.button(page_name, key=f"nav_{page_key}", use_container_width=True):
+    def _render_top_nav(self):
+        """Renderiza menu horizontal minimalista"""
+        st.markdown('<div class="horizontal-nav">', unsafe_allow_html=True)
+        
+        # Menu horizontal com 5 botões
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        nav_items = [
+            ('overview', 'Visão Geral', col1),
+            ('sentiment', 'Análise de Sentimento', col2), 
+            ('topics', 'Tópicos', col3),
+            ('political', 'Análise Política', col4),
+            ('search', 'Busca', col5)
+        ]
+        
+        for page_key, page_name, col in nav_items:
+            with col:
+                if st.button(page_name, key=f"hnav_{page_key}", use_container_width=True):
                     st.session_state.current_page = page_key
                     st.rerun()
-            
-            # Status simplificado
-            st.markdown("---")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    def _render_sidebar(self):
+        """Sidebar apenas com status - sem navegação"""
+        with st.sidebar:
+            st.markdown("### Status do Sistema")
             if self.data_loader:
                 try:
                     status = self.data_loader.get_data_status()
-                    st.markdown(f"**Status:** {status.get('available_files', 0)} arquivos disponíveis")
+                    st.markdown(f"**Arquivos:** {status.get('available_files', 0)}")
                 except:
-                    st.markdown("**Status:** Sistema ativo")
+                    st.markdown("**Sistema:** Ativo")
     
     def _render_page_indicator(self, current_page: str):
         """Renderiza indicador minimalista da página atual"""
