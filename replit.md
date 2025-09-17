@@ -23,7 +23,7 @@ This is a comprehensive research pipeline for analyzing Brazilian political disc
 - `config/`: YAML configuration files for various system components
 
 ## Usage
-The dashboard is automatically available via the Replit web preview. The system can process political discourse data through a 22-stage analysis pipeline with advanced caching, monitoring, and optimization features.
+The dashboard is automatically available via the Replit web preview. **IMPORTANT**: Use the Replit Preview button or the generated external URL - DO NOT try to access http://0.0.0.0:5000 directly as this will result in "access denied" errors. The system can process political discourse data through a 22-stage analysis pipeline with advanced caching, monitoring, and optimization features.
 
 ## Recent Changes
 - **2025-09-17**: **REDESIGN PROFISSIONAL COMPLETO - 4 FASES IMPLEMENTADAS**

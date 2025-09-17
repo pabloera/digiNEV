@@ -332,6 +332,9 @@ class DigiNEVDashboard:
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # 📱 INFORMAÇÃO IMPORTANTE DE ACESSO - Resolução do problema do usuário
+        st.info("📱 **Como acessar este dashboard**: Use o botão 'Preview' do Replit ou a URL gerada automaticamente. Não tente acessar http://0.0.0.0:5000 diretamente (isso resulta em 'acesso negado').")
     
     def _render_main_nav(self):
         """Menu principal com dropdown corrigido - 5 opções"""
