@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diginev-pipeline
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./logs:/app/logs
+      - cache:/app/.cache
+      - pipeline_cache:/app/.pipeline_cache
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    restart: unless-stopped
+    networks:
+      - diginev-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: diginev-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      - ./output:/app/output:ro
+      - ./data:/app/data:ro
+    depends_on:
+      - pipeline
+    restart: unless-stopped
+    networks:
+      - diginev-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: diginev-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - diginev-network
+
+volumes:
+  cache:
+    driver: local
+  pipeline_cache:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  diginev-network:
+    driver: bridge

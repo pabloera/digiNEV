@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data
+data/*.csv
+data/*.parquet
+output/
+logs/
+*.log
+
+# Cache
+.cache/
+.pipeline_cache/
+*.cache
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/_build/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Environment
+.env
+.env.*
+!.env.template
+
+# macOS
+.DS_Store
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Test files
+test_*.py
+tests/
+conftest.py
+
+# Backup files
+*.bak
+*.backup
+*.old

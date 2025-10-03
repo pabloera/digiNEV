@@ -1,0 +1,163 @@
+# Configuração de Pesquisa - Batch Analyzer
+# Otimizada para Análise de Discurso Político
+
+# ===== Configurações de Pesquisa =====
+research:
+  # Modo de pesquisa otimizado
+  enabled: true
+
+  # Foco da análise
+  focus: brazilian_political_discourse
+
+  # Período de análise
+  period: "2019-2023"
+
+# ===== Análise Otimizada =====
+analysis:
+  # Todos os estágios para pesquisa completa
+  stages_enabled: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+
+  # Amostragem para otimização
+  sampling:
+    enabled: true
+    rate: 0.1  # 10% do dataset
+    strategy: stratified  # Mantém representatividade
+
+  # Foco em política brasileira
+  political_focus:
+    keywords:
+      - bolsonaro
+      - lula
+      - eleições
+      - democracia
+      - ditadura
+      - militares
+
+# ===== Configuração de APIs ======
+apis:
+  anthropic:
+    enabled: true
+    model: claude-3-5-haiku-20241022  # Modelo otimizado
+    max_tokens: 500  # Otimizado
+    temperature: 0.3
+    rate_limit: 10  # Taxa limitada
+
+  voyage:
+    enabled: false  # Desabilitado por padrão
+    model: voyage-3.5-lite
+    batch_size: 64  # Menor batch
+
+# ===== Cache Agressivo =====
+cache:
+  enabled: true
+  directory: ./cache/academic
+  ttl_hours: 168  # 1 semana
+  max_size_mb: 2048  # 2GB cache
+
+  # Cache semântico
+  semantic_cache:
+    enabled: true
+    similarity_threshold: 0.85
+
+# ===== Performance Acadêmica =====
+performance:
+  # Configurações modestas para computadores acadêmicos
+  batch_size: 50
+  max_workers: 2
+  chunk_size: 500
+  memory_limit_gb: 4.0
+
+  # Timeouts conservadores
+  timeout_seconds: 60
+  retry_attempts: 3
+
+# ===== Reprodutibilidade =====
+reproducibility:
+  # Seed para resultados consistentes
+  random_seed: 42
+
+  # Versionamento
+  track_versions: true
+
+  # Logs detalhados
+  detailed_logging: true
+
+  # Salvar configurações usadas
+  save_config: true
+
+# ===== Qualidade de Pesquisa =====
+research_quality:
+  # Validação rigorosa
+  validation_level: strict
+
+  # Controle de viés
+  bias_detection: true
+  bias_reporting: true
+
+  # Confiabilidade inter-avaliador
+  inter_rater_reliability: true
+
+  # Testes estatísticos
+  statistical_tests:
+    - chi_square
+    - t_test
+    - anova
+
+# ===== Saída Acadêmica =====
+output:
+  # Formatos para análise estatística
+  formats:
+    - csv  # Para R/SPSS
+    - json  # Metadados completos
+    - stata  # Formato .dta
+
+  # Dados completos para citação
+  include_original_text: true
+  include_metadata: true
+  include_confidence_scores: true
+  include_timestamps: true
+
+  # Anonimização
+  anonymize_users: true
+  remove_personal_info: true
+
+# ===== Ética de Pesquisa =====
+ethics:
+  # Conformidade com comitê de ética
+  irb_compliant: true
+
+  # Proteção de dados (LGPD)
+  data_protection: true
+
+  # Consentimento
+  require_consent: true
+
+  # Anonimização
+  anonymization_level: high
+
+# ===== Relatórios Acadêmicos =====
+reporting:
+  # Estatísticas descritivas
+  descriptive_stats: true
+
+  # Visualizações
+  generate_plots: true
+  plot_format: pdf  # Para publicação
+
+  # Tabelas formatadas
+  formatted_tables: true
+
+  # Citações
+  generate_citations: true
+  citation_format: apa7
+
+# ===== Backup e Versionamento =====
+backup:
+  # Backup automático
+  enabled: true
+  directory: ./backups
+  frequency: after_each_run
+
+  # Versionamento de dados
+  version_control: true
+  git_integration: false

@@ -1,0 +1,27 @@
+Sample Dataset Metadata
+==================================================
+
+Created: 2025-09-28 02:57:45
+Total samples: 1000
+Shape: (1000, 12)
+
+Source distribution:
+  - 3_2022-2023-poseleic.csv: 200
+  - 4_2022-2023-elec.csv: 200
+  - 5_2022-2023-elec-extra.csv: 200
+  - 1_2019-2021-govbolso.csv: 200
+  - 2_2021-2022-pandemia.csv: 200
+
+Columns (12):
+  - datetime
+  - body
+  - url
+  - hashtag
+  - channel
+  - is_fwrd
+  - mentions
+  - sender
+  - media_type
+  - domain
+  - body_cleaned
+  - source_dataset

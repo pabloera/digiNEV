@@ -1,0 +1,48 @@
+{
+    "_warning": "⚠️ CRITICAL FILE - DO NOT DELETE ⚠️",
+    "metadata": {
+        "version": "5.0.0",
+        "total_palavras": 1587,
+        "period_coverage": "2019-2023",
+        "discipline": "Ciência Política Digital",
+        "last_updated": "2024-09-28",
+        "source": "Observatório de Discursos Políticos Brasileiros"
+    },
+    "lexico": {
+        "extrema_direita": {
+            "nome": "Extremismo de Direita",
+            "pontuacao": {
+                "autoritarismo": 0.9,
+                "antidemocracia": 0.85,
+                "nacionalismo_radical": 0.8
+            },
+            "subtemas": {
+                "teorias_conspiratorias": {
+                    "nome": "Teorias Conspiratórias",
+                    "palavras": ["globalismo", "nova ordem mundial", "kit gay", "doutrinação"],
+                    "expressoes": ["Brasil acima de tudo", "Deus, Pátria, Família"]
+                },
+                "mobilizacao_radical": {
+                    "nome": "Mobilização Radical",
+                    "palavras": ["resistência", "luta", "combate", "guerra"],
+                    "expressoes": ["Vai ser pior", "Chegou a hora"]
+                }
+            }
+        },
+        "direita_tradicional": {
+            "nome": "Direita Conservadora",
+            "pontuacao": {
+                "conservadorismo": 0.7,
+                "tradicionalismo": 0.6,
+                "anticomunismo": 0.5
+            },
+            "subtemas": {
+                "valores_tradicionais": {
+                    "nome": "Valores Tradicionais",
+                    "palavras": ["família", "religião", "moral", "costumes"],
+                    "expressoes": ["Valores cristãos", "Tradição e ordem"]
+                }
+            }
+        }
+    }
+}

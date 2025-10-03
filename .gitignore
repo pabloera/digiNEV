@@ -6,6 +6,11 @@ __pycache__/
 .env
 .envrc
 .vscode
+.serena
+.claude
+.archive
+.data
+
 
 # Poetry files - TRACKED IN REPO
 # poetry.lock    ✅ dependency versions

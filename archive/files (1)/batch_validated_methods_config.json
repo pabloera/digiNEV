@@ -1,0 +1,196 @@
+{
+  "validated_methods_configuration": {
+    "description": "Configuração de métodos cientificamente validados para substituir heurísticas",
+    "dataset": "sample_1000_cases_20250928_025745.csv",
+    "stages": {
+      "stage_01_preprocessing": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "text_normalization": {
+            "use": "spacy_portuguese",
+            "model": "pt_core_news_lg",
+            "preserve_emojis": true,
+            "citation": "Honnibal et al. (2020)"
+          }
+        }
+      },
+      "stage_02_text_mining": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "political_classification": {
+            "use": "frame_analysis",
+            "implementation": "entman_frames",
+            "citation": "Entman (1993) J Communication"
+          },
+          "entity_recognition": {
+            "use": "spacy_ner",
+            "model": "pt_core_news_lg",
+            "custom_entities": ["politicians", "institutions", "events"]
+          }
+        }
+      },
+      "stage_03_statistical_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "trend_analysis": {
+            "use": "mann_kendall",
+            "citation": "Mann (1945); Kendall (1975)"
+          },
+          "changepoint": {
+            "use": "pelt",
+            "library": "ruptures",
+            "citation": "Killick et al. (2012)"
+          }
+        }
+      },
+      "stage_04_semantic_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "embeddings": {
+            "use": "bertimbau",
+            "model": "neuralmind/bert-base-portuguese-cased",
+            "citation": "Souza et al. (2020)"
+          }
+        }
+      },
+      "stage_05_tfidf_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "ranking": {
+            "use": "bm25",
+            "citation": "Robertson et al. (1995)"
+          },
+          "feature_extraction": {
+            "use": "tfidf_ngrams",
+            "ngram_range": [1, 3],
+            "language": "portuguese"
+          }
+        }
+      },
+      "stage_06_clustering": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "clustering": {
+            "use": "hdbscan",
+            "min_cluster_size": 5,
+            "citation": "Campello et al. (2013)"
+          },
+          "validation": {
+            "use": "silhouette_score",
+            "citation": "Rousseeuw (1987)"
+          }
+        }
+      },
+      "stage_07_topic_modeling": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "topic_model": {
+            "use": "bertopic",
+            "language": "portuguese",
+            "nr_topics": "auto",
+            "citation": "Grootendorst (2022)"
+          },
+          "alternative": {
+            "use": "stm",
+            "covariates": ["datetime", "source_dataset"],
+            "citation": "Roberts et al. (2014)"
+          }
+        }
+      },
+      "stage_08_evolution_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "burst_detection": {
+            "use": "kleinberg",
+            "citation": "Kleinberg (2003)"
+          },
+          "dynamic_topics": {
+            "use": "dynamic_topic_model",
+            "citation": "Blei & Lafferty (2006)"
+          }
+        }
+      },
+      "stage_09_network_coordination": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "cascade_detection": {
+            "use": "information_cascades",
+            "citation": "Leskovec et al. (2007)"
+          },
+          "coordination": {
+            "use": "cross_correlation",
+            "window": "1H",
+            "citation": "Box & Jenkins (1976)"
+          }
+        }
+      },
+      "stage_10_domain_url_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "domain_classification": {
+            "use": "authority_scoring",
+            "categories": ["mainstream", "alternative", "government", "social"],
+            "citation": "Page et al. (1999) adapted"
+          }
+        }
+      },
+      "stage_11_event_context": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "event_detection": {
+            "use": "critical_discourse_analysis",
+            "periods": ["election_2022", "pandemic", "government"],
+            "citation": "Wodak (2001)"
+          }
+        }
+      },
+      "stage_12_channel_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "influence": {
+            "use": "pagerank",
+            "citation": "Page et al. (1999)"
+          },
+          "divergence": {
+            "use": "kl_divergence",
+            "citation": "Kullback & Leibler (1951)"
+          }
+        }
+      },
+      "stage_13_linguistic_analysis": {
+        "enabled": true,
+        "replace_heuristic": true,
+        "methods": {
+          "psychological": {
+            "use": "liwc_portuguese",
+            "citation": "Balage Filho et al. (2013)"
+          },
+          "moral_foundations": {
+            "use": "mfd_portuguese",
+            "citation": "Graham et al. (2009); Silveira (2018)"
+          }
+        }
+      }
+    },
+    "global_settings": {
+      "use_validated_only": true,
+      "fallback_to_heuristic": false,
+      "require_citations": true,
+      "output_validation_scores": true,
+      "language": "portuguese",
+      "random_seed": 42
+    }
+  }
+}
