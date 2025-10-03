@@ -1,0 +1,44 @@
+import os
+
+import anthropic
+
+client = anthropic.Anthropic(
+  # defaults to os.environ.get("ANTHROPIC_API_KEY")
+  api_key="REDACTED_ANTHROPIC_KEY_1",
+)
+
+# Seu código do batch
+message_batch = client.messages.batches.create(
+    requests=[
+        {
+            "custom_id": "first-prompt-in-my-batch",
+            "params": {
+                "model": "claude-3-5-haiku-20241022",
+                "max_tokens": 100,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Hey Claude, tell me a short fun fact about video games!",
+                    }
+                ],
+            },
+        },
+        {
+            "custom_id": "second-prompt-in-my-batch",
+            "params": {
+                "model": "claude-3-5-haiku-20241022",  # Corrigido
+                "max_tokens": 100,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Hey Claude, tell me a short fun fact about bees!",
+                    }
+                ],
+            },
+        },
+    ]
+)
+
+print("✅ Batch criado com sucesso!")
+print(f"ID do Batch: {message_batch.id}")
+print(f"Status: {message_batch.processing_status}")

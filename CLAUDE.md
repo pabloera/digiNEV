@@ -1,362 +1,316 @@
-# digiNEV - Monitor do Discurso Digital v5.0.0
-## Technical Documentation for AI Assistants and Developers
+# digiNEV v.final - Brazilian Political Discourse Analysis
 
-### 🎓 Project Context
-This is an **academic research tool** for social scientists studying violence and authoritarianism in Brazilian society. The system analyzes Telegram messages (2019-2023) to identify patterns of political discourse, denialism, and digital authoritarianism.
+## 🎯 CONTEXTO
+**Tipo**: Pesquisa Acadêmica em Ciências Sociais
+**Foco**: Análise sociológica de discurso político brasileiro
+**Dataset**: Mensagens Telegram (2019-2023)
+**Specs**: 4GB RAM | Portuguese-optimized | 14 stages científicos | Consolidado
 
-**Target Users**: Social science researchers, not enterprise developers
-**Purpose**: Academic research on Brazilian political discourse
-**Focus**: Research utility, cost efficiency, accessibility
+## 🏗️ Sistema Científico Consolidado v.final
 
----
+### Pipeline Científico (14 estágios) - IMPLEMENTADO
+1. **Feature Extraction (01)**: Detecção automática de colunas e features
+2. **Text Preprocessing (02)**: Limpeza básica de texto em português
+3. **Linguistic Processing (03)**: Processamento linguístico avançado com spaCy
+4. **Statistical Analysis (04)**: Análise estatística com dados spaCy
+5. **Political Classification (05)**: Classificação política brasileira
+6. **TF-IDF Vectorization (06)**: TF-IDF com tokens spaCy
+7. **Clustering Analysis (07)**: Clustering baseado em features linguísticas
+8. **Topic Modeling (08)**: Topic modeling com embeddings
+9. **Temporal Analysis (09)**: Análise temporal
+10. **Network Analysis (10)**: Coordenação e padrões de rede
+11. **Domain Analysis (11)**: Análise de domínios e URLs
+12. **Semantic Analysis (12)**: Análise semântica avançada
+13. **Event Context (13)**: Detecção de contextos políticos
+14. **Channel Analysis (14)**: Classificação de canais/fontes
 
-## 🎓 **FINAL CONSOLIDATION v5.0.0: PRODUCTION-READY ACADEMIC SYSTEM** ✅
+**Stack**: Python | scikit-learn | spaCy pt_core_news_lg | Streamlit
 
-**COMPLETED:** 15/06/2025 - Complete Week 1-5 pipeline optimization consolidated for academic research
+## 🚀 Execução
 
-### 🏆 **FINAL CONSOLIDATION ACHIEVEMENTS:**
-
-**✅ COMPREHENSIVE INTEGRATION COMPLETE:**
-- **Week 1-5 optimizations**: 100% integrated and validated (15/15 tests passing)
-- **Academic memory optimization**: 4GB target achieved for research computing environments
-- **Production deployment**: Enterprise-grade system adapted for academic use
-- **Cost optimization**: 40% API cost reduction maintained for research sustainability
-- **Research reliability**: 95% success rate achieved and maintained
-
-**✅ SYSTEM MATURITY MILESTONES:**
-- **Version unification**: All components standardized to v5.0.0
-- **Academic deployment**: Ready for research center deployment with `academic_deploy.py`
-- **Quality assurance**: Comprehensive testing framework validates all optimizations
-- **Memory efficiency**: 50% reduction (8GB → 4GB) suitable for academic computing
-- **Performance enhancement**: 60% time reduction through parallel processing
-
-**✅ ACADEMIC DELIVERABLES COMPLETE:**
-- **Academic Deployment System**: `academic_deploy.py` - Full deployment automation for research centers
-- **Academic User Guide**: `ACADEMIC_USER_GUIDE.md` - Comprehensive guide for social scientists
-- **English Standardization**: Documentation standardized, Portuguese analysis categories preserved
-- **Cost Management**: $50/month budget with automatic protection and monitoring
-- **Research Validation**: 100% system validation with academic-focused quality checks
-
-### 🔬 **SOCIAL SCIENCE RESEARCH OPTIMIZATIONS:**
-
-**✅ WEEK 1-2 INTEGRATION FOR ACADEMICS:**
-- **40% API cost reduction** through intelligent caching optimized for research workflows
-- **Portuguese text optimization** for Brazilian political discourse analysis
-- **Academic budget controls** with $50/month default for research sustainability
-- **Simplified configuration** removes enterprise complexity for researchers
-- **Research data integrity** preservation throughout optimization process
-
-### 🚀 **ACADEMIC FEATURES IMPLEMENTED:**
-
-**📚 Simplified Research Configuration:**
-- `config/academic_settings.yaml` - Research-focused settings
-- `src/academic_config.py` - Academic configuration loader
-- Automatic optimization detection and activation
-- Research quality validation and bias monitoring
-
-**🧠 Week 1: Emergency Cache (Academic):**
-- Embeddings cache for Voyage.ai stages (09, 10, 11, 19)
-- Portuguese text normalization for better cache hits
-- Academic budget-aware cache management
-- Research reproducibility through consistent caching
-
-**🎯 Week 2: Smart Semantic Cache (Academic):**
-- Brazilian political term normalization (Bolsonaro→political_figure)
-- Academic semantic similarity matching (85% threshold)
-- Research-focused API caching with 48-72 hour TTL
-- Portuguese discourse pattern optimization
-
-**💰 Academic Budget Management:**
-- $50/month default budget for research sustainability
-- Real-time cost tracking and alerts
-- Auto-downgrade to cheaper models when needed
-- Academic usage statistics and cost optimization reports
-
-**🇧🇷 Portuguese Research Optimization:**
-- Brazilian political entity recognition
-- Social media text normalization
-- Academic research quality controls
-- Data integrity preservation for citation
-
-### 📊 **ACADEMIC PERFORMANCE METRICS:**
-- **Cost Reduction**: 40% through Week 1-2 optimizations
-- **Research Efficiency**: Cache hit rates >70% for similar analysis
-- **Budget Control**: Automatic protection against overspending
-- **Reproducibility**: Consistent results through semantic caching
-- **Data Integrity**: 100% preservation of original research data
-
-### 🧪 **VALIDATION COMPLETED:**
-- ✅ **15/15 optimization tests passed** (100% success rate across all weeks)
-- ✅ **Research functionality preserved and enhanced** 
-- ✅ **Cost optimization validation confirmed** (40% API cost reduction)
-- ✅ **Portuguese analysis optimization verified** (Brazilian political taxonomy preserved)
-- ✅ **Academic budget controls tested and working** ($50/month budget with auto-protection)
-
-### 📊 **CONSOLIDATION VALIDATION RESULTS**
-
-**System Integration Status:**
-```
-✅ Week 1: Emergency Optimizations         - 3/3 tests passing (100%)
-✅ Week 2: Advanced Caching & Monitoring   - 3/3 tests passing (100%)
-✅ Week 3: Parallelization & Streaming     - 3/3 tests passing (100%)
-✅ Week 4: Advanced Monitoring & Validation - 3/3 tests passing (100%)
-✅ Week 5: Production Readiness & Memory   - 3/3 tests passing (100%)
-
-Overall Success Rate: 100.0% (15/15 tests passing)
-```
-
-**Academic Environment Validation:**
-```
-✅ Environment Suitable: Yes
-✅ Optimizations Working: Yes (100% success rate)
-✅ Research Features: Yes (4 core features operational)
-✅ Memory Requirements: 4GB target achieved (50% reduction from 8GB)
-✅ Cost Management: $50/month with auto-protection
-✅ Portuguese Categories: Preserved for research authenticity
-```
-
-**Performance Metrics Achieved:**
-- **Memory Efficiency**: 50% reduction (8GB → 4GB target)
-- **Processing Speed**: 60% improvement through parallelization
-- **Cost Reduction**: 40% savings through intelligent caching
-- **Success Rate**: 95% reliability for academic reproducibility
-- **Academic Features**: 4 core research features fully operational
-
-### 🚀 **ACADEMIC DEPLOYMENT SYSTEM** 
-
-**Available for Research Centers:**
+### Analyzer v.final
 ```bash
-# Validate academic environment 
-poetry run python academic_deploy.py --validate
+# Execução direta
+python run_pipeline.py
 
-# Full research deployment
-poetry run python academic_deploy.py --environment research
+# Teste com dados controlados
+python test_clean_analyzer.py
 
-# Generate deployment report
-poetry run python academic_deploy.py --report
+# Dashboard acadêmico
+python -m src.dashboard.start_dashboard
 ```
 
-**Features:**
-- Automated academic environment validation
-- Complete system health checks
-- Research-focused configuration setup
-- Academic feature validation
-- Deployment report generation
-
-### 🚀 **QUICK START FOR RESEARCHERS:**
-
-```bash
-# 1. Academic configuration (automatic)
-poetry run python -c "from src.academic_config import get_academic_config; print(get_academic_config().get_research_summary())"
-
-# 2. Run academic validation
-poetry run python tests/test_academic_integration.py
-
-# 3. Execute research pipeline with optimizations
-poetry run python run_pipeline.py
-```
-
-**Academic Configuration Highlights:**
-- **Emergency cache**: 48h TTL for research consistency
-- **Smart cache**: Portuguese political term normalization
-- **Budget**: $50/month with auto-protection
-- **Models**: claude-3-5-haiku-20241022 (most economical)
-- **Voyage.ai**: voyage-3.5-lite with 96% sampling for cost control
-
----
-
-## 🚀 Current System Status (v5.0.0)
-
-### ✅ Optimization Status
-- **Week 1-5 Optimizations**: Fully implemented and integrated
-- **Success Rate**: 95% (improved from 45%)
-- **Performance**: 60% time reduction, 50% memory reduction
-- **Cost Optimization**: 40% API cost reduction for academic budgets
-
-### 🔧 Core Architecture
-```
-src/
-├── anthropic_integration/           # Main analysis pipeline (22 stages)
-│   ├── unified_pipeline.py         # Core pipeline with integrated optimizations
-│   └── base.py                     # API integration base
-├── optimized/                      # Performance enhancement modules
-│   ├── optimized_pipeline.py      # Week 1: Emergency optimizations
-│   ├── parallel_engine.py         # Week 3: Parallel processing (832 lines)
-│   ├── streaming_pipeline.py      # Week 3: Memory-efficient streaming
-│   └── [other optimization modules]
-├── dashboard/                      # Research visualization interface
-└── tests/                         # Validation and testing framework
-```
-
----
-
-## 📊 Research Pipeline (22 Stages)
-
-| Stage | Function | Technology | Research Purpose |
-|-------|----------|------------|------------------|
-| 01-04 | Data processing | Core Python | Prepare messages for analysis |
-| 05 | Political analysis | Anthropic API | Categorize political orientation |
-| 06-07 | Text cleaning & linguistics | spaCy | Preserve meaning, extract features |
-| 08 | Sentiment analysis | Anthropic API | Detect emotional tone |
-| 09-11 | Topic modeling & clustering | Voyage.ai | Discover discussion themes |
-| 12-14 | Content analysis | Mixed | Analyze hashtags, domains, time |
-| 15-18 | Advanced analysis | Anthropic API | Network patterns, qualitative coding |
-| 19-20 | Search & validation | Voyage.ai + validation | Quality assurance |
-
----
-
-## 🎯 Key Rules for AI Assistants
-
-### 1. Academic Context Priority
-- **Simplify complexity**: Remove enterprise jargon, focus on research utility
-- **Cost consciousness**: Optimize for academic budgets, not enterprise scale
-- **Accessibility**: Make code understandable for social scientists
-
-### 2. Language Standards
-- **Documentation**: English for technical docs and code comments
-- **Analysis categories**: Portuguese for political/sentiment categories (research validity)
-- **Variable names**: English for code, Portuguese preserved in analysis outputs
-
-### 3. File Management
-- **Always use Poetry**: `poetry run python [command]`
-- **Core files**: Modify existing files, don't create new ones unless essential
-- **Documentation**: Keep README.md and CLAUDE.md organized and current
-
-### 4. Research Data Integrity
-- **Portuguese analysis categories**: Never translate political categories to English
-- **Reproducibility**: Maintain consistent model versions
-- **Validation**: Ensure research reliability through quality checks
-
----
-
-## 🔧 Essential Commands
-
-### Basic Research Workflow
-```bash
-# Complete analysis pipeline
-poetry run python run_pipeline.py
-
-# Launch research dashboard
-poetry run python src/dashboard/start_dashboard.py
-
-# Analyze specific dataset
-poetry run python run_pipeline.py --dataset "data/your_messages.csv"
-```
-
-### Development and Testing
-```bash
-# Test optimization integrations
-poetry run python test_all_weeks_consolidated.py
-
-# Validate system health
-poetry run python scripts/maintenance_tools.py validate
-
-# Check environment
-poetry env info
-```
-
----
-
-## 📁 File Commentary Standard
-
-All Python files should include 3-line headers:
+### Uso Programático
 ```python
-"""
-[File Title]: Brief description of purpose
-Function: Core functionality (analysis/processing/visualization)
-Usage: How researchers interact with this module
-"""
+from src.analyzer import Analyzer
+
+analyzer = Analyzer()
+results = analyzer.analyze_dataset(df)
+print(f"Colunas geradas: {results['columns_generated']}")
+print(f"Stages completados: {results['stats']['stages_completed']}/14")
 ```
 
+## 🔧 Características Principais
+
+### Classificação Política (Stage 05)
+- **Categorias**: extrema-direita, direita, centro, esquerda, neutral, unknown
+- **Léxico político brasileiro** integrado
+- **Classificação baseada** em análise de conteúdo real
+
+### Recursos Implementados
+- **spaCy**: Processamento linguístico em português (pt_core_news_lg)
+- **scikit-learn**: TF-IDF, K-Means clustering, LDA topic modeling
+- **Python puro**: Análise estatística, temporal e de redes
+- **Regex otimizado**: Extração de features em português brasileiro
+
+## 📁 Estrutura
+
+```
+├── src/                         # Sistema científico consolidado
+│   ├── analyzer.py              # Analyzer v.final (núcleo principal) - 14 stages
+│   ├── lexicon_loader.py        # Carregador de léxico político
+│   └── dashboard/               # Dashboard acadêmico
+│       ├── start_dashboard.py   # Iniciador do dashboard
+│       ├── data_analysis_dashboard.py  # Dashboard principal
+│       └── [outros dashboards]  # Dashboards especializados
+├── config/                      # Configuração unificada
+│   ├── settings.yaml            # Configurações principais
+│   ├── processing.yaml          # Configurações de processamento
+│   └── [outras configs]         # Configurações específicas
+├── data/                        # Datasets de pesquisa
+├── run_pipeline.py              # Script principal de execução
+└── test_clean_analyzer.py       # Teste do sistema
+```
+
+### Regras Estruturais
+- TODO código científico em `/src`
+- Configuração distribuída em `/config`
+- NUNCA criar `.fixed`, `.new`, `.updated`
+- SEMPRE editar arquivos in-place
+
+## 🔬 Aplicações de Pesquisa
+- Evolução da polarização política (2019-2023)
+- Padrões de legitimação da violência
+- Marcadores do discurso autoritário
+- Análise de coordenação em rede
+- Indicadores de erosão democrática
+
+## 📊 Saída de Dados
+- **30+ colunas reais** geradas pelo pipeline sequencial de 14 stages
+- Classificação política (extrema-direita, direita, centro, esquerda, neutral)
+- Análise estatística descritiva (word_count, char_count, sentence_count)
+- Features extraídas automaticamente (hashtags, URLs, mentions, emojis)
+- TF-IDF com scores reais e top termos por documento
+- Clustering K-Means com distâncias calculadas
+- Topic modeling LDA com probabilidades reais
+- Análise temporal (hour, day_of_week, month) quando disponível
+- Coordenação de rede detectada por cluster e tempo
+- Análise de domínios e URLs com classificação
+- Análise semântica avançada com conectivos e modalidade
+- Contexto de eventos políticos brasileiros
+- Análise de canais/fontes com autoridade e padrões
+
+## 🧪 Testes
+```bash
+# Teste do pipeline consolidado
+python test_clean_analyzer.py
+
+# Execução com dados reais
+python run_pipeline.py
+```
+
+## 💡 Diretrizes de Desenvolvimento
+
+### Princípios Fundamentais
+1. **TESTAR SEMPRE** - Cada mudança testada imediatamente
+2. **DADOS REAIS** - Usar datasets reais, não sintéticos
+3. **REFATORAR INCREMENTALMENTE** - Pequenas mudanças validadas
+4. **FALHAR RÁPIDO** - Detectar problemas cedo
+5. **MEDIR IMPACTO** - Comparar performance antes/depois
+
+### Workflow Obrigatório
+```python
+# Baseline → Mudança → Teste → Validação → Commit
+df_original = pd.read_csv('data/controlled_test_100.csv', sep=';')
+baseline_results = pipeline.process_dataset(df_original.copy())
+# ... código modificado ...
+new_results = pipeline.process_dataset(df_test.copy())
+assert len(new_results) == len(baseline_results)
+```
+
+## 🔧 Políticas de Implementação
+
+### Refatoração de Módulos
+```python
+# 1. Branch → 2. Módulo isolado → 3. Teste → 4. Integração → 5. Consolidação
+refactoring_checklist = {
+    'political_analyzer.py': {'tested': False, 'integrated': False},
+    'sentiment_analyzer.py': {'tested': False, 'integrated': False}
+}
+# Consolidar APENAS se todos passaram
+```
+
+### Debugging e Validação
+```python
+# Logging detalhado
+logging.debug(f"Input: {df.shape}, Columns: {df.columns.tolist()}")
+
+# Tratamento de erros com contexto
+try:
+    result = complex_operation(data)
+except Exception as e:
+    logging.error(f"Erro: {e}, Context: {data.shape}")
+    raise
+
+# Validação pragmática
+def validate_dataframe(df, stage_name):
+    validations = {'not_empty': len(df) > 0, 'has_text': 'text' in df.columns}
+    failed = [k for k, v in validations.items() if not v]
+    if failed: logging.warning(f"Stage {stage_name}: {failed}")
+    return df
+```
+
+### Otimização e Cache
+```python
+# Medir antes de otimizar
+@measure_performance
+def expensive_function(): pass
+
+# Cache inteligente
+@lru_cache(maxsize=10)
+def cached_operation(cache_key): pass
+
+# Monitoramento de memória
+def check_memory(expected_gb=2.0):
+    mem_gb = psutil.Process().memory_info().rss / 1024**3
+    if mem_gb > expected_gb: gc.collect()
+```
+
+## 📝 Controle de Mudanças
+
+### Estrutura do Changelog
+```markdown
+## [2025-09-30] - Sprint Atual
+### ✅ Adicionado: Pipeline 22 estágios, validação dados reais
+### 🔄 Modificado: political_analyzer.py otimização (linha 45-67)
+### 🐛 Corrigido: Bug memória stage_15, encoding UTF-8
+### 📊 Métricas: Tempo 45s→31s, Memória 2.1GB→1.4GB
+```
+
+### Automação
+```python
+class ChangelogManager:
+    def add_change(self, type, description, details=None):
+        # Buffer automático com timestamp
+    def commit_to_changelog(self, version=None):
+        # Consolidação por tipo: added/changed/fixed/removed
+```
+
+## 🎭 Orquestração de Tarefas
+
+### Padrão de Orquestração
+```python
+@dataclass
+class Task:
+    name: str
+    function: Callable
+    dependencies: List[str] = None
+    retry_count: int = 3
+    timeout: float = 300
+    critical: bool = True
+
+class PragmaticOrchestrator:
+    def add_task(self, task: Task): # Registrar tarefa
+    async def run_task(self, task_name: str): # Executar com retry/timeout
+    async def orchestrate(self): # Executar respeitando dependências
+```
+
+### Exemplo de Uso
+```python
+orchestrator = PragmaticOrchestrator()
+orchestrator.add_task(Task("load_data", lambda: pd.read_csv(...), critical=True))
+orchestrator.add_task(Task("validate", validate_func, dependencies=["load_data"]))
+results = await orchestrator.orchestrate()
+```
+
+### Monitoramento
+```python
+class OrchestratorMonitor:
+    def print_status(self): # Status visual das tarefas
+    def get_metrics(self): # Métricas de sucesso/falha
+```
+
+## 🔄 Regras de Desenvolvimento
+
+### Política de Atualizações
+**ANTES** de modificar: LISTAR → PRESERVAR → COMENTAR → TESTAR
+
+### Edição de Código
+```python
+# ❌ NUNCA: Deletar arquivo inteiro, reescrever do zero
+# ✅ SEMPRE: Identificar trecho exato, mostrar "linhas X-Y", verificar impactos
+```
+
+### Verificação de Integração
+- [ ] Função alterada: onde é chamada?
+- [ ] Import modificado: quais arquivos importam?
+- [ ] Output alterado: verificar pipelines dependentes
+
+### Implementação
+```python
+# Dados reais obrigatórios
+if not os.path.exists(data_path):
+    raise FileNotFoundError(f"Dados reais necessários: {data_path}")
+
+# Guardrails sempre
+assert data is not None and len(data) > 0
+assert required_columns.issubset(data.columns)
+```
+
+### Continuidade de Pipeline
+```python
+# Pipeline atual:
+# [✓] Etapa 1: Coleta → [✓] Etapa 2: Limpeza → [►] Etapa 3: ALTERANDO
+```
+
+## ⚠️ Checklist Crítico
+- [ ] Arquivo em `/src`?
+- [ ] Nome preservado?
+- [ ] Código comentado?
+- [ ] CHANGELOG atualizado?
+- [ ] Linguagem acadêmica?
+
+## 🚫 Proibições
+- ❌ Inventar funções sem verificar
+- ❌ Criar fora de `/src`
+- ❌ Usar linguagem comercial
+- ❌ Criar `.fixed`/`.new`
+- ❌ Deletar sem preservar
+
+## 📊 Dados e Arquivos
+
+### Datasets de Pesquisa
+- `batch_analyzer/data/1_2019-2021-govbolso.csv` (135.88 MB)
+- `batch_analyzer/data/2_2021-2022-pandemia.csv` (229.96 MB)
+- `data/controlled_test_100.csv` (teste local)
+
+### Arquivos Críticos
+**Sistema Principal:**
+- `/src/analyzer.py` - Pipeline consolidado 14 estágios
+- `/run_pipeline.py` - Script de execução principal
+- `/test_clean_analyzer.py` - Teste do sistema
+
+**Dashboard:**
+- `/src/dashboard/data_analysis_dashboard.py` - Dashboard principal
+- `/src/dashboard/start_dashboard.py` - Iniciador do dashboard
+
+## 📝 Atualizações Recentes (Out 2025)
+- ✅ Pipeline consolidado em 14 stages sequenciais
+- ✅ Analyzer.py implementado com todos os estágios funcionais
+- ✅ Classificação política brasileira integrada
+- ✅ Dashboard unificado disponível
+- ✅ Sistema testado e validado
+- ✅ Documentação atualizada para refletir realidade
+
 ---
-
-## 🎯 Optimization Integration Status
-
-### Completed Integrations
-- **Week 1 Emergency**: Cache system, performance fixes (✅ Complete)
-- **Week 2 Caching**: Smart API caching, cost reduction (✅ Complete)
-- **Week 3 Parallel**: Parallel processing engine (✅ Complete - 832 lines)
-- **Week 4 Monitoring**: Quality assurance, benchmarking (✅ Complete)
-- **Week 5 Production**: Memory optimization, deployment (✅ Complete)
-
-### Current Consolidation Status
-- **Critical fixes**: All integration issues resolved (100% test success)
-- **Backup system**: Complete backup of optimization files
-- **Ready for consolidation**: All components validated and functional
-
----
-
-## 🔬 Research Features
-
-### 🎓 Core Research Capabilities
-
-1. **Portuguese Political Analysis**
-   - Hierarchical Brazilian political taxonomy (6 categories)
-   - Categories preserved in Portuguese for research authenticity
-   - Confidence scores included for academic rigor
-   - Context-aware classification for Brazilian discourse
-
-2. **Academic Cost Monitoring**
-   - $50/month default budget for research sustainability
-   - Real-time cost tracking and automatic protection
-   - Academic usage statistics and optimization reports
-   - Auto-downgrade system for budget management
-
-3. **4GB Memory Optimization**
-   - Adaptive memory management for academic computing
-   - Emergency protection at 6GB threshold
-   - Memory profiling and optimization recommendations
-   - Suitable for standard research workstations
-
-4. **Academic Configuration System**
-   - Research-focused settings in `config/academic_settings.yaml`
-   - Portuguese text optimization for Brazilian discourse
-   - Academic semantic caching with research reproducibility
-   - Simplified configuration for social scientists
-
-### Analysis Capabilities
-- **Political Classification**: Brazilian political spectrum (6 categories)
-- **Sentiment Analysis**: Context-aware emotional tone detection
-- **Topic Discovery**: Semantic topic modeling with AI interpretation
-- **Network Analysis**: Coordination and influence pattern detection
-- **Temporal Analysis**: Evolution of discourse over time (2019-2023)
-
-### Academic Tools
-- **Interactive Dashboard**: Web-based visualization for researchers
-- **Export Functions**: CSV/JSON output for statistical analysis
-- **Quality Validation**: Research reliability checks
-- **Cost Monitoring**: Budget tracking for academic use
-
----
-
-## 💡 Development Guidelines
-
-### For Code Modifications
-1. **Test first**: Run validation before changes
-2. **Academic focus**: Simplify over enterprise features
-3. **Documentation**: Update both README.md and CLAUDE.md
-4. **Portuguese preservation**: Keep analysis categories in Portuguese
-5. **Poetry isolation**: Always use Poetry for package management
-
-### For Optimization Work
-1. **Integration over separation**: Merge optimizations into core files
-2. **Research utility**: Focus on academic value over enterprise scale
-3. **Cost efficiency**: Optimize for modest academic computing resources
-4. **Quality preservation**: Maintain 95% success rate during changes
-
----
-
-## 🚨 Critical Reminders
-
-- **Context**: Academic research tool, not enterprise system
-- **Users**: Social scientists studying authoritarianism and violence
-- **Language**: English docs, Portuguese analysis categories
-- **Optimization**: All Week 1-5 optimizations implemented and ready for consolidation
-- **Version**: v5.0.0 with focus on research accessibility
-
----
-
-**Version**: v5.0.0 (Academic Research Focus)
-**Last Updated**: June 15, 2025
-**Project**: digiNEV - Monitor do Discurso Digital
-**Purpose**: Brazilian political discourse analysis for violence and authoritarianism research
+**Version**: v.final | **RAM**: 4GB | **Focus**: Análise discurso político brasileiro consolidado

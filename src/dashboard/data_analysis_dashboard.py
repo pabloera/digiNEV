@@ -22,6 +22,9 @@ import numpy as np
 from datetime import datetime
 from plotly.subplots import make_subplots
 
+# GUARDRAILS: Sistema de validação de conteúdo
+from dashboard_guardrails import dashboard_guardrail, require_real_data_only, validate_dashboard_data
+
 # Page configuration
 st.set_page_config(
     page_title="Political Analysis - Brazil Telegram",
@@ -80,20 +83,29 @@ class DataAnalysisDashboard:
         """Inicializa o dashboard"""
         self.project_root = Path(__file__).parent.parent.parent
         
-        # Caminhos para dados processados
+        # Caminhos para dados processados (legacy)
         self.data_path = self.project_root / "data/interim/sample_dataset_v495_19_pipeline_validated.csv"
         self.validation_report_path = self.project_root / "logs/pipeline/validation_report_20250611_150026.json"
-        
+
+        # Novos caminhos para dados do pipeline consolidado
+        self.pipeline_outputs_path = self.project_root / "pipeline_outputs" / "dashboard_ready"
+        self.dashboard_results_path = self.project_root / "src" / "dashboard" / "data" / "dashboard_results"
+
         # Caminhos para dados antes/depois da limpeza
         self.data_original_path = self.project_root / "data/interim/sample_dataset_v495_01_chunked.csv"
         self.data_deduplicated_path = self.project_root / "data/interim/sample_dataset_v495_03_deduplicated.csv"
         self.pre_cleaning_stats_path = self.project_root / "data/interim/sample_dataset_v495_01_chunked_02_encoding_validated_03_deduplicated_04_feature_validated_04b_pre_cleaning_stats.json"
         self.post_cleaning_stats_path = self.project_root / "data/interim/sample_dataset_v495_01_chunked_02_encoding_validated_03_deduplicated_04_feature_validated_05_political_analyzed_06_text_cleaned_06b_post_cleaning_stats.json"
-        
-        # Carregar dados
-        self.df = self._load_dataset()
+
+        # Carregar dados (priorizar dados novos do pipeline)
+        latest_df = self._load_latest_pipeline_data()
+        if latest_df is not None and not latest_df.empty:
+            self.df = latest_df
+        else:
+            self.df = self._load_dataset()
         self.validation_data = self._load_validation_report()
-        
+        self.pipeline_results = self._load_pipeline_results()
+
         # Carregar dados antes/depois para comparação
         self.df_original = self._load_dataset_from_path(self.data_original_path)
         self.df_deduplicated = self._load_dataset_from_path(self.data_deduplicated_path)
@@ -147,6 +159,47 @@ class DataAnalysisDashboard:
         except Exception as e:
             st.error(f"Erro carregando arquivo JSON {path.name}: {e}")
             return None
+
+    def _load_latest_pipeline_data(self) -> Optional[pd.DataFrame]:
+        """Carrega os dados mais recentes do pipeline consolidado"""
+        try:
+            # Verificar se há dados novos do pipeline
+            if self.pipeline_outputs_path.exists():
+                csv_files = list(self.pipeline_outputs_path.glob('*.csv'))
+                if csv_files:
+                    # Pegar o arquivo mais recente
+                    latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
+                    st.info(f"📊 Carregando dados do pipeline: {latest_file.name}")
+
+                    # Tentar diferentes separadores
+                    for sep in [';', ',', '\t']:
+                        try:
+                            df = pd.read_csv(latest_file, sep=sep, encoding='utf-8')
+                            if len(df.columns) > 1:
+                                if 'datetime' in df.columns:
+                                    df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+                                return df
+                        except:
+                            continue
+            return None
+        except Exception as e:
+            st.warning(f"Erro carregando dados do pipeline: {e}")
+            return None
+
+    def _load_pipeline_results(self) -> Optional[Dict]:
+        """Carrega resultados JSON do pipeline"""
+        try:
+            if self.dashboard_results_path.exists():
+                json_files = list(self.dashboard_results_path.glob('*.json'))
+                if json_files:
+                    # Pegar o arquivo mais recente
+                    latest_file = max(json_files, key=lambda x: x.stat().st_mtime)
+                    with open(latest_file, 'r', encoding='utf-8') as f:
+                        return json.load(f)
+            return None
+        except Exception as e:
+            st.warning(f"Erro carregando resultados do pipeline: {e}")
+            return None
     
     def run(self):
         """Executa o dashboard principal"""
@@ -182,29 +235,66 @@ class DataAnalysisDashboard:
     def _render_header(self):
         """Renderiza o cabeçalho"""
         st.markdown('<div class="main-header">🏛️ Análise do Discurso Político Brasileiro</div>', unsafe_allow_html=True)
-        st.markdown("### 📊 Pipeline de Limpeza e Transformação de Dados - Telegram (2019-2021)")
-        
+        st.markdown("### 📊 Pipeline Consolidado v5.0.0 - Telegram (2019-2023)")
+
+        # Verificar fonte dos dados
+        data_source_info = self._get_data_source_info()
+        if data_source_info['is_new_pipeline']:
+            st.success(f"✅ **Dados do Pipeline Consolidado**: {data_source_info['source_file']} | ⏱️ Atualizado: {data_source_info['last_updated']}")
+        else:
+            st.info("📚 **Dados Legacy**: Execute `python run_pipeline.py` para gerar dados atualizados")
+
         # Métricas comparativas principais
-        if self.df_original is not None and self.df is not None:
+        if self.df is not None:
             col1, col2, col3, col4 = st.columns(4)
-            
+
             with col1:
-                original_count = len(self.df_original)
-                st.metric("📥 Dados Originais", f"{original_count:,}")
-            
+                total_records = len(self.df)
+                st.metric("📊 Total de Registros", f"{total_records:,}")
+
             with col2:
-                final_count = len(self.df)
-                st.metric("🧹 Dados Finais", f"{final_count:,}")
-            
+                if 'political_category' in self.df.columns:
+                    political_categories = self.df['political_category'].nunique()
+                    st.metric("🏛️ Categorias Políticas", f"{political_categories}")
+                else:
+                    st.metric("🏛️ Categorias Políticas", "N/A")
+
             with col3:
-                reduction_pct = ((original_count - final_count) / original_count) * 100 if original_count > 0 else 0
-                st.metric("📉 Redução Total", f"{reduction_pct:.1f}%")
-            
+                if 'cluster_name' in self.df.columns:
+                    clusters = self.df['cluster_name'].nunique()
+                    st.metric("🔍 Clusters Semânticos", f"{clusters}")
+                else:
+                    st.metric("🔍 Clusters Semânticos", "N/A")
+
             with col4:
-                stages_executed = 20
-                st.metric("⚙️ Stages Executados", f"{stages_executed}")
-        
+                # Número de colunas como proxy para estágios executados
+                analysis_columns = [col for col in self.df.columns if any(keyword in col.lower() for keyword in ['political', 'sentiment', 'topic', 'cluster', 'discourse'])]
+                st.metric("⚙️ Análises Executadas", f"{len(analysis_columns)}")
+
         st.markdown("---")
+
+    def _get_data_source_info(self) -> Dict[str, Any]:
+        """Obtém informações sobre a fonte dos dados"""
+        info = {
+            'is_new_pipeline': False,
+            'source_file': 'Legacy data',
+            'last_updated': 'Unknown'
+        }
+
+        try:
+            # Verificar se os dados vieram do pipeline novo
+            if self.pipeline_outputs_path.exists():
+                csv_files = list(self.pipeline_outputs_path.glob('*.csv'))
+                if csv_files:
+                    latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
+                    info['is_new_pipeline'] = True
+                    info['source_file'] = latest_file.name
+                    info['last_updated'] = datetime.fromtimestamp(latest_file.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+
+        except Exception:
+            pass
+
+        return info
     
     def _render_navigation(self):
         """Renderiza a navegação lateral"""
