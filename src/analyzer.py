@@ -4,11 +4,11 @@ digiNEV Analyzer v.final
 =======================
 
 Sistema consolidado único de análise de discurso político brasileiro.
-Pipeline com 14 estágios interligados gerando 81+ colunas de análise.
+Pipeline com 17 estágios interligados gerando 102+ colunas de análise.
 
 ARQUITETURA CONSOLIDADA:
 - Sistema único centralizado (elimina estruturas paralelas)
-- 14 estágios científicos sequenciais
+- 17 estágios científicos sequenciais
 - Dados reais processados (sem métricas inventadas)
 - Configuração unificada via config/settings.yaml
 
@@ -38,6 +38,45 @@ import unicodedata
 import time
 from collections import Counter
 from urllib.parse import urlparse
+
+# Memory monitoring (optional)
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+
+# Dependency validation decorator
+def validate_stage_dependencies(required_columns=None, required_attrs=None):
+    """
+    Decorator para validar dependências entre stages.
+
+    Args:
+        required_columns: Lista de colunas obrigatórias no DataFrame
+        required_attrs: Lista de atributos obrigatórios na instância
+    """
+    def decorator(func):
+        def wrapper(self, df, *args, **kwargs):
+            stage_name = func.__name__.replace('_stage_', 'Stage ').replace('_', ' ').title()
+
+            # Validar colunas obrigatórias
+            if required_columns:
+                missing_cols = [col for col in required_columns if col not in df.columns]
+                if missing_cols:
+                    self.logger.error(f"❌ {stage_name}: Colunas obrigatórias ausentes: {missing_cols}")
+                    raise ValueError(f"Colunas obrigatórias ausentes para {stage_name}: {missing_cols}")
+
+            # Validar atributos obrigatórios na instância
+            if required_attrs:
+                missing_attrs = [attr for attr in required_attrs if not hasattr(self, attr)]
+                if missing_attrs:
+                    self.logger.error(f"❌ {stage_name}: Atributos obrigatórios ausentes: {missing_attrs}")
+                    raise ValueError(f"Atributos obrigatórios ausentes para {stage_name}: {missing_attrs}")
+
+            # Executar função se validações passaram
+            return func(self, df, *args, **kwargs)
+        return wrapper
+    return decorator
 
 # spaCy para processamento linguístico em português
 try:
@@ -75,14 +114,16 @@ class Analyzer:
     10. network_analysis (Python puro) - Coordenação e padrões de rede
     """
 
-    def __init__(self, chunk_size: int = 5000, memory_limit_gb: float = 2.0, auto_chunk: bool = True):
+    def __init__(self, chunk_size: int = 5000, memory_limit_gb: float = 2.0, auto_chunk: bool = True,
+                 political_relevance_threshold: float = 0.02):
         """
         Inicializar analyzer com capacidades de auto-chunking.
-        
+
         Args:
             chunk_size: Tamanho do chunk quando auto-chunking é necessário
             memory_limit_gb: Limite de memória para trigger de chunking
             auto_chunk: Se True, detecta automaticamente quando usar chunks
+            political_relevance_threshold: Threshold mínimo para relevância política (padrão: 0.02)
         """
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -90,6 +131,9 @@ class Analyzer:
         self.chunk_size = chunk_size
         self.memory_limit_gb = memory_limit_gb
         self.auto_chunk = auto_chunk
+
+        # Configurações de filtros
+        self.political_relevance_threshold = political_relevance_threshold
 
         # Load political lexicon if available
         self.political_lexicon = self._load_political_lexicon()
@@ -182,11 +226,18 @@ class Analyzer:
 
     def _check_memory_usage(self) -> bool:
         """Verificar se memória está próxima do limite."""
+        if not PSUTIL_AVAILABLE:
+            self.logger.warning("⚠️ psutil não disponível para monitoramento de memória")
+            return False
+
         try:
-            import psutil
             memory_gb = psutil.Process().memory_info().rss / (1024**3)
-            return memory_gb > self.memory_limit_gb
-        except ImportError:
+            if memory_gb > self.memory_limit_gb:
+                self.logger.warning(f"🚨 Memória alta: {memory_gb:.1f}GB > {self.memory_limit_gb}GB")
+                return True
+            return False
+        except Exception as e:
+            self.logger.error(f"❌ Erro no monitoramento de memória: {e}")
             return False
 
     def _clean_memory(self):
@@ -482,41 +533,41 @@ class Analyzer:
             # ===========================================
             
             # STAGE 07: Linguistic Processing (spaCy - AGORA com volume otimizado)
-            df = self._stage_03_linguistic_processing(df)  # Usar método existente
+            df = self._stage_07_linguistic_processing(df)  # Usar método existente
 
             # STAGE 08: Political Classification (usando tokens spaCy)
-            df = self._stage_05_political_classification(df)  # Usar método existente
+            df = self._stage_08_political_classification(df)  # Usar método existente
 
             # STAGE 09: TF-IDF Vectorization (usando lemmas spaCy)
-            df = self._stage_06_tfidf_vectorization(df)  # Usar método existente
+            df = self._stage_09_tfidf_vectorization(df)  # Usar método existente
 
             # ===========================================
             # FASE 4: ANÁLISES AVANÇADAS (10-17)
             # ===========================================
             
             # STAGE 10: Clustering Analysis
-            df = self._stage_07_clustering_analysis(df)  # Usar método existente
+            df = self._stage_10_clustering_analysis(df)  # Usar método existente
 
             # STAGE 11: Topic Modeling
-            df = self._stage_08_topic_modeling(df)  # Usar método existente
+            df = self._stage_11_topic_modeling(df)  # Usar método existente
 
             # STAGE 12: Semantic Analysis
             df = self._stage_12_semantic_analysis(df)  # Usar método existente
 
             # STAGE 13: Temporal Analysis
-            df = self._stage_09_temporal_analysis(df)  # Usar método existente
+            df = self._stage_13_temporal_analysis(df)  # Usar método existente
 
             # STAGE 14: Network Analysis
-            df = self._stage_10_network_analysis(df)  # Usar método existente
+            df = self._stage_14_network_analysis(df)  # Usar método existente
 
             # STAGE 15: Domain Analysis
-            df = self._stage_11_domain_analysis(df)  # Usar método existente
+            df = self._stage_15_domain_analysis(df)  # Usar método existente
 
             # STAGE 16: Event Context Analysis
-            df = self._stage_13_event_context(df)  # Usar método existente
+            df = self._stage_16_event_context(df)  # Usar método existente
 
             # STAGE 17: Channel Analysis
-            df = self._stage_14_channel_analysis(df)  # Usar método existente
+            df = self._stage_17_channel_analysis(df)  # Usar método existente
 
             # Final metadata
             df['processing_timestamp'] = datetime.now().isoformat()
@@ -1010,7 +1061,7 @@ class Analyzer:
         
         return df
 
-    def _stage_03_linguistic_processing(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_07_linguistic_processing(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         STAGE 03: Processamento linguístico com spaCy (LOGO APÓS limpeza).
 
@@ -1543,14 +1594,21 @@ class Analyzer:
             df['political_terms_found'] = [result[2] for result in classification_results]
             
             # === FILTRO DE RELEVÂNCIA ===
-            # Manter apenas textos com score > 0.1 (threshold mínimo)
-            relevance_threshold = 0.1
+            # Threshold mais baixo para preservar mais dados (configurável)
+            relevance_threshold = getattr(self, 'political_relevance_threshold', 0.02)
             relevance_filter = df['political_relevance_score'] > relevance_threshold
             
             df_filtered = df[relevance_filter].copy().reset_index(drop=True)
-            
+
             final_count = len(df_filtered)
             reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
+
+            # Safeguard: warn if too much data is being filtered out
+            if reduction_pct > 80:
+                self.logger.warning(f"🚨 ALTA REDUÇÃO DE DADOS: {reduction_pct:.1f}% (threshold={relevance_threshold})")
+                self.logger.warning("   Considere ajustar political_relevance_threshold ou revisar critérios")
+            elif reduction_pct > 60:
+                self.logger.warning(f"⚠️ Redução significativa: {reduction_pct:.1f}% (threshold={relevance_threshold})")
             
             # === ESTATÍSTICAS POLÍTICAS ===
             # Contagem por categoria
@@ -1684,7 +1742,8 @@ class Analyzer:
         
         return True  # Default para português
 
-    def _stage_05_political_classification(self, df: pd.DataFrame) -> pd.DataFrame:
+    @validate_stage_dependencies(required_columns=['normalized_text'], required_attrs=['political_lexicon'])
+    def _stage_08_political_classification(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 05: Classificação política brasileira.
         
@@ -1716,7 +1775,8 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_06_tfidf_vectorization(self, df: pd.DataFrame) -> pd.DataFrame:
+    @validate_stage_dependencies(required_columns=['normalized_text'])
+    def _stage_09_tfidf_vectorization(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 06: Vetorização TF-IDF com tokens spaCy.
         
@@ -1768,7 +1828,8 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_07_clustering_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+    @validate_stage_dependencies(required_columns=['tfidf_score_mean'], required_attrs=['tfidf_matrix'])
+    def _stage_10_clustering_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 07: Análise de clustering baseado em features linguísticas.
         
@@ -1823,7 +1884,7 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_08_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_11_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 08: Topic modeling com embeddings.
         
@@ -1876,7 +1937,8 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_09_temporal_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+    @validate_stage_dependencies(required_columns=['normalized_text'])
+    def _stage_13_temporal_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 09: Análise temporal.
         
@@ -1920,7 +1982,7 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_10_network_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_14_network_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 10: Análise de rede (coordenação e padrões).
         
@@ -1975,7 +2037,7 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_11_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_15_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 11: Análise de domínios.
         
@@ -2063,7 +2125,7 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_13_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_16_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 13: Análise de contexto de eventos.
         
@@ -2102,7 +2164,7 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             return df
 
-    def _stage_14_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_17_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Stage 14: Análise de canais/fontes.
         
