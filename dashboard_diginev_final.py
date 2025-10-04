@@ -33,7 +33,7 @@ except ImportError:
 
 # Header principal
 st.title("🔬 digiNEV v.final - Dashboard Científico")
-st.markdown("**Análise de Discurso Político Brasileiro | Dados Eleitorais 2022-2023**")
+st.markdown("**Análise de Discurso Político Brasileiro | Canais Públicos Telegram 2022-2023**")
 st.divider()
 
 # Sidebar para controles
@@ -43,7 +43,7 @@ with st.sidebar:
     # Seleção do dataset
     dataset_option = st.selectbox(
         "📊 Dataset:",
-        ["4_2022-2023-elec.csv (Eleições)", "sample_1000_cases.csv (Teste)"],
+        ["4_2022-2023-elec.csv (Telegram Político)", "sample_1000_cases.csv (Amostra Teste)"],
         index=0
     )
 
@@ -67,7 +67,7 @@ with st.sidebar:
     - 14 stages científicos
     - spaCy 3.8.7
     - 86+ colunas geradas
-    - Dados eleitorais reais
+    - Canais Telegram políticos
     """)
 
 # Container principal
@@ -198,21 +198,67 @@ if run_analysis:
         st.plotly_chart(fig_pol, use_container_width=True)
 
     with col2:
-        # Polarização ao longo do tempo
-        if 'date' in df_result.columns and 'political_spectrum' in df_result.columns:
-            df_result['date'] = pd.to_datetime(df_result['date'], errors='coerce')
-            df_result['month'] = df_result['date'].dt.to_period('M')
+        # Análise temporal ou distribuição alternativa
+        try:
+            if 'date' in df_result.columns and 'political_spectrum' in df_result.columns:
+                df_result['date'] = pd.to_datetime(df_result['date'], errors='coerce')
+                df_result['month'] = df_result['date'].dt.to_period('M').astype(str)
 
-            pol_time = df_result.groupby(['month', 'political_spectrum']).size().unstack(fill_value=0)
+                pol_time = df_result.groupby(['month', 'political_spectrum']).size().unstack(fill_value=0)
 
-            fig_time = px.line(
-                pol_time.reset_index(),
-                x='month',
-                y=['extrema-direita', 'direita', 'esquerda'],
-                title="Evolução da Polarização Política",
-                labels={'value': 'Número de Mensagens', 'month': 'Período'}
-            )
-            st.plotly_chart(fig_time, use_container_width=True)
+                # Verificar se há dados suficientes e colunas disponíveis
+                if len(pol_time) > 1:
+                    available_cols = [col for col in ['extrema-direita', 'direita', 'esquerda']
+                                    if col in pol_time.columns and pol_time[col].sum() > 0]
+
+                    if available_cols:
+                        pol_time_reset = pol_time.reset_index()
+                        fig_time = px.line(
+                            pol_time_reset,
+                            x='month',
+                            y=available_cols,
+                            title="Evolução da Polarização Política",
+                            labels={'value': 'Número de Mensagens', 'month': 'Período'}
+                        )
+                        fig_time.update_xaxis(tickangle=45)
+                        st.plotly_chart(fig_time, use_container_width=True)
+                    else:
+                        # Fallback: gráfico de barras da distribuição política
+                        pol_counts = df_result['political_spectrum'].value_counts().head(5)
+                        fig_bar = px.bar(
+                            x=pol_counts.index,
+                            y=pol_counts.values,
+                            title="Top 5 Categorias Políticas",
+                            labels={'x': 'Categoria', 'y': 'Quantidade'}
+                        )
+                        st.plotly_chart(fig_bar, use_container_width=True)
+                else:
+                    # Fallback: distribuição por canal se disponível
+                    if 'channel' in df_result.columns:
+                        channel_counts = df_result['channel'].value_counts().head(5)
+                        fig_channel = px.bar(
+                            x=channel_counts.index,
+                            y=channel_counts.values,
+                            title="Top 5 Canais",
+                            labels={'x': 'Canal', 'y': 'Mensagens'}
+                        )
+                        fig_channel.update_xaxis(tickangle=45)
+                        st.plotly_chart(fig_channel, use_container_width=True)
+                    else:
+                        st.info("📊 Dados temporais insuficientes para análise de evolução")
+            else:
+                st.info("📅 Colunas de data ou política não disponíveis")
+        except Exception as e:
+            st.warning(f"⚠️ Erro na análise temporal: {str(e)}")
+            # Fallback simples
+            if 'political_spectrum' in df_result.columns:
+                pol_simple = df_result['political_spectrum'].value_counts().head(3)
+                fig_simple = px.bar(
+                    x=pol_simple.index,
+                    y=pol_simple.values,
+                    title="Distribuição Política (Simplificada)"
+                )
+                st.plotly_chart(fig_simple, use_container_width=True)
 
     # === ANÁLISE TÉCNICA ===
     st.header("🔬 Análise Técnica")
@@ -395,10 +441,10 @@ else:
     with col2:
         st.subheader("📊 Datasets Disponíveis")
         st.write("""
-        - **4_2022-2023-elec.csv**: 145k+ registros eleitorais
-        - **sample_1000_cases.csv**: Dados de teste
+        - **4_2022-2023-elec.csv**: 145k+ mensagens de canais políticos
+        - **sample_1000_cases.csv**: Amostra para teste
         - Período: 2022-2023
-        - Fonte: Telegram brasileiro
+        - Fonte: Canais públicos Telegram BR
         """)
 
     with col3:

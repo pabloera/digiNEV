@@ -1,13 +1,13 @@
 exe📋 RELATÓRIO FINAL DE VALIDAÇÃO - digiNEV v.final
 ================================================================
 
-🎯 TESTE COMPLETO COM DADOS ELEITORAIS REAIS
-Dataset: 4_2022-2023-elec.csv
+🎯 TESTE COMPLETO COM DADOS TELEGRAM POLÍTICO REAIS
+Dataset: 4_2022-2023-elec.csv (Canais Públicos Telegram)
 Timestamp: 2025-10-03 21:08:00
 Sistema: digiNEV v.final com dependências atualizadas
 
 🎯 RESULTADOS DO TESTE COMPLETO:
-✅ Dataset completo: 145,942 registros (eleições 2022-2023)
+✅ Dataset completo: 145,942 mensagens de canais Telegram (2022-2023)
 ✅ Registros processados: 5,000 registros (amostra)
 ✅ Colunas geradas: 86 colunas científicas
 ✅ Stages completados: 14/14 (100%)
@@ -15,7 +15,7 @@ Sistema: digiNEV v.final com dependências atualizadas
 ✅ Performance: 110.2 registros/segundo
 ✅ Tempo total: 45.38 segundos
 
-🏛️ ANÁLISE POLÍTICA (Dados Eleitorais Reais):
+🏛️ ANÁLISE POLÍTICA (Canais Telegram Políticos):
 • neutral: 2,752 registros (55.0%)
 • unknown: 2,030 registros (40.6%)
 • extrema-direita: 197 registros (3.9%)
