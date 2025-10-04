@@ -286,7 +286,7 @@ class Analyzer:
             return self.analyze_dataset(df)
 
     def _load_dataframe(self, file_path: str, max_records: Optional[int] = None) -> pd.DataFrame:
-        """Carregar DataFrame com detecção automática de separador."""
+        """Carregar DataFrame com detecção automática de separador e tratamento robusto."""
         file_path = Path(file_path)
         
         # Detectar separador lendo primeira linha
@@ -322,27 +322,57 @@ class Analyzer:
         
         # Carregar com limite de registros se especificado
         try:
+            # Usar configurações mais robustas para CSV com conteúdo complexo
+            read_kwargs = {
+                'sep': separator,
+                'encoding': 'utf-8',
+                'quotechar': '"',
+                'quoting': 1,  # QUOTE_ALL
+                'skipinitialspace': True,
+                'on_bad_lines': 'skip'  # Pular linhas problemáticas
+            }
+            
             if max_records:
-                df = pd.read_csv(file_path, sep=separator, encoding='utf-8', nrows=max_records)
-            else:
-                df = pd.read_csv(file_path, sep=separator, encoding='utf-8')
+                read_kwargs['nrows'] = max_records
+                
+            df = pd.read_csv(file_path, **read_kwargs)
                 
             # Verificar se carregamento foi bem-sucedido
             if len(df.columns) == 1 and separator == ';':
                 # Tentar com vírgula se ponto-vírgula resultou em uma coluna só
                 self.logger.warning("⚠️ Tentando vírgula após falha com ponto-vírgula")
-                if max_records:
-                    df = pd.read_csv(file_path, sep=',', encoding='utf-8', nrows=max_records)
-                else:
-                    df = pd.read_csv(file_path, sep=',', encoding='utf-8')
+                read_kwargs['sep'] = ','
+                df = pd.read_csv(file_path, **read_kwargs)
                 separator = ','
                 
             self.logger.info(f"📂 Dataset carregado: {len(df):,} registros, {len(df.columns)} colunas (sep='{separator}')")
             return df
             
         except Exception as e:
-            self.logger.error(f"❌ Erro ao carregar arquivo: {e}")
-            raise
+            # Fallback: tentar com configurações mais permissivas
+            self.logger.warning(f"⚠️ Erro com configurações padrão: {e}, tentando modo permissivo")
+            try:
+                fallback_kwargs = {
+                    'sep': separator,
+                    'encoding': 'utf-8',
+                    'quotechar': '"',
+                    'quoting': 0,  # QUOTE_MINIMAL
+                    'skipinitialspace': True,
+                    'on_bad_lines': 'skip',
+                    'error_bad_lines': False,
+                    'warn_bad_lines': True
+                }
+                
+                if max_records:
+                    fallback_kwargs['nrows'] = max_records
+                    
+                df = pd.read_csv(file_path, **fallback_kwargs)
+                self.logger.info(f"📂 Dataset carregado (modo permissivo): {len(df):,} registros, {len(df.columns)} colunas")
+                return df
+                
+            except Exception as e2:
+                self.logger.error(f"❌ Erro ao carregar arquivo mesmo com fallback: {e2}")
+                raise
 
     def _analyze_chunked(self, data_input, **kwargs) -> Dict[str, Any]:
         """
@@ -495,7 +525,7 @@ class Analyzer:
             result_chunk = self._stage_03_cross_dataset_deduplication(result_chunk)
             result_chunk = self._stage_04_statistical_analysis(result_chunk)
             result_chunk = self._stage_05_content_quality_filter(result_chunk)
-            result_chunk = self._stage_06_political_relevance_filter(result_chunk)
+            result_chunk = self._stage_06_affordances_classification(result_chunk)
             
             # Verificar se ainda há dados suficientes após filtros
             if len(result_chunk) == 0:
@@ -650,33 +680,95 @@ class Analyzer:
         
         self.logger.info(f"📂 Carregando dataset em chunks: {file_path}")
         
-        records_processed = 0
-        chunk_number = 1
-        
-        # Determinar separador baseado no dataset
-        separator = ','  # Padrão para govbolso
-        if '4_2022-2023-elec' in str(file_path):
-            separator = ';'
-        
+        # Detectar separador e configuração necessária
         try:
-            for chunk in pd.read_csv(file_path, sep=separator, chunksize=self.chunk_size, encoding='utf-8'):
-                if max_records and records_processed >= max_records:
-                    break
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
                 
-                # Ajustar chunk se exceder max_records
-                if max_records and records_processed + len(chunk) > max_records:
-                    remaining = max_records - records_processed
-                    chunk = chunk.head(remaining)
+            # Determinar separador
+            comma_count = first_line.count(',')
+            semicolon_count = first_line.count(';')
+            separator = ';' if semicolon_count > comma_count else ','
+            
+            # Configurações robustas para CSV complexo
+            read_kwargs = {
+                'sep': separator,
+                'encoding': 'utf-8',
+                'engine': 'python',  # Usar engine Python para maior flexibilidade
+                'quotechar': '"',
+                'quoting': 1,  # QUOTE_ALL
+                'skipinitialspace': True,
+                'on_bad_lines': 'skip',
+                'chunksize': self.chunk_size
+            }
+            
+            if max_records:
+                read_kwargs['nrows'] = max_records
                 
-                records_processed += len(chunk)
+            self.logger.info(f"🔍 Configuração: sep='{separator}', engine=python")
+            
+            chunk_number = 0
+            total_processed = 0
+            
+            try:
+                # Usar pandas com engine Python para maior robustez
+                for chunk in pd.read_csv(file_path, **read_kwargs):
+                    chunk_number += 1
+                    total_processed += len(chunk)
+                    
+                    self.logger.info(f"📦 Chunk {chunk_number}: {len(chunk)} registros (total: {total_processed})")
+                    
+                    # Verificar se chunk tem dados válidos
+                    if len(chunk) > 0 and len(chunk.columns) > 1:
+                        yield chunk
+                    
+                    if max_records and total_processed >= max_records:
+                        break
+                        
+            except Exception as e:
+                self.logger.error(f"❌ Erro ao carregar dataset: {e}")
                 
-                self.logger.info(f"📦 Chunk {chunk_number}: {len(chunk):,} registros, Total: {records_processed:,}")
-                
-                yield chunk
-                chunk_number += 1
+                # Fallback: carregar linha por linha se necessário
+                self.logger.warning("⚠️ Tentando carregamento linha por linha...")
+                try:
+                    import csv
+                    
+                    with open(file_path, 'r', encoding='utf-8') as csvfile:
+                        # Detectar dialect automaticamente
+                        sample = csvfile.read(1024)
+                        csvfile.seek(0)
+                        sniffer = csv.Sniffer()
+                        dialect = sniffer.sniff(sample)
+                        
+                        reader = csv.DictReader(csvfile, dialect=dialect)
+                        
+                        chunk_data = []
+                        for i, row in enumerate(reader):
+                            chunk_data.append(row)
+                            
+                            if len(chunk_data) >= self.chunk_size:
+                                df_chunk = pd.DataFrame(chunk_data)
+                                chunk_number += 1
+                                self.logger.info(f"📦 Chunk CSV {chunk_number}: {len(df_chunk)} registros")
+                                yield df_chunk
+                                chunk_data = []
+                            
+                            if max_records and i >= max_records:
+                                break
+                        
+                        # Último chunk se houver dados
+                        if chunk_data:
+                            df_chunk = pd.DataFrame(chunk_data)
+                            chunk_number += 1
+                            self.logger.info(f"📦 Chunk CSV final {chunk_number}: {len(df_chunk)} registros")
+                            yield df_chunk
+                            
+                except Exception as e2:
+                    self.logger.error(f"❌ Fallback também falhou: {e2}")
+                    raise
                 
         except Exception as e:
-            self.logger.error(f"❌ Erro ao carregar dataset: {e}")
+            self.logger.error(f"❌ Erro crítico no carregamento: {e}")
             raise
 
     def _chunked_from_dataframe(self, df: pd.DataFrame, **kwargs) -> Dict[str, Any]:
@@ -773,8 +865,8 @@ class Analyzer:
             # STAGE 05: Content Quality Filter (15-25% redução adicional)
             df = self._stage_05_content_quality_filter(df)
 
-            # STAGE 06: Political Relevance Filter (30-40% redução adicional)
-            df = self._stage_06_political_relevance_filter(df)
+            # STAGE 06: Affordances Classification (AI-powered analysis)
+            df = self._stage_06_affordances_classification(df)
 
             self.logger.info(f"📊 FASE 2 CONCLUÍDA: Volume reduzido para {len(df):,} registros")
 
@@ -1724,187 +1816,243 @@ class Analyzer:
             df['content_quality_score'] = 80
             return df
 
-    def _stage_06_political_relevance_filter(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _stage_06_affordances_classification(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        STAGE 06: Political Relevance Filter
-        
-        Manter apenas conteúdo relevante para a pesquisa política.
-        Input: Conteúdo de qualidade
-        Output: Apenas textos com relevância temática
-        
-        Usa léxico político brasileiro com categorias cat0-cat10:
-        - cat0: autoritarismo_regime
-        - cat2: pandemia_covid  
-        - cat3: violencia_seguranca
-        - cat4: religiao_moral
-        - cat6: inimigos_ideologicos + identidade_politica
-        - cat7: meio_ambiente_amazonia
-        - cat8: moralidade
-        - cat9: antissistema
-        - cat10: polarizacao
-        
-        Redução esperada: 30-40% (135k → 80k)
+        STAGE 06: Affordances Classification
+
+        Classificar mensagens usando API Anthropic em categorias de affordances:
+        - noticia: Conteúdo informativo, notícias, fatos
+        - midia_social: Posts, compartilhamentos, interações sociais
+        - video_audio_gif: Conteúdo multimídia
+        - opiniao: Opiniões, análises, comentários pessoais
+        - mobilizacao: Chamadas para ação, mobilização política
+        - ataque: Ataques pessoais, insultos, agressões verbais
+        - interacao: Respostas, menções, conversações
+        - is_forwarded: Conteúdo encaminhado/repassado
+
+        Usa Zero-Shot Analysis com Claude API.
         """
         try:
-            self.logger.info("🎯 STAGE 06: Political Relevance Filter")
-            
-            # Importar léxico político
-            political_keywords = {
-                'cat0_autoritarismo_regime': [
-                    'ai-5', 'regime militar', 'ditadura', 'tortura', 'repressão', 'intervenção militar',
-                    'estado de sítio', 'golpe', 'censura', 'doutrina de segurança nacional'
-                ],
-                'cat2_pandemia_covid': [
-                    'covid-19', 'corona', 'pandemia', 'quarentena', 'lockdown', 'tratamento precoce',
-                    'cloroquina', 'ivermectina', 'máscara', 'máscaras', 'oms', 'pfizer', 'vacina',
-                    'passaporte sanitário'
-                ],
-                'cat3_violencia_seguranca': [
-                    'criminalidade', 'segurança pública', 'violência', 'bandidos', 'facções', 'polícia',
-                    'militarização', 'armas', 'desarmamento', 'legítima defesa'
-                ],
-                'cat4_religiao_moral': [
-                    'família tradicional', 'valores cristãos', 'igreja', 'pastor', 'padre', 'bíblia',
-                    'cristofobia', 'marxismo cultural', 'ideologia de gênero'
-                ],
-                'cat6_inimigos_ideologicos': [
-                    'comunista', 'comunismo', 'esquerdista', 'petista', 'pt', 'lula', 'stf', 'supremo',
-                    'globo', 'mídia lixo', 'sistema', 'globalista', 'china', 'urss', 'cuba', 'venezuela',
-                    'narcoditadura', 'esquerda', 'progressista'
-                ],
-                'cat6_identidade_politica': [
-                    'bolsonaro', 'bolsonarista', 'direita', 'conservador', 'patriota', 'verde e amarelo',
-                    'mito', 'liberdade', 'intervencionista', 'cristão', 'antiglobalista', 'patriota', 'patriotismo'
-                ],
-                'cat7_meio_ambiente_amazonia': [
-                    'amazônia', 'reserva', 'queimadas', 'desmatamento', 'ong', 'soberania nacional',
-                    'clima', 'aquecimento global', 'agenda 2030'
-                ],
-                'cat8_moralidade': [
-                    'corrupção', 'liberdade', 'patriotismo', 'soberania', 'criminoso', 'traidor',
-                    'bandido', 'herói', 'santo', 'vítima', 'injustiça'
-                ],
-                'cat9_antissistema': [
-                    'sistema', 'establishment', 'corrupto', 'imprensa vendida', 'mídia lixo', 'stf ativista',
-                    'conspiração', 'globalista', 'ditadura do judiciário', 'deep state'
-                ],
-                'cat10_polarizacao': [
-                    'nós contra eles', 'vergonha', 'ódio', 'orgulho', 'traição', 'luta do bem contra o mal',
-                    'defensores da pátria', 'inimigos do povo'
-                ]
-            }
-            
+            self.logger.info("🎯 STAGE 06: Affordances Classification")
+
+            # Importar bibliotecas necessárias
+            import os
+            import requests
+            import json
+            import time
+            from typing import List, Dict, Any
+
+            # Verificar configuração da API
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if not api_key:
+                self.logger.error("❌ ANTHROPIC_API_KEY não encontrada. Pulando classificação por IA.")
+                # Aplicar classificação heurística como fallback
+                return self._stage_06_affordances_heuristic_fallback(df)
+
             text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
             initial_count = len(df)
-            
-            # === CLASSIFICAÇÃO POLÍTICA ===
-            def classify_political_content(text):
-                if pd.isna(text):
-                    return [], 0.0, []
-                
-                text_lower = str(text).lower()
-                categories_found = []
-                matched_terms = []
-                total_matches = 0
-                
-                # Verificar cada categoria
-                for category_key, keywords in political_keywords.items():
-                    category_matches = 0
-                    category_terms = []
-                    
-                    for keyword in keywords:
-                        keyword_lower = keyword.lower()
-                        
-                        # Busca exata e variações (palavras cortadas, erros)
-                        if keyword_lower in text_lower:
-                            category_matches += text_lower.count(keyword_lower)
-                            category_terms.append(keyword)
-                        
-                        # Busca por palavras-raiz (para detectar variações)
-                        elif len(keyword_lower) > 4:
-                            root_word = keyword_lower[:int(len(keyword_lower)*0.75)]
-                            if root_word in text_lower:
-                                category_matches += 0.5  # Peso menor para matches parciais
-                                category_terms.append(f"{keyword}~")
-                    
-                    if category_matches > 0:
-                        # Extrair número da categoria
-                        cat_num = category_key.split('_')[0].replace('cat', '')
-                        if cat_num == '6' and 'identidade' in category_key:
-                            cat_num = '6i'  # Distinguir identidade política
-                        
-                        categories_found.append(cat_num)
-                        matched_terms.extend(category_terms)
-                        total_matches += category_matches
-                
-                # Score de relevância política (0.0 a 1.0)
-                # Baseado no número de matches e categorias
-                relevance_score = min(1.0, (total_matches * 0.1) + (len(categories_found) * 0.15))
-                
-                return categories_found, relevance_score, matched_terms
-            
-            # Aplicar classificação
-            self.logger.info("🔍 Classificando conteúdo político...")
-            
-            classification_results = df[text_column].apply(classify_political_content)
-            
-            df['cat'] = [result[0] for result in classification_results]
-            df['political_relevance_score'] = [result[1] for result in classification_results]
-            df['political_terms_found'] = [result[2] for result in classification_results]
-            
-            # === FILTRO DE RELEVÂNCIA ===
-            # Threshold mais baixo para preservar mais dados (configurável)
-            relevance_threshold = getattr(self, 'political_relevance_threshold', 0.02)
-            relevance_filter = df['political_relevance_score'] > relevance_threshold
-            
-            df_filtered = df[relevance_filter].copy().reset_index(drop=True)
 
-            final_count = len(df_filtered)
-            reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
+            # === CONFIGURAÇÃO DA API ===
+            api_config = {
+                'model': 'claude-3-5-haiku-20241022',  # Modelo mais econômico
+                'max_tokens': 150,
+                'temperature': 0.1,
+                'system_prompt': """Você é um classificador de conteúdo especializado em discurso político brasileiro em redes sociais.
 
-            # Safeguard: warn if too much data is being filtered out
-            if reduction_pct > 80:
-                self.logger.warning(f"🚨 ALTA REDUÇÃO DE DADOS: {reduction_pct:.1f}% (threshold={relevance_threshold})")
-                self.logger.warning("   Considere ajustar political_relevance_threshold ou revisar critérios")
-            elif reduction_pct > 60:
-                self.logger.warning(f"⚠️ Redução significativa: {reduction_pct:.1f}% (threshold={relevance_threshold})")
-            
-            # === ESTATÍSTICAS POLÍTICAS ===
+Classifique cada mensagem de acordo com as seguintes categorias de affordances (múltiplas categorias são possíveis):
+
+1. noticia: Conteúdo informativo, reportagem, fatos, acontecimentos
+2. midia_social: Posts típicos de redes sociais, compartilhamentos casuais
+3. video_audio_gif: Referências a conteúdo multimídia (vídeo, áudio, gif)
+4. opiniao: Opiniões pessoais, análises, comentários subjetivos
+5. mobilizacao: Chamadas para ação, convocações, mobilização política
+6. ataque: Ataques pessoais, insultos, agressões verbais
+7. interacao: Respostas, menções, conversações diretas
+8. is_forwarded: Indica se o conteúdo parece ser encaminhado/repassado
+
+Responda APENAS com um JSON válido no formato:
+{"categorias": ["categoria1", "categoria2"], "confianca": 0.85}
+
+Onde confianca é um valor entre 0.0 e 1.0."""
+            }
+
+            # === FUNÇÃO DE CLASSIFICAÇÃO POR API ===
+            def classify_with_anthropic(text: str) -> Dict[str, Any]:
+                """Classificar texto usando API Anthropic."""
+                if pd.isna(text) or len(str(text).strip()) < 10:
+                    return {"categorias": [], "confianca": 0.0}
+
+                # Limitar texto para economizar tokens
+                text_sample = str(text)[:500]
+
+                headers = {
+                    'Content-Type': 'application/json',
+                    'x-api-key': api_key,
+                    'anthropic-version': '2023-06-01'
+                }
+
+                payload = {
+                    'model': api_config['model'],
+                    'max_tokens': api_config['max_tokens'],
+                    'temperature': api_config['temperature'],
+                    'system': api_config['system_prompt'],
+                    'messages': [
+                        {
+                            'role': 'user',
+                            'content': f'Classifique esta mensagem: "{text_sample}"'
+                        }
+                    ]
+                }
+
+                try:
+                    response = requests.post(
+                        'https://api.anthropic.com/v1/messages',
+                        headers=headers,
+                        json=payload,
+                        timeout=30
+                    )
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        content = result['content'][0]['text'].strip()
+
+                        # Parse do JSON retornado
+                        try:
+                            classification = json.loads(content)
+                            if isinstance(classification, dict) and 'categorias' in classification:
+                                return classification
+                        except json.JSONDecodeError:
+                            # Tentar extrair JSON de resposta não estruturada
+                            if '{' in content and '}' in content:
+                                json_start = content.find('{')
+                                json_end = content.rfind('}') + 1
+                                try:
+                                    classification = json.loads(content[json_start:json_end])
+                                    if isinstance(classification, dict) and 'categorias' in classification:
+                                        return classification
+                                except:
+                                    pass
+
+                    # Rate limiting
+                    elif response.status_code == 429:
+                        self.logger.warning("⚠️ Rate limit atingido, aguardando...")
+                        time.sleep(2)
+                        return {"categorias": [], "confianca": 0.0}
+
+                    else:
+                        self.logger.warning(f"⚠️ API error: {response.status_code}")
+
+                except requests.RequestException as e:
+                    self.logger.warning(f"⚠️ Erro de conexão: {e}")
+
+                # Fallback em caso de erro
+                return {"categorias": [], "confianca": 0.0}
+
+            # === PROCESSAMENTO EM LOTES ===
+            self.logger.info(f"🤖 Classificando {initial_count} mensagens com API Anthropic...")
+
+            batch_size = 50  # Processar em lotes pequenos
+            results = []
+            api_calls_made = 0
+            successful_classifications = 0
+
+            for i in range(0, len(df), batch_size):
+                batch = df.iloc[i:i+batch_size]
+                batch_results = []
+
+                for idx, row in batch.iterrows():
+                    text = row[text_column]
+                    classification = classify_with_anthropic(text)
+
+                    batch_results.append(classification)
+                    api_calls_made += 1
+
+                    if classification['confianca'] > 0:
+                        successful_classifications += 1
+
+                    # Rate limiting
+                    time.sleep(0.1)  # 100ms entre requests
+
+                results.extend(batch_results)
+
+                # Log de progresso
+                progress = min(100, ((i + batch_size) / len(df)) * 100)
+                self.logger.info(f"   🔄 Progresso: {progress:.1f}% ({api_calls_made} calls, {successful_classifications} sucessos)")
+
+            # === APLICAR RESULTADOS ===
+            df['affordance_categories'] = [result['categorias'] for result in results]
+            df['affordance_confidence'] = [result['confianca'] for result in results]
+
+            # Adicionar colunas binárias para cada categoria
+            affordance_types = ['noticia', 'midia_social', 'video_audio_gif', 'opiniao',
+                              'mobilizacao', 'ataque', 'interacao', 'is_forwarded']
+
+            for affordance_type in affordance_types:
+                df[f'aff_{affordance_type}'] = df['affordance_categories'].apply(
+                    lambda cats: 1 if affordance_type in cats else 0
+                )
+
+            # === ESTATÍSTICAS ===
+            avg_confidence = df['affordance_confidence'].mean()
+            classified_count = len(df[df['affordance_confidence'] > 0])
+
             # Contagem por categoria
-            all_categories = []
-            for cat_list in df_filtered['cat']:
-                if isinstance(cat_list, list):
-                    all_categories.extend(cat_list)
-            
-            from collections import Counter
-            category_counts = Counter(all_categories)
-            
-            avg_relevance = df_filtered['political_relevance_score'].mean()
-            texts_with_politics = len(df_filtered[df_filtered['political_relevance_score'] > 0])
-            
-            self.logger.info(f"✅ Filtro político aplicado:")
-            self.logger.info(f"   📉 {initial_count:,} → {final_count:,} registros")
-            self.logger.info(f"   📊 Redução: {reduction_pct:.1f}%")
-            self.logger.info(f"   🎯 Score relevância médio: {avg_relevance:.3f}")
-            self.logger.info(f"   🏛️ Textos com conteúdo político: {texts_with_politics:,}")
-            
-            if category_counts:
-                top_categories = category_counts.most_common(5)
-                self.logger.info(f"   🔝 Top categorias: {dict(top_categories)}")
-            
+            category_counts = {}
+            for affordance_type in affordance_types:
+                count = df[f'aff_{affordance_type}'].sum()
+                category_counts[affordance_type] = count
+
+            self.logger.info(f"✅ Classificação de Affordances concluída:")
+            self.logger.info(f"   📊 {api_calls_made} chamadas API realizadas")
+            self.logger.info(f"   ✅ {successful_classifications}/{initial_count} mensagens classificadas")
+            self.logger.info(f"   🎯 Confiança média: {avg_confidence:.3f}")
+            self.logger.info(f"   📈 Taxa de sucesso: {(successful_classifications/initial_count)*100:.1f}%")
+
+            # Top 5 categorias
+            top_categories = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+            self.logger.info(f"   🔝 Top categorias: {dict(top_categories)}")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 3
-            
-            return df_filtered
-            
+            self.stats['features_extracted'] += len(affordance_types) + 2
+
+            return df
+
         except Exception as e:
             self.logger.error(f"❌ Erro Stage 06: {e}")
             self.stats['processing_errors'] += 1
-            # Em caso de erro, retornar dados com colunas padrão
-            df['cat'] = [[] for _ in range(len(df))]
-            df['political_relevance_score'] = 0.5
-            df['political_terms_found'] = [[] for _ in range(len(df))]
-            return df
+            # Fallback heurístico
+            return self._stage_06_affordances_heuristic_fallback(df)
+
+    def _stage_06_affordances_heuristic_fallback(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Fallback heurístico para classificação de affordances sem API."""
+        self.logger.info("🔄 Aplicando classificação heurística de affordances...")
+
+        text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+
+        # Padrões heurísticos baseados em palavras-chave
+        patterns = {
+            'noticia': ['aconteceu', 'notícia', 'informação', 'fato', 'governo', 'brasil'],
+            'midia_social': ['compartilhem', 'rt', 'retweet', 'curtir', 'like'],
+            'video_audio_gif': ['vídeo', 'audio', 'gif', 'assista', 'ouça'],
+            'opiniao': ['acho', 'penso', 'na minha opinião', 'acredito', 'creio'],
+            'mobilizacao': ['vamos', 'precisamos', 'juntos', 'ação', 'mobilizar'],
+            'ataque': ['idiota', 'burro', 'canalha', 'corrupto', 'mentiroso'],
+            'interacao': ['@', 'resposta', 'pergunta', 'dúvida'],
+            'is_forwarded': ['encaminhado', 'forward', 'repasse', 'compartilhe']
+        }
+
+        # Aplicar classificação heurística
+        for affordance_type, keywords in patterns.items():
+            df[f'aff_{affordance_type}'] = df[text_column].apply(
+                lambda text: 1 if any(kw in str(text).lower() for kw in keywords) else 0
+            )
+
+        # Colunas de compatibilidade
+        df['affordance_categories'] = [[] for _ in range(len(df))]
+        df['affordance_confidence'] = 0.5  # Confiança baixa para heurística
+
+        self.logger.info("✅ Classificação heurística aplicada como fallback")
+        return df
 
     # ===============================================
     # MÉTODOS HELPER PARA ANÁLISE DE QUALIDADE
