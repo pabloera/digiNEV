@@ -16,6 +16,7 @@ from typing import Any, Dict, List
 
 import yaml
 import pandas as pd
+from src.utils.data_integrity import validate_real_data, track_data_lineage, validate_portuguese_text, DataIntegrityError
 
 # Load environment variables FIRST
 from dotenv import load_dotenv
@@ -310,6 +311,15 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 # Load dataset
                 import pandas as pd
                 df = pd.read_csv(dataset_path, sep=';', encoding='utf-8')
+                df = track_data_lineage(df)
+
+                # Validate Portuguese text columns
+                text_columns = df.select_dtypes(include=['object']).columns
+                for col in text_columns:
+                    valid_texts = validate_portuguese_text(df[col])
+                    if not valid_texts.all():
+                        logger.warning(f'Invalid Portuguese text detected in column: {col}')
+
                 logger.info(f"Dataset loaded: {len(df)} records")
 
                 # Run analysis
@@ -514,6 +524,7 @@ def main():
         else:
             print("📊 Discovering datasets...")
             data_paths = [
+                'data',  # Changed to use the existing data directory
                 config.get('data', {}).get('path', 'data/uploads'),
                 'data/DATASETS_FULL',
                 'data/uploads'

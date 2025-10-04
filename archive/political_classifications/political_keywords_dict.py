@@ -28,27 +28,25 @@ POLITICAL_KEYWORDS = {
 
     'cat6_identidade_politica': [
         'bolsonaro', 'bolsonarista', 'direita', 'conservador', 'patriota', 'verde e amarelo',
-        'mito', 'liberdade', 'intervencionista', 'cristão', 'antiglobalista'
+        'mito', 'liberdade', 'intervencionista', 'cristão', 'antiglobalista', 'patriota', 'patriotismo'
     ],
 
     'cat7_meio_ambiente_amazonia': [
         'amazônia', 'reserva', 'queimadas', 'desmatamento', 'ong', 'soberania nacional',
         'clima', 'aquecimento global', 'agenda 2030'
-    ]
-}
-
-TRANSVERSAL_KEYWORDS = {
-    'emocional_moral': [
+    ],
+    
+    'cat8_moralidade': [
         'corrupção', 'liberdade', 'patriotismo', 'soberania', 'criminoso', 'traidor',
         'bandido', 'herói', 'santo', 'vítima', 'injustiça'
     ],
 
-    'antissistema_deslegitimacao': [
+    'cat9_antissistema': [
         'sistema', 'establishment', 'corrupto', 'imprensa vendida', 'mídia lixo', 'stf ativista',
         'conspiração', 'globalista', 'ditadura do judiciário', 'deep state'
     ],
 
-    'polarizacao_afetiva': [
+    'cat10_polarizacao': [
         'nós contra eles', 'vergonha', 'ódio', 'orgulho', 'traição', 'luta do bem contra o mal',
         'defensores da pátria', 'inimigos do povo'
     ]

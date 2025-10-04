@@ -429,7 +429,13 @@ class Analyzer:
 
     def analyze_dataset(self, df: pd.DataFrame) -> Dict[str, Any]:
         """
-        Analisar dataset com pipeline sequencial interligado de 14 stages.
+        Analisar dataset com pipeline sequencial otimizado de 17 stages.
+        
+        NOVA SEQUÊNCIA OTIMIZADA (conforme PIPELINE_STAGES_ANALYSIS.md):
+        Fase 1: Preparação (01-02) - estrutura básica
+        Fase 2: Redução de volume (03-06) - CRÍTICO para performance
+        Fase 3: Análise linguística (07-09) - volume reduzido
+        Fase 4: Análises avançadas (10-17) - dados otimizados
 
         Args:
             df: DataFrame com dados para análise
@@ -438,59 +444,87 @@ class Analyzer:
             Dict com resultado da análise
         """
         try:
-            self.logger.info(f"🔬 Iniciando análise: {len(df)} registros")
+            self.logger.info(f"🔬 Iniciando análise OTIMIZADA: {len(df)} registros")
 
             # Reset stats
             self.stats = {'stages_completed': 0, 'features_extracted': 0, 'processing_errors': 0}
 
-            # STAGE 01: Feature Extraction (SEMPRE PRIMEIRO)
+            # ===========================================
+            # FASE 1: PREPARAÇÃO E ESTRUTURA (01-02)
+            # ===========================================
+            
+            # STAGE 01: Feature Extraction (estrutura básica)
             df = self._stage_01_feature_extraction(df)
 
-            # STAGE 02: Text Preprocessing (Limpeza básica)
+            # STAGE 02: Text Preprocessing (limpeza básica)
             df = self._stage_02_text_preprocessing(df)
 
-            # STAGE 03: Linguistic Processing (spaCy LOGO APÓS limpeza)
-            df = self._stage_03_linguistic_processing(df)
+            # ===========================================
+            # FASE 2: REDUÇÃO DE VOLUME (03-06) - CRÍTICO!
+            # ===========================================
+            
+            # STAGE 03: Cross-Dataset Deduplication (40-50% redução)
+            df = self._stage_03_cross_dataset_deduplication(df)
 
-            # STAGE 04: Statistical Analysis (com dados spaCy)
+            # STAGE 04: Statistical Analysis (comparação antes/depois)
             df = self._stage_04_statistical_analysis(df)
 
-            # STAGE 05: Political Classification (brasileira)
-            df = self._stage_04_political_classification(df)
+            # STAGE 05: Content Quality Filter (15-25% redução adicional)
+            df = self._stage_05_content_quality_filter(df)
 
-            # STAGE 06: TF-IDF Vectorization (com tokens spaCy)
-            df = self._stage_05_tfidf_vectorization(df)
+            # STAGE 06: Political Relevance Filter (30-40% redução adicional)
+            df = self._stage_06_political_relevance_filter(df)
 
-            # STAGE 07: Clustering Analysis (baseado em features linguísticas)
-            df = self._stage_06_clustering_analysis(df)
+            self.logger.info(f"📊 FASE 2 CONCLUÍDA: Volume reduzido para {len(df):,} registros")
 
-            # STAGE 08: Topic Modeling (com embeddings)
-            df = self._stage_07_topic_modeling(df)
+            # ===========================================
+            # FASE 3: ANÁLISE LINGUÍSTICA (07-09) - VOLUME REDUZIDO
+            # ===========================================
+            
+            # STAGE 07: Linguistic Processing (spaCy - AGORA com volume otimizado)
+            df = self._stage_03_linguistic_processing(df)  # Usar método existente
 
-            # STAGE 09: Temporal Analysis
-            df = self._stage_08_temporal_analysis(df)
+            # STAGE 08: Political Classification (usando tokens spaCy)
+            df = self._stage_05_political_classification(df)  # Usar método existente
 
-            # STAGE 10: Network Analysis (coordenação e padrões)
-            df = self._stage_09_network_analysis(df)
+            # STAGE 09: TF-IDF Vectorization (usando lemmas spaCy)
+            df = self._stage_06_tfidf_vectorization(df)  # Usar método existente
 
-            # STAGE 11: Domain Analysis
-            df = self._stage_10_domain_analysis(df)
+            # ===========================================
+            # FASE 4: ANÁLISES AVANÇADAS (10-17)
+            # ===========================================
+            
+            # STAGE 10: Clustering Analysis
+            df = self._stage_07_clustering_analysis(df)  # Usar método existente
 
-            # STAGE 12: Semantic Analysis (NOVO)
-            df = self._stage_11_semantic_analysis(df)
+            # STAGE 11: Topic Modeling
+            df = self._stage_08_topic_modeling(df)  # Usar método existente
 
-            # STAGE 13: Event Context Analysis (NOVO)
-            df = self._stage_12_event_context(df)
+            # STAGE 12: Semantic Analysis
+            df = self._stage_12_semantic_analysis(df)  # Usar método existente
 
-            # STAGE 14: Channel Analysis (NOVO)
-            df = self._stage_13_channel_analysis(df)
+            # STAGE 13: Temporal Analysis
+            df = self._stage_09_temporal_analysis(df)  # Usar método existente
+
+            # STAGE 14: Network Analysis
+            df = self._stage_10_network_analysis(df)  # Usar método existente
+
+            # STAGE 15: Domain Analysis
+            df = self._stage_11_domain_analysis(df)  # Usar método existente
+
+            # STAGE 16: Event Context Analysis
+            df = self._stage_13_event_context(df)  # Usar método existente
+
+            # STAGE 17: Channel Analysis
+            df = self._stage_14_channel_analysis(df)  # Usar método existente
 
             # Final metadata
             df['processing_timestamp'] = datetime.now().isoformat()
             df['stages_completed'] = self.stats['stages_completed']
             df['features_extracted'] = self.stats['features_extracted']
 
-            self.logger.info(f"✅ Análise concluída: {len(df.columns)} colunas, {self.stats['stages_completed']} stages")
+            self.logger.info(f"✅ Análise OTIMIZADA concluída: {len(df.columns)} colunas, {self.stats['stages_completed']} stages")
+            self.logger.info(f"🎯 Performance: Processados {len(df):,} registros finais")
 
             return {
                 'data': df,
@@ -1063,649 +1097,1263 @@ class Analyzer:
         self.stats['features_extracted'] += 3
         return df
 
+    def _stage_03_cross_dataset_deduplication(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        STAGE 03: Cross-Dataset Deduplication
+        
+        Eliminação de duplicatas entre TODOS os datasets com contador de frequência.
+        Algoritmo: Agrupar por texto idêntico, manter registro mais antigo, 
+        contar duplicatas com dupli_freq.
+        
+        Redução esperada: 40-50% (300k → 180k)
+        """
+        try:
+            self.logger.info("🔄 STAGE 03: Cross-Dataset Deduplication")
+            
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+            datetime_column = 'datetime' if 'datetime' in df.columns else df.columns[df.columns.str.contains('date|time', case=False)].tolist()[0] if any(df.columns.str.contains('date|time', case=False)) else None
+            
+            initial_count = len(df)
+            self.logger.info(f"📊 Registros iniciais: {initial_count:,}")
+            
+            # Agrupar por texto idêntico
+            grouping_columns = [text_column]
+            
+            # Preparar dados para agrupamento
+            dedup_data = []
+            
+            for text, group in df.groupby(text_column):
+                if pd.isna(text) or text.strip() == '':
+                    continue
+                    
+                # Manter registro mais antigo (primeiro datetime)
+                if datetime_column and datetime_column in group.columns:
+                    # Converter datetime para ordenação
+                    group_sorted = group.copy()
+                    if group_sorted[datetime_column].dtype == 'object':
+                        try:
+                            group_sorted['datetime_parsed'] = pd.to_datetime(group_sorted[datetime_column], 
+                                                                           format='%d/%m/%Y %H:%M:%S', errors='coerce')
+                        except:
+                            group_sorted['datetime_parsed'] = pd.to_datetime(group_sorted[datetime_column], errors='coerce')
+                        
+                        # Ordenar por datetime e pegar o mais antigo
+                        oldest_record = group_sorted.sort_values('datetime_parsed').iloc[0]
+                    else:
+                        oldest_record = group.iloc[0]
+                else:
+                    oldest_record = group.iloc[0]
+                
+                # Contador de duplicatas
+                dupli_freq = len(group)
+                
+                # Metadados de dispersão
+                channels_found = []
+                if 'channel' in group.columns:
+                    channels_found = group['channel'].dropna().unique().tolist()
+                elif 'sender_id' in group.columns:
+                    channels_found = group['sender_id'].dropna().unique().tolist()
+                
+                # Período de ocorrência
+                date_span_days = 0
+                if datetime_column and datetime_column in group.columns:
+                    try:
+                        dates = pd.to_datetime(group[datetime_column], errors='coerce').dropna()
+                        if len(dates) > 1:
+                            date_span_days = (dates.max() - dates.min()).days
+                    except:
+                        pass
+                
+                # Criar registro deduplificado
+                dedup_record = oldest_record.copy()
+                dedup_record['dupli_freq'] = dupli_freq
+                dedup_record['channels_found'] = len(channels_found)
+                dedup_record['date_span_days'] = date_span_days
+                
+                dedup_data.append(dedup_record)
+            
+            # Criar DataFrame deduplificado
+            if dedup_data:
+                df_deduplicated = pd.DataFrame(dedup_data)
+                df_deduplicated = df_deduplicated.reset_index(drop=True)
+            else:
+                df_deduplicated = df.copy()
+                df_deduplicated['dupli_freq'] = 1
+                df_deduplicated['channels_found'] = 0
+                df_deduplicated['date_span_days'] = 0
+            
+            final_count = len(df_deduplicated)
+            reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
+            
+            # Estatísticas de deduplicação
+            unique_texts = df_deduplicated['dupli_freq'].value_counts().sort_index()
+            total_duplicates = df_deduplicated[df_deduplicated['dupli_freq'] > 1]['dupli_freq'].sum()
+            
+            self.logger.info(f"✅ Deduplicação concluída:")
+            self.logger.info(f"   📉 {initial_count:,} → {final_count:,} registros")
+            self.logger.info(f"   📊 Redução: {reduction_pct:.1f}%")
+            self.logger.info(f"   🔄 Duplicatas processadas: {total_duplicates:,}")
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            return df_deduplicated
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 03: {e}")
+            self.stats['processing_errors'] += 1
+            # Em caso de erro, adicionar colunas padrão
+            df['dupli_freq'] = 1
+            df['channels_found'] = 0
+            df['date_span_days'] = 0
+            return df
+
     def _stage_04_statistical_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        STAGE 03: Análise estatística básica (Python puro).
-
-        USA: normalized_text do Stage 02
-        """
-        self.logger.info("📊 STAGE 03: Statistical Analysis")
-
-        # Estatísticas básicas de texto
-        df['word_count'] = df['normalized_text'].str.split().str.len().fillna(0).astype(int)
-        df['char_count'] = df['normalized_text'].str.len().fillna(0).astype(int)
-        df['sentence_count'] = df['normalized_text'].str.count(r'[.!?]+').fillna(0).astype(int)
-
-        # Estatísticas derivadas
-        df['avg_word_length'] = (df['char_count'] / df['word_count'].replace(0, 1)).round(2)
-        df['words_per_sentence'] = (df['word_count'] / df['sentence_count'].replace(0, 1)).round(2)
-
-        # Categorização por tamanho
-        def categorize_text_length(word_count):
-            if word_count < 10:
-                return 'short'
-            elif word_count < 50:
-                return 'medium'
-            else:
-                return 'long'
-
-        df['text_length_category'] = df['word_count'].apply(categorize_text_length)
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 6
-
-        self.logger.info(f"✅ Estatísticas: {df['word_count'].mean():.1f} palavras média")
-        return df
-
-    def _stage_04_political_classification(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 04: Classificação política usando lexicon real.
-
-        USA: normalized_text do Stage 02
-        """
-        self.logger.info("🏛️ STAGE 04: Political Classification")
-
-        def classify_political_spectrum(text):
-            """Classificar usando lexicon político real."""
-            if pd.isna(text) or not text:
-                return 'unknown'
-
-            text = str(text).lower()
-            scores = {}
-
-            # Calcular scores para cada categoria
-            for category, terms in self.political_lexicon.items():
-                score = sum(1 for term in terms if term.lower() in text)
-                if score > 0:
-                    scores[category] = score
-
-            # Retornar categoria com maior score
-            if scores:
-                return max(scores.keys(), key=scores.get)
-            return 'neutral'
-
-        def count_political_entities(text):
-            """Contar entidades políticas no texto."""
-            if pd.isna(text) or not text:
-                return 0
-
-            text = str(text).lower()
-            count = 0
-
-            for terms in self.political_lexicon.values():
-                count += sum(1 for term in terms if term.lower() in text)
-
-            return count
-
-        # Aplicar classificação política
-        df['political_spectrum'] = df['normalized_text'].apply(classify_political_spectrum)
-        df['political_entity_count'] = df['normalized_text'].apply(count_political_entities)
-        df['has_political_content'] = df['political_entity_count'] > 0
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 3
-
-        political_dist = df['political_spectrum'].value_counts()
-        self.logger.info(f"✅ Classificação política: {political_dist.to_dict()}")
-        return df
-
-    def _stage_05_tfidf_vectorization(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 05: Vetorização TF-IDF (scikit-learn).
-
-        USA: normalized_text do Stage 02
-        """
-        self.logger.info("🔢 STAGE 05: TF-IDF Vectorization")
-
-        # Configurar TF-IDF com ajuste dinâmico e safety check
-        n_docs = len(df)
-        min_df = max(1, min(2, n_docs // 10))  # Ajuste dinâmico baseado no tamanho
-        max_df = min(0.8, max(0.5, (n_docs - min_df) / n_docs))  # Garantir max_df > min_df
-
-        # Safety check para evitar max_df <= min_df
-        if max_df <= min_df:
-            max_df = min_df + 0.1
-            if max_df > 1.0:
-                min_df = 1
-                max_df = 0.9
-
-        self.tfidf_vectorizer = TfidfVectorizer(
-            max_features=min(1000, n_docs * 10),  # Limitar features baseado no tamanho
-            stop_words=None,  # Não remover stop words para português
-            ngram_range=(1, 2),
-            min_df=min_df,
-            max_df=max_df
-        )
-
-        # Ajustar e transformar
-        texts = df['normalized_text'].fillna('').tolist()
-        self.tfidf_matrix = self.tfidf_vectorizer.fit_transform(texts)
-
-        # Extrair top terms por documento
-        feature_names = self.tfidf_vectorizer.get_feature_names_out()
-
-        def get_top_tfidf_terms(doc_idx, n_terms=5):
-            """Extrair top termos TF-IDF para um documento."""
-            doc_vector = self.tfidf_matrix[doc_idx].toarray().flatten()
-            top_indices = doc_vector.argsort()[-n_terms:][::-1]
-            top_terms = [feature_names[i] for i in top_indices if doc_vector[i] > 0]
-            return ', '.join(top_terms[:n_terms])
-
-        # Adicionar features TF-IDF
-        df['tfidf_top_terms'] = [get_top_tfidf_terms(i) for i in range(len(df))]
-        df['tfidf_max_score'] = [self.tfidf_matrix[i].max() for i in range(len(df))]
-        df['tfidf_feature_count'] = self.tfidf_matrix.shape[1]
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 3
-
-        self.logger.info(f"✅ TF-IDF: {self.tfidf_matrix.shape[1]} features, max_score: {df['tfidf_max_score'].max():.3f}")
-        return df
-
-    def _stage_06_clustering_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 06: Análise de clustering (scikit-learn).
-
-        USA: tfidf_matrix do Stage 05
-        """
-        self.logger.info("🎯 STAGE 06: Clustering Analysis")
-
-        if self.tfidf_matrix is None:
-            raise ValueError("❌ TF-IDF matrix não disponível - execute Stage 05 primeiro")
-
-        # Determinar número de clusters
-        n_samples = self.tfidf_matrix.shape[0]
-        n_clusters = min(max(2, n_samples // 10), 10)  # Entre 2 e 10 clusters
-
-        # Aplicar K-Means
-        self.kmeans_model = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-        cluster_labels = self.kmeans_model.fit_predict(self.tfidf_matrix)
-
-        # Calcular distâncias aos centros
-        distances = self.kmeans_model.transform(self.tfidf_matrix)
-        min_distances = distances.min(axis=1)
-
-        # Adicionar features de clustering
-        df['cluster_id'] = cluster_labels
-        df['cluster_distance'] = min_distances.round(3)
-        df['cluster_size'] = df['cluster_id'].map(df['cluster_id'].value_counts())
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 3
-
-        cluster_dist = df['cluster_id'].value_counts()
-        self.logger.info(f"✅ Clustering: {n_clusters} clusters, distribuição: {cluster_dist.head(3).to_dict()}")
-        return df
-
-    def _stage_07_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 07: Modelagem de tópicos (scikit-learn LDA).
-
-        USA: tfidf_matrix do Stage 05 + cluster_id do Stage 06
-        """
-        self.logger.info("📚 STAGE 07: Topic Modeling")
-
-        if self.tfidf_matrix is None:
-            raise ValueError("❌ TF-IDF matrix não disponível - execute Stage 05 primeiro")
-
-        # Determinar número de tópicos baseado em clusters
-        n_clusters = df['cluster_id'].nunique()
-        n_topics = min(max(2, n_clusters), 5)  # Entre 2 e 5 tópicos
-
-        # Aplicar LDA
-        self.lda_model = LatentDirichletAllocation(
-            n_components=n_topics,
-            random_state=42,
-            max_iter=100
-        )
-
-        topic_distributions = self.lda_model.fit_transform(self.tfidf_matrix)
-
-        # Extrair tópico dominante para cada documento
-        dominant_topics = topic_distributions.argmax(axis=1)
-        topic_probabilities = topic_distributions.max(axis=1)
-
-        # Adicionar features de tópicos
-        df['topic_id'] = dominant_topics
-        df['topic_probability'] = topic_probabilities.round(3)
-        df['topic_diversity'] = (topic_distributions > 0.1).sum(axis=1)  # Quantos tópicos > 10%
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 3
-
-        topic_dist = df['topic_id'].value_counts()
-        self.logger.info(f"✅ Tópicos: {n_topics} tópicos, prob média: {df['topic_probability'].mean():.3f}")
-        return df
-
-    def _stage_08_temporal_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 08: Análise temporal (Python puro).
-
-        USA: timestamp_column identificada no Stage 01
-        """
-        self.logger.info("⏰ STAGE 08: Temporal Analysis")
-
-        timestamp_col = df['timestamp_column'].iloc[0]
-
-        if timestamp_col == 'none' or timestamp_col not in df.columns:
-            # Sem timestamp - criar features genéricas
-            df['hour'] = -1
-            df['day_of_week'] = -1
-            df['month'] = -1
-            df['has_temporal_data'] = False
-        else:
-            # Processar timestamps reais
-            def extract_temporal_features(timestamp):
-                """Extrair features temporais."""
-                try:
-                    if pd.isna(timestamp):
-                        return -1, -1, -1
-
-                    # Tentar converter para datetime
-                    if isinstance(timestamp, str):
-                        dt = pd.to_datetime(timestamp, errors='coerce')
-                    else:
-                        dt = pd.to_datetime(timestamp, errors='coerce')
-
-                    if pd.isna(dt):
-                        return -1, -1, -1
-
-                    return dt.hour, dt.dayofweek, dt.month
-
-                except:
-                    return -1, -1, -1
-
-            temporal_features = df[timestamp_col].apply(
-                lambda x: extract_temporal_features(x)
-            )
-
-            df['hour'] = [t[0] for t in temporal_features]
-            df['day_of_week'] = [t[1] for t in temporal_features]
-            df['month'] = [t[2] for t in temporal_features]
-            df['has_temporal_data'] = df['hour'] != -1
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 4
-
-        valid_temporal = (df['has_temporal_data']).sum()
-        self.logger.info(f"✅ Temporal: {valid_temporal}/{len(df)} registros com timestamp válido")
-        return df
-
-    def _stage_09_network_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        STAGE 09: Análise de redes e coordenação (Python puro).
-
-        USA: cluster_id do Stage 06 + temporal features do Stage 08
-        """
-        self.logger.info("🕸️ STAGE 09: Network Analysis")
-
-        # Detectar coordenação temporal entre clusters
-        def detect_temporal_coordination():
-            """Detectar coordenação baseada em clusters e tempo."""
-            coordination_scores = []
-
-            for idx, row in df.iterrows():
-                score = 0
-
-                # Se tem dados temporais válidos
-                if row['has_temporal_data']:
-                    # Verificar se há outros no mesmo cluster na mesma hora
-                    same_cluster_same_hour = df[
-                        (df['cluster_id'] == row['cluster_id']) &
-                        (df['hour'] == row['hour']) &
-                        (df.index != idx)
-                    ]
-
-                    if len(same_cluster_same_hour) >= 2:
-                        score += 0.5
-
-                    # Verificar coordenação por tamanho do cluster
-                    if row['cluster_size'] >= len(df) * 0.1:  # Cluster com >10% dos dados
-                        score += 0.3
-
-                coordination_scores.append(min(score, 1.0))
-
-            return coordination_scores
-
-        # Calcular coordenação
-        df['coordination_score'] = detect_temporal_coordination()
-        df['potential_coordination'] = df['coordination_score'] > 0.3
-
-        # Padrões temporais por cluster
-        def get_temporal_pattern(cluster_id):
-            """Identificar padrão temporal do cluster."""
-            cluster_data = df[df['cluster_id'] == cluster_id]
-
-            if not cluster_data['has_temporal_data'].any():
-                return 'no_temporal_data'
-
-            valid_hours = cluster_data[cluster_data['has_temporal_data']]['hour']
-
-            if len(valid_hours) == 0:
-                return 'no_temporal_data'
-
-            hour_counts = valid_hours.value_counts()
-
-            if hour_counts.max() >= len(valid_hours) * 0.5:
-                return 'concentrated'
-            else:
-                return 'distributed'
-
-        df['temporal_pattern'] = df['cluster_id'].apply(get_temporal_pattern)
-
-        self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 3
-
-        coordination_count = df['potential_coordination'].sum()
-        self.logger.info(f"✅ Network: {coordination_count}/{len(df)} com potencial coordenação")
-        return df
-
-    def _stage_10_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 10: Análise de Domínios e URLs"""
-        start_time = time.time()
-        self.logger.info("🌐 STAGE 10: Análise de Domínios")
+        STAGE 04: Statistical Analysis
         
+        Comparar início do dataset com o dataset reduzido.
+        Gerar estatísticas para classificação e gráficos.
+        
+        Processamentos:
+        - Contagem de dados antes e depois
+        - Proporção de duplicadas
+        - Proporção de hashtags
+        - Detecção de repetições excessivas para tabela com 10 principais casos
+        """
         try:
-            import re
-            from urllib.parse import urlparse
+            self.logger.info("📊 STAGE 04: Statistical Analysis")
             
-            texts = df['normalized_text'].fillna('').astype(str)
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
             
-            # Extrair URLs
-            url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-            df['urls_found'] = texts.apply(lambda x: re.findall(url_pattern, x))
-            df['url_count'] = df['urls_found'].apply(len)
+            # === ANÁLISE DE DUPLICAÇÃO ===
+            total_registros = len(df)
+            registros_unicos = len(df[df['dupli_freq'] == 1])
+            registros_duplicados = total_registros - registros_unicos
             
-            # Extrair domínios únicos
-            def extract_domains(urls):
-                domains = []
-                for url in urls:
-                    try:
-                        domain = urlparse(url).netloc
-                        if domain:
-                            domains.append(domain)
-                    except:
-                        continue
-                return list(set(domains))
+            duplicacao_pct = (registros_duplicados / total_registros * 100) if total_registros > 0 else 0
             
-            df['domains_found'] = df['urls_found'].apply(extract_domains)
-            df['unique_domains_count'] = df['domains_found'].apply(len)
+            # === ANÁLISE DE HASHTAGS ===
+            has_hashtags = 0
+            if 'has_hashtags' in df.columns:
+                has_hashtags = df['has_hashtags'].sum()
+            elif text_column in df.columns:
+                has_hashtags = df[text_column].str.contains('#', na=False).sum()
             
-            # Classificar tipos de domínio
-            mainstream_domains = ['g1.com', 'folha.uol.com.br', 'estadao.com.br', 'globo.com']
-            alternative_domains = ['brasil247.com', 'diariodocentrodomundo.com.br']
-            social_domains = ['youtube.com', 'twitter.com', 'facebook.com', 'instagram.com']
+            hashtag_pct = (has_hashtags / total_registros * 100) if total_registros > 0 else 0
             
-            def classify_domains(domains):
-                if not domains:
-                    return 'none'
+            # === TOP 10 REPETIÇÕES EXCESSIVAS ===
+            top_duplicates = df[df['dupli_freq'] > 1].nlargest(10, 'dupli_freq')[
+                [text_column, 'dupli_freq', 'channels_found', 'date_span_days']
+            ].to_dict('records')
+            
+            # === ESTATÍSTICAS BÁSICAS DE TEXTO ===
+            if text_column in df.columns:
+                char_counts = df[text_column].str.len().fillna(0)
+                word_counts = df[text_column].str.split().str.len().fillna(0)
                 
-                mainstream_count = sum(1 for d in domains if any(md in d for md in mainstream_domains))
-                alternative_count = sum(1 for d in domains if any(ad in d for ad in alternative_domains))
-                social_count = sum(1 for d in domains if any(sd in d for sd in social_domains))
+                df['char_count'] = char_counts
+                df['word_count'] = word_counts
                 
-                if mainstream_count > 0:
-                    return 'mainstream'
-                elif alternative_count > 0:
-                    return 'alternative'
-                elif social_count > 0:
-                    return 'social'
-                else:
-                    return 'other'
+                avg_chars = char_counts.mean()
+                avg_words = word_counts.mean()
+            else:
+                avg_chars = 0
+                avg_words = 0
+                df['char_count'] = 0
+                df['word_count'] = 0
             
-            df['domain_category'] = df['domains_found'].apply(classify_domains)
+            # === PROPORÇÕES DE QUALIDADE ===
+            if text_column in df.columns:
+                df['emoji_ratio'] = df[text_column].apply(self._calculate_emoji_ratio)
+                df['caps_ratio'] = df[text_column].apply(self._calculate_caps_ratio)
+                df['repetition_ratio'] = df[text_column].apply(self._calculate_repetition_ratio)
+                
+                # Detecção de idioma básica
+                df['likely_portuguese'] = df[text_column].apply(self._detect_portuguese)
+            else:
+                df['emoji_ratio'] = 0.0
+                df['caps_ratio'] = 0.0
+                df['repetition_ratio'] = 0.0
+                df['likely_portuguese'] = True
             
-            # Detectar presença de links externos
-            df['has_external_links'] = df['url_count'] > 0
+            # === METADADOS ESTATÍSTICOS ===
+            df['total_dataset_size'] = total_registros
+            df['unique_texts_count'] = registros_unicos
+            df['duplication_percentage'] = round(duplicacao_pct, 2)
+            df['hashtag_percentage'] = round(hashtag_pct, 2)
+            df['avg_chars_per_text'] = round(avg_chars, 1)
+            df['avg_words_per_text'] = round(avg_words, 1)
             
-            # Diversidade de fontes
-            total_domains = df['domains_found'].apply(len).sum()
-            df['domain_diversity'] = 'low' if total_domains < 5 else 'medium' if total_domains < 20 else 'high'
+            # Log das estatísticas
+            self.logger.info(f"✅ Análise estatística concluída:")
+            self.logger.info(f"   📊 Total de registros: {total_registros:,}")
+            self.logger.info(f"   🔄 Duplicação: {duplicacao_pct:.1f}%")
+            self.logger.info(f"   # Hashtags: {hashtag_pct:.1f}%")
+            self.logger.info(f"   📝 Média: {avg_words:.1f} palavras, {avg_chars:.0f} chars")
+            
+            if top_duplicates:
+                self.logger.info(f"   🔝 Maior repetição: {top_duplicates[0]['dupli_freq']} ocorrências")
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 11
+            
+            return df
             
         except Exception as e:
-            self.logger.warning(f"Erro na análise de domínios: {e}")
-            df['url_count'] = 0
-            df['unique_domains_count'] = 0
-            df['domain_category'] = 'error'
-            df['has_external_links'] = False
-            df['domain_diversity'] = 'error'
-        
-        processing_time = time.time() - start_time
-        self.stats['stage_10_time'] = processing_time
-        self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 10 concluído em {processing_time:.2f}s")
-        
-        return df
+            self.logger.error(f"❌ Erro Stage 04: {e}")
+            self.stats['processing_errors'] += 1
+            return df
 
-
-    def _stage_11_semantic_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 11: Análise Semântica Avançada"""
-        start_time = time.time()
-        self.logger.info("🧠 STAGE 11: Análise Semântica")
+    def _stage_05_content_quality_filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        STAGE 05: Content Quality Filter
         
-        # Análise semântica com fallback heurístico
+        Filtrar conteúdo por qualidade e completude.
+        Input: Dados deduplificados
+        Output: Apenas conteúdo de qualidade
+        
+        Filtros:
+        - Comprimento: < 10 chars ou > 2000 chars
+        - Qualidade: emoji_ratio > 70%, caps_ratio > 80%, repetition_ratio > 50%
+        - Idioma: Manter apenas likely_portuguese = True
+        
+        Redução esperada: 15-25% (180k → 135k)
+        """
         try:
-            # Análise de coocorrência de termos
-            texts = df['normalized_text'].fillna('').astype(str)
+            self.logger.info("🎯 STAGE 05: Content Quality Filter")
             
-            # Calcular métricas semânticas básicas
-            df['semantic_complexity'] = texts.apply(lambda x: len(set(x.split())) / max(len(x.split()), 1))
-            df['semantic_richness'] = texts.apply(lambda x: len(set(x.split())) if x else 0)
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+            initial_count = len(df)
             
-            # Análise de conectivos e marcadores discursivos
-            conectivos = ['mas', 'porém', 'contudo', 'entretanto', 'todavia', 'no entanto']
-            df['conectivos_count'] = texts.apply(lambda x: sum(1 for c in conectivos if c in x.lower()))
+            # === FILTROS DE COMPRIMENTO ===
+            # Muito curto: < 10 chars (só emoji/URL)
+            length_filter = (df['char_count'] >= 10) & (df['char_count'] <= 2000)
             
-            # Marcadores de intensidade
-            intensificadores = ['muito', 'bastante', 'extremamente', 'totalmente', 'completamente']
-            df['intensificadores_count'] = texts.apply(lambda x: sum(1 for i in intensificadores if i in x.lower()))
+            # === FILTROS DE QUALIDADE ===
+            # emoji_ratio > 70% = ruído
+            emoji_filter = df['emoji_ratio'] <= 0.70
             
-            # Análise de modalidade
-            modalidade = ['deve', 'deveria', 'pode', 'poderia', 'talvez', 'provavelmente']
-            df['modalidade_count'] = texts.apply(lambda x: sum(1 for m in modalidade if m in x.lower()))
+            # caps_ratio > 80% = spam  
+            caps_filter = df['caps_ratio'] <= 0.80
             
-            # Contextualização semântica
-            df['semantic_context'] = 'neutral'
-            mask_high_complexity = df['semantic_complexity'] > df['semantic_complexity'].quantile(0.75)
-            df.loc[mask_high_complexity, 'semantic_context'] = 'complex'
+            # repetition_ratio > 50% = baixa qualidade
+            repetition_filter = df['repetition_ratio'] <= 0.50
             
-            mask_low_complexity = df['semantic_complexity'] < df['semantic_complexity'].quantile(0.25)
-            df.loc[mask_low_complexity, 'semantic_context'] = 'simple'
+            # === FILTROS DE IDIOMA ===
+            # Manter apenas likely_portuguese = True
+            language_filter = df['likely_portuguese'] == True
             
-        except Exception as e:
-            self.logger.warning(f"Erro na análise semântica: {e}")
-            df['semantic_complexity'] = 0.5
-            df['semantic_richness'] = 0
-            df['conectivos_count'] = 0
-            df['intensificadores_count'] = 0
-            df['modalidade_count'] = 0
-            df['semantic_context'] = 'unknown'
-        
-        processing_time = time.time() - start_time
-        self.stats['stage_11_time'] = processing_time
-        self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 11 concluído em {processing_time:.2f}s")
-        
-        return df
-
-    def _stage_12_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 12: Análise de Contexto de Eventos Políticos"""
-        start_time = time.time()
-        self.logger.info("📰 STAGE 12: Contexto de Eventos")
-        
-        try:
-            # Eventos políticos brasileiros relevantes (2019-2023)
-            political_events = [
-                {'event': 'Posse Bolsonaro', 'date': '2019-01-01', 'category': 'institucional'},
-                {'event': 'Início Pandemia', 'date': '2020-03-11', 'category': 'saude'},
-                {'event': 'Eleições 2022', 'date': '2022-10-02', 'category': 'eleitoral'},
-                {'event': 'CPI COVID', 'date': '2021-04-27', 'category': 'investigativa'},
-                {'event': '7 Setembro 2021', 'date': '2021-09-07', 'category': 'manifestacao'}
+            # === APLICAR TODOS OS FILTROS ===
+            quality_mask = length_filter & emoji_filter & caps_filter & repetition_filter & language_filter
+            
+            # === GERAR COLUNAS DE QUALIDADE ===
+            # Quality flags (lista de problemas detectados)
+            df['quality_flags'] = ''
+            
+            # Identificar problemas
+            problems = []
+            df.loc[~length_filter, 'quality_flags'] += 'length_issue;'
+            df.loc[~emoji_filter, 'quality_flags'] += 'excessive_emojis;'
+            df.loc[~caps_filter, 'quality_flags'] += 'excessive_caps;'
+            df.loc[~repetition_filter, 'quality_flags'] += 'excessive_repetition;'
+            df.loc[~language_filter, 'quality_flags'] += 'non_portuguese;'
+            
+            # Content quality score (0-100)
+            quality_components = [
+                length_filter.astype(int) * 20,  # 20 pontos para comprimento adequado
+                emoji_filter.astype(int) * 20,   # 20 pontos para emojis adequados
+                caps_filter.astype(int) * 20,    # 20 pontos para caps adequados
+                repetition_filter.astype(int) * 20, # 20 pontos para repetição adequada
+                language_filter.astype(int) * 20    # 20 pontos para português
             ]
             
-            # Detectar timestamp se disponível
-            timestamp_columns = ['timestamp', 'date', 'created_at', 'published_at']
-            timestamp_col = None
-            for col in timestamp_columns:
-                if col in df.columns:
-                    timestamp_col = col
-                    break
+            df['content_quality_score'] = sum(quality_components)
             
-            if timestamp_col:
-                # Converter timestamp para datetime
-                df['event_timestamp'] = pd.to_datetime(df[timestamp_col], errors='coerce')
-                
-                # Marcar proximidade a eventos
-                df['near_event'] = False
-                df['event_category'] = 'none'
-                df['days_to_event'] = 999
-                
-                for event in political_events:
-                    event_date = pd.to_datetime(event['date'])
-                    # Janela de ±7 dias do evento
-                    window_start = event_date - pd.Timedelta(days=7)
-                    window_end = event_date + pd.Timedelta(days=7)
-                    
-                    mask = (df['event_timestamp'] >= window_start) & (df['event_timestamp'] <= window_end)
-                    df.loc[mask, 'near_event'] = True
-                    df.loc[mask, 'event_category'] = event['category']
-                    
-                    # Calcular dias até o evento
-                    days_diff = (df['event_timestamp'] - event_date).dt.days.abs()
-                    closer_mask = days_diff < df['days_to_event']
-                    df.loc[mask & closer_mask, 'days_to_event'] = days_diff[mask & closer_mask]
-                
-                # Análise temporal contextual
-                df['temporal_context'] = 'normal'
-                df.loc[df['near_event'], 'temporal_context'] = 'event_period'
-                
-            else:
-                # Fallback sem timestamp
-                df['near_event'] = False
-                df['event_category'] = 'unknown'
-                df['days_to_event'] = 999
-                df['temporal_context'] = 'unknown'
-                
-            # Detecção de contexto por palavras-chave
-            event_keywords = {
-                'eleitoral': ['eleição', 'voto', 'urna', 'candidato', 'campanha'],
-                'saude': ['covid', 'pandemia', 'vacina', 'lockdown', 'quarentena'],
-                'institucional': ['governo', 'presidente', 'congresso', 'supremo'],
-                'manifestacao': ['protesto', 'manifestação', 'ato', 'marcha']
+            # Language confidence (simulação básica baseada em características)
+            df['language_confidence'] = df.apply(lambda row: 
+                0.95 if row['likely_portuguese'] and row['content_quality_score'] >= 80
+                else 0.80 if row['likely_portuguese'] and row['content_quality_score'] >= 60
+                else 0.60 if row['likely_portuguese']
+                else 0.30, axis=1
+            )
+            
+            # === APLICAR FILTRO ===
+            df_filtered = df[quality_mask].copy().reset_index(drop=True)
+            
+            final_count = len(df_filtered)
+            reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
+            
+            # === ESTATÍSTICAS DOS FILTROS ===
+            rejected_by_length = (~length_filter).sum()
+            rejected_by_emojis = (~emoji_filter).sum()
+            rejected_by_caps = (~caps_filter).sum()
+            rejected_by_repetition = (~repetition_filter).sum()
+            rejected_by_language = (~language_filter).sum()
+            
+            avg_quality_score = df_filtered['content_quality_score'].mean()
+            
+            self.logger.info(f"✅ Filtro de qualidade aplicado:")
+            self.logger.info(f"   📉 {initial_count:,} → {final_count:,} registros")
+            self.logger.info(f"   📊 Redução: {reduction_pct:.1f}%")
+            self.logger.info(f"   🎯 Score qualidade médio: {avg_quality_score:.1f}/100")
+            self.logger.info(f"   ❌ Rejeitados: comprimento={rejected_by_length}, emojis={rejected_by_emojis}")
+            self.logger.info(f"      caps={rejected_by_caps}, repetição={rejected_by_repetition}, idioma={rejected_by_language}")
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            return df_filtered
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 05: {e}")
+            self.stats['processing_errors'] += 1
+            # Em caso de erro, retornar dados originais com colunas padrão
+            df['content_quality_score'] = 80
+            df['quality_flags'] = ''
+            df['language_confidence'] = 0.8
+            return df
+
+    def _stage_06_political_relevance_filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        STAGE 06: Political Relevance Filter
+        
+        Manter apenas conteúdo relevante para a pesquisa política.
+        Input: Conteúdo de qualidade
+        Output: Apenas textos com relevância temática
+        
+        Usa léxico político brasileiro com categorias cat0-cat10:
+        - cat0: autoritarismo_regime
+        - cat2: pandemia_covid  
+        - cat3: violencia_seguranca
+        - cat4: religiao_moral
+        - cat6: inimigos_ideologicos + identidade_politica
+        - cat7: meio_ambiente_amazonia
+        - cat8: moralidade
+        - cat9: antissistema
+        - cat10: polarizacao
+        
+        Redução esperada: 30-40% (135k → 80k)
+        """
+        try:
+            self.logger.info("🎯 STAGE 06: Political Relevance Filter")
+            
+            # Importar léxico político
+            political_keywords = {
+                'cat0_autoritarismo_regime': [
+                    'ai-5', 'regime militar', 'ditadura', 'tortura', 'repressão', 'intervenção militar',
+                    'estado de sítio', 'golpe', 'censura', 'doutrina de segurança nacional'
+                ],
+                'cat2_pandemia_covid': [
+                    'covid-19', 'corona', 'pandemia', 'quarentena', 'lockdown', 'tratamento precoce',
+                    'cloroquina', 'ivermectina', 'máscara', 'máscaras', 'oms', 'pfizer', 'vacina',
+                    'passaporte sanitário'
+                ],
+                'cat3_violencia_seguranca': [
+                    'criminalidade', 'segurança pública', 'violência', 'bandidos', 'facções', 'polícia',
+                    'militarização', 'armas', 'desarmamento', 'legítima defesa'
+                ],
+                'cat4_religiao_moral': [
+                    'família tradicional', 'valores cristãos', 'igreja', 'pastor', 'padre', 'bíblia',
+                    'cristofobia', 'marxismo cultural', 'ideologia de gênero'
+                ],
+                'cat6_inimigos_ideologicos': [
+                    'comunista', 'comunismo', 'esquerdista', 'petista', 'pt', 'lula', 'stf', 'supremo',
+                    'globo', 'mídia lixo', 'sistema', 'globalista', 'china', 'urss', 'cuba', 'venezuela',
+                    'narcoditadura', 'esquerda', 'progressista'
+                ],
+                'cat6_identidade_politica': [
+                    'bolsonaro', 'bolsonarista', 'direita', 'conservador', 'patriota', 'verde e amarelo',
+                    'mito', 'liberdade', 'intervencionista', 'cristão', 'antiglobalista', 'patriota', 'patriotismo'
+                ],
+                'cat7_meio_ambiente_amazonia': [
+                    'amazônia', 'reserva', 'queimadas', 'desmatamento', 'ong', 'soberania nacional',
+                    'clima', 'aquecimento global', 'agenda 2030'
+                ],
+                'cat8_moralidade': [
+                    'corrupção', 'liberdade', 'patriotismo', 'soberania', 'criminoso', 'traidor',
+                    'bandido', 'herói', 'santo', 'vítima', 'injustiça'
+                ],
+                'cat9_antissistema': [
+                    'sistema', 'establishment', 'corrupto', 'imprensa vendida', 'mídia lixo', 'stf ativista',
+                    'conspiração', 'globalista', 'ditadura do judiciário', 'deep state'
+                ],
+                'cat10_polarizacao': [
+                    'nós contra eles', 'vergonha', 'ódio', 'orgulho', 'traição', 'luta do bem contra o mal',
+                    'defensores da pátria', 'inimigos do povo'
+                ]
             }
             
-            texts = df['normalized_text'].fillna('').astype(str)
-            df['context_keywords_count'] = 0
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+            initial_count = len(df)
             
-            for category, keywords in event_keywords.items():
-                keyword_count = texts.apply(lambda x: sum(1 for kw in keywords if kw in x.lower()))
-                df[f'{category}_keywords'] = keyword_count
-                df['context_keywords_count'] += keyword_count
+            # === CLASSIFICAÇÃO POLÍTICA ===
+            def classify_political_content(text):
+                if pd.isna(text):
+                    return [], 0.0, []
                 
-        except Exception as e:
-            self.logger.warning(f"Erro na análise de contexto: {e}")
-            df['near_event'] = False
-            df['event_category'] = 'error'
-            df['days_to_event'] = 999
-            df['temporal_context'] = 'error'
-            df['context_keywords_count'] = 0
-        
-        processing_time = time.time() - start_time
-        self.stats['stage_12_time'] = processing_time
-        self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 12 concluído em {processing_time:.2f}s")
-        
-        return df
-
-    def _stage_13_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 13: Análise de Canais e Fontes"""
-        start_time = time.time()
-        self.logger.info("📡 STAGE 13: Análise de Canais")
-        
-        try:
-            # Detectar colunas de canal/fonte
-            channel_columns = ['channel', 'channel_username', 'source', 'author', 'sender']
-            channel_col = None
-            for col in channel_columns:
-                if col in df.columns:
-                    channel_col = col
-                    break
-            
-            if channel_col:
-                # Análise de canais
-                df['channel_name'] = df[channel_col].fillna('unknown')
+                text_lower = str(text).lower()
+                categories_found = []
+                matched_terms = []
+                total_matches = 0
                 
-                # Estatísticas por canal
-                channel_stats = df.groupby('channel_name').agg({
-                    'normalized_text': 'count',
-                    'word_count': 'mean',
-                    'political_spectrum': lambda x: x.mode().iloc[0] if len(x.mode()) > 0 else 'unknown'
-                }).reset_index()
-                
-                channel_stats.columns = ['channel', 'message_count', 'avg_word_count', 'dominant_political']
-                
-                # Classificar tipos de canal
-                df['channel_type'] = 'regular'
-                
-                # Canais com muitas mensagens = 'high_volume'
-                high_volume_channels = channel_stats[channel_stats['message_count'] > channel_stats['message_count'].quantile(0.8)]['channel'].tolist()
-                df.loc[df['channel_name'].isin(high_volume_channels), 'channel_type'] = 'high_volume'
-                
-                # Canais com textos longos = 'detailed'
-                detailed_channels = channel_stats[channel_stats['avg_word_count'] > channel_stats['avg_word_count'].quantile(0.8)]['channel'].tolist()
-                df.loc[df['channel_name'].isin(detailed_channels), 'channel_type'] = 'detailed'
-                
-                # Autoridade do canal (baseada em volume e engajamento)
-                df['channel_authority'] = 'low'
-                medium_auth_channels = channel_stats[
-                    (channel_stats['message_count'] > channel_stats['message_count'].quantile(0.5)) &
-                    (channel_stats['avg_word_count'] > channel_stats['avg_word_count'].quantile(0.5))
-                ]['channel'].tolist()
-                df.loc[df['channel_name'].isin(medium_auth_channels), 'channel_authority'] = 'medium'
-                
-                high_auth_channels = channel_stats[
-                    (channel_stats['message_count'] > channel_stats['message_count'].quantile(0.8)) &
-                    (channel_stats['avg_word_count'] > channel_stats['avg_word_count'].quantile(0.8))
-                ]['channel'].tolist()
-                df.loc[df['channel_name'].isin(high_auth_channels), 'channel_authority'] = 'high'
-                
-            else:
-                # Fallback sem coluna de canal
-                df['channel_name'] = 'unknown'
-                df['channel_type'] = 'unknown'
-                df['channel_authority'] = 'unknown'
-            
-            # Análise de diversidade de fontes
-            unique_channels = df['channel_name'].nunique()
-            df['source_diversity'] = 'low' if unique_channels < 5 else 'medium' if unique_channels < 20 else 'high'
-            
-            # Detecção de padrões de fonte
-            df['source_pattern'] = 'organic'
-            
-            # Se muitas mensagens do mesmo canal em sequência = possível coordenação
-            if channel_col and len(df) > 10:
-                consecutive_same = 0
-                for i in range(1, min(len(df), 50)):
-                    if df.iloc[i]['channel_name'] == df.iloc[i-1]['channel_name']:
-                        consecutive_same += 1
-                
-                if consecutive_same > len(df) * 0.3:  # Mais de 30% consecutivas do mesmo canal
-                    df['source_pattern'] = 'coordinated'
+                # Verificar cada categoria
+                for category_key, keywords in political_keywords.items():
+                    category_matches = 0
+                    category_terms = []
                     
+                    for keyword in keywords:
+                        keyword_lower = keyword.lower()
+                        
+                        # Busca exata e variações (palavras cortadas, erros)
+                        if keyword_lower in text_lower:
+                            category_matches += text_lower.count(keyword_lower)
+                            category_terms.append(keyword)
+                        
+                        # Busca por palavras-raiz (para detectar variações)
+                        elif len(keyword_lower) > 4:
+                            root_word = keyword_lower[:int(len(keyword_lower)*0.75)]
+                            if root_word in text_lower:
+                                category_matches += 0.5  # Peso menor para matches parciais
+                                category_terms.append(f"{keyword}~")
+                    
+                    if category_matches > 0:
+                        # Extrair número da categoria
+                        cat_num = category_key.split('_')[0].replace('cat', '')
+                        if cat_num == '6' and 'identidade' in category_key:
+                            cat_num = '6i'  # Distinguir identidade política
+                        
+                        categories_found.append(cat_num)
+                        matched_terms.extend(category_terms)
+                        total_matches += category_matches
+                
+                # Score de relevância política (0.0 a 1.0)
+                # Baseado no número de matches e categorias
+                relevance_score = min(1.0, (total_matches * 0.1) + (len(categories_found) * 0.15))
+                
+                return categories_found, relevance_score, matched_terms
+            
+            # Aplicar classificação
+            self.logger.info("🔍 Classificando conteúdo político...")
+            
+            classification_results = df[text_column].apply(classify_political_content)
+            
+            df['cat'] = [result[0] for result in classification_results]
+            df['political_relevance_score'] = [result[1] for result in classification_results]
+            df['political_terms_found'] = [result[2] for result in classification_results]
+            
+            # === FILTRO DE RELEVÂNCIA ===
+            # Manter apenas textos com score > 0.1 (threshold mínimo)
+            relevance_threshold = 0.1
+            relevance_filter = df['political_relevance_score'] > relevance_threshold
+            
+            df_filtered = df[relevance_filter].copy().reset_index(drop=True)
+            
+            final_count = len(df_filtered)
+            reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
+            
+            # === ESTATÍSTICAS POLÍTICAS ===
+            # Contagem por categoria
+            all_categories = []
+            for cat_list in df_filtered['cat']:
+                if isinstance(cat_list, list):
+                    all_categories.extend(cat_list)
+            
+            from collections import Counter
+            category_counts = Counter(all_categories)
+            
+            avg_relevance = df_filtered['political_relevance_score'].mean()
+            texts_with_politics = len(df_filtered[df_filtered['political_relevance_score'] > 0])
+            
+            self.logger.info(f"✅ Filtro político aplicado:")
+            self.logger.info(f"   📉 {initial_count:,} → {final_count:,} registros")
+            self.logger.info(f"   📊 Redução: {reduction_pct:.1f}%")
+            self.logger.info(f"   🎯 Score relevância médio: {avg_relevance:.3f}")
+            self.logger.info(f"   🏛️ Textos com conteúdo político: {texts_with_politics:,}")
+            
+            if category_counts:
+                top_categories = category_counts.most_common(5)
+                self.logger.info(f"   🔝 Top categorias: {dict(top_categories)}")
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            return df_filtered
+            
         except Exception as e:
-            self.logger.warning(f"Erro na análise de canais: {e}")
-            df['channel_name'] = 'error'
-            df['channel_type'] = 'error'
-            df['channel_authority'] = 'error'
-            df['source_diversity'] = 'error'
-            df['source_pattern'] = 'error'
+            self.logger.error(f"❌ Erro Stage 06: {e}")
+            self.stats['processing_errors'] += 1
+            # Em caso de erro, retornar dados com colunas padrão
+            df['cat'] = [[] for _ in range(len(df))]
+            df['political_relevance_score'] = 0.5
+            df['political_terms_found'] = [[] for _ in range(len(df))]
+            return df
+
+    # ===============================================
+    # MÉTODOS HELPER PARA ANÁLISE DE QUALIDADE
+    # ===============================================
+    
+    def _calculate_emoji_ratio(self, text: str) -> float:
+        """Calcular proporção de emojis no texto."""
+        if pd.isna(text) or len(text) == 0:
+            return 0.0
         
-        processing_time = time.time() - start_time
-        self.stats['stage_13_time'] = processing_time
-        self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 13 concluído em {processing_time:.2f}s")
+        import re
+        # Regex para detectar emojis Unicode
+        emoji_pattern = re.compile(
+            "["
+            "\U0001F600-\U0001F64F"  # emoticons
+            "\U0001F300-\U0001F5FF"  # symbols & pictographs
+            "\U0001F680-\U0001F6FF"  # transport & map symbols
+            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "\U00002702-\U000027B0"
+            "\U000024C2-\U0001F251"
+            "]+",
+            flags=re.UNICODE
+        )
         
-        return df
+        emojis = emoji_pattern.findall(str(text))
+        emoji_count = sum(len(emoji) for emoji in emojis)
+        
+        return min(1.0, emoji_count / len(str(text)))
+    
+    def _calculate_caps_ratio(self, text: str) -> float:
+        """Calcular proporção de letras maiúsculas."""
+        if pd.isna(text) or len(text) == 0:
+            return 0.0
+        
+        text_str = str(text)
+        letters = [c for c in text_str if c.isalpha()]
+        
+        if len(letters) == 0:
+            return 0.0
+        
+        caps_count = sum(1 for c in letters if c.isupper())
+        return caps_count / len(letters)
+    
+    def _calculate_repetition_ratio(self, text: str) -> float:
+        """Calcular proporção de caracteres repetitivos."""
+        if pd.isna(text) or len(text) <= 1:
+            return 0.0
+        
+        text_str = str(text).lower()
+        
+        # Contar sequências repetitivas (3+ caracteres iguais)
+        repetition_count = 0
+        current_char = ''
+        current_count = 1
+        
+        for char in text_str:
+            if char == current_char:
+                current_count += 1
+                if current_count >= 3:
+                    repetition_count += 1
+            else:
+                current_char = char
+                current_count = 1
+        
+        return min(1.0, repetition_count / len(text_str))
+    
+    def _detect_portuguese(self, text: str) -> bool:
+        """Detecção básica de idioma português."""
+        if pd.isna(text) or len(text) < 10:
+            return True  # Assumir português para textos muito curtos
+        
+        text_lower = str(text).lower()
+        
+        # Palavras comuns em português
+        portuguese_indicators = [
+            'que', 'não', 'com', 'uma', 'para', 'são', 'por', 'mais', 'das', 'dos',
+            'mas', 'foi', 'pela', 'até', 'isso', 'ela', 'entre', 'depois', 'sem',
+            'mesmo', 'aos', 'seus', 'quem', 'nas', 'me', 'esse', 'eles', 'você',
+            'já', 'eu', 'também', 'só', 'pelo', 'nos', 'é', 'o', 'a', 'de', 'do',
+            'da', 'em', 'um', 'para', 'é', 'com', 'não', 'uma', 'os', 'no', 'se',
+            'na', 'por', 'mais', 'as', 'dos', 'como', 'mas', 'foi', 'ao', 'ele',
+            'das', 'tem', 'à', 'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'há',
+            'nos', 'já', 'está', 'eu', 'também', 'só', 'pelo', 'pela', 'até'
+        ]
+        
+        # Contar palavras portuguesas encontradas
+        words = text_lower.split()
+        portuguese_count = sum(1 for word in words if word in portuguese_indicators)
+        
+        # Considerar português se >= 20% das palavras são indicadores
+        if len(words) > 0:
+            portuguese_ratio = portuguese_count / len(words)
+            return portuguese_ratio >= 0.2
+        
+        return True  # Default para português
+
+    def _stage_05_political_classification(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 05: Classificação política brasileira.
+        
+        Aplica léxico político brasileiro para classificar textos em:
+        - extrema-direita, direita, centro-direita, centro, centro-esquerda, esquerda
+        """
+        try:
+            self.logger.info("🔄 Stage 05: Classificação política brasileira")
+            
+            if 'normalized_text' not in df.columns:
+                self.logger.warning("⚠️ normalized_text não encontrado, usando body")
+                text_column = 'body'
+            else:
+                text_column = 'normalized_text'
+            
+            # Classificação política básica
+            df['political_orientation'] = df[text_column].apply(self._classify_political_orientation)
+            df['political_keywords'] = df[text_column].apply(self._extract_political_keywords)
+            df['political_intensity'] = df[text_column].apply(self._calculate_political_intensity)
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            self.logger.info(f"✅ Stage 05 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 05: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_06_tfidf_vectorization(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 06: Vetorização TF-IDF com tokens spaCy.
+        
+        Calcula TF-IDF usando tokens processados pelo spaCy.
+        """
+        try:
+            self.logger.info("🔄 Stage 06: Vetorização TF-IDF")
+            
+            if 'tokens' not in df.columns:
+                self.logger.warning("⚠️ tokens não encontrados, usando normalized_text")
+                text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+                text_data = df[text_column].fillna('').tolist()
+            else:
+                # Usar tokens do spaCy
+                text_data = df['tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
+            
+            # TF-IDF básico
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            import numpy as np
+            
+            vectorizer = TfidfVectorizer(
+                max_features=100,
+                stop_words=None,  # Já removemos stopwords no spaCy
+                lowercase=False   # Já normalizado
+            )
+            
+            tfidf_matrix = vectorizer.fit_transform(text_data)
+            feature_names = vectorizer.get_feature_names_out()
+            
+            # Converter para array denso para cálculos
+            tfidf_dense = tfidf_matrix.toarray()
+            
+            # Scores médios por documento
+            df['tfidf_score_mean'] = np.mean(tfidf_dense, axis=1)
+            df['tfidf_score_max'] = np.max(tfidf_dense, axis=1)
+            df['tfidf_top_terms'] = [
+                [feature_names[i] for i in row.argsort()[::-1][:5]]
+                for row in tfidf_dense
+            ]
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            self.logger.info(f"✅ Stage 06 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 06: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_07_clustering_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 07: Análise de clustering baseado em features linguísticas.
+        
+        Agrupa documentos similares usando características extraídas.
+        """
+        try:
+            self.logger.info("🔄 Stage 07: Análise de clustering")
+            
+            # Features numéricas para clustering
+            numeric_features = []
+            for col in ['word_count', 'text_length', 'tfidf_score_mean', 'political_intensity']:
+                if col in df.columns:
+                    numeric_features.append(col)
+            
+            if len(numeric_features) < 2:
+                self.logger.warning("⚠️ Features insuficientes para clustering")
+                df['cluster_id'] = 0
+                df['cluster_distance'] = 0.0
+                df['cluster_size'] = len(df)
+            else:
+                from sklearn.cluster import KMeans
+                from sklearn.preprocessing import StandardScaler
+                
+                # Preparar dados
+                feature_data = df[numeric_features].fillna(0)
+                scaler = StandardScaler()
+                scaled_data = scaler.fit_transform(feature_data)
+                
+                # Clustering simples
+                n_clusters = min(5, len(df) // 10 + 1)
+                kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                clusters = kmeans.fit_predict(scaled_data)
+                
+                df['cluster_id'] = clusters
+                df['cluster_distance'] = [
+                    min(((scaled_data[i] - center) ** 2).sum() for center in kmeans.cluster_centers_)
+                    for i in range(len(scaled_data))
+                ]
+                
+                # Tamanho dos clusters
+                cluster_sizes = pd.Series(clusters).value_counts().to_dict()
+                df['cluster_size'] = df['cluster_id'].map(cluster_sizes)
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            self.logger.info(f"✅ Stage 07 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 07: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_08_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 08: Topic modeling com embeddings.
+        
+        Descoberta automática de tópicos nos textos.
+        """
+        try:
+            self.logger.info("🔄 Stage 08: Topic modeling")
+            
+            if 'tokens' not in df.columns:
+                self.logger.warning("⚠️ tokens não encontrados, usando normalized_text")
+                text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+                text_data = df[text_column].fillna('').tolist()
+            else:
+                text_data = df['tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
+            
+            # Topic modeling básico com LDA
+            from sklearn.feature_extraction.text import CountVectorizer
+            from sklearn.decomposition import LatentDirichletAllocation
+            
+            # Preparar dados
+            vectorizer = CountVectorizer(max_features=50, stop_words=None)
+            doc_term_matrix = vectorizer.fit_transform(text_data)
+            
+            # LDA simples
+            n_topics = min(5, len(df) // 20 + 1)
+            lda = LatentDirichletAllocation(n_components=n_topics, random_state=42)
+            doc_topic_matrix = lda.fit_transform(doc_term_matrix)
+            
+            # Tópico dominante para cada documento
+            df['dominant_topic'] = doc_topic_matrix.argmax(axis=1)
+            df['topic_probability'] = doc_topic_matrix.max(axis=1)
+            
+            # Palavras-chave dos tópicos
+            feature_names = vectorizer.get_feature_names_out()
+            topic_keywords = []
+            for topic_idx, topic in enumerate(lda.components_):
+                top_words = [feature_names[i] for i in topic.argsort()[::-1][:3]]
+                topic_keywords.append(top_words)
+            
+            df['topic_keywords'] = df['dominant_topic'].apply(lambda x: topic_keywords[x] if x < len(topic_keywords) else [])
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 3
+            
+            self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 08: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_09_temporal_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 09: Análise temporal.
+        
+        Extrai padrões temporais dos timestamps.
+        """
+        try:
+            self.logger.info("🔄 Stage 09: Análise temporal")
+            
+            if 'datetime' not in df.columns:
+                self.logger.warning("⚠️ datetime não encontrado")
+                df['hour'] = 12
+                df['day_of_week'] = 1
+                df['month'] = 1
+            else:
+                # Converter datetime para análise temporal
+                try:
+                    datetime_series = pd.to_datetime(df['datetime'], format='%d/%m/%Y %H:%M:%S', errors='coerce')
+                    
+                    df['hour'] = datetime_series.dt.hour
+                    df['day_of_week'] = datetime_series.dt.dayofweek
+                    df['month'] = datetime_series.dt.month
+                    df['year'] = datetime_series.dt.year
+                    df['day_of_year'] = datetime_series.dt.dayofyear
+                    
+                except Exception as e:
+                    self.logger.warning(f"⚠️ Erro conversão datetime: {e}")
+                    df['hour'] = 12
+                    df['day_of_week'] = 1
+                    df['month'] = 1
+                    df['year'] = 2020
+                    df['day_of_year'] = 1
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 5
+            
+            self.logger.info(f"✅ Stage 09 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 09: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_10_network_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 10: Análise de rede (coordenação e padrões).
+        
+        Detecta padrões de coordenação e comportamento de rede.
+        """
+        try:
+            self.logger.info("🔄 Stage 10: Análise de rede")
+            
+            # Análise de coordenação básica
+            if 'sender' in df.columns:
+                sender_counts = df['sender'].value_counts()
+                df['sender_frequency'] = df['sender'].map(sender_counts)
+                df['is_frequent_sender'] = df['sender_frequency'] > df['sender_frequency'].median()
+            else:
+                df['sender_frequency'] = 1
+                df['is_frequent_sender'] = False
+            
+            # Análise de URLs compartilhadas
+            if 'urls_extracted' in df.columns:
+                # URLs mais compartilhadas
+                all_urls = []
+                for urls in df['urls_extracted'].fillna('[]'):
+                    if isinstance(urls, str):
+                        try:
+                            url_list = eval(urls) if urls.startswith('[') else [urls]
+                            all_urls.extend(url_list)
+                        except:
+                            pass
+                
+                url_counts = pd.Series(all_urls).value_counts()
+                df['shared_url_frequency'] = df['urls_extracted'].apply(
+                    lambda x: max([url_counts.get(url, 0) for url in (eval(x) if isinstance(x, str) and x.startswith('[') else [])], default=0)
+                )
+            else:
+                df['shared_url_frequency'] = 0
+            
+            # Coordenação temporal (mensagens em horários similares)
+            if 'hour' in df.columns:
+                hour_counts = df['hour'].value_counts()
+                df['temporal_coordination'] = df['hour'].map(hour_counts) / len(df)
+            else:
+                df['temporal_coordination'] = 0.0
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 4
+            
+            self.logger.info(f"✅ Stage 10 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 10: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_11_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 11: Análise de domínios.
+        
+        Analisa domínios e URLs para identificar padrões de mídia.
+        """
+        try:
+            self.logger.info("🔄 Stage 11: Análise de domínios")
+            
+            # Análise de domínios
+            if 'domain' in df.columns:
+                df['domain_type'] = df['domain'].apply(self._classify_domain_type)
+                
+                domain_counts = df['domain'].value_counts()
+                df['domain_frequency'] = df['domain'].map(domain_counts)
+                
+                # Mídia mainstream vs alternativa
+                mainstream_domains = ['youtube.com', 'twitter.com', 'facebook.com', 'instagram.com', 'g1.globo.com', 'folha.uol.com.br']
+                df['is_mainstream_media'] = df['domain'].isin(mainstream_domains)
+            else:
+                df['domain_type'] = 'unknown'
+                df['domain_frequency'] = 0
+                df['is_mainstream_media'] = False
+            
+            # Análise de URLs
+            if 'urls_extracted' in df.columns:
+                df['url_count'] = df['urls_extracted'].apply(
+                    lambda x: len(eval(x)) if isinstance(x, str) and x.startswith('[') else (1 if x else 0)
+                )
+                df['has_external_links'] = df['url_count'] > 0
+            else:
+                df['url_count'] = 0
+                df['has_external_links'] = False
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 5
+            
+            self.logger.info(f"✅ Stage 11 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 11: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+
+    def _stage_12_semantic_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 12: Análise semântica.
+        
+        Análise semântica e de sentimento dos textos.
+        """
+        try:
+            self.logger.info("🔄 Stage 12: Análise semântica")
+            
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+            
+            # Análise de sentimento básica
+            df['sentiment_polarity'] = df[text_column].apply(self._calculate_sentiment_polarity)
+            df['sentiment_label'] = df['sentiment_polarity'].apply(
+                lambda x: 'positive' if x > 0.1 else ('negative' if x < -0.1 else 'neutral')
+            )
+            
+            # Análise de emoções básicas
+            df['emotion_intensity'] = df[text_column].apply(self._calculate_emotion_intensity)
+            df['has_aggressive_language'] = df[text_column].apply(self._detect_aggressive_language)
+            
+            # Complexidade semântica
+            if 'tokens' in df.columns:
+                df['semantic_diversity'] = df['tokens'].apply(
+                    lambda x: len(set(x)) / len(x) if isinstance(x, list) and len(x) > 0 else 0
+                )
+            else:
+                df['semantic_diversity'] = df[text_column].apply(
+                    lambda x: len(set(str(x).split())) / len(str(x).split()) if len(str(x).split()) > 0 else 0
+                )
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 5
+            
+            self.logger.info(f"✅ Stage 12 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 12: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_13_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 13: Análise de contexto de eventos.
+        
+        Detecta contextos políticos e eventos relevantes.
+        """
+        try:
+            self.logger.info("🔄 Stage 13: Análise de contexto de eventos")
+            
+            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+            
+            # Contextos políticos brasileiros
+            df['political_context'] = df[text_column].apply(self._detect_political_context)
+            df['mentions_government'] = df[text_column].apply(self._mentions_government)
+            df['mentions_opposition'] = df[text_column].apply(self._mentions_opposition)
+            
+            # Eventos específicos (eleições, manifestações, etc.)
+            df['election_context'] = df[text_column].apply(self._detect_election_context)
+            df['protest_context'] = df[text_column].apply(self._detect_protest_context)
+            
+            # Análise temporal de eventos
+            if 'datetime' in df.columns:
+                df['is_weekend'] = df['day_of_week'].isin([5, 6]) if 'day_of_week' in df.columns else False
+                df['is_business_hours'] = df['hour'].between(9, 17) if 'hour' in df.columns else False
+            else:
+                df['is_weekend'] = False
+                df['is_business_hours'] = True
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 7
+            
+            self.logger.info(f"✅ Stage 13 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 13: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    def _stage_14_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 14: Análise de canais/fontes.
+        
+        Classifica canais e fontes de informação.
+        """
+        try:
+            self.logger.info("🔄 Stage 14: Análise de canais")
+            
+            # Análise de canais
+            if 'channel' in df.columns:
+                df['channel_type'] = df['channel'].apply(self._classify_channel_type)
+                
+                channel_counts = df['channel'].value_counts()
+                df['channel_activity'] = df['channel'].map(channel_counts)
+                df['is_active_channel'] = df['channel_activity'] > df['channel_activity'].median()
+            else:
+                df['channel_type'] = 'unknown'
+                df['channel_activity'] = 1
+                df['is_active_channel'] = False
+            
+            # Análise de mídia
+            if 'media_type' in df.columns:
+                df['content_type'] = df['media_type'].fillna('text')
+                df['has_media'] = df['media_type'].notna()
+            else:
+                df['content_type'] = 'text'
+                df['has_media'] = False
+            
+            # Padrões de forwarding
+            if 'is_fwrd' in df.columns:
+                df['is_forwarded'] = df['is_fwrd'].fillna(False)
+                forwarded_ratio = df['is_forwarded'].mean()
+                df['forwarding_context'] = forwarded_ratio
+            else:
+                df['is_forwarded'] = False
+                df['forwarding_context'] = 0.0
+            
+            # Influência do canal
+            if 'sender' in df.columns and 'channel' in df.columns:
+                sender_channel_counts = df.groupby(['sender', 'channel']).size()
+                df['sender_channel_influence'] = df.apply(
+                    lambda row: sender_channel_counts.get((row['sender'], row['channel']), 0), axis=1
+                )
+            else:
+                df['sender_channel_influence'] = 1
+            
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 7
+            
+            self.logger.info(f"✅ Stage 14 concluído: {len(df)} registros processados")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro Stage 14: {e}")
+            self.stats['processing_errors'] += 1
+            return df
+
+    # ==========================================
+    # HELPER METHODS FOR ANALYSIS STAGES
+    # ==========================================
+
+    def _classify_political_orientation(self, text: str) -> str:
+        """Classifica orientação política do texto."""
+        if not text or pd.isna(text):
+            return 'neutral'
+        
+        text_lower = str(text).lower()
+        
+        # Palavras-chave para classificação política brasileira
+        extrema_direita = ['bolsonaro', 'mito', 'capitão', 'comunista', 'petralha', 'globalismo']
+        direita = ['conservador', 'tradicional', 'família', 'ordem', 'progresso']
+        centro_direita = ['liberal', 'empreendedor', 'mercado', 'economia']
+        centro = ['moderado', 'equilibrio', 'consenso']
+        centro_esquerda = ['social', 'trabalhador', 'direitos']
+        esquerda = ['lula', 'pt', 'socialismo', 'igualdade', 'justiça social']
+        
+        scores = {
+            'extrema-direita': sum(1 for word in extrema_direita if word in text_lower),
+            'direita': sum(1 for word in direita if word in text_lower),
+            'centro-direita': sum(1 for word in centro_direita if word in text_lower),
+            'centro': sum(1 for word in centro if word in text_lower),
+            'centro-esquerda': sum(1 for word in centro_esquerda if word in text_lower),
+            'esquerda': sum(1 for word in esquerda if word in text_lower)
+        }
+        
+        return max(scores.items(), key=lambda x: x[1])[0] if max(scores.values()) > 0 else 'neutral'
+
+    def _extract_political_keywords(self, text: str) -> list:
+        """Extrai palavras-chave políticas do texto."""
+        if not text or pd.isna(text):
+            return []
+        
+        political_keywords = [
+            'bolsonaro', 'lula', 'pt', 'psl', 'mdb', 'psdb',
+            'eleição', 'voto', 'democracia', 'ditadura', 'golpe',
+            'esquerda', 'direita', 'conservador', 'liberal'
+        ]
+        
+        text_lower = str(text).lower()
+        found_keywords = [word for word in political_keywords if word in text_lower]
+        
+        return found_keywords[:5]  # Máximo 5 palavras-chave
+
+    def _calculate_political_intensity(self, text: str) -> float:
+        """Calcula intensidade do discurso político."""
+        if not text or pd.isna(text):
+            return 0.0
+        
+        intensity_words = [
+            'sempre', 'nunca', 'jamais', 'obrigatório', 'proibido',
+            'urgente', 'imediato', 'crucial', 'fundamental', 'essencial'
+        ]
+        
+        text_lower = str(text).lower()
+        intensity_count = sum(1 for word in intensity_words if word in text_lower)
+        
+        return min(intensity_count / 10.0, 1.0)  # Normalizar entre 0 e 1
+
+    def _classify_domain_type(self, domain: str) -> str:
+        """Classifica tipo de domínio."""
+        if not domain or pd.isna(domain):
+            return 'unknown'
+        
+        domain_lower = str(domain).lower()
+        
+        if any(x in domain_lower for x in ['youtube', 'youtu.be']):
+            return 'video'
+        elif any(x in domain_lower for x in ['twitter', 'facebook', 'instagram']):
+            return 'social'
+        elif any(x in domain_lower for x in ['globo', 'folha', 'estadao', 'uol']):
+            return 'mainstream_news'
+        elif any(x in domain_lower for x in ['blog', 'wordpress', 'medium']):
+            return 'blog'
+        else:
+            return 'other'
+
+    def _calculate_sentiment_polarity(self, text: str) -> float:
+        """Calcula polaridade de sentimento básica."""
+        if not text or pd.isna(text):
+            return 0.0
+        
+        positive_words = ['bom', 'ótimo', 'excelente', 'maravilhoso', 'perfeito', 'amor', 'feliz']
+        negative_words = ['ruim', 'péssimo', 'terrível', 'ódio', 'raiva', 'triste', 'infeliz']
+        
+        text_lower = str(text).lower()
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        negative_count = sum(1 for word in negative_words if word in text_lower)
+        
+        total_words = len(text_lower.split())
+        if total_words == 0:
+            return 0.0
+        
+        return (positive_count - negative_count) / total_words
+
+    def _calculate_emotion_intensity(self, text: str) -> float:
+        """Calcula intensidade emocional."""
+        if not text or pd.isna(text):
+            return 0.0
+        
+        # Contagem de pontuação emocional
+        emotion_markers = text.count('!') + text.count('?') + text.count('...') 
+        caps_words = sum(1 for word in str(text).split() if word.isupper() and len(word) > 2)
+        
+        return min((emotion_markers + caps_words) / 10.0, 1.0)
+
+    def _detect_aggressive_language(self, text: str) -> bool:
+        """Detecta linguagem agressiva."""
+        if not text or pd.isna(text):
+            return False
+        
+        aggressive_words = [
+            'ódio', 'matar', 'destruir', 'eliminar', 'acabar',
+            'burro', 'idiota', 'imbecil', 'estúpido'
+        ]
+        
+        text_lower = str(text).lower()
+        return any(word in text_lower for word in aggressive_words)
+
+    def _detect_political_context(self, text: str) -> str:
+        """Detecta contexto político."""
+        if not text or pd.isna(text):
+            return 'none'
+        
+        text_lower = str(text).lower()
+        
+        if any(word in text_lower for word in ['eleição', 'voto', 'urna', 'candidato']):
+            return 'electoral'
+        elif any(word in text_lower for word in ['governo', 'ministro', 'presidente']):
+            return 'government'
+        elif any(word in text_lower for word in ['manifestação', 'protesto', 'greve']):
+            return 'protest'
+        elif any(word in text_lower for word in ['economia', 'inflação', 'desemprego']):
+            return 'economic'
+        else:
+            return 'general'
+
+    def _mentions_government(self, text: str) -> bool:
+        """Verifica se menciona governo."""
+        if not text or pd.isna(text):
+            return False
+        
+        government_terms = ['governo', 'presidente', 'ministro', 'secretário', 'federal']
+        text_lower = str(text).lower()
+        
+        return any(term in text_lower for term in government_terms)
+
+    def _mentions_opposition(self, text: str) -> bool:
+        """Verifica se menciona oposição."""
+        if not text or pd.isna(text):
+            return False
+        
+        opposition_terms = ['oposição', 'contra', 'resistência', 'impeachment']
+        text_lower = str(text).lower()
+        
+        return any(term in text_lower for term in opposition_terms)
+
+    def _detect_election_context(self, text: str) -> bool:
+        """Detecta contexto eleitoral."""
+        if not text or pd.isna(text):
+            return False
+        
+        election_terms = ['eleição', 'voto', 'urna', 'candidato', 'campanha', 'debate']
+        text_lower = str(text).lower()
+        
+        return any(term in text_lower for term in election_terms)
+
+    def _detect_protest_context(self, text: str) -> bool:
+        """Detecta contexto de protesto."""
+        if not text or pd.isna(text):
+            return False
+        
+        protest_terms = ['manifestação', 'protesto', 'greve', 'ocupação', 'ato']
+        text_lower = str(text).lower()
+        
+        return any(term in text_lower for term in protest_terms)
+
+    def _classify_channel_type(self, channel: str) -> str:
+        """Classifica tipo de canal."""
+        if not channel or pd.isna(channel):
+            return 'unknown'
+        
+        channel_lower = str(channel).lower()
+        
+        if any(word in channel_lower for word in ['news', 'notícia', 'jornal']):
+            return 'news'
+        elif any(word in channel_lower for word in ['brasil', 'patriota', 'conservador']):
+            return 'political'
+        elif any(word in channel_lower for word in ['humor', 'meme', 'engraçado']):
+            return 'entertainment'
+        else:
+            return 'general'
 
 
 def main():
