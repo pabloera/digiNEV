@@ -98,7 +98,7 @@ class Analyzer:
         self.logger.info("✅ Clean Scientific Analyzer v.final inicializado")
 
     def _load_political_lexicon(self) -> Dict:
-        """Carregar lexicon político real (se disponível)."""
+        """Carregar lexicon político brasileiro correto."""
         lexicon_path = Path("src/core/lexico_politico_hierarquizado.json")
 
         if lexicon_path.exists():
@@ -110,12 +110,14 @@ class Analyzer:
             except Exception as e:
                 self.logger.warning(f"⚠️ Erro ao carregar lexicon: {e}")
 
-        # Fallback mínimo (sem confusão)
+        # Lexicon político brasileiro correto (conforme political_visualization_enhanced.py)
         return {
-            "extrema-direita": ["bolsonaro", "conservador"],
-            "direita": ["liberal", "capitalista"],
-            "centro": ["moderado", "centrista"],
-            "esquerda": ["socialista", "progressista"]
+            "bolsonarista": ["bolsonaro", "mito", "capitão", "messias", "brasil acima de tudo"],
+            "lulista": ["lula", "squid", "ex-presidente", "pt", "petista"],
+            "anti-bolsonaro": ["fora bolsonaro", "impeachment", "golpista", "fascista"],
+            "neutro": ["governo", "política", "brasil", "país"],
+            "geral": ["eleição", "voto", "democracia", "constituição"],
+            "indefinido": ["moderado", "centrista"]
         }
 
     def analyze_dataset(self, df: pd.DataFrame) -> Dict[str, Any]:
@@ -168,13 +170,13 @@ class Analyzer:
             df = self._stage_10_domain_analysis(df)
 
             # STAGE 12: Semantic Analysis (NOVO)
-            df = self._stage_12_semantic_analysis(df)
+            df = self._stage_11_semantic_analysis(df)
 
             # STAGE 13: Event Context Analysis (NOVO)
-            df = self._stage_13_event_context(df)
+            df = self._stage_12_event_context(df)
 
             # STAGE 14: Channel Analysis (NOVO)
-            df = self._stage_14_channel_analysis(df)
+            df = self._stage_13_channel_analysis(df)
 
             # Final metadata
             df['processing_timestamp'] = datetime.now().isoformat()
@@ -879,87 +881,11 @@ class Analyzer:
         
         return df
 
-    def _stage_11_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 11: Análise de Domínios e URLs"""
-        start_time = time.time()
-        self.logger.info("🌐 STAGE 11: Análise de Domínios")
-        
-        try:
-            import re
-            from urllib.parse import urlparse
-            
-            texts = df['normalized_text'].fillna('').astype(str)
-            
-            # Extrair URLs
-            url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-            df['urls_found'] = texts.apply(lambda x: re.findall(url_pattern, x))
-            df['url_count'] = df['urls_found'].apply(len)
-            
-            # Extrair domínios únicos
-            def extract_domains(urls):
-                domains = []
-                for url in urls:
-                    try:
-                        domain = urlparse(url).netloc
-                        if domain:
-                            domains.append(domain)
-                    except:
-                        continue
-                return list(set(domains))
-            
-            df['domains_found'] = df['urls_found'].apply(extract_domains)
-            df['unique_domains_count'] = df['domains_found'].apply(len)
-            
-            # Classificar tipos de domínio
-            mainstream_domains = ['g1.com', 'folha.uol.com.br', 'estadao.com.br', 'globo.com']
-            alternative_domains = ['brasil247.com', 'diariodocentrodomundo.com.br']
-            social_domains = ['youtube.com', 'twitter.com', 'facebook.com', 'instagram.com']
-            
-            def classify_domains(domains):
-                if not domains:
-                    return 'none'
-                
-                mainstream_count = sum(1 for d in domains if any(md in d for md in mainstream_domains))
-                alternative_count = sum(1 for d in domains if any(ad in d for ad in alternative_domains))
-                social_count = sum(1 for d in domains if any(sd in d for sd in social_domains))
-                
-                if mainstream_count > 0:
-                    return 'mainstream'
-                elif alternative_count > 0:
-                    return 'alternative'
-                elif social_count > 0:
-                    return 'social'
-                else:
-                    return 'other'
-            
-            df['domain_category'] = df['domains_found'].apply(classify_domains)
-            
-            # Detectar presença de links externos
-            df['has_external_links'] = df['url_count'] > 0
-            
-            # Diversidade de fontes
-            total_domains = df['domains_found'].apply(len).sum()
-            df['domain_diversity'] = 'low' if total_domains < 5 else 'medium' if total_domains < 20 else 'high'
-            
-        except Exception as e:
-            self.logger.warning(f"Erro na análise de domínios: {e}")
-            df['url_count'] = 0
-            df['unique_domains_count'] = 0
-            df['domain_category'] = 'error'
-            df['has_external_links'] = False
-            df['domain_diversity'] = 'error'
-        
-        processing_time = time.time() - start_time
-        self.stats['stage_11_time'] = processing_time
-        self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 11 concluído em {processing_time:.2f}s")
-        
-        return df
 
-    def _stage_12_semantic_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 12: Análise Semântica Avançada"""
+    def _stage_11_semantic_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """STAGE 11: Análise Semântica Avançada"""
         start_time = time.time()
-        self.logger.info("🧠 STAGE 12: Análise Semântica")
+        self.logger.info("🧠 STAGE 11: Análise Semântica")
         
         # Análise semântica com fallback heurístico
         try:
@@ -1000,16 +926,16 @@ class Analyzer:
             df['semantic_context'] = 'unknown'
         
         processing_time = time.time() - start_time
-        self.stats['stage_12_time'] = processing_time
+        self.stats['stage_11_time'] = processing_time
         self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 12 concluído em {processing_time:.2f}s")
+        self.logger.info(f"✅ Stage 11 concluído em {processing_time:.2f}s")
         
         return df
 
-    def _stage_13_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 13: Análise de Contexto de Eventos Políticos"""
+    def _stage_12_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
+        """STAGE 12: Análise de Contexto de Eventos Políticos"""
         start_time = time.time()
-        self.logger.info("📰 STAGE 13: Contexto de Eventos")
+        self.logger.info("📰 STAGE 12: Contexto de Eventos")
         
         try:
             # Eventos políticos brasileiros relevantes (2019-2023)
@@ -1089,16 +1015,16 @@ class Analyzer:
             df['context_keywords_count'] = 0
         
         processing_time = time.time() - start_time
-        self.stats['stage_13_time'] = processing_time
+        self.stats['stage_12_time'] = processing_time
         self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 13 concluído em {processing_time:.2f}s")
+        self.logger.info(f"✅ Stage 12 concluído em {processing_time:.2f}s")
         
         return df
 
-    def _stage_14_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
-        """STAGE 14: Análise de Canais e Fontes"""
+    def _stage_13_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
+        """STAGE 13: Análise de Canais e Fontes"""
         start_time = time.time()
-        self.logger.info("📡 STAGE 14: Análise de Canais")
+        self.logger.info("📡 STAGE 13: Análise de Canais")
         
         try:
             # Detectar colunas de canal/fonte
@@ -1179,9 +1105,9 @@ class Analyzer:
             df['source_pattern'] = 'error'
         
         processing_time = time.time() - start_time
-        self.stats['stage_14_time'] = processing_time
+        self.stats['stage_13_time'] = processing_time
         self.stats['stages_completed'] += 1
-        self.logger.info(f"✅ Stage 14 concluído em {processing_time:.2f}s")
+        self.logger.info(f"✅ Stage 13 concluído em {processing_time:.2f}s")
         
         return df
 
