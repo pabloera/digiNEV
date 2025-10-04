@@ -25,6 +25,9 @@ from plotly.subplots import make_subplots
 # GUARDRAILS: Sistema de validação de conteúdo
 from dashboard_guardrails import dashboard_guardrail, require_real_data_only, validate_dashboard_data
 
+# Stage 04 Duplication Statistics
+from stage04_duplication_stats_dashboard import Stage04DuplicationStatsView
+
 # Page configuration
 st.set_page_config(
     page_title="Political Analysis - Brazil Telegram",
@@ -217,6 +220,8 @@ class DataAnalysisDashboard:
             self._render_overview_page()
         elif page == 'political_analysis':
             self._render_political_analysis_page()
+        elif page == 'duplication_stats':
+            self._render_duplication_stats_page()
         elif page == 'sentiment_analysis':
             self._render_sentiment_analysis_page()
         elif page == 'discourse_analysis':
@@ -304,6 +309,7 @@ class DataAnalysisDashboard:
             pages = {
                 'overview': '📋 Visão Geral',
                 'political_analysis': '🏛️ Análise Política',
+                'duplication_stats': '📊 Estatísticas de Duplicação',
                 'sentiment_analysis': '😊 Análise de Sentimento',
                 'discourse_analysis': '💬 Análise do Discurso',
                 'temporal_analysis': '📅 Análise Temporal',
@@ -1484,6 +1490,27 @@ class DataAnalysisDashboard:
         if 'text_length' in self.df.columns and 'political_category' in self.df.columns:
             length_by_category = self.df.groupby('political_category')['text_length'].agg(['mean', 'median', 'std'])
             st.dataframe(length_by_category, use_container_width=True)
+
+    def _render_duplication_stats_page(self):
+        """Render Stage 04 duplication statistics analysis"""
+        try:
+            duplication_dashboard = Stage04DuplicationStatsView()
+            duplication_dashboard.render_dashboard()
+        except Exception as e:
+            st.error(f"Erro ao carregar análise de duplicação: {e}")
+            st.markdown("""
+            ### Análise de Padrões de Duplicação não disponível
+
+            Esta página apresenta estatísticas detalhadas dos padrões de duplicação identificados no Stage 04 do pipeline.
+
+            **Recursos inclusos:**
+            - 📊 Distribuição de frequência de duplicatas
+            - 🔄 Análise de ocorrências repetidas
+            - 🔗 Estatísticas de sobreposição entre datasets
+            - 📈 Resumo estatístico consolidado
+
+            Execute o pipeline completo para gerar os dados necessários.
+            """)
 
 def main():
     """Função principal"""

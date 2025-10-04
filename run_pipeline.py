@@ -14,6 +14,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+# Add validation imports
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src', 'validation'))
+from dataset_validator import DatasetValidator
+
 import yaml
 import pandas as pd
 from src.utils.data_integrity import validate_real_data, track_data_lineage, validate_portuguese_text, DataIntegrityError
@@ -186,6 +190,8 @@ def load_configuration():
     return config
 
 def discover_datasets(data_paths: List[str]) -> List[str]:
+    # Add validator for dataset discovery
+    validator = DatasetValidator()
     """Discover all available datasets with validation"""
     datasets = []
     
@@ -193,30 +199,28 @@ def discover_datasets(data_paths: List[str]) -> List[str]:
         if os.path.exists(data_path):
             import glob
             csv_files = glob.glob(os.path.join(data_path, '*.csv'))
-            
-            # Validate that CSV files are not empty
+
+            # Validate that CSV files are not empty using DatasetValidator
             valid_files = []
             for csv_file in csv_files:
                 try:
-                    file_size = os.path.getsize(csv_file)
-                    # Try to read as CSV to validate structure
-                    if file_size > 0:
-                        try:
-                            df = pd.read_csv(csv_file)
-                            if len(df) > 0 and not df.empty:
-                                valid_files.append(csv_file)
-                                logger.info(f"Valid dataset found: {Path(csv_file).name} ({file_size/1024/1024:.1f} MB)")
-                            else:
-                                logger.warning(f"Dataset too small ignored: {Path(csv_file).name}")
-                        except pd.errors.EmptyDataError:
-                            logger.warning(f"Empty CSV file ignored: {Path(csv_file).name}")
-                        except Exception as e:
-                            logger.warning(f"Invalid CSV file ignored: {Path(csv_file).name}: {e}")
+                    # Validate dataset using our custom validator
+                    dataset_validation = validator.validate_dataset(csv_file)
+
+                    # Additional checks based on validation results
+                    if (dataset_validation['total_records'] > 0 and
+                        dataset_validation['file_size_mb'] > 0 and
+                        dataset_validation['memory_usage_mb'] < 1024):  # 1GB limit
+                        valid_files.append(csv_file)
+                        logger.info(f"Valid dataset found: {Path(csv_file).name} ({dataset_validation['file_size_mb']:.1f} MB)")
                     else:
-                        logger.warning(f"Empty file ignored: {Path(csv_file).name}")
+                        logger.warning(f"Dataset validation failed: {Path(csv_file).name}")
+
+                except FileNotFoundError:
+                    logger.warning(f"Dataset file not found: {csv_file}")
                 except Exception as e:
-                    logger.error(f"Error checking dataset {csv_file}: {e}")
-            
+                    logger.error(f"Error validating dataset {csv_file}: {e}")
+
             datasets.extend(valid_files)
         else:
             logger.warning(f"Data directory not found: {data_path}")
