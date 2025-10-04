@@ -153,6 +153,9 @@ class Analyzer:
             'total_chunks': 0
         }
 
+        # Global statistics container
+        self.global_stats = {}
+
         self.logger.info("✅ Analyzer v.final inicializado (auto-chunking habilitado)")
 
     def _load_political_lexicon(self) -> Dict:
@@ -777,26 +780,22 @@ class Analyzer:
         # Só extrair se não existir coluna correspondente
         if 'hashtags' not in features_info['existing']:
             df['hashtags_extracted'] = df[text_column].astype(str).str.findall(r'#\w+')
-            df['hashtags_count'] = df['hashtags_extracted'].str.len()
             extracted_features.append('hashtags')
 
         if 'urls' not in features_info['existing']:
             url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
             df['urls_extracted'] = df[text_column].astype(str).str.findall(url_pattern)
-            df['urls_count'] = df['urls_extracted'].str.len()
             extracted_features.append('urls')
 
         if 'mentions' not in features_info['existing']:
             # Padrão para @mentions
             df['mentions_extracted'] = df[text_column].astype(str).str.findall(r'@\w+')
-            df['mentions_count'] = df['mentions_extracted'].str.len()
             extracted_features.append('mentions')
 
         if 'emojis' not in features_info['existing']:
             # Padrão básico para emojis (Unicode)
             emoji_pattern = r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000027BF]'
             df['emojis_extracted'] = df[text_column].astype(str).str.findall(emoji_pattern)
-            df['emojis_count'] = df['emojis_extracted'].str.len()
             extracted_features.append('emojis')
 
         # REMOVIDAS: has_interrogation, has_exclamation, has_caps_words, has_portuguese_words
@@ -862,7 +861,6 @@ class Analyzer:
 
         # Aplicar limpeza ao texto principal
         df['normalized_text'] = df[main_text_col].apply(clean_text)
-        df['text_cleaned'] = True
 
         self.stats['stages_completed'] += 1
         self.stats['features_extracted'] += 2
@@ -1118,11 +1116,9 @@ class Analyzer:
         # Processar textos normalizados
         spacy_results = df['normalized_text'].apply(process_text_with_spacy)
 
-        # Extrair dados do spaCy
+        # Extrair dados do spaCy (removidos pos_tags e entities - não utilizados)
         df['spacy_tokens'] = spacy_results.apply(lambda x: x['tokens'])
         df['spacy_lemmas'] = spacy_results.apply(lambda x: x['lemmas'])
-        df['spacy_pos_tags'] = spacy_results.apply(lambda x: x['pos_tags'])
-        df['spacy_entities'] = spacy_results.apply(lambda x: x['entities'])
         df['spacy_tokens_count'] = spacy_results.apply(lambda x: x['tokens_count'])
         df['spacy_entities_count'] = spacy_results.apply(lambda x: x['entities_count'])
 
@@ -1130,7 +1126,7 @@ class Analyzer:
         df['lemmatized_text'] = df['spacy_lemmas'].apply(lambda x: ' '.join(x) if x else '')
 
         self.stats['stages_completed'] += 1
-        self.stats['features_extracted'] += 6
+        self.stats['features_extracted'] += 4
 
         avg_tokens = df['spacy_tokens_count'].mean()
         avg_entities = df['spacy_entities_count'].mean()
@@ -1329,13 +1325,19 @@ class Analyzer:
                 df['repetition_ratio'] = 0.0
                 df['likely_portuguese'] = True
             
-            # === METADADOS ESTATÍSTICOS ===
-            df['total_dataset_size'] = total_registros
-            df['unique_texts_count'] = registros_unicos
-            df['duplication_percentage'] = round(duplicacao_pct, 2)
-            df['hashtag_percentage'] = round(hashtag_pct, 2)
-            df['avg_chars_per_text'] = round(avg_chars, 1)
-            df['avg_words_per_text'] = round(avg_words, 1)
+            # === CONSOLIDAÇÃO DE ESTATÍSTICAS ===
+            # Consolidar estatísticas globais em objeto summary
+            summary_stats = {
+                'total_dataset_size': total_registros,
+                'unique_texts_count': registros_unicos,
+                'duplication_percentage': round(duplicacao_pct, 2),
+                'hashtag_percentage': round(hashtag_pct, 2),
+                'avg_chars_per_text': round(avg_chars, 1),
+                'avg_words_per_text': round(avg_words, 1)
+            }
+
+            # Salvar no contexto para acesso posterior
+            self.global_stats = summary_stats
             
             # Log das estatísticas
             self.logger.info(f"✅ Análise estatística concluída:")
@@ -1400,16 +1402,14 @@ class Analyzer:
             quality_mask = length_filter & emoji_filter & caps_filter & repetition_filter & language_filter
             
             # === GERAR COLUNAS DE QUALIDADE ===
-            # Quality flags (lista de problemas detectados)
-            df['quality_flags'] = ''
-            
-            # Identificar problemas
-            problems = []
-            df.loc[~length_filter, 'quality_flags'] += 'length_issue;'
-            df.loc[~emoji_filter, 'quality_flags'] += 'excessive_emojis;'
-            df.loc[~caps_filter, 'quality_flags'] += 'excessive_caps;'
-            df.loc[~repetition_filter, 'quality_flags'] += 'excessive_repetition;'
-            df.loc[~language_filter, 'quality_flags'] += 'non_portuguese;'
+            # Contar problemas por tipo para logging
+            problems = {
+                'length_issue': (~length_filter).sum(),
+                'excessive_emojis': (~emoji_filter).sum(),
+                'excessive_caps': (~caps_filter).sum(),
+                'excessive_repetition': (~repetition_filter).sum(),
+                'non_portuguese': (~language_filter).sum()
+            }
             
             # Content quality score (0-100)
             quality_components = [
@@ -1422,14 +1422,6 @@ class Analyzer:
             
             df['content_quality_score'] = sum(quality_components)
             
-            # Language confidence (simulação básica baseada em características)
-            df['language_confidence'] = df.apply(lambda row: 
-                0.95 if row['likely_portuguese'] and row['content_quality_score'] >= 80
-                else 0.80 if row['likely_portuguese'] and row['content_quality_score'] >= 60
-                else 0.60 if row['likely_portuguese']
-                else 0.30, axis=1
-            )
-            
             # === APLICAR FILTRO ===
             df_filtered = df[quality_mask].copy().reset_index(drop=True)
             
@@ -1437,23 +1429,17 @@ class Analyzer:
             reduction_pct = ((initial_count - final_count) / initial_count * 100) if initial_count > 0 else 0
             
             # === ESTATÍSTICAS DOS FILTROS ===
-            rejected_by_length = (~length_filter).sum()
-            rejected_by_emojis = (~emoji_filter).sum()
-            rejected_by_caps = (~caps_filter).sum()
-            rejected_by_repetition = (~repetition_filter).sum()
-            rejected_by_language = (~language_filter).sum()
-            
             avg_quality_score = df_filtered['content_quality_score'].mean()
-            
+
             self.logger.info(f"✅ Filtro de qualidade aplicado:")
             self.logger.info(f"   📉 {initial_count:,} → {final_count:,} registros")
             self.logger.info(f"   📊 Redução: {reduction_pct:.1f}%")
             self.logger.info(f"   🎯 Score qualidade médio: {avg_quality_score:.1f}/100")
-            self.logger.info(f"   ❌ Rejeitados: comprimento={rejected_by_length}, emojis={rejected_by_emojis}")
-            self.logger.info(f"      caps={rejected_by_caps}, repetição={rejected_by_repetition}, idioma={rejected_by_language}")
-            
+            self.logger.info(f"   ❌ Rejeitados: comprimento={problems['length_issue']}, emojis={problems['excessive_emojis']}")
+            self.logger.info(f"      caps={problems['excessive_caps']}, repetição={problems['excessive_repetition']}, idioma={problems['non_portuguese']}")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 3
+            self.stats['features_extracted'] += 1
             
             return df_filtered
             
@@ -1462,8 +1448,6 @@ class Analyzer:
             self.stats['processing_errors'] += 1
             # Em caso de erro, retornar dados originais com colunas padrão
             df['content_quality_score'] = 80
-            df['quality_flags'] = ''
-            df['language_confidence'] = 0.8
             return df
 
     def _stage_06_political_relevance_filter(self, df: pd.DataFrame) -> pd.DataFrame:
