@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 digiNEV v.final Pipeline Executor: Clean Scientific Analyzer
-Function: Centralized 14-stage scientific analysis pipeline
+Function: Centralized 17-stage scientific analysis pipeline
 Usage: python run_pipeline.py --dataset data/controlled_test_100.csv
 """
 
@@ -35,6 +35,9 @@ src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 # Configure logging
+import os
+os.makedirs('logs', exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -279,22 +282,25 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         logger.info("✅ Week 4: Real-time monitoring INTEGRATED")
         logger.info("✅ Week 5: Memory management INTEGRATED")
         
-        # ✅ CLEAN SCIENTIFIC ANALYZER STAGES (14 total) - Consolidated and interlinked
+        # ✅ CLEAN SCIENTIFIC ANALYZER STAGES (17 total) - Consolidated and interlinked
         all_stages = [
-            'stage_01_feature_extraction',
-            'stage_02_preprocessing',
-            'stage_03_statistics',
-            'stage_04_political_classification',
-            'stage_05_tfidf_analysis',
-            'stage_06_clustering',
-            'stage_07_topic_modeling',
-            'stage_08_temporal_analysis',
-            'stage_09_network_analysis',
-            'stage_10_domain_analysis',
-            'stage_11_event_context',
-            'stage_12_channel_analysis',
-            'stage_13_linguistic_analysis',
-            'stage_14_channel_analysis'  # Final stage
+            'stage_01_feature_extraction',           # Detecção automática de colunas
+            'stage_02_text_preprocessing',           # Limpeza básica de texto
+            'stage_03_cross_dataset_deduplication',  # Eliminação de duplicatas
+            'stage_04_statistical_analysis',         # Análise estatística
+            'stage_05_content_quality_filter',       # Filtro de qualidade
+            'stage_06_political_relevance_filter',   # Filtro relevância política
+            'stage_07_linguistic_processing',        # Processamento spaCy
+            'stage_08_political_classification',     # Classificação política
+            'stage_09_tfidf_vectorization',          # Vetorização TF-IDF
+            'stage_10_clustering_analysis',          # Análise de clustering
+            'stage_11_topic_modeling',               # Topic modeling
+            'stage_12_semantic_analysis',            # Análise semântica
+            'stage_13_temporal_analysis',            # Análise temporal
+            'stage_14_network_analysis',             # Análise de rede
+            'stage_15_domain_analysis',              # Análise de domínios
+            'stage_16_event_context',                # Contexto de eventos
+            'stage_17_channel_analysis'              # Análise de canais
         ]
 
         logger.info(f"🏭 Executing Analyzer v.final: {len(all_stages)} stages")
@@ -305,7 +311,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
             logger.info(f"📊 Processing dataset: {dataset_name}")
             
             try:
-                # ✅ CRITICAL: Execute Analyzer v.final (14 stages)
+                # ✅ CRITICAL: Execute Analyzer v.final (17 stages)
                 logger.info("🔄 Executing Analyzer v.final...")
 
                 # Load dataset
@@ -449,7 +455,7 @@ def main():
 
     print("🏆 DIGITAL DISCOURSE MONITOR v.final - ANALYZER")
     print("=" * 80)
-    print("📊 EXECUTION: Analyzer v.final (14 interlinked stages)")
+    print("📊 EXECUTION: Analyzer v.final (17 interlinked stages)")
     print("🚀 CONSOLIDATED SYSTEM: Real data only, no invented metrics")
     print("⚡ CENTRALIZED ARCHITECTURE: Single system, no parallel structures")
     print("=" * 80)

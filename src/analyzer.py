@@ -578,6 +578,7 @@ class Analyzer:
             self.logger.info(f"🎯 Performance: Processados {len(df):,} registros finais")
 
             return {
+                'success': True,
                 'data': df,
                 'stats': self.stats.copy(),
                 'columns_generated': len(df.columns),
