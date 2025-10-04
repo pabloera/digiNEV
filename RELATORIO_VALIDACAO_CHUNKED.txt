@@ -1,0 +1,31 @@
+📋 RELATÓRIO CONSOLIDADO - digiNEV v.final
+============================================================
+
+📊 ESTATÍSTICAS GERAIS:
+• Total de registros processados: 2,000
+• Total de chunks: 4
+• Tempo total: 15.4 segundos
+• Performance: 130.0 registros/segundo
+
+🏛️ DISTRIBUIÇÃO POLÍTICA:
+• unknown: 728 (36.4%)
+• neutral: 994 (49.7%)
+• lulista: 113 (5.7%)
+• bolsonarista: 81 (4.0%)
+• neutro: 74 (3.7%)
+• geral: 8 (0.4%)
+• anti-bolsonaro: 2 (0.1%)
+
+📅 ANÁLISE TEMPORAL:
+• Timestamps válidos: 2,000/2,000 (100.0%)
+
+🔗 ANÁLISE DE COORDENAÇÃO:
+• Potencial coordenação: 1,796/2,000 (89.8%)
+
+🌐 ANÁLISE DE DOMÍNIOS:
+• Mensagens com links: 0/2,000 (0.0%)
+
+🔧 PIPELINE:
+• Stages completados: 14
+• Features extraídas: 42
+• Erros de processamento: 0
