@@ -1091,14 +1091,11 @@ class Analyzer:
 
                 tokens = [token.text for token in doc if not token.is_space]
                 lemmas = [token.lemma_ for token in doc if not token.is_space and token.lemma_ != '-PRON-']
-                pos_tags = [token.pos_ for token in doc if not token.is_space]
                 entities = [(ent.text, ent.label_) for ent in doc.ents]
 
                 return {
                     'tokens': tokens,
                     'lemmas': lemmas,
-                    'pos_tags': pos_tags,
-                    'entities': entities,
                     'tokens_count': len(tokens),
                     'entities_count': len(entities)
                 }
@@ -1107,8 +1104,6 @@ class Analyzer:
                 return {
                     'tokens': [],
                     'lemmas': [],
-                    'pos_tags': [],
-                    'entities': [],
                     'tokens_count': 0,
                     'entities_count': 0
                 }

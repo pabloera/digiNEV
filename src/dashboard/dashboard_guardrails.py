@@ -76,8 +76,7 @@ class DashboardContentGuard:
         'emotion_scores', 'emotion_category',
 
         # Processamento linguístico
-        'text_cleaned', 'tokens', 'pos_tags', 'entities',
-        'language_detected', 'text_quality_score',
+        'tokens', 'language_detected', 'text_quality_score',
 
         # Análise semântica
         'topic_id', 'topic_words', 'topic_probability',

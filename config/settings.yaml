@@ -192,8 +192,6 @@ output:
       - "spacy_tokens_count"                 # spaCy token count
       - "spacy_sentences_count"              # spaCy sentence count
       - "spacy_lemmas"                       # Lemmatized text
-      - "spacy_pos_tags"                     # Part-of-speech tags
-      - "spacy_named_entities"               # Named entities
       - "tokens_category"                    # short/medium/long
       - "complexity_category"                # simple/medium/complex
       - "lexical_richness"                   # Lexical diversity

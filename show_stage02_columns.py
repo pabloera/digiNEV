@@ -44,11 +44,11 @@ def analyze_stage02_columns():
     for col in df.columns:
         if col.startswith('datetime,') or 'body' in col or 'url' in col:
             column_categories['Originais'].append(col)
-        elif col in ['emojis_extracted', 'emojis_count', 'has_interrogation', 'has_exclamation', 'has_caps_words', 'has_portuguese_words']:
+        elif col in ['emojis_extracted', 'has_interrogation', 'has_exclamation', 'has_caps_words', 'has_portuguese_words']:
             column_categories['Extração Features (Stage 01)'].append(col)
         elif col in ['hashtags', 'urls', 'mentions', 'channel_name']:
             column_categories['Features Texto (Stage 02)'].append(col)
-        elif col in ['normalized_text', 'text_cleaned']:
+        elif col in ['normalized_text']:
             column_categories['Limpeza Texto (Stage 02)'].append(col)
         else:
             column_categories['Metadados Sistema'].append(col)
@@ -83,8 +83,8 @@ def analyze_stage02_columns():
         mention_count = df['mentions'].apply(lambda x: len(eval(x)) if isinstance(x, str) and x.startswith('[') else 0).sum()
         feature_stats['Mentions total'] = mention_count
 
-    if 'emojis_count' in df.columns:
-        emoji_total = df['emojis_count'].sum()
+    if 'emojis_extracted' in df.columns:
+        emoji_total = df['emojis_extracted'].apply(lambda x: len(eval(x)) if isinstance(x, str) and x.startswith('[') else 0).sum()
         feature_stats['Emojis total'] = emoji_total
 
     # Mostrar estatísticas
