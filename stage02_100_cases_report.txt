@@ -1,0 +1,15 @@
+RELATÓRIO STAGE 02 - 100 CASOS REAIS
+==================================================
+
+📊 Dataset: 100 registros processados
+⚡ Performance: 7575.9 registros/segundo
+🆕 Colunas criadas: 12
+
+🔍 VALIDAÇÃO DE FEATURES:
+   • url: 30 → 30 ✅
+   • hashtag: 2 → 2 ✅
+   • mentions: 12 → 12 ✅
+   • channel: 12 → 12 ✅
+
+🧹 LIMPEZA DE TEXTO:
+   • Texto normalizado: 104.4 chars média

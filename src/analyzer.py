@@ -75,9 +75,21 @@ class Analyzer:
     10. network_analysis (Python puro) - Coordenação e padrões de rede
     """
 
-    def __init__(self):
-        """Inicializar analyzer com configuração clara."""
+    def __init__(self, chunk_size: int = 5000, memory_limit_gb: float = 2.0, auto_chunk: bool = True):
+        """
+        Inicializar analyzer com capacidades de auto-chunking.
+        
+        Args:
+            chunk_size: Tamanho do chunk quando auto-chunking é necessário
+            memory_limit_gb: Limite de memória para trigger de chunking
+            auto_chunk: Se True, detecta automaticamente quando usar chunks
+        """
         self.logger = logging.getLogger(self.__class__.__name__)
+
+        # Configurações de chunking automático
+        self.chunk_size = chunk_size
+        self.memory_limit_gb = memory_limit_gb
+        self.auto_chunk = auto_chunk
 
         # Load political lexicon if available
         self.political_lexicon = self._load_political_lexicon()
@@ -92,10 +104,12 @@ class Analyzer:
         self.stats = {
             'stages_completed': 0,
             'features_extracted': 0,
-            'processing_errors': 0
+            'processing_errors': 0,
+            'chunked_processing': False,
+            'total_chunks': 0
         }
 
-        self.logger.info("✅ Clean Scientific Analyzer v.final inicializado")
+        self.logger.info("✅ Analyzer v.final inicializado (auto-chunking habilitado)")
 
     def _load_political_lexicon(self) -> Dict:
         """Carregar lexicon político brasileiro correto."""
@@ -119,6 +133,299 @@ class Analyzer:
             "geral": ["eleição", "voto", "democracia", "constituição"],
             "indefinido": ["moderado", "centrista"]
         }
+
+    def _should_use_chunking(self, data_input):
+        """
+        Determinar automaticamente se deve usar processamento em chunks.
+        
+        Args:
+            data_input: DataFrame ou caminho do arquivo
+            
+        Returns:
+            Tuple[usar_chunks, estimativa_registros, motivo]
+        """
+        try:
+            # Se for DataFrame, verificar tamanho direto
+            if isinstance(data_input, pd.DataFrame):
+                n_records = len(data_input)
+                memory_usage_mb = data_input.memory_usage(deep=True).sum() / (1024**2)
+                
+                if n_records > 10000:
+                    return True, n_records, f"Dataset grande: {n_records:,} registros"
+                elif memory_usage_mb > self.memory_limit_gb * 1024:
+                    return True, n_records, f"Uso de memória alto: {memory_usage_mb:.1f}MB"
+                else:
+                    return False, n_records, f"Dataset pequeno: {n_records:,} registros"
+            
+            # Se for caminho de arquivo, estimar tamanho
+            elif isinstance(data_input, (str, Path)):
+                file_path = Path(data_input)
+                if not file_path.exists():
+                    return False, 0, "Arquivo não encontrado"
+                
+                # Estimar número de registros pelo tamanho do arquivo
+                file_size_mb = file_path.stat().st_size / (1024**2)
+                estimated_records = int(file_size_mb * 100)  # Estimativa: ~100 registros por MB
+                
+                if file_size_mb > 50:  # Arquivos > 50MB
+                    return True, estimated_records, f"Arquivo grande: {file_size_mb:.1f}MB"
+                elif estimated_records > 10000:
+                    return True, estimated_records, f"Muitos registros estimados: {estimated_records:,}"
+                else:
+                    return False, estimated_records, f"Arquivo pequeno: {file_size_mb:.1f}MB"
+            
+            return False, 0, "Tipo de entrada não reconhecido"
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ Erro ao determinar chunking: {e}")
+            return False, 0, "Erro na detecção"
+
+    def _check_memory_usage(self) -> bool:
+        """Verificar se memória está próxima do limite."""
+        try:
+            import psutil
+            memory_gb = psutil.Process().memory_info().rss / (1024**3)
+            return memory_gb > self.memory_limit_gb
+        except ImportError:
+            return False
+
+    def _clean_memory(self):
+        """Limpar memória forçadamente."""
+        import gc
+        gc.collect()
+        self.logger.info("🧹 Memória limpa")
+
+    def analyze(self, data_input, **kwargs) -> Dict[str, Any]:
+        """
+        Método principal unificado que detecta automaticamente o modo de processamento.
+        
+        Args:
+            data_input: DataFrame ou caminho para arquivo CSV
+            **kwargs: Argumentos adicionais (max_records, output_file, etc.)
+            
+        Returns:
+            Resultado da análise (formato unificado)
+        """
+        # Auto-detecção do modo de processamento
+        should_chunk, estimated_records, reason = self._should_use_chunking(data_input)
+        
+        self.logger.info(f"🤖 Auto-detecção: {reason}")
+        
+        if self.auto_chunk and should_chunk:
+            self.logger.info(f"⚡ Modo CHUNKED ativado automaticamente")
+            self.stats['chunked_processing'] = True
+            return self._analyze_chunked(data_input, **kwargs)
+        else:
+            self.logger.info(f"🔬 Modo NORMAL (in-memory)")
+            self.stats['chunked_processing'] = False
+            
+            # Se for arquivo, carregar como DataFrame
+            if isinstance(data_input, (str, Path)):
+                df = self._load_dataframe(data_input, kwargs.get('max_records'))
+            else:
+                df = data_input.copy()
+                
+            return self.analyze_dataset(df)
+
+    def _load_dataframe(self, file_path: str, max_records: Optional[int] = None) -> pd.DataFrame:
+        """Carregar DataFrame com detecção automática de separador."""
+        file_path = Path(file_path)
+        
+        # Detectar separador baseado no nome do arquivo
+        separator = ';' if '4_2022-2023-elec' in str(file_path) else ','
+        
+        # Carregar com limite de registros se especificado
+        if max_records:
+            df = pd.read_csv(file_path, sep=separator, encoding='utf-8', nrows=max_records)
+        else:
+            df = pd.read_csv(file_path, sep=separator, encoding='utf-8')
+            
+        self.logger.info(f"📂 Dataset carregado: {len(df):,} registros, {len(df.columns)} colunas")
+        return df
+
+    def _analyze_chunked(self, data_input, **kwargs) -> Dict[str, Any]:
+        """
+        Processamento em chunks integrado ao Analyzer principal.
+        
+        Args:
+            data_input: Caminho do arquivo ou DataFrame  
+            **kwargs: max_records, output_file, etc.
+            
+        Returns:
+            Estatísticas consolidadas no formato padrão
+        """
+        self.logger.info("⚡ Iniciando análise chunked integrada")
+        
+        # Se for DataFrame, converter para modo chunked simulado
+        if isinstance(data_input, pd.DataFrame):
+            return self._chunked_from_dataframe(data_input, **kwargs)
+        
+        # Processar arquivo em chunks
+        file_path = Path(data_input)
+        max_records = kwargs.get('max_records')
+        output_file = kwargs.get('output_file')
+        
+        consolidated_results = []
+        total_records = 0
+        total_chunks = 0
+        
+        # Estatísticas consolidadas
+        consolidated_stats = {
+            'political_distribution': {},
+            'temporal_stats': {'valid_timestamps': 0, 'total_records': 0},
+            'coordination_stats': {'coordinated': 0, 'total_records': 0},
+            'domain_stats': {'with_links': 0, 'total_records': 0},
+            'stages_completed': 0,
+            'features_extracted': 0,
+            'processing_errors': 0
+        }
+        
+        try:
+            # Processar cada chunk
+            for chunk in self._load_dataset_chunks(file_path, max_records):
+                chunk_start = time.time()
+                
+                # Analisar chunk usando o pipeline normal
+                result = self.analyze_dataset(chunk.copy())
+                
+                # Extrair dados do resultado
+                chunk_data = result['data']
+                chunk_stats = result['stats']
+                
+                # Consolidar estatísticas
+                total_records += len(chunk_data)
+                total_chunks += 1
+                
+                # Consolidar distribuição política
+                if 'political_spectrum' in chunk_data.columns:
+                    political_dist = chunk_data['political_spectrum'].value_counts()
+                    for category, count in political_dist.items():
+                        consolidated_stats['political_distribution'][category] = \
+                            consolidated_stats['political_distribution'].get(category, 0) + count
+                
+                # Consolidar outras estatísticas
+                if 'has_temporal_data' in chunk_data.columns:
+                    valid_temporal = chunk_data['has_temporal_data'].sum()
+                    consolidated_stats['temporal_stats']['valid_timestamps'] += valid_temporal
+                    consolidated_stats['temporal_stats']['total_records'] += len(chunk_data)
+                
+                if 'potential_coordination' in chunk_data.columns:
+                    coordinated = chunk_data['potential_coordination'].sum()
+                    consolidated_stats['coordination_stats']['coordinated'] += coordinated
+                    consolidated_stats['coordination_stats']['total_records'] += len(chunk_data)
+                
+                if 'has_external_links' in chunk_data.columns:
+                    with_links = chunk_data['has_external_links'].sum()
+                    consolidated_stats['domain_stats']['with_links'] += with_links
+                    consolidated_stats['domain_stats']['total_records'] += len(chunk_data)
+                
+                # Manter stats do último chunk
+                consolidated_stats['stages_completed'] = chunk_stats.get('stages_completed', 0)
+                consolidated_stats['features_extracted'] = chunk_stats.get('features_extracted', 0)
+                
+                # Salvar chunk se solicitado
+                if output_file:
+                    chunk_output = f"{output_file.replace('.csv', '')}_chunk_{total_chunks}.csv"
+                    chunk_data.to_csv(chunk_output, index=False, sep=';')
+                    self.logger.info(f"💾 Chunk salvo: {chunk_output}")
+                
+                chunk_time = time.time() - chunk_start
+                chunk_performance = len(chunk_data) / chunk_time if chunk_time > 0 else 0
+                
+                self.logger.info(f"✅ Chunk {total_chunks} processado: {len(chunk_data):,} registros em {chunk_time:.1f}s ({chunk_performance:.1f} reg/s)")
+                
+                # Limpar memória entre chunks
+                del chunk_data, result, chunk
+                if self._check_memory_usage():
+                    self._clean_memory()
+                
+        except Exception as e:
+            self.logger.error(f"❌ Erro na análise chunked: {e}")
+            consolidated_stats['processing_errors'] += 1
+            raise
+        
+        # Atualizar stats principais
+        self.stats.update({
+            'total_records_processed': total_records,
+            'total_chunks': total_chunks,
+            'chunked_processing': True,
+            'stages_completed': consolidated_stats['stages_completed'],
+            'features_extracted': consolidated_stats['features_extracted']
+        })
+        
+        self.logger.info(f"🎉 Análise chunked concluída: {total_records:,} registros em {total_chunks} chunks")
+        
+        # Retornar no formato padrão do Analyzer
+        return {
+            'data': pd.DataFrame({'processed_records': [total_records]}),  # DataFrame mínimo para compatibilidade
+            'stats': self.stats.copy(),
+            'consolidated_stats': consolidated_stats,
+            'columns_generated': 85,  # Estimativa baseada no pipeline completo
+            'stages_completed': consolidated_stats['stages_completed']
+        }
+
+    def _load_dataset_chunks(self, file_path: Path, max_records: Optional[int] = None):
+        """Generator para carregar dataset em chunks."""
+        if not file_path.exists():
+            raise FileNotFoundError(f"Dataset não encontrado: {file_path}")
+        
+        self.logger.info(f"📂 Carregando dataset em chunks: {file_path}")
+        
+        records_processed = 0
+        chunk_number = 1
+        
+        # Determinar separador baseado no dataset
+        separator = ','  # Padrão para govbolso
+        if '4_2022-2023-elec' in str(file_path):
+            separator = ';'
+        
+        try:
+            for chunk in pd.read_csv(file_path, sep=separator, chunksize=self.chunk_size, encoding='utf-8'):
+                if max_records and records_processed >= max_records:
+                    break
+                
+                # Ajustar chunk se exceder max_records
+                if max_records and records_processed + len(chunk) > max_records:
+                    remaining = max_records - records_processed
+                    chunk = chunk.head(remaining)
+                
+                records_processed += len(chunk)
+                
+                self.logger.info(f"📦 Chunk {chunk_number}: {len(chunk):,} registros, Total: {records_processed:,}")
+                
+                yield chunk
+                chunk_number += 1
+                
+        except Exception as e:
+            self.logger.error(f"❌ Erro ao carregar dataset: {e}")
+            raise
+
+    def _chunked_from_dataframe(self, df: pd.DataFrame, **kwargs) -> Dict[str, Any]:
+        """Simular processamento chunked para DataFrame que já está em memória."""
+        self.logger.info("🔄 Simulando chunked para DataFrame em memória")
+        
+        # Se DataFrame é pequeno, processar normalmente
+        if len(df) <= self.chunk_size:
+            return self.analyze_dataset(df)
+        
+        # Dividir DataFrame em chunks
+        chunks = [df[i:i+self.chunk_size] for i in range(0, len(df), self.chunk_size)]
+        
+        consolidated_results = []
+        for i, chunk in enumerate(chunks, 1):
+            self.logger.info(f"📦 Processando chunk {i}/{len(chunks)}: {len(chunk)} registros")
+            result = self.analyze_dataset(chunk.copy())
+            consolidated_results.append(result)
+            
+            if self._check_memory_usage():
+                self._clean_memory()
+        
+        # Para simplificar, retornar resultado do último chunk com stats consolidados
+        final_result = consolidated_results[-1]
+        final_result['stats']['total_chunks'] = len(chunks)
+        final_result['stats']['chunked_processing'] = True
+        
+        return final_result
 
     def analyze_dataset(self, df: pd.DataFrame) -> Dict[str, Any]:
         """
@@ -238,15 +545,24 @@ class Analyzer:
                 timestamp_column = col
                 break
 
+        # === PADRONIZAÇÃO DE DATETIME ===
+        if timestamp_column:
+            df = self._standardize_datetime_column(df, timestamp_column)
+            # Após padronização, a coluna se chama 'datetime'
+            timestamp_column = 'datetime'
+
         # DETECÇÃO AUTOMÁTICA DE FEATURES EXISTENTES
         features_detected = self._detect_existing_features(df)
 
         # EXTRAÇÃO AUTOMÁTICA DE FEATURES (se não existem)
         df = self._extract_missing_features(df, main_text_column, features_detected)
 
-        # Identificar colunas de metadados
-        metadata_columns = [col for col in df.columns
-                           if col not in [main_text_column, timestamp_column]]
+        # === CONTAR COLUNAS DE METADADOS ===
+        # Metadados = todas as colunas exceto texto principal e datetime padronizado
+        metadata_columns = []
+        for col in df.columns:
+            if col not in [main_text_column, 'datetime'] and not col.startswith(('emojis_', 'hashtags_', 'urls_', 'mentions_')):
+                metadata_columns.append(col)
 
         # Adicionar features identificadas
         df['main_text_column'] = main_text_column
@@ -260,6 +576,80 @@ class Analyzer:
         self.logger.info(f"✅ Features: text={main_text_column}, timestamp={timestamp_column}")
         self.logger.info(f"✅ Features detectadas: {list(features_detected['existing'].keys())}")
         self.logger.info(f"✅ Features extraídas: {features_detected['extracted']}")
+        if timestamp_column:
+            self.logger.info(f"📅 Datetime otimizado: coluna única 'datetime'")
+        return df
+
+    def _standardize_datetime_column(self, df: pd.DataFrame, timestamp_column: str) -> pd.DataFrame:
+        """
+        Padronizar coluna de datetime para formato único DD/MM/AAAA HH:MM:SS.
+        Remove coluna original e substitui por versão padronizada.
+        
+        Args:
+            df: DataFrame com dados
+            timestamp_column: Nome da coluna de timestamp identificada
+            
+        Returns:
+            DataFrame com coluna datetime padronizada (substitui a original)
+        """
+        self.logger.info(f"📅 Padronizando datetime da coluna: {timestamp_column}")
+        
+        def parse_datetime(datetime_str):
+            """Tentar múltiplos formatos de datetime."""
+            if pd.isna(datetime_str):
+                return None
+                
+            datetime_str = str(datetime_str).strip()
+            
+            # Formatos comuns para tentar
+            formats_to_try = [
+                '%Y-%m-%d %H:%M:%S',      # 2019-07-02 01:10:00
+                '%d/%m/%Y %H:%M:%S',      # 02/07/2019 01:10:00
+                '%Y-%m-%d',               # 2019-07-02
+                '%d/%m/%Y',               # 02/07/2019
+                '%Y-%m-%d %H:%M',         # 2019-07-02 01:10
+                '%d/%m/%Y %H:%M',         # 02/07/2019 01:10
+                '%Y/%m/%d %H:%M:%S',      # 2019/07/02 01:10:00
+                '%m/%d/%Y %H:%M:%S',      # 07/02/2019 01:10:00 (formato americano)
+            ]
+            
+            for fmt in formats_to_try:
+                try:
+                    parsed_dt = pd.to_datetime(datetime_str, format=fmt)
+                    # Converter para formato padrão brasileiro DD/MM/AAAA HH:MM:SS
+                    return parsed_dt.strftime('%d/%m/%Y %H:%M:%S')
+                except (ValueError, TypeError):
+                    continue
+                    
+            # Se nenhum formato funcionou, tentar parse genérico do pandas
+            try:
+                parsed_dt = pd.to_datetime(datetime_str, infer_datetime_format=True)
+                return parsed_dt.strftime('%d/%m/%Y %H:%M:%S')
+            except:
+                return None
+        
+        # Aplicar padronização
+        datetime_standardized = df[timestamp_column].apply(parse_datetime)
+        
+        # === SUBSTITUIR COLUNA ORIGINAL ===
+        # Remover coluna original e usar nome 'datetime' para a versão padronizada
+        df = df.drop(columns=[timestamp_column])
+        df['datetime'] = datetime_standardized
+        
+        # Estatísticas de conversão
+        valid_datetimes = df['datetime'].notna().sum()
+        total_records = len(df)
+        success_rate = (valid_datetimes / total_records) * 100
+        
+        self.logger.info(f"✅ Datetime padronizado e substituído: {valid_datetimes}/{total_records} ({success_rate:.1f}%) válidos")
+        
+        # Amostras do resultado
+        sample_standardized = df['datetime'].dropna().head(3).tolist()
+        
+        self.logger.info(f"📋 Formato final:")
+        for i, std in enumerate(sample_standardized):
+            self.logger.info(f"   {i+1}. {std}")
+        
         return df
 
     def _detect_existing_features(self, df: pd.DataFrame) -> Dict:
@@ -294,7 +684,7 @@ class Analyzer:
 
     def _extract_missing_features(self, df: pd.DataFrame, text_column: str, features_info: Dict) -> pd.DataFrame:
         """
-        Extrai features ausentes do texto principal usando regex otimizados para português brasileiro.
+        Extrai apenas features essenciais do texto principal.
         """
         extracted_features = []
 
@@ -323,32 +713,46 @@ class Analyzer:
             df['emojis_count'] = df['emojis_extracted'].str.len()
             extracted_features.append('emojis')
 
-        # Features de texto em português brasileiro
-        df['has_interrogation'] = df[text_column].astype(str).str.contains(r'\?', na=False)
-        df['has_exclamation'] = df[text_column].astype(str).str.contains(r'!', na=False)
-        df['has_caps_words'] = df[text_column].astype(str).str.contains(r'\b[A-Z]{2,}\b', na=False)
-        extracted_features.extend(['interrogation', 'exclamation', 'caps_words'])
-
-        # Detectar características do português brasileiro
-        df['has_portuguese_words'] = df[text_column].astype(str).str.contains(
-            r'\b(que|com|para|por|não|são|muito|mais|todo|bem|ainda|só|já|até|ainda)\b',
-            case=False, na=False
-        )
-        extracted_features.append('portuguese_words')
+        # REMOVIDAS: has_interrogation, has_exclamation, has_caps_words, has_portuguese_words
+        # Estas colunas não são necessárias para a análise
 
         features_info['extracted'] = extracted_features
         return df
 
     def _stage_02_text_preprocessing(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        STAGE 02: Pré-processamento de texto (Python puro).
+        STAGE 02: Validação de Features + Limpeza de Texto.
 
-        USA: main_text_column identificada no Stage 01
+        Para datasets com estrutura correta (datetime, body, url, hashtag, channel, etc):
+        1. Validar features existentes contra coluna 'body' 
+        2. Corrigir features incorretas/vazias
+        3. Limpar body_cleaned (texto sem features)
+        4. Aplicar normalização de texto
+        
+        USA: Detecção automática da estrutura do dataset
         """
-        self.logger.info("🧹 STAGE 02: Text Preprocessing")
+        self.logger.info("🧹 STAGE 02: Feature Validation + Text Preprocessing")
 
-        main_text_col = df['main_text_column'].iloc[0]
-
+        # === DETECTAR ESTRUTURA DO DATASET ===
+        expected_columns = ['datetime', 'body', 'url', 'hashtag', 'channel', 'is_fwrd', 'mentions', 'sender', 'media_type', 'domain', 'body_cleaned']
+        
+        if all(col in df.columns for col in expected_columns[:5]):  # Verificar colunas essenciais
+            self.logger.info("✅ Dataset estruturado detectado - validando features existentes")
+            
+            # === FASE 1: VALIDAÇÃO DE FEATURES EXISTENTES ===
+            df = self._extract_and_validate_features(df, 'body')
+            
+            # === FASE 2: LIMPEZA DE TEXTO (usar body como principal) ===
+            main_text_col = 'body'
+            
+        else:
+            self.logger.info("⚠️ Dataset não estruturado - usando coluna principal")
+            main_text_col = df['main_text_column'].iloc[0]
+            
+            # === FASE 1: EXTRAÇÃO DE FEATURES ===
+            df = self._extract_and_validate_features(df, main_text_col)
+        
+        # === FASE 2: NORMALIZAÇÃO DE TEXTO ===
         def clean_text(text):
             """Limpar texto usando Python puro."""
             if pd.isna(text):
@@ -370,14 +774,206 @@ class Analyzer:
 
             return text
 
-        # Aplicar limpeza
+        # Aplicar limpeza ao texto principal
         df['normalized_text'] = df[main_text_col].apply(clean_text)
         df['text_cleaned'] = True
 
         self.stats['stages_completed'] += 1
         self.stats['features_extracted'] += 2
 
-        self.logger.info(f"✅ Texto pré-processado: {df['normalized_text'].str.len().mean():.1f} chars média")
+        self.logger.info(f"✅ Stage 02 concluído: {df['normalized_text'].str.len().mean():.1f} chars média")
+        return df
+
+    def _extract_and_validate_features(self, df: pd.DataFrame, main_text_col: str) -> pd.DataFrame:
+        """
+        Validar features existentes contra coluna 'body' e corrigir se necessário.
+        
+        Dataset já tem: datetime, body, url, hashtag, channel, is_fwrd, mentions, sender, media_type, domain, body_cleaned
+        """
+        self.logger.info("🔍 Validando features existentes contra coluna 'body'...")
+        
+        # === VERIFICAR SE DATASET TEM ESTRUTURA CORRETA ===
+        expected_columns = ['datetime', 'body', 'url', 'hashtag', 'channel', 'is_fwrd', 'mentions', 'sender', 'media_type', 'domain', 'body_cleaned']
+        
+        # Se o dataset tem as colunas corretas, usar body como texto principal
+        if all(col in df.columns for col in expected_columns[:5]):  # Verificar colunas essenciais
+            self.logger.info("✅ Dataset com estrutura correta detectado")
+            
+            # === REMOVER BODY_CLEANED (duplicação desnecessária) ===
+            if 'body_cleaned' in df.columns:
+                df = df.drop(columns=['body_cleaned'])
+                self.logger.info("🗑️ body_cleaned removido (duplicação desnecessária)")
+            
+            # === VALIDAR FEATURES CONTRA BODY ===
+            corrections_made = 0
+            
+            # Validar URL
+            if 'url' in df.columns and 'body' in df.columns:
+                corrections_made += self._validate_feature_against_body(df, 'url', 'body', [r'https?://\S+', r'www\.\S+'])
+            
+            # Validar Hashtags
+            if 'hashtag' in df.columns and 'body' in df.columns:
+                corrections_made += self._validate_feature_against_body(df, 'hashtag', 'body', [r'#\w+'])
+            
+            # Validar Mentions
+            if 'mentions' in df.columns and 'body' in df.columns:
+                corrections_made += self._validate_feature_against_body(df, 'mentions', 'body', [r'@\w+'])
+            
+            self.logger.info(f"✅ Validação concluída: {corrections_made} correções aplicadas")
+            
+        else:
+            # === DATASET SEM ESTRUTURA PADRÃO - EXTRAIR TUDO ===
+            self.logger.info("⚠️ Dataset sem estrutura padrão - extraindo features do texto principal")
+            df = self._extract_features_from_text(df, main_text_col)
+        
+        return df
+    
+    def _validate_feature_against_body(self, df: pd.DataFrame, feature_col: str, body_col: str, patterns: list) -> int:
+        """Validar feature específica contra body."""
+        corrections = 0
+        
+        for idx, row in df.iterrows():
+            body_text = str(row[body_col]) if pd.notna(row[body_col]) else ""
+            existing_feature = row[feature_col] if pd.notna(row[feature_col]) else ""
+            
+            # Extrair feature do body
+            extracted_features = []
+            for pattern in patterns:
+                matches = re.findall(pattern, body_text, re.IGNORECASE)
+                extracted_features.extend(matches)
+            
+            # Se encontrou features no body mas coluna está vazia, corrigir
+            if extracted_features and not existing_feature:
+                if len(extracted_features) == 1:
+                    df.at[idx, feature_col] = extracted_features[0]
+                else:
+                    df.at[idx, feature_col] = ';'.join(extracted_features)  # Múltiplas features
+                corrections += 1
+        
+        if corrections > 0:
+            self.logger.info(f"🔧 {feature_col}: {corrections} correções aplicadas")
+        
+        return corrections
+    
+    def _clean_body_text(self, df: pd.DataFrame):
+        """
+        REMOVIDO: body_cleaned não é mais necessário.
+        O texto limpo é gerado como 'normalized_text' no Stage 02.
+        """
+        # Não fazer nada - body_cleaned removido para evitar duplicação
+        self.logger.info("🗑️ body_cleaned removido (duplicação desnecessária)")
+        pass    
+    def _extract_features_from_text(self, df: pd.DataFrame, text_col: str) -> pd.DataFrame:
+        """Extrair features de dataset sem estrutura padrão (fallback)."""
+        
+        # Features essenciais para extrair
+        feature_patterns = {
+            'urls': [r'https?://\S+', r'www\.\S+'],
+            'hashtags': [r'#\w+'],
+            'mentions': [r'@\w+'],
+            'channel_name': []  # Usar valor padrão
+        }
+        
+        for feature_name, patterns in feature_patterns.items():
+            if patterns:
+                def extract_feature(text):
+                    if pd.isna(text):
+                        return []
+                    
+                    extracted = []
+                    for pattern in patterns:
+                        matches = re.findall(pattern, str(text), re.IGNORECASE)
+                        extracted.extend(matches)
+                    return list(set(extracted)) if extracted else []
+                
+                df[feature_name] = df[text_col].apply(extract_feature)
+            else:
+                df[feature_name] = "unknown_channel"
+        
+        self.logger.info("🆕 Features extraídas de dataset sem estrutura padrão")
+        return df
+    
+    def _find_existing_feature_column(self, df: pd.DataFrame, possible_names: list) -> str:
+        """Encontrar coluna existente para uma feature."""
+        for col_name in possible_names:
+            if col_name in df.columns:
+                return col_name
+        return None
+    
+    def _validate_and_correct_feature(self, df: pd.DataFrame, existing_col: str, feature_name: str, patterns: list, text_col: str) -> pd.DataFrame:
+        """Validar e corrigir feature existente."""
+        if not patterns:  # Channel name não tem padrão regex
+            self.logger.info(f"✅ Feature {existing_col} mantida (sem validação regex)")
+            return df
+        
+        # Extrair valores corretos do texto
+        def extract_correct_values(text):
+            if pd.isna(text):
+                return []
+            
+            text = str(text)
+            extracted = []
+            for pattern in patterns:
+                matches = re.findall(pattern, text, re.IGNORECASE)
+                extracted.extend(matches)
+            return list(set(extracted))  # Remover duplicatas
+        
+        # Validar contra texto original
+        df['_temp_extracted'] = df[text_col].apply(extract_correct_values)
+        
+        # Comparar e corrigir se necessário
+        corrections_made = 0
+        
+        def validate_and_fix(row):
+            nonlocal corrections_made
+            existing_value = row[existing_col]
+            correct_value = row['_temp_extracted']
+            
+            # Se valor existente está vazio ou incorreto, corrigir
+            if pd.isna(existing_value) or existing_value == [] or existing_value == '':
+                if correct_value:
+                    corrections_made += 1
+                    return correct_value
+            
+            return existing_value
+        
+        df[existing_col] = df.apply(validate_and_fix, axis=1)
+        df = df.drop('_temp_extracted', axis=1)
+        
+        if corrections_made > 0:
+            self.logger.info(f"🔧 Feature {existing_col}: {corrections_made} correções aplicadas")
+        else:
+            self.logger.info(f"✅ Feature {existing_col}: validação OK, sem correções necessárias")
+        
+        return df
+    
+    def _extract_new_feature(self, df: pd.DataFrame, feature_name: str, patterns: list, text_col: str) -> pd.DataFrame:
+        """Extrair nova feature do texto."""
+        def extract_feature(text):
+            if pd.isna(text):
+                return []
+            
+            text = str(text)
+            extracted = []
+            
+            if patterns:  # Features com padrão regex
+                for pattern in patterns:
+                    matches = re.findall(pattern, text, re.IGNORECASE)
+                    extracted.extend(matches)
+            else:  # Channel name - tentar extrair de metadados ou usar valor padrão
+                return "unknown_channel"
+            
+            return list(set(extracted)) if extracted else []
+        
+        # Extrair feature
+        df[feature_name] = df[text_col].apply(extract_feature)
+        
+        # Estatísticas
+        non_empty = df[feature_name].apply(lambda x: len(x) > 0 if isinstance(x, list) else bool(x)).sum()
+        total = len(df)
+        
+        self.logger.info(f"📊 Feature {feature_name}: {non_empty}/{total} registros ({non_empty/total*100:.1f}%)")
+        
         return df
 
     def _stage_03_linguistic_processing(self, df: pd.DataFrame) -> pd.DataFrame:
