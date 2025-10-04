@@ -481,10 +481,10 @@ class Analyzer:
         
         return final_result
 
-    def analyze_dataset(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def analyze_dataset(self, data_input) -> Dict[str, Any]:
         """
         Analisar dataset com pipeline sequencial otimizado de 17 stages.
-        
+
         NOVA SEQUÊNCIA OTIMIZADA (conforme PIPELINE_STAGES_ANALYSIS.md):
         Fase 1: Preparação (01-02) - estrutura básica
         Fase 2: Redução de volume (03-06) - CRÍTICO para performance
@@ -492,11 +492,31 @@ class Analyzer:
         Fase 4: Análises avançadas (10-17) - dados otimizados
 
         Args:
-            df: DataFrame com dados para análise
+            data_input: DataFrame ou caminho do arquivo para análise
 
         Returns:
             Dict com resultado da análise
         """
+        # Verificar se deve usar chunking
+        should_chunk, estimated_records, reason = self._should_use_chunking(data_input)
+
+        # Se for caminho de arquivo e deve usar chunking, usar processamento chunked
+        if self.auto_chunk and should_chunk:
+            self.logger.info(f"⚡ Chunking ativado: {reason}")
+            self.stats['chunked_processing'] = True
+            return self._analyze_chunked(data_input)
+
+        # Senão, carregar dados e processar normalmente
+        self.stats['chunked_processing'] = False
+
+        # Se for caminho de arquivo, carregar
+        if isinstance(data_input, (str, Path)):
+            import pandas as pd
+            df = pd.read_csv(data_input, sep=';', encoding='utf-8')
+            self.logger.info(f"📂 Dataset carregado: {len(df)} registros")
+        else:
+            df = data_input
+
         try:
             self.logger.info(f"🔬 Iniciando análise OTIMIZADA: {len(df)} registros")
 

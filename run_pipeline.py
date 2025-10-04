@@ -314,22 +314,10 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
                 # ✅ CRITICAL: Execute Analyzer v.final (17 stages)
                 logger.info("🔄 Executing Analyzer v.final...")
 
-                # Load dataset
-                import pandas as pd
-                df = pd.read_csv(dataset_path, sep=';', encoding='utf-8')
-                df = track_data_lineage(df)
-
-                # Validate Portuguese text columns
-                text_columns = df.select_dtypes(include=['object']).columns
-                for col in text_columns:
-                    valid_texts = validate_portuguese_text(df[col])
-                    if not valid_texts.all():
-                        logger.warning(f'Invalid Portuguese text detected in column: {col}')
-
-                logger.info(f"Dataset loaded: {len(df)} records")
-
-                # Run analysis
-                analyzer_result = analyzer.analyze_dataset(df)
+                # Run analysis with automatic chunking detection
+                # Pass file path to enable chunked processing for large files
+                logger.info(f"Analyzing dataset: {dataset_path}")
+                analyzer_result = analyzer.analyze_dataset(dataset_path)
 
                 # Convert to expected format
                 results = {
