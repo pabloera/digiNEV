@@ -44,7 +44,7 @@ def analyze_stage02_columns():
     for col in df.columns:
         if col.startswith('datetime,') or 'body' in col or 'url' in col:
             column_categories['Originais'].append(col)
-        elif col in ['emojis_extracted', 'has_interrogation', 'has_exclamation', 'has_caps_words', 'has_portuguese_words']:
+        elif col in ['emojis_extracted']:
             column_categories['Extração Features (Stage 01)'].append(col)
         elif col in ['hashtags', 'urls', 'mentions', 'channel_name']:
             column_categories['Features Texto (Stage 02)'].append(col)
@@ -108,8 +108,7 @@ def analyze_stage02_columns():
             'URLs': str(row['urls']) if 'urls' in row else "N/A",
             'Mentions': str(row['mentions']) if 'mentions' in row else "N/A",
             'Emojis': str(row['emojis_extracted']) if 'emojis_extracted' in row else "N/A",
-            'Has_Portuguese': str(row['has_portuguese_words']) if 'has_portuguese_words' in row else "N/A",
-            'Has_Exclamation': str(row['has_exclamation']) if 'has_exclamation' in row else "N/A"
+            'Channel_Name': str(row['channel_name']) if 'channel_name' in row else "N/A"
         }
         output_data.append(record)
 
