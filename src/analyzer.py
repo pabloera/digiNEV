@@ -559,13 +559,17 @@ class Analyzer:
         """
         self.logger.info("🔢 STAGE 05: TF-IDF Vectorization")
 
-        # Configurar TF-IDF
+        # Configurar TF-IDF com ajuste dinâmico
+        n_docs = len(df)
+        min_df = max(1, min(2, n_docs // 10))  # Ajuste dinâmico baseado no tamanho
+        max_df = min(0.8, max(0.5, (n_docs - min_df) / n_docs))  # Garantir max_df > min_df
+
         self.tfidf_vectorizer = TfidfVectorizer(
-            max_features=1000,
+            max_features=min(1000, n_docs * 10),  # Limitar features baseado no tamanho
             stop_words=None,  # Não remover stop words para português
             ngram_range=(1, 2),
-            min_df=2,
-            max_df=0.8
+            min_df=min_df,
+            max_df=max_df
         )
 
         # Ajustar e transformar
