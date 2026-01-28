@@ -40,7 +40,8 @@ import psutil
 try:
     from .optimized_pipeline import get_global_optimized_pipeline, OptimizedPipelineOrchestrator
     from .pipeline_benchmark import get_global_benchmark, PipelineBenchmark
-    from .realtime_monitor import get_global_performance_monitor, PerformanceMonitor
+    from .realtime_monitor import get_global_realtime_monitor
+    from .performance_monitor import get_global_performance_monitor, PerformanceMonitor
     from .quality_tests import get_global_quality_tests, QualityRegressionTestSuite
     from .memory_optimizer import get_global_memory_manager, AdaptiveMemoryManager
     OPTIMIZATION_SYSTEMS_AVAILABLE = True

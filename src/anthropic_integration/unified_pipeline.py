@@ -992,7 +992,7 @@ class UnifiedAnthropicPipeline:
                     f"Check detailed cache operations: {metrics_dir / 'cache'}",
                     f"Check parallel benchmarks: {metrics_dir / 'parallel'}",
                     f"Check evidence packages: {metrics_dir / 'evidence'}",
-                    f"Review this performance summary: {metrics_dir / f'performance_metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json'}"
+                    f"Review this performance summary: {metrics_dir / 'performance_metrics_[timestamp].json'}"
                 ]
             }
             
