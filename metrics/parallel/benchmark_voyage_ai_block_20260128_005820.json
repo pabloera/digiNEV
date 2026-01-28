@@ -1,0 +1,18 @@
+{
+  "stage_id": "voyage_ai_block",
+  "dataset_size": 50,
+  "sequential_time": 0.009668350219726562,
+  "parallel_time": 0.12162017822265625,
+  "speedup_factor": 0.07949626748635594,
+  "threads_used": 4,
+  "timestamp": "2026-01-28T00:58:20.293120",
+  "memory_sequential_mb": 0,
+  "memory_parallel_mb": 0.12890625,
+  "verification": {
+    "sequential_success": true,
+    "parallel_success": true,
+    "improvement_achieved": false,
+    "target_speedup_met": false,
+    "evidence_type": "concrete_timing_benchmark"
+  }
+}
