@@ -291,7 +291,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         # Apply monitoring optimization if available
         if optimization_status.get('week4_monitoring', False):
             try:
-                from src.optimized.realtime_monitor import get_global_performance_monitor
+                from src.optimized.performance_monitor import get_global_performance_monitor
                 monitor = get_global_performance_monitor()
                 if monitor:
                     monitor.start_monitoring()
@@ -375,7 +375,7 @@ def run_complete_pipeline_execution(datasets: List[str], config: Dict[str, Any])
         try:
             # Stop monitoring if it was started
             if optimization_status.get('week4_monitoring', False):
-                from src.optimized.realtime_monitor import get_global_performance_monitor
+                from src.optimized.performance_monitor import get_global_performance_monitor
                 monitor = get_global_performance_monitor()
                 if monitor:
                     monitor.stop_monitoring()
@@ -483,7 +483,7 @@ def check_optimization_systems():
         optimization_status['week3_parallelization'] = parallel_engine is not None and streaming_pipeline is not None
         
         # Check Week 4 - Monitoring
-        from src.optimized.realtime_monitor import get_global_performance_monitor
+        from src.optimized.performance_monitor import get_global_performance_monitor
         from src.optimized.pipeline_benchmark import get_global_benchmark
         monitor = get_global_performance_monitor()
         benchmark = get_global_benchmark()
