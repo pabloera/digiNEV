@@ -135,44 +135,44 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def load_processed_data() -> Optional[pd.DataFrame]:
-    """Load processed pipeline results for network analysis"""
+    """Load processed pipeline results for network analysis.
+
+    Maps real pipeline column names to the internal names used by this page:
+    - political_orientation -> political_analysis
+    - sentiment_label -> sentiment_analysis
+    - dominant_topic -> topic_modeling
+    - body -> text
+    """
     try:
         # Load processed CSV file
         output_dir = project_root / 'pipeline_outputs'
         csv_files = list(output_dir.glob('processed_*.csv'))
-        
+
         if csv_files:
             latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
             df = pd.read_csv(latest_file)
-            
-            # Ensure required columns for network analysis
+
+            # Map real pipeline columns to page-internal names
+            column_mapping = {
+                'political_orientation': 'political_analysis',
+                'sentiment_label': 'sentiment_analysis',
+                'dominant_topic': 'topic_modeling',
+                'body': 'text',
+            }
+            for src_col, dst_col in column_mapping.items():
+                if src_col in df.columns and dst_col not in df.columns:
+                    df[dst_col] = df[src_col]
+
+            # Require at least political_analysis to proceed
             if 'political_analysis' not in df.columns:
-                df['political_analysis'] = np.random.choice(['Bolsonarista', 'Anti-Bolsonarista', 'Neutro'], size=len(df))
-            if 'sentiment_analysis' not in df.columns:
-                df['sentiment_analysis'] = np.random.choice(['Positivo', 'Negativo', 'Neutro'], size=len(df))
-            if 'topic_modeling' not in df.columns:
-                df['topic_modeling'] = [f'Tópico {i%5+1}' for i in range(len(df))]
-            if 'text' not in df.columns:
-                df['text'] = [f'Mensagem de análise {i}' for i in range(len(df))]
-            
+                st.warning("Pipeline data missing 'political_orientation'. Run the pipeline first.")
+                return None
+
             return df
-        
-        # Generate synthetic network data for demonstration
-        np.random.seed(42)
-        n_records = 100
-        
-        return pd.DataFrame({
-            'id': range(1, n_records + 1),
-            'text': [f'Mensagem política {i}' for i in range(1, n_records + 1)],
-            'political_analysis': np.random.choice(['Bolsonarista', 'Anti-Bolsonarista', 'Neutro'], size=n_records, p=[0.4, 0.35, 0.25]),
-            'sentiment_analysis': np.random.choice(['Positivo', 'Negativo', 'Neutro'], size=n_records, p=[0.3, 0.4, 0.3]),
-            'topic_modeling': np.random.choice([f'Tópico {i}' for i in range(1, 8)], size=n_records),
-            'date': pd.date_range('2023-01-01', periods=n_records, freq='D'),
-            'user_id': np.random.randint(1, 50, size=n_records),
-            'hashtags': [f'#tag{np.random.randint(1, 10)}' for _ in range(n_records)],
-            'mentions': [f'@user{np.random.randint(1, 20)}' for _ in range(n_records)]
-        })
-        
+
+        # No pipeline output found
+        return None
+
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return None

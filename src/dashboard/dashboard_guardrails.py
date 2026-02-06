@@ -62,51 +62,79 @@ class DashboardContentGuard:
     - Dados sintéticos não autorizados
     """
 
-    # Colunas autorizadas que vêm diretamente do pipeline
+    # Colunas autorizadas que vem diretamente do pipeline (Analyzer, 17 stages)
+    # Atualizado: 2026-02-06 - Baseado na auditoria completa de 122 colunas
     AUTHORIZED_PIPELINE_COLUMNS = {
-        # Dados básicos
-        'text', 'chunk_id', 'encoding', 'is_duplicate',
+        # Dados originais do CSV
+        'body', 'date', 'channel', 'sender', 'message_id',
+        'text', 'id', 'user_id',
 
-        # Análise política
-        'political_category', 'political_confidence', 'political_alignment',
-        'political_spectrum', 'political_keywords_found',
+        # Stage 01-04: Preprocessing & Feature Extraction
+        'normalized_text', 'text_length', 'word_count', 'char_count',
+        'hashtag_count', 'url_count', 'mention_count', 'emoji_count',
+        'hashtags_extracted', 'urls_extracted', 'mentions_extracted',
+        'emojis_extracted', 'exclamation_count', 'question_count',
+        'caps_ratio', 'unique_words', 'avg_word_length',
+        'emoji_ratio', 'repetition_ratio', 'likely_portuguese',
+        'duplicate_count', 'is_duplicate', 'quality_score',
+        'content_quality_score',
 
-        # Análise de sentimento
-        'sentiment', 'sentiment_score', 'sentiment_confidence',
-        'emotion_scores', 'emotion_category',
+        # Stage 06: Affordances Classification
+        'affordance_type', 'affordance_confidence', 'affordance_method',
+        'affordance_categories', 'hybrid_classification', 'hybrid_confidence',
+        'aff_informacao', 'aff_opiniao', 'aff_mobilizacao', 'aff_ataque',
+        'aff_humor_ironia', 'aff_desinformacao', 'aff_denuncia',
+        'aff_propaganda', 'aff_testemunho', 'aff_medo',
 
-        # Processamento linguístico
-        'tokens', 'language_detected', 'text_quality_score',
+        # Stage 07: NLP/Linguistic Processing
+        'tokens', 'lemmas', 'pos_tags', 'entities', 'noun_phrases',
+        'token_count', 'entity_count', 'lemmatized_text',
+        'spacy_tokens', 'spacy_lemmas', 'spacy_pos',
 
-        # Análise semântica
-        'topic_id', 'topic_words', 'topic_probability',
-        'tfidf_scores', 'cluster_id', 'cluster_label',
+        # Stage 08: Political Classification
+        'political_orientation', 'political_intensity', 'political_keywords',
+        'cat_autoritarismo_regime', 'cat_pandemia_covid',
+        'cat_violencia_seguranca', 'cat_religiao_moral',
+        'cat_inimigos_ideologicos', 'cat_identidade_politica',
+        'cat_meio_ambiente_amazonia', 'cat_moralidade',
+        'cat_antissistema', 'cat_polarizacao',
 
-        # Análise de conteúdo
-        'hashtags', 'hashtags_normalized', 'urls', 'domains',
-        'mentions', 'reply_count', 'forward_count',
+        # Stage 09: TF-IDF
+        'tfidf_score_mean', 'tfidf_score_max', 'tfidf_top_terms',
 
-        # Análise temporal
-        'date', 'timestamp', 'temporal_pattern', 'time_period',
-        'day_of_week', 'hour_of_day',
+        # Stage 10: Clustering
+        'cluster_id', 'cluster_distance',
 
-        # Análise de rede
-        'network_metrics', 'centrality_score', 'influence_score',
-        'community_id', 'connection_strength',
+        # Stage 11: Topic Modeling (LDA)
+        'topic_id', 'dominant_topic', 'topic_weight', 'topic_keywords',
+        'topic_probability',
 
-        # Análise qualitativa
-        'qualitative_codes', 'coding_confidence', 'themes',
-        'narrative_patterns', 'rhetorical_strategies',
+        # Stage 12: Semantic Analysis
+        'sentiment_label', 'sentiment_polarity', 'sentiment_subjectivity',
+        'emotion_intensity', 'emotional_valence',
 
-        # Detecção de padrões
-        'patterns', 'pattern_confidence', 'anomaly_score',
-        'is_anomaly', 'anomaly_type',
+        # Stage 13: Temporal Analysis
+        'hour', 'day_of_week', 'month', 'year',
+        'is_weekend', 'is_business_hours', 'is_burst_day',
 
-        # Busca semântica
-        'search_embeddings', 'similarity_scores', 'search_rank',
+        # Stage 14: Network/Context Features
+        'sender_frequency', 'is_frequent_sender',
+        'shared_url_frequency', 'temporal_coordination',
 
-        # Validação
-        'validation_passed', 'validation_score', 'quality_metrics'
+        # Stage 15: Domain Analysis
+        'domain_type', 'domain_trust_score',
+        'has_alternative_media', 'has_aggressive_language',
+
+        # Stage 16: Event Context & Frame Analysis
+        'political_context', 'mentions_government', 'mentions_opposition',
+        'has_election_context', 'has_protest_context',
+        'frame_conflito', 'frame_responsabilizacao',
+        'frame_moralista', 'frame_economico',
+
+        # Stage 17: Channel Classification
+        'channel_type', 'channel_activity', 'is_active_channel',
+        'content_type', 'has_media', 'is_forwarded',
+        'forwarding_context', 'sender_channel_influence',
     }
 
     # Métricas proibidas que NÃO devem ser criadas sem autorização
@@ -479,7 +507,7 @@ if __name__ == "__main__":
     valid_data = {
         'political_analysis': pd.DataFrame({
             'text': ['Teste 1', 'Teste 2'],
-            'political_category': ['direita', 'esquerda'],
+            'political_orientation': ['direita', 'esquerda'],
             'sentiment_score': [0.7, 0.3]
         })
     }

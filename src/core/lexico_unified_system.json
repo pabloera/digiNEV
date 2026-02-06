@@ -1,0 +1,652 @@
+{
+  "_warning": "⚠️ CRITICAL FILE - DO NOT DELETE ⚠️",
+  "metadata": {
+    "version": "1.0",
+    "description": "Léxico político hierarquizado - Direita conservadora/Bolsonarista no Telegram",
+    "created": "2025-09-28",
+    "source": "Agregação de taxonomia_lexico_integrado.json, brazilian_political_lexicon.yaml, political_analyzer.py e batch_analysis.py",
+    "period_coverage": "2019-2023",
+    "total_macrotemas": 9,
+    "total_subtemas": 41,
+    "total_palavras": 847,
+    "methodology": "Extração exaustiva de termos nativos do discurso bolsonarista/conservador no Telegram brasileiro"
+  },
+  "lexico": {
+    "identidade_patriotica": {
+      "nome": "Identidade Patriótica e Nacional",
+      "descricao": "Construção da identidade 'nós patriotas' vs 'eles traidores'",
+      "subtemas": {
+        "patriotismo_nacional": {
+          "nome": "Patriotismo e Símbolos Nacionais",
+          "descricao": "Evocação de símbolos pátrios e identidade nacional",
+          "palavras": [
+            "patriota", "patriotas", "patriótico", "patriótica", "patriotismo",
+            "pátria", "patria", "brasil", "brasileiro", "brasileira", "brasileiros",
+            "nação", "nacional", "nacionalista", "nacionalismo", "nacionalistas",
+            "bandeira", "verde e amarelo", "verde amarelo", "hino", "hino nacional",
+            "ordem e progresso", "independência", "7 de setembro", "sete de setembro",
+            "tradição", "tradicional", "tradicionalista", "valores tradicionais",
+            "honra", "glória", "orgulho nacional", "soberania", "soberania nacional"
+          ],
+          "expressoes": [
+            "brasil acima de tudo",
+            "deus pátria família",
+            "orgulho de ser brasileiro",
+            "verde e amarelo no coração",
+            "pátria amada brasil",
+            "terra adorada",
+            "gigante pela própria natureza"
+          ]
+        },
+        "militarismo_ordem": {
+          "nome": "Militarismo e Ordem",
+          "descricao": "Valorização das forças armadas e ordem militar",
+          "palavras": [
+            "militar", "militares", "militarismo", "militarização",
+            "forças armadas", "exército", "marinha", "aeronáutica",
+            "general", "generais", "coronel", "coronéis", "major", "capitão",
+            "soldado", "soldados", "praça", "praças", "oficial", "oficiais",
+            "quartel", "caserna", "comando", "comandos militares",
+            "disciplina", "disciplina militar", "hierarquia", "subordinação",
+            "ordem", "ordem pública", "lei e ordem", "ordenamento",
+            "intervenção militar", "intervencao militar", "intervenção federal",
+            "glo", "garantia da lei", "segurança nacional", "defesa nacional"
+          ],
+          "expressoes": [
+            "volta dos militares",
+            "militares no poder",
+            "ordem e disciplina",
+            "hierarquia e disciplina",
+            "forças armadas salvadoras",
+            "guardiães da pátria",
+            "bravos guerreiros"
+          ]
+        },
+        "valores_conservadores": {
+          "nome": "Valores Cristãos e Conservadores",
+          "descricao": "Defesa da moral cristã e valores tradicionais",
+          "palavras": [
+            "deus", "cristo", "jesus", "senhor", "divino", "sagrado",
+            "cristão", "cristãos", "cristã", "cristãs", "cristianismo",
+            "católico", "católicos", "católica", "católicas",
+            "evangélico", "evangélicos", "evangélica", "evangélicas",
+            "pastor", "pastores", "pastora", "bispo", "bispos", "padre",
+            "igreja", "templo", "congregação", "fiel", "fiéis",
+            "família", "famílias", "família tradicional", "família brasileira",
+            "valores", "valores cristãos", "valores familiares", "moral",
+            "moralidade", "ética", "bons costumes", "decência",
+            "conservador", "conservadora", "conservadorismo", "tradição"
+          ],
+          "expressoes": [
+            "deus acima de todos",
+            "em nome de deus",
+            "família tradicional brasileira",
+            "valores cristãos ocidentais",
+            "moral e bons costumes",
+            "base da sociedade",
+            "família sagrada"
+          ]
+        }
+      }
+    },
+    "inimigos_ideologicos": {
+      "nome": "Inimigos Ideológicos",
+      "descricao": "Identificação e caracterização dos adversários políticos",
+      "subtemas": {
+        "pt_lula": {
+          "nome": "PT e Lula",
+          "descricao": "Ataques específicos ao PT e lideranças petistas",
+          "palavras": [
+            "pt", "petista", "petistas", "petismo", "petralha",
+            "partido dos trabalhadores", "vermelho", "vermelhos",
+            "lula", "lulismo", "lulista", "lulistas", "lulopetismo",
+            "squid", "molusco", "presidiário", "condenado", "ladrão",
+            "bandido", "criminoso", "corrupto", "corruptos", "quadrilha"
+          ],
+          "expressoes": [
+            "lula ladrão",
+            "pt corrupto",
+            "quadrilha do pt",
+            "gangue petista",
+            "lula presidiário",
+            "bandidos do pt",
+            "corruptos petistas"
+          ]
+        },
+        "esquerda_comunista": {
+          "nome": "Esquerda e Comunismo",
+          "descricao": "Rotulação ideológica da oposição como comunista",
+          "palavras": [
+            "comunismo", "comunista", "comunistas", "comunistinha",
+            "socialismo", "socialista", "socialistas", "socialistinha",
+            "marxismo", "marxista", "marxistas", "marxismo cultural",
+            "esquerda", "esquerdista", "esquerdistas", "esquerdismo",
+            "esquerdopata", "esquerdinha", "esquerdalha", "vermelho",
+            "bolivariano", "chavista", "madurista", "castrista",
+            "gramscismo", "gramsci", "antonio gramsci", "frankfurtiano",
+            "escola de frankfurt", "marxista cultural", "cultural marxista"
+          ],
+          "expressoes": [
+            "esquerda comunista",
+            "marxismo cultural",
+            "infiltração comunista",
+            "doutrinação marxista",
+            "comunistas disfarçados",
+            "agenda comunista",
+            "ameaça vermelha"
+          ]
+        },
+        "stf_judiciario": {
+          "nome": "STF e Judiciário",
+          "descricao": "Ataques ao Supremo Tribunal Federal e magistrados",
+          "palavras": [
+            "stf", "supremo", "supremo tribunal federal",
+            "alexandre de moraes", "xandão", "xandao", "moraes",
+            "barroso", "luís roberto barroso", "toffoli", "dias toffoli",
+            "gilmar mendes", "gilmar", "cármen lúcia", "carmen lucia",
+            "ministro", "ministros", "ministra", "ministras",
+            "toga", "togado", "togados", "juiz", "juíza", "juizes",
+            "magistrado", "magistrados", "tribunal", "corte"
+          ],
+          "expressoes": [
+            "stf comunista",
+            "ditadura do stf",
+            "supremo ditatorial",
+            "xandão ditador",
+            "moraes censura",
+            "togados comunistas",
+            "judiciário aparelhado"
+          ]
+        },
+        "midia_imprensa": {
+          "nome": "Mídia e Imprensa",
+          "descricao": "Ataques à grande mídia e jornalistas",
+          "palavras": [
+            "mídia", "midia", "imprensa", "grande mídia", "grande midia",
+            "globo", "rede globo", "globolixo", "globosta", "tv globo",
+            "folha", "folha de são paulo", "folha de sp", "folhinha",
+            "estadão", "estadao", "o estado de são paulo", "veja",
+            "jornalista", "jornalistas", "repórter", "reporteres",
+            "âncora", "ancora", "apresentador", "comentarista",
+            "manipulação", "manipulacao", "propaganda", "fake news"
+          ],
+          "expressoes": [
+            "imprensa comunista",
+            "mídia golpista",
+            "globo lixo",
+            "jornalistas mentirosos",
+            "fake news da mídia",
+            "imprensa vendida",
+            "mídia partidária"
+          ]
+        }
+      }
+    },
+    "teorias_conspiracao": {
+      "nome": "Teorias Conspiratórias",
+      "descricao": "Narrativas conspiratórias sobre controle global e nacional",
+      "subtemas": {
+        "globalismo_nova_ordem": {
+          "nome": "Globalismo e Nova Ordem Mundial",
+          "descricao": "Teorias sobre elite globalista e controle mundial",
+          "palavras": [
+            "globalismo", "globalista", "globalistas", "globalização",
+            "nova ordem mundial", "nom", "new world order", "nwo",
+            "governo mundial", "governo global", "elite global",
+            "soros", "george soros", "open society", "fundação soros",
+            "foro de são paulo", "foro de sao paulo", "fssp",
+            "bilderberg", "davos", "fórum econômico mundial",
+            "great reset", "grande reinicialização", "agenda 2030",
+            "klaus schwab", "onu", "organização das nações unidas",
+            "desenvolvimento sustentável", "sustentabilidade"
+          ],
+          "expressoes": [
+            "nova ordem mundial",
+            "plano globalista",
+            "elite globalista",
+            "soros financia",
+            "agenda globalista",
+            "governo mundial",
+            "great reset comunista"
+          ]
+        },
+        "deep_state": {
+          "nome": "Estado Profundo",
+          "descricao": "Teorias sobre sabotagem institucional interna",
+          "palavras": [
+            "deep state", "estado profundo", "aparelhamento",
+            "burocracia", "burocratas", "funcionários públicos",
+            "carreira", "concursado", "estável", "estabilidade",
+            "aparelhado", "aparelhar", "aparelhamento do estado",
+            "infiltrado", "infiltração", "infiltracao", "infiltracao",
+            "sabotagem", "sabotar", "sabotador", "sabotadores",
+            "quinta coluna", "inimigo interno", "traição interna"
+          ],
+          "expressoes": [
+            "estado profundo brasileiro",
+            "burocratas sabotando",
+            "deep state tupiniquim",
+            "aparelhamento petista",
+            "sabotagem interna",
+            "quinta coluna"
+          ]
+        },
+        "conspiracao_vacinal": {
+          "nome": "Conspiração Vacinal e Sanitária",
+          "descricao": "Teorias sobre controle populacional via vacinas",
+          "palavras": [
+            "vacina", "vacinas", "vacinação", "vacinaçao", "imunização",
+            "experimental", "teste", "cobaia", "cobaia humana",
+            "chip", "microchip", "5g", "controle", "rastreamento",
+            "genética", "genetica", "dna", "rna", "mrna", "modificação",
+            "efeito colateral", "reação adversa", "reacao adversa",
+            "big pharma", "farmacêutica", "farmaceutica", "laboratório",
+            "depopulação", "depopulacao", "genocídio", "genocidio",
+            "controle populacional", "redução populacional", "esterilização",
+            "bill gates", "fundação gates", "fundacao gates",
+            "oms", "organização mundial da saúde"
+          ],
+          "expressoes": [
+            "vacina mata",
+            "vacina experimental",
+            "cobaia humana",
+            "chip na vacina",
+            "controle populacional",
+            "plano de extermínio",
+            "genocídio mundial"
+          ]
+        }
+      }
+    },
+    "negacionismo": {
+      "nome": "Negacionismo",
+      "descricao": "Negação de fatos científicos, históricos e eleitorais",
+      "subtemas": {
+        "negacionismo_pandemico": {
+          "nome": "Negacionismo Pandêmico",
+          "descricao": "Minimização da COVID-19 e críticas às medidas sanitárias",
+          "palavras": [
+            "gripezinha", "gripinha", "resfriado", "gripe comum",
+            "covid fake", "covid falsa", "plandemia", "plandemica",
+            "china vírus", "china virus", "vírus chinês", "virus chines",
+            "histeria", "histérico", "histerica", "pânico", "panico",
+            "lockdown", "lock down", "isolamento forçado", "prisão domiciliar",
+            "ditadura sanitária", "ditadura sanitaria", "autoritarismo sanitário",
+            "máscaras", "mascaras", "focinheira", "mordaça",
+            "tratamento precoce", "kit covid", "cloroquina",
+            "hidroxicloroquina", "ivermectina", "azitromicina"
+          ],
+          "expressoes": [
+            "é só uma gripe",
+            "gripezinha do capeta",
+            "plandemia chinesa",
+            "ditadura do lockdown",
+            "máscaras não funcionam",
+            "covid não mata",
+            "histeria coletiva"
+          ]
+        },
+        "negacionismo_eleitoral": {
+          "nome": "Negacionismo Eleitoral",
+          "descricao": "Questionamento da legitimidade do sistema eleitoral",
+          "palavras": [
+            "urna", "urnas eletrônicas", "urnas eletronicas", "urna eletrônica",
+            "fraude eleitoral", "fraude nas urnas", "eleição fraudada",
+            "voto impresso", "papel", "comprovante", "auditoria",
+            "auditar", "auditável", "auditavel", "transparência",
+            "tse", "tribunal superior eleitoral", "justiça eleitoral",
+            "algoritmo", "software", "manipulado", "manipulação",
+            "hackeado", "hackeada", "invasão", "invasao", "hacker"
+          ],
+          "expressoes": [
+            "urna não é auditável",
+            "fraude nas eleições",
+            "roubaram a eleição",
+            "voto impresso já",
+            "auditoria nas urnas",
+            "eleição fraudada",
+            "tse comunista"
+          ]
+        },
+        "negacionismo_historico": {
+          "nome": "Negacionismo Histórico",
+          "descricao": "Revisão da história da ditadura militar e eventos históricos",
+          "palavras": [
+            "golpe de 64", "revolução de 64", "revolucao de 64",
+            "movimento de 64", "31 de março", "contra-revolução",
+            "ditadura", "regime militar", "governo militar",
+            "tortura", "torturador", "mortos", "desaparecidos",
+            "comissão da verdade", "verdade histórica", "historia oficial",
+            "revisão histórica", "revisao historica", "revisionismo",
+            "ai-5", "ai5", "ato institucional", "censura", "repressão"
+          ],
+          "expressoes": [
+            "não foi golpe foi revolução",
+            "ditadura salvou o brasil",
+            "revolução de 64",
+            "movimento democrático",
+            "salvaram da ameaça comunista",
+            "regime que deu certo"
+          ]
+        }
+      }
+    },
+    "autoritarismo_violencia": {
+      "nome": "Autoritarismo e Violência",
+      "descricao": "Discursos autoritários e incitação à violência",
+      "subtemas": {
+        "autoritarismo_institucional": {
+          "nome": "Autoritarismo Institucional",
+          "descricao": "Defesa de medidas autoritárias contra instituições",
+          "palavras": [
+            "fechar", "fechamento", "acabar", "acabar com",
+            "intervenção", "interventor", "golpe", "golpe militar",
+            "ai-5", "ai5", "novo ai-5", "decreto", "medida de força",
+            "mão firme", "mao firme", "pulso forte", "autoridade",
+            "censura", "censurar", "silenciar", "calar", "fechar a boca",
+            "prender", "prisão", "cadeia", "xadrez", "algemar"
+          ],
+          "expressoes": [
+            "fechar o stf",
+            "acabar com o congresso",
+            "intervenção militar já",
+            "novo ai-5",
+            "fechar tudo",
+            "mão firme no poder"
+          ]
+        },
+        "linguagem_belica": {
+          "nome": "Linguagem Bélica",
+          "descricao": "Metáforas militares e de combate",
+          "palavras": [
+            "guerra", "guerra civil", "batalha", "combate", "luta",
+            "frente", "linha de frente", "trincheira", "campo de batalha",
+            "inimigo", "inimigos", "adversário", "adversarios", "oponente",
+            "destruir", "eliminar", "exterminar", "acabar", "aniquilar",
+            "ataque", "atacar", "ofensiva", "contra-ataque", "contraofensiva",
+            "resistência", "resistir", "defender", "defesa", "proteção",
+            "soldado", "guerreiro", "guerreiros", "combatente", "lutador"
+          ],
+          "expressoes": [
+            "guerra cultural",
+            "combate ao comunismo",
+            "resistência patriótica",
+            "soldados de cristo",
+            "guerreiros da liberdade",
+            "trincheira da família"
+          ]
+        },
+        "incitacao_violencia": {
+          "nome": "Incitação à Violência",
+          "descricao": "Chamadas diretas ou indiretas à violência",
+          "palavras": [
+            "matar", "morte", "morrer", "assassinar", "assassinato",
+            "enforcar", "enforcamento", "fuzilar", "fuzilamento",
+            "paredão", "paredao", "guilhotina", "cadafalso",
+            "extermínio", "exterminio", "liquidar", "liquidação",
+            "explodir", "bomba", "dinamite", "queimar", "incendiar",
+            "linchar", "linchamento", "espancar", "surrar", "bater"
+          ],
+          "expressoes": [
+            "tem que matar",
+            "tem que morrer",
+            "paredão neles",
+            "fuzilamento já",
+            "hora da forca",
+            "limpar a raça"
+          ]
+        }
+      }
+    },
+    "mobilizacao_acao": {
+      "nome": "Mobilização e Ação",
+      "descricao": "Convocações para ação coletiva e manifestações",
+      "subtemas": {
+        "manifestacoes_protestos": {
+          "nome": "Manifestações e Protestos",
+          "descricao": "Organização de atos públicos e manifestações",
+          "palavras": [
+            "manifestação", "manifestacao", "protesto", "ato", "atos",
+            "passeata", "marcha", "caminhada", "concentração",
+            "rua", "ruas", "avenida", "praça", "praca", "esplanada",
+            "paulista", "brasília", "brasilia", "copacabana",
+            "caminhão", "caminhao", "caminhoneiro", "caminhoneiros",
+            "trator", "tratores", "agro", "produtor rural",
+            "bloqueio", "bloqueios", "paralisação", "paralização"
+          ],
+          "expressoes": [
+            "vamos às ruas",
+            "brasil nas ruas",
+            "povo na rua",
+            "7 de setembro protesto",
+            "manifestação patriótica",
+            "ato pela liberdade"
+          ]
+        },
+        "compartilhamento_viral": {
+          "nome": "Compartilhamento e Viralização",
+          "descricao": "Estratégias de disseminação de conteúdo",
+          "palavras": [
+            "compartilha", "compartilhe", "compartilhar", "repassar",
+            "divulga", "divulgue", "divulgar", "espalhar", "espalhe",
+            "viralizar", "viral", "bombar", "explodir", "estourar",
+            "telegram", "whatsapp", "zap", "zapzap", "grupo", "grupos",
+            "canal", "canais", "lista", "broadcast", "corrente"
+          ],
+          "expressoes": [
+            "compartilhe essa verdade",
+            "divulgue antes que apaguem",
+            "espalhe essa mensagem",
+            "repassem para todos",
+            "bomba essa mensagem",
+            "viraliza essa verdade"
+          ]
+        },
+        "convocacao_uniao": {
+          "nome": "Convocação e União",
+          "descricao": "Chamadas para união e ação coordenada",
+          "palavras": [
+            "vamos", "bora", "juntos", "unidos", "unir", "união", "uniao",
+            "todos", "todo mundo", "galera", "pessoal", "patriotas",
+            "irmãos", "irmaos", "companheiros", "camaradas", "família",
+            "time", "equipe", "grupo", "movimento", "força", "coragem"
+          ],
+          "expressoes": [
+            "vamos juntos",
+            "unidos venceremos",
+            "força patriota",
+            "juntos somos mais fortes",
+            "família brasileira unida",
+            "time bolsonaro"
+          ]
+        }
+      }
+    },
+    "desinformacao_verdade": {
+      "nome": "Desinformação e 'Verdade'",
+      "descricao": "Narrativas sobre verdade oculta e informação alternativa",
+      "subtemas": {
+        "verdade_oculta": {
+          "nome": "Verdade Oculta",
+          "descricao": "Alegações sobre informações escondidas",
+          "palavras": [
+            "verdade", "real", "realidade", "fato", "fatos",
+            "escondido", "escondem", "oculto", "secreto", "segredo",
+            "mentira", "mentiras", "fake", "falso", "farsa",
+            "manipulação", "manipulacao", "distorção", "distorcido",
+            "censurado", "apagado", "deletado", "removido", "bloqueado"
+          ],
+          "expressoes": [
+            "a verdade que não te contam",
+            "mídia esconde",
+            "eles não querem que saibam",
+            "verdade censurada",
+            "fatos escondidos",
+            "realidade oculta"
+          ]
+        },
+        "pesquisa_investigacao": {
+          "nome": "Pesquisa e Investigação",
+          "descricao": "Incentivo à busca por informações alternativas",
+          "palavras": [
+            "pesquise", "pesquisem", "pesquisa", "investigar", "investigação",
+            "buscar", "procurar", "descubra", "descobrir", "revelação",
+            "estudo", "estudar", "analisar", "análise", "dados",
+            "fonte", "fontes", "documento", "documentos", "prova", "provas",
+            "evidência", "evidencia", "evidências", "evidencias"
+          ],
+          "expressoes": [
+            "pesquise a verdade",
+            "façam suas pesquisas",
+            "busquem a verdade",
+            "investiguem vocês mesmos",
+            "estudem os fatos",
+            "analisem os dados"
+          ]
+        },
+        "despertar_consciencia": {
+          "nome": "Despertar e Consciência",
+          "descricao": "Apelos para 'acordar' e ganhar consciência",
+          "palavras": [
+            "acordem", "acorda", "despertar", "desperta", "despertem",
+            "consciência", "consciencia", "conscientizar", "perceber",
+            "enxergar", "ver", "abrir os olhos", "clareza", "lucidez",
+            "alienado", "alienação", "alienacao", "cego", "dormindo"
+          ],
+          "expressoes": [
+            "acorda brasil",
+            "desperta brasil",
+            "abram os olhos",
+            "povo alienado",
+            "saiam da matrix",
+            "despertem brasileiros"
+          ]
+        }
+      }
+    },
+    "estrategias_discursivas": {
+      "nome": "Estratégias Discursivas",
+      "descricao": "Técnicas retóricas e estratégias de persuasão",
+      "subtemas": {
+        "vitimizacao": {
+          "nome": "Vitimização",
+          "descricao": "Narrativas de perseguição e injustiça",
+          "palavras": [
+            "perseguição", "perseguicao", "perseguido", "perseguidos",
+            "vítima", "vitima", "vitimado", "injustiça", "injustica",
+            "injusto", "injusta", "sofrer", "sofrimento", "sofreu",
+            "ataque", "atacado", "atacada", "alvo", "mira",
+            "caça às bruxas", "caca as bruxas", "linchamento moral"
+          ],
+          "expressoes": [
+            "perseguição política",
+            "vítima do sistema",
+            "injustiça contra bolsonaro",
+            "caça às bruxas",
+            "perseguem os patriotas",
+            "sofrem perseguição"
+          ]
+        },
+        "polarizacao": {
+          "nome": "Polarização",
+          "descricao": "Divisão radical entre nós e eles",
+          "palavras": [
+            "nós", "nos", "eles", "vocês", "voces", "nosso", "nossa",
+            "lado", "lados", "escolher", "escolha", "decisão", "decisao",
+            "bem", "mal", "certo", "errado", "bom", "ruim",
+            "traidor", "traidores", "inimigo", "inimigos", "adversário"
+          ],
+          "expressoes": [
+            "de que lado você está",
+            "ou está conosco ou contra nós",
+            "patriotas vs traidores",
+            "bem contra o mal",
+            "escolha seu lado",
+            "hora da definição"
+          ]
+        },
+        "urgencia_medo": {
+          "nome": "Urgência e Medo",
+          "descricao": "Criação de senso de urgência e ameaça",
+          "palavras": [
+            "urgente", "urgência", "emergência", "emergencia",
+            "agora", "já", "ja", "imediato", "rápido", "rapido",
+            "perigo", "perigoso", "ameaça", "ameaca", "risco",
+            "cuidado", "atenção", "atencao", "alerta", "alarme",
+            "última chance", "ultima chance", "acabando", "fim"
+          ],
+          "expressoes": [
+            "é agora ou nunca",
+            "última chance",
+            "perigo iminente",
+            "alerta vermelho",
+            "ameaça real",
+            "precisamos agir agora"
+          ]
+        }
+      }
+    },
+    "eventos_simbolicos": {
+      "nome": "Eventos Simbólicos",
+      "descricao": "Referências a eventos específicos do período 2019-2023",
+      "subtemas": {
+        "8_janeiro": {
+          "nome": "8 de Janeiro de 2023",
+          "descricao": "Referências aos ataques aos Três Poderes",
+          "palavras": [
+            "8 de janeiro", "oito de janeiro", "08/01", "08 de janeiro",
+            "brasília", "brasilia", "esplanada", "três poderes",
+            "invasão", "invasao", "ocupação", "ocupacao", "ato",
+            "manifestação", "manifestacao", "protesto", "patriotas",
+            "prisão", "prisao", "presos", "presas", "detidos",
+            "terrorismo", "terrorista", "vândalo", "vandalismo"
+          ],
+          "expressoes": [
+            "patriotas presos",
+            "presos políticos",
+            "invasão de brasília",
+            "ato democrático",
+            "manifestação pacífica",
+            "patriotas injustiçados"
+          ]
+        },
+        "eleicoes_2022": {
+          "nome": "Eleições 2022",
+          "descricao": "Questionamentos sobre o processo eleitoral",
+          "palavras": [
+            "eleição", "eleições", "eleicoes", "primeiro turno", "segundo turno",
+            "outubro", "2022", "campanha", "resultado", "apuração",
+            "vitória", "derrota", "vencedor", "perdedor", "eleito",
+            "votos", "votação", "votacao", "contagem", "recontagem"
+          ],
+          "expressoes": [
+            "eleição roubada",
+            "fraude nas eleições",
+            "resultado manipulado",
+            "vitória legítima",
+            "eleição fraudulenta",
+            "verdadeiro vencedor"
+          ]
+        },
+        "pandemia_governo": {
+          "nome": "Gestão da Pandemia",
+          "descricao": "Críticas às medidas sanitárias e defesa do governo",
+          "palavras": [
+            "pandemia", "covid", "covid-19", "coronavirus", "virus",
+            "oms", "organização mundial da saúde", "ministério da saúde",
+            "pazuello", "queiroga", "mandetta", "teich", "ministro",
+            "cpi", "cpi da covid", "renan calheiros", "omar aziz"
+          ],
+          "expressoes": [
+            "cpi da mentira",
+            "gestão exemplar",
+            "governo atacado",
+            "perseguição na cpi",
+            "cpi golpista",
+            "inquérito tendencioso"
+          ]
+        }
+      }
+    }
+  }
+}

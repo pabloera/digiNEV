@@ -88,7 +88,7 @@ class TopicModelingDashboard:
                     'topic_keywords': 'topic_keywords',
                     'topic_label': 'topic_label',
                     'topic_theme': 'topic_theme',
-                    'political_alignment': 'political_alignment',
+                    'political_orientation': 'political_orientation',
                     'cluster_id': 'cluster_id',
                     'date': 'date'
                 }
@@ -112,8 +112,8 @@ class TopicModelingDashboard:
                 cross_data['affordances'] = affordance_data
 
             # Extract political data
-            if 'political_alignment' in df.columns:
-                political_data = df[['political_alignment', 'alignment_confidence' if 'alignment_confidence' in df.columns else 'political_alignment', 'text_content']].dropna(subset=['political_alignment'])
+            if 'political_orientation' in df.columns:
+                political_data = df[['political_orientation', 'alignment_confidence' if 'alignment_confidence' in df.columns else 'political_orientation', 'text_content']].dropna(subset=['political_orientation'])
                 cross_data['politics'] = political_data
 
             # Extract temporal data
@@ -245,14 +245,14 @@ class TopicModelingDashboard:
 
 
             # Group by topic and political alignment
-            if 'political_alignment' in topics_df.columns:
+            if 'political_orientation' in topics_df.columns:
                 # Prepare aggregation dictionary
                 agg_dict = {'text_content': 'count'}
                 if 'topic_probability' in topics_df.columns:
                     agg_dict['topic_probability'] = ['mean', 'count']
                 # Note: Don't add topic_col to aggregation since it's already in groupby
 
-                grouped = topics_df.groupby([topic_col, 'political_alignment']).agg(agg_dict).reset_index()
+                grouped = topics_df.groupby([topic_col, 'political_orientation']).agg(agg_dict).reset_index()
 
                 # Flatten column names - handle MultiIndex properly
                 if isinstance(grouped.columns, pd.MultiIndex):
@@ -267,7 +267,7 @@ class TopicModelingDashboard:
 
                     bubble_data.append({
                         'topic': topic_label,
-                        'political_alignment': row['political_alignment'],
+                        'political_orientation': row['political_orientation'],
                         'topic_intensity': row.get('topic_probability_mean', row['text_content']),
                         'frequency': row['text_content'],
                         'avg_probability': row.get('topic_probability_mean', 0.5)
@@ -295,7 +295,7 @@ class TopicModelingDashboard:
 
                     bubble_data.append({
                         'topic': topic_label,
-                        'political_alignment': 'Indefinido',
+                        'political_orientation': 'Indefinido',
                         'topic_intensity': row.get('topic_probability_mean', row['text_content']),
                         'frequency': row['text_content'],
                         'avg_probability': row.get('topic_probability_mean', 0.5)
@@ -310,7 +310,7 @@ class TopicModelingDashboard:
             # Create bubble chart
             fig = px.scatter(
                 bubble_df,
-                x='political_alignment',
+                x='political_orientation',
                 y='topic_intensity',
                 size='frequency',
                 color='topic',
@@ -361,8 +361,8 @@ class TopicModelingDashboard:
                 stats['avg_topic_probability'] = topics_df['topic_probability'].mean()
                 stats['topic_probability_std'] = topics_df['topic_probability'].std()
 
-            if 'political_alignment' in topics_df.columns:
-                stats['political_distribution'] = topics_df['political_alignment'].value_counts().to_dict()
+            if 'political_orientation' in topics_df.columns:
+                stats['political_distribution'] = topics_df['political_orientation'].value_counts().to_dict()
 
             if 'cluster_id' in topics_df.columns:
                 stats['unique_clusters'] = topics_df['cluster_id'].nunique()

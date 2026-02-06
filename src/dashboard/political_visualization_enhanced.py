@@ -76,15 +76,15 @@ class EnhancedPoliticalVisualizationDashboard:
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
         # Clean sentiment scores
-        if 'sentiment_score' in df.columns:
-            df['sentiment_score'] = pd.to_numeric(df['sentiment_score'], errors='coerce')
+        if 'sentiment_polarity' in df.columns:
+            df['sentiment_polarity'] = pd.to_numeric(df['sentiment_polarity'], errors='coerce')
 
         # Ensure political categories are strings
-        if 'political_category' in df.columns:
-            df['political_category'] = df['political_category'].fillna('indefinido').astype(str)
+        if 'political_orientation' in df.columns:
+            df['political_orientation'] = df['political_orientation'].fillna('indefinido').astype(str)
 
-        if 'political_alignment' in df.columns:
-            df['political_alignment'] = df['political_alignment'].fillna('indefinido').astype(str)
+        if 'political_orientation' in df.columns:
+            df['political_orientation'] = df['political_orientation'].fillna('indefinido').astype(str)
 
         # Clean text length and word count
         if 'text_length' in df.columns:
@@ -149,11 +149,11 @@ class EnhancedPoliticalVisualizationDashboard:
         st.sidebar.header("🔍 Filters")
 
         # Political category filter
-        if 'political_category' in self.df.columns:
-            categories = ['All'] + sorted(self.df['political_category'].unique().tolist())
+        if 'political_orientation' in self.df.columns:
+            categories = ['All'] + sorted(self.df['political_orientation'].unique().tolist())
             selected_category = st.sidebar.selectbox("Political Category", categories)
             if selected_category != 'All':
-                self.df = self.df[self.df['political_category'] == selected_category]
+                self.df = self.df[self.df['political_orientation'] == selected_category]
 
         # Date range filter
         if 'date' in self.df.columns:
@@ -181,15 +181,15 @@ class EnhancedPoliticalVisualizationDashboard:
             st.metric("Total Messages", len(self.df))
 
         with col2:
-            if 'political_category' in self.df.columns:
-                political_count = self.df['political_category'].value_counts().iloc[0]
-                dominant_category = self.df['political_category'].value_counts().index[0]
+            if 'political_orientation' in self.df.columns:
+                political_count = self.df['political_orientation'].value_counts().iloc[0]
+                dominant_category = self.df['political_orientation'].value_counts().index[0]
                 st.metric("Dominant Category", f"{dominant_category} ({political_count})")
 
         with col3:
-            if 'sentiment' in self.df.columns:
-                sentiment_count = self.df['sentiment'].value_counts().iloc[0]
-                dominant_sentiment = self.df['sentiment'].value_counts().index[0]
+            if 'sentiment_label' in self.df.columns:
+                sentiment_count = self.df['sentiment_label'].value_counts().iloc[0]
+                dominant_sentiment = self.df['sentiment_label'].value_counts().index[0]
                 st.metric("Dominant Sentiment", f"{dominant_sentiment} ({sentiment_count})")
 
         with col4:
@@ -197,9 +197,9 @@ class EnhancedPoliticalVisualizationDashboard:
             st.metric("Avg Message Length", f"{avg_length:.0f} chars")
 
         # Political category distribution
-        if 'political_category' in self.df.columns:
+        if 'political_orientation' in self.df.columns:
             st.subheader("Political Category Distribution")
-            category_counts = self.df['political_category'].value_counts()
+            category_counts = self.df['political_orientation'].value_counts()
 
             fig_pie = px.pie(
                 values=category_counts.values,
@@ -213,7 +213,7 @@ class EnhancedPoliticalVisualizationDashboard:
         """Render detailed political analysis"""
         st.header("🎯 Political Analysis")
 
-        if 'political_category' not in self.df.columns or 'political_alignment' not in self.df.columns:
+        if 'political_orientation' not in self.df.columns or 'political_orientation' not in self.df.columns:
             st.warning("Political analysis columns not found in dataset")
             return
 
@@ -221,7 +221,7 @@ class EnhancedPoliticalVisualizationDashboard:
 
         with col1:
             st.subheader("Political Category Distribution")
-            category_counts = self.df['political_category'].value_counts()
+            category_counts = self.df['political_orientation'].value_counts()
 
             # Color mapping for political categories
             color_map = {
@@ -253,7 +253,7 @@ class EnhancedPoliticalVisualizationDashboard:
 
         with col2:
             st.subheader("Political Alignment Distribution")
-            alignment_counts = self.df['political_alignment'].value_counts()
+            alignment_counts = self.df['political_orientation'].value_counts()
 
             # Color mapping for political alignment
             alignment_colors = {
@@ -285,10 +285,10 @@ class EnhancedPoliticalVisualizationDashboard:
             st.plotly_chart(fig_alignment, use_container_width=True)
 
         # Political vs Sentiment Analysis
-        if 'sentiment' in self.df.columns:
+        if 'sentiment_label' in self.df.columns:
             st.subheader("Political Category vs Sentiment")
 
-            cross_tab = pd.crosstab(self.df['political_category'], self.df['sentiment'])
+            cross_tab = pd.crosstab(self.df['political_orientation'], self.df['sentiment_label'])
 
             fig_heatmap = px.imshow(
                 cross_tab.values,
@@ -308,7 +308,7 @@ class EnhancedPoliticalVisualizationDashboard:
         """Render sentiment analysis visualizations"""
         st.header("💭 Sentiment Analysis")
 
-        if 'sentiment' not in self.df.columns:
+        if 'sentiment_label' not in self.df.columns:
             st.warning("Sentiment analysis columns not found in dataset")
             return
 
@@ -316,7 +316,7 @@ class EnhancedPoliticalVisualizationDashboard:
 
         with col1:
             st.subheader("Sentiment Distribution")
-            sentiment_counts = self.df['sentiment'].value_counts()
+            sentiment_counts = self.df['sentiment_label'].value_counts()
 
             # Color mapping for sentiments
             sentiment_colors = {
@@ -336,12 +336,12 @@ class EnhancedPoliticalVisualizationDashboard:
             st.plotly_chart(fig_sentiment, use_container_width=True)
 
         with col2:
-            if 'sentiment_score' in self.df.columns:
+            if 'sentiment_polarity' in self.df.columns:
                 st.subheader("Sentiment Score Distribution")
 
                 fig_scores = px.histogram(
                     self.df,
-                    x='sentiment_score',
+                    x='sentiment_polarity',
                     title="Distribution of Sentiment Scores",
                     nbins=30,
                     color_discrete_sequence=['#3498DB']
@@ -353,10 +353,10 @@ class EnhancedPoliticalVisualizationDashboard:
                 st.plotly_chart(fig_scores, use_container_width=True)
 
         # Sentiment by Political Category
-        if 'political_category' in self.df.columns:
+        if 'political_orientation' in self.df.columns:
             st.subheader("Sentiment by Political Category")
 
-            sentiment_political = self.df.groupby(['political_category', 'sentiment']).size().unstack(fill_value=0)
+            sentiment_political = self.df.groupby(['political_orientation', 'sentiment_label']).size().unstack(fill_value=0)
 
             fig_stacked = px.bar(
                 sentiment_political.T,
@@ -391,12 +391,12 @@ class EnhancedPoliticalVisualizationDashboard:
         st.plotly_chart(fig_monthly, use_container_width=True)
 
         # Political evolution over time
-        if 'political_category' in self.df.columns:
+        if 'political_orientation' in self.df.columns:
             st.subheader("Political Category Evolution")
 
             temporal_political = self.df.groupby([
                 self.df['date'].dt.to_period('M'),
-                'political_category'
+                'political_orientation'
             ]).size().unstack(fill_value=0)
 
             fig_evolution = px.area(
@@ -454,9 +454,9 @@ class EnhancedPoliticalVisualizationDashboard:
                 st.plotly_chart(fig_users, use_container_width=True)
 
         # Cluster analysis
-        if 'cluster_name' in self.df.columns:
+        if 'cluster_id' in self.df.columns:
             st.subheader("Cluster Analysis")
-            cluster_counts = self.df['cluster_name'].value_counts()
+            cluster_counts = self.df['cluster_id'].value_counts()
 
             fig_clusters = px.pie(
                 values=cluster_counts.values,
@@ -467,9 +467,9 @@ class EnhancedPoliticalVisualizationDashboard:
             st.plotly_chart(fig_clusters, use_container_width=True)
 
         # Topic analysis
-        if 'topic_name' in self.df.columns:
+        if 'dominant_topic' in self.df.columns:
             st.subheader("Topic Distribution")
-            topic_counts = self.df['topic_name'].value_counts().head(10)
+            topic_counts = self.df['dominant_topic'].value_counts().head(10)
 
             fig_topics = px.bar(
                 x=topic_counts.index,

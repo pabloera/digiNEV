@@ -39,6 +39,9 @@ import time
 from collections import Counter
 from urllib.parse import urlparse
 
+# Lexicon loader
+from src.lexicon_loader import LexiconLoader
+
 # Memory monitoring (optional)
 try:
     import psutil
@@ -118,7 +121,7 @@ class Analyzer:
     10. network_analysis (Python puro) - Coordenação e padrões de rede
     """
 
-    def __init__(self, chunk_size: int = 10000, memory_limit_gb: float = 2.0, auto_chunk: bool = True,
+    def __init__(self, chunk_size: int = 2000, memory_limit_gb: float = 2.0, auto_chunk: bool = True,
                  political_relevance_threshold: float = 0.02):
         """
         Inicializar analyzer com capacidades de auto-chunking.
@@ -139,8 +142,10 @@ class Analyzer:
         # Configurações de filtros
         self.political_relevance_threshold = political_relevance_threshold
 
-        # Load political lexicon if available
+        # Load political lexicon via LexiconLoader (unified system: 956 termos, 9 macrotemas)
+        self.lexicon_loader = LexiconLoader()
         self.political_lexicon = self._load_political_lexicon()
+        self._political_terms_map = self.lexicon_loader.get_terms_by_category_map()
 
         # Initialize ML components
         self.tfidf_vectorizer = None
@@ -163,26 +168,19 @@ class Analyzer:
         self.logger.info("✅ Analyzer v.final inicializado (auto-chunking habilitado)")
 
     def _load_political_lexicon(self) -> Dict:
-        """Carregar lexicon político brasileiro correto."""
-        lexicon_path = Path("src/core/lexico_politico_hierarquizado.json")
+        """Carregar lexicon político via LexiconLoader (lexico_unified_system.json)."""
+        if self.lexicon_loader.lexicon:
+            terms_map = self.lexicon_loader.get_terms_by_category_map()
+            total_terms = sum(len(v) for v in terms_map.values())
+            self.logger.info(f"✅ Lexicon unificado carregado: {len(terms_map)} categorias, {total_terms} termos")
+            return self.lexicon_loader.lexicon
 
-        if lexicon_path.exists():
-            try:
-                with open(lexicon_path, 'r', encoding='utf-8') as f:
-                    lexicon = json.load(f)
-                self.logger.info(f"✅ Lexicon político carregado: {len(lexicon)} categorias")
-                return lexicon
-            except Exception as e:
-                self.logger.warning(f"⚠️ Erro ao carregar lexicon: {e}")
-
-        # Lexicon político brasileiro correto (conforme political_visualization_enhanced.py)
+        self.logger.warning("⚠️ Lexicon unificado não encontrado, usando fallback mínimo")
         return {
-            "bolsonarista": ["bolsonaro", "mito", "capitão", "messias", "brasil acima de tudo"],
-            "lulista": ["lula", "squid", "ex-presidente", "pt", "petista"],
-            "anti-bolsonaro": ["fora bolsonaro", "impeachment", "golpista", "fascista"],
-            "neutro": ["governo", "política", "brasil", "país"],
-            "geral": ["eleição", "voto", "democracia", "constituição"],
-            "indefinido": ["moderado", "centrista"]
+            "lexico": {
+                "identidade_patriotica": {"subtemas": {"fallback": {"palavras": ["bolsonaro", "mito", "patriota"]}}},
+                "inimigos_ideologicos": {"subtemas": {"fallback": {"palavras": ["lula", "pt", "petista", "comunista"]}}}
+            }
         }
 
     def _should_use_chunking(self, data_input):
@@ -238,10 +236,20 @@ class Analyzer:
             return False
 
         try:
-            memory_gb = psutil.Process().memory_info().rss / (1024**3)
+            process = psutil.Process()
+            memory_info = process.memory_info()
+            memory_gb = memory_info.rss / (1024**3)
+            memory_percent = process.memory_percent()
+
+            # Log detalhado de memória a cada verificação
+            self.logger.debug(f"💾 Memória atual: {memory_gb:.2f}GB ({memory_percent:.1f}% do sistema)")
+
             if memory_gb > self.memory_limit_gb:
-                self.logger.warning(f"🚨 Memória alta: {memory_gb:.1f}GB > {self.memory_limit_gb}GB")
+                self.logger.warning(f"🚨 Memória alta: {memory_gb:.1f}GB > {self.memory_limit_gb}GB ({memory_percent:.1f}%)")
                 return True
+            elif memory_gb > self.memory_limit_gb * 0.8:
+                self.logger.info(f"⚠️ Memória crescendo: {memory_gb:.1f}GB (80% do limite)")
+
             return False
         except Exception as e:
             self.logger.error(f"❌ Erro no monitoramento de memória: {e}")
@@ -784,12 +792,27 @@ class Analyzer:
 
         consolidated_results = []
         for i, chunk in enumerate(chunks, 1):
-            self.logger.info(f"📦 Processando chunk {i}/{len(chunks)}: {len(chunk)} registros")
+            self.logger.info(f"📦 Chunk {i}: {len(chunk)} registros, Total: {len(chunks):,}")
+
+            # Log de progresso a cada 5 chunks
+            if i % 5 == 0:
+                progress_pct = (i / len(chunks)) * 100
+                self.logger.info(f"🔄 Progresso: {progress_pct:.1f}% ({i}/{len(chunks)} chunks)")
+
             result = self._analyze_single_chunk(chunk.copy())
             consolidated_results.append(result)
-            
+
+            # Limpeza forçada de memória após cada chunk
+            import gc
+            del chunk  # Liberar chunk explicitamente
+            gc.collect()
+
+            # Verificar memória e limpar se necessário
             if self._check_memory_usage():
+                self.logger.warning(f"🚨 Limpeza de memória no chunk {i}")
                 self._clean_memory()
+
+            self.logger.info(f"✅ Chunk {i} processado: {len(result['data']) if 'data' in result else 0} registros finais")
         
         # Para simplificar, retornar resultado do último chunk com stats consolidados
         final_result = consolidated_results[-1]
@@ -1433,12 +1456,12 @@ class Analyzer:
 
     def _stage_07_linguistic_processing(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        STAGE 03: Processamento linguístico com spaCy (LOGO APÓS limpeza).
+        Stage 07: Processamento linguístico com spaCy.
 
         USA: normalized_text do Stage 02
         GERA: tokens, lemmas, POS tags, entidades nomeadas
         """
-        self.logger.info("🔤 STAGE 03: Linguistic Processing (spaCy)")
+        self.logger.info("🔤 Stage 07: Linguistic Processing (spaCy)")
 
         if not SPACY_AVAILABLE:
             self.logger.warning("⚠️ spaCy não disponível - usando processamento básico")
@@ -1818,90 +1841,120 @@ class Analyzer:
 
     def _stage_06_affordances_classification(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        STAGE 06: Affordances Classification
+        STAGE 06: Affordances Classification (Híbrido: Heurística + API)
 
-        Classificar mensagens usando API Anthropic em categorias de affordances:
-        - noticia: Conteúdo informativo, notícias, fatos
-        - midia_social: Posts, compartilhamentos, interações sociais
-        - video_audio_gif: Conteúdo multimídia
-        - opiniao: Opiniões, análises, comentários pessoais
-        - mobilizacao: Chamadas para ação, mobilização política
-        - ataque: Ataques pessoais, insultos, agressões verbais
-        - interacao: Respostas, menções, conversações
-        - is_forwarded: Conteúdo encaminhado/repassado
+        Estratégia otimizada em 3 fases:
+        1. Heurística expandida classifica todas as mensagens com scoring
+        2. Mensagens de alta confiança (>=0.6) ficam com resultado heurístico
+        3. Mensagens de baixa confiança (<0.6) são enviadas à API em batches de 10
 
-        Usa Zero-Shot Analysis com Claude API.
+        Categorias:
+        - noticia, midia_social, video_audio_gif, opiniao,
+        - mobilizacao, ataque, interacao, is_forwarded
         """
         try:
-            self.logger.info("🎯 STAGE 06: Affordances Classification")
+            self.logger.info("🎯 STAGE 06: Affordances Classification (Híbrido)")
 
-            # Importar bibliotecas necessárias
             import os
             import requests
             import json
             import time
             from typing import List, Dict, Any
 
-            # Verificar configuração da API
-            api_key = os.getenv('ANTHROPIC_API_KEY')
-            if not api_key:
-                self.logger.error("❌ ANTHROPIC_API_KEY não encontrada. Pulando classificação por IA.")
-                # Aplicar classificação heurística como fallback
-                return self._stage_06_affordances_heuristic_fallback(df)
-
             text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
             initial_count = len(df)
 
-            # === CONFIGURAÇÃO DA API ===
+            # === FASE 1: Heurística expandida em todas as mensagens ===
+            self.logger.info(f"   📋 Fase 1: Heurística expandida em {initial_count} mensagens...")
+            df = self._stage_06_affordances_heuristic_fallback(df)
+
+            # Contar mensagens por nível de confiança
+            high_conf_mask = df['affordance_confidence'] >= 0.6
+            low_conf_mask = df['affordance_confidence'] < 0.6
+            high_conf_count = high_conf_mask.sum()
+            low_conf_count = low_conf_mask.sum()
+
+            self.logger.info(f"   🟢 Alta confiança heurística: {high_conf_count} ({high_conf_count/initial_count*100:.1f}%)")
+            self.logger.info(f"   🟡 Baixa confiança (candidatas API): {low_conf_count} ({low_conf_count/initial_count*100:.1f}%)")
+
+            # === FASE 2: Verificar se API está disponível ===
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if not api_key:
+                self.logger.warning("⚠️ ANTHROPIC_API_KEY não encontrada. Usando apenas heurística.")
+                # Limpar coluna temporária
+                if '_heuristic_scores' in df.columns:
+                    df = df.drop(columns=['_heuristic_scores'])
+                self.stats['stages_completed'] += 1
+                self.stats['features_extracted'] += 10
+                return df
+
+            if low_conf_count == 0:
+                self.logger.info("   ✅ Todas as mensagens classificadas com alta confiança. API não necessária.")
+                if '_heuristic_scores' in df.columns:
+                    df = df.drop(columns=['_heuristic_scores'])
+                self.stats['stages_completed'] += 1
+                self.stats['features_extracted'] += 10
+                return df
+
+            # === FASE 3: Classificar mensagens de baixa confiança via API (batches de 10) ===
+            self.logger.info(f"   🤖 Fase 3: Enviando {low_conf_count} mensagens à API em batches de 10...")
+
+            # Modelo configurável via .env (default: Haiku 3.5)
+            configured_model = os.getenv('ANTHROPIC_MODEL', 'claude-3-5-haiku-20241022')
+            self.logger.info(f"   🔧 Modelo API: {configured_model}")
+
             api_config = {
-                'model': 'claude-3-5-haiku-20241022',  # Modelo mais econômico
-                'max_tokens': 150,
+                'model': configured_model,
+                'max_tokens': 800,
                 'temperature': 0.1,
                 'system_prompt': """Você é um classificador de conteúdo especializado em discurso político brasileiro em redes sociais.
 
-Classifique cada mensagem de acordo com as seguintes categorias de affordances (múltiplas categorias são possíveis):
+Classifique CADA mensagem numerada de acordo com as categorias de affordances (múltiplas possíveis):
 
-1. noticia: Conteúdo informativo, reportagem, fatos, acontecimentos
-2. midia_social: Posts típicos de redes sociais, compartilhamentos casuais
-3. video_audio_gif: Referências a conteúdo multimídia (vídeo, áudio, gif)
-4. opiniao: Opiniões pessoais, análises, comentários subjetivos
-5. mobilizacao: Chamadas para ação, convocações, mobilização política
+1. noticia: Conteúdo informativo, reportagem, fatos
+2. midia_social: Posts de redes sociais, compartilhamentos
+3. video_audio_gif: Referências a conteúdo multimídia
+4. opiniao: Opiniões pessoais, comentários subjetivos
+5. mobilizacao: Chamadas para ação, mobilização política
 6. ataque: Ataques pessoais, insultos, agressões verbais
 7. interacao: Respostas, menções, conversações diretas
-8. is_forwarded: Indica se o conteúdo parece ser encaminhado/repassado
+8. is_forwarded: Conteúdo encaminhado/repassado
 
-Responda APENAS com um JSON válido no formato:
-{"categorias": ["categoria1", "categoria2"], "confianca": 0.85}
-
-Onde confianca é um valor entre 0.0 e 1.0."""
+Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
+[{"id":1,"categorias":["opiniao","ataque"],"confianca":0.9},{"id":2,"categorias":["noticia"],"confianca":0.85},{"id":3,"categorias":["mobilizacao"],"confianca":0.8}]"""
             }
 
-            # === FUNÇÃO DE CLASSIFICAÇÃO POR API ===
-            def classify_with_anthropic(text: str) -> Dict[str, Any]:
-                """Classificar texto usando API Anthropic."""
-                if pd.isna(text) or len(str(text).strip()) < 10:
-                    return {"categorias": [], "confianca": 0.0}
+            def classify_batch_with_anthropic(texts: List[str]) -> List[Dict[str, Any]]:
+                """Classificar batch de textos (até 10) em uma única chamada API."""
+                # Montar mensagem com textos numerados
+                numbered_texts = []
+                for i, text in enumerate(texts, 1):
+                    text_sample = str(text)[:400] if not pd.isna(text) else ''
+                    if len(text_sample.strip()) < 10:
+                        text_sample = '(mensagem vazia ou muito curta)'
+                    numbered_texts.append(f"[{i}] {text_sample}")
 
-                # Limitar texto para economizar tokens
-                text_sample = str(text)[:500]
+                user_content = "Classifique estas mensagens:\n\n" + "\n\n".join(numbered_texts)
 
                 headers = {
                     'Content-Type': 'application/json',
                     'x-api-key': api_key,
-                    'anthropic-version': '2023-06-01'
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-beta': 'prompt-caching-2024-07-31'
                 }
 
                 payload = {
                     'model': api_config['model'],
                     'max_tokens': api_config['max_tokens'],
                     'temperature': api_config['temperature'],
-                    'system': api_config['system_prompt'],
-                    'messages': [
+                    'system': [
                         {
-                            'role': 'user',
-                            'content': f'Classifique esta mensagem: "{text_sample}"'
+                            'type': 'text',
+                            'text': api_config['system_prompt'],
+                            'cache_control': {'type': 'ephemeral'}
                         }
-                    ]
+                    ],
+                    'messages': [{'role': 'user', 'content': user_content}]
                 }
 
                 try:
@@ -1909,35 +1962,33 @@ Onde confianca é um valor entre 0.0 e 1.0."""
                         'https://api.anthropic.com/v1/messages',
                         headers=headers,
                         json=payload,
-                        timeout=30
+                        timeout=60
                     )
 
                     if response.status_code == 200:
                         result = response.json()
                         content = result['content'][0]['text'].strip()
 
-                        # Parse do JSON retornado
+                        # Parse JSON array
                         try:
-                            classification = json.loads(content)
-                            if isinstance(classification, dict) and 'categorias' in classification:
-                                return classification
+                            classifications = json.loads(content)
+                            if isinstance(classifications, list):
+                                return classifications
                         except json.JSONDecodeError:
-                            # Tentar extrair JSON de resposta não estruturada
-                            if '{' in content and '}' in content:
-                                json_start = content.find('{')
-                                json_end = content.rfind('}') + 1
+                            # Tentar extrair JSON de resposta
+                            if '[' in content and ']' in content:
+                                json_start = content.find('[')
+                                json_end = content.rfind(']') + 1
                                 try:
-                                    classification = json.loads(content[json_start:json_end])
-                                    if isinstance(classification, dict) and 'categorias' in classification:
-                                        return classification
-                                except:
+                                    classifications = json.loads(content[json_start:json_end])
+                                    if isinstance(classifications, list):
+                                        return classifications
+                                except Exception:
                                     pass
 
-                    # Rate limiting
                     elif response.status_code == 429:
-                        self.logger.warning("⚠️ Rate limit atingido, aguardando...")
-                        time.sleep(2)
-                        return {"categorias": [], "confianca": 0.0}
+                        self.logger.warning("⚠️ Rate limit atingido, aguardando 5s...")
+                        time.sleep(5)
 
                     else:
                         self.logger.warning(f"⚠️ API error: {response.status_code}")
@@ -1945,70 +1996,84 @@ Onde confianca é um valor entre 0.0 e 1.0."""
                 except requests.RequestException as e:
                     self.logger.warning(f"⚠️ Erro de conexão: {e}")
 
-                # Fallback em caso de erro
-                return {"categorias": [], "confianca": 0.0}
+                # Retorno vazio em caso de erro
+                return []
 
-            # === PROCESSAMENTO EM LOTES ===
-            self.logger.info(f"🤖 Classificando {initial_count} mensagens com API Anthropic...")
+            # Processar mensagens de baixa confiança
+            low_conf_indices = df.index[low_conf_mask].tolist()
 
-            batch_size = 50  # Processar em lotes pequenos
-            results = []
-            api_calls_made = 0
-            successful_classifications = 0
+            # Verificar se deve usar Batch API (assíncrona) ou chamadas individuais
+            use_batch_api = os.getenv('USE_BATCH_API', 'false').lower() in ('true', '1', 'yes')
 
-            for i in range(0, len(df), batch_size):
-                batch = df.iloc[i:i+batch_size]
-                batch_results = []
+            if use_batch_api and low_conf_count > 100:
+                # === BATCH API (assíncrona, 50% desconto, até 24h) ===
+                self.logger.info(f"   📦 Usando Batch API assíncrona para {low_conf_count} mensagens...")
+                df = self._stage_06_submit_batch_api(
+                    df, low_conf_indices, text_column, api_key, api_config
+                )
+            else:
+                # === CHAMADAS INDIVIDUAIS (síncrono, batches de 10) ===
+                if use_batch_api and low_conf_count <= 100:
+                    self.logger.info(f"   ℹ️ Batch API não eficiente para {low_conf_count} mensagens. Usando chamadas diretas.")
 
-                for idx, row in batch.iterrows():
-                    text = row[text_column]
-                    classification = classify_with_anthropic(text)
+                batch_size = 10
+                api_calls_made = 0
+                api_successes = 0
+                api_failures = 0
 
-                    batch_results.append(classification)
+                for i in range(0, len(low_conf_indices), batch_size):
+                    batch_indices = low_conf_indices[i:i+batch_size]
+                    batch_texts = [df.loc[idx, text_column] for idx in batch_indices]
+
+                    classifications = classify_batch_with_anthropic(batch_texts)
                     api_calls_made += 1
 
-                    if classification['confianca'] > 0:
-                        successful_classifications += 1
+                    if classifications:
+                        for j, idx in enumerate(batch_indices):
+                            if j < len(classifications):
+                                cls = classifications[j]
+                                if isinstance(cls, dict) and 'categorias' in cls:
+                                    df.at[idx, 'affordance_categories'] = cls['categorias']
+                                    df.at[idx, 'affordance_confidence'] = cls.get('confianca', 0.8)
+                                    for aff_type in ['noticia', 'midia_social', 'video_audio_gif', 'opiniao',
+                                                    'mobilizacao', 'ataque', 'interacao', 'is_forwarded']:
+                                        df.at[idx, f'aff_{aff_type}'] = 1 if aff_type in cls['categorias'] else 0
+                                    api_successes += 1
+                                else:
+                                    api_failures += 1
+                            else:
+                                api_failures += 1
+                    else:
+                        api_failures += len(batch_indices)
 
-                    # Rate limiting
-                    time.sleep(0.1)  # 100ms entre requests
+                    time.sleep(0.2)
 
-                results.extend(batch_results)
+                    if api_calls_made % 100 == 0:
+                        progress = min(100, (i / len(low_conf_indices)) * 100)
+                        self.logger.info(f"   🔄 API Progresso: {progress:.1f}% ({api_calls_made} calls, {api_successes} sucessos)")
 
-                # Log de progresso
-                progress = min(100, ((i + batch_size) / len(df)) * 100)
-                self.logger.info(f"   🔄 Progresso: {progress:.1f}% ({api_calls_made} calls, {successful_classifications} sucessos)")
+            # === ESTATÍSTICAS FINAIS ===
+            avg_confidence = df['affordance_confidence'].mean()
+            classified_count = len(df[df['affordance_confidence'] > 0.1])
 
-            # === APLICAR RESULTADOS ===
-            df['affordance_categories'] = [result['categorias'] for result in results]
-            df['affordance_confidence'] = [result['confianca'] for result in results]
-
-            # Adicionar colunas binárias para cada categoria
             affordance_types = ['noticia', 'midia_social', 'video_audio_gif', 'opiniao',
                               'mobilizacao', 'ataque', 'interacao', 'is_forwarded']
-
-            for affordance_type in affordance_types:
-                df[f'aff_{affordance_type}'] = df['affordance_categories'].apply(
-                    lambda cats: 1 if affordance_type in cats else 0
-                )
-
-            # === ESTATÍSTICAS ===
-            avg_confidence = df['affordance_confidence'].mean()
-            classified_count = len(df[df['affordance_confidence'] > 0])
-
-            # Contagem por categoria
             category_counts = {}
             for affordance_type in affordance_types:
                 count = df[f'aff_{affordance_type}'].sum()
                 category_counts[affordance_type] = count
 
-            self.logger.info(f"✅ Classificação de Affordances concluída:")
-            self.logger.info(f"   📊 {api_calls_made} chamadas API realizadas")
-            self.logger.info(f"   ✅ {successful_classifications}/{initial_count} mensagens classificadas")
-            self.logger.info(f"   🎯 Confiança média: {avg_confidence:.3f}")
-            self.logger.info(f"   📈 Taxa de sucesso: {(successful_classifications/initial_count)*100:.1f}%")
+            # Limpar coluna temporária
+            if '_heuristic_scores' in df.columns:
+                df = df.drop(columns=['_heuristic_scores'])
 
-            # Top 5 categorias
+            self.logger.info(f"✅ Classificação Híbrida de Affordances concluída:")
+            self.logger.info(f"   📊 Heurística: {high_conf_count} mensagens ({high_conf_count/initial_count*100:.1f}%)")
+            api_mode = "Batch API" if (use_batch_api and low_conf_count > 100) else "chamadas diretas"
+            self.logger.info(f"   🤖 API ({api_mode}): {low_conf_count} mensagens processadas")
+            self.logger.info(f"   ✅ Total classificadas: {classified_count}/{initial_count}")
+            self.logger.info(f"   🎯 Confiança média: {avg_confidence:.3f}")
+
             top_categories = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:5]
             self.logger.info(f"   🔝 Top categorias: {dict(top_categories)}")
 
@@ -2023,35 +2088,482 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             # Fallback heurístico
             return self._stage_06_affordances_heuristic_fallback(df)
 
+    def _stage_06_submit_batch_api(self, df: pd.DataFrame, low_conf_indices: list,
+                                    text_column: str, api_key: str, api_config: dict) -> pd.DataFrame:
+        """
+        Submeter mensagens de baixa confiança à Anthropic Batch API.
+        Processa até 10.000 requests por batch com 50% de desconto.
+
+        Args:
+            df: DataFrame com dados
+            low_conf_indices: Índices de mensagens de baixa confiança
+            text_column: Nome da coluna de texto
+            api_key: Chave da API Anthropic
+            api_config: Configurações do modelo (model, system_prompt, etc.)
+
+        Returns:
+            DataFrame atualizado com classificações da Batch API
+        """
+        import requests
+        import json
+        import time
+        import tempfile
+        import os
+
+        batch_size = 10  # Mensagens por request individual dentro do batch
+        max_requests_per_batch = 10000  # Limite da Batch API
+
+        self.logger.info(f"   📦 Preparando Batch API: {len(low_conf_indices)} mensagens em batches de {batch_size}")
+
+        # === FASE 1: Gerar requests para a Batch API ===
+        batch_requests = []
+        request_mapping = {}  # custom_id -> lista de índices do DataFrame
+
+        for i in range(0, len(low_conf_indices), batch_size):
+            batch_indices = low_conf_indices[i:i+batch_size]
+            batch_texts = []
+            for idx in batch_indices:
+                text = df.loc[idx, text_column]
+                text_sample = str(text)[:400] if not pd.isna(text) else ''
+                if len(text_sample.strip()) < 10:
+                    text_sample = '(mensagem vazia ou muito curta)'
+                batch_texts.append(text_sample)
+
+            # Montar mensagem com textos numerados
+            numbered_texts = [f"[{j+1}] {t}" for j, t in enumerate(batch_texts)]
+            user_content = "Classifique estas mensagens:\n\n" + "\n\n".join(numbered_texts)
+
+            custom_id = f"batch_{i//batch_size:06d}"
+            request_mapping[custom_id] = batch_indices
+
+            request = {
+                "custom_id": custom_id,
+                "params": {
+                    "model": api_config['model'],
+                    "max_tokens": api_config['max_tokens'],
+                    "temperature": api_config['temperature'],
+                    "system": [
+                        {
+                            "type": "text",
+                            "text": api_config['system_prompt'],
+                            "cache_control": {"type": "ephemeral"}
+                        }
+                    ],
+                    "messages": [{"role": "user", "content": user_content}]
+                }
+            }
+            batch_requests.append(request)
+
+        total_requests = len(batch_requests)
+        self.logger.info(f"   📝 {total_requests} requests gerados para Batch API")
+
+        # === FASE 2: Submeter batches (até 10.000 por vez) ===
+        all_results = {}
+
+        for batch_start in range(0, total_requests, max_requests_per_batch):
+            batch_chunk = batch_requests[batch_start:batch_start + max_requests_per_batch]
+            chunk_num = batch_start // max_requests_per_batch + 1
+            total_chunks = (total_requests + max_requests_per_batch - 1) // max_requests_per_batch
+
+            self.logger.info(f"   🚀 Submetendo batch {chunk_num}/{total_chunks} ({len(batch_chunk)} requests)...")
+
+            headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': api_key,
+                'anthropic-version': '2023-06-01',
+                'anthropic-beta': 'prompt-caching-2024-07-31'
+            }
+
+            payload = {"requests": batch_chunk}
+
+            try:
+                response = requests.post(
+                    'https://api.anthropic.com/v1/messages/batches',
+                    headers=headers,
+                    json=payload,
+                    timeout=120
+                )
+
+                if response.status_code != 200:
+                    self.logger.error(f"   ❌ Batch API erro: {response.status_code} - {response.text[:200]}")
+                    continue
+
+                batch_response = response.json()
+                batch_id = batch_response['id']
+                self.logger.info(f"   ✅ Batch {batch_id} criado. Status: {batch_response['processing_status']}")
+
+                # === FASE 3: Polling para resultados ===
+                results = self._stage_06_poll_batch_results(batch_id, api_key, headers)
+                all_results.update(results)
+
+            except requests.RequestException as e:
+                self.logger.error(f"   ❌ Erro ao submeter batch: {e}")
+                continue
+
+        # === FASE 4: Aplicar resultados ao DataFrame ===
+        api_successes = 0
+        api_failures = 0
+
+        for custom_id, classifications in all_results.items():
+            if custom_id not in request_mapping:
+                continue
+
+            batch_indices = request_mapping[custom_id]
+
+            if classifications:
+                for j, idx in enumerate(batch_indices):
+                    if j < len(classifications):
+                        cls = classifications[j]
+                        if isinstance(cls, dict) and 'categorias' in cls:
+                            df.at[idx, 'affordance_categories'] = cls['categorias']
+                            df.at[idx, 'affordance_confidence'] = cls.get('confianca', 0.8)
+                            for aff_type in ['noticia', 'midia_social', 'video_audio_gif', 'opiniao',
+                                            'mobilizacao', 'ataque', 'interacao', 'is_forwarded']:
+                                df.at[idx, f'aff_{aff_type}'] = 1 if aff_type in cls['categorias'] else 0
+                            api_successes += 1
+                        else:
+                            api_failures += 1
+                    else:
+                        api_failures += 1
+            else:
+                api_failures += len(batch_indices)
+
+        self.logger.info(f"   📊 Batch API concluída: {api_successes} sucessos, {api_failures} falhas")
+        return df
+
+    def _stage_06_poll_batch_results(self, batch_id: str, api_key: str, headers: dict,
+                                      max_wait_seconds: int = 86400, poll_interval: int = 30) -> dict:
+        """
+        Polling para resultados da Batch API.
+
+        Args:
+            batch_id: ID do batch submetido
+            api_key: Chave da API
+            headers: Headers HTTP
+            max_wait_seconds: Tempo máximo de espera (default: 24h)
+            poll_interval: Intervalo entre polls (default: 30s)
+
+        Returns:
+            Dict de custom_id -> lista de classificações
+        """
+        import requests
+        import json
+        import time
+
+        results = {}
+        start_time = time.time()
+
+        self.logger.info(f"   ⏳ Aguardando resultados do batch {batch_id}...")
+
+        while time.time() - start_time < max_wait_seconds:
+            try:
+                # Verificar status do batch
+                status_response = requests.get(
+                    f'https://api.anthropic.com/v1/messages/batches/{batch_id}',
+                    headers={
+                        'x-api-key': api_key,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    timeout=30
+                )
+
+                if status_response.status_code != 200:
+                    self.logger.warning(f"   ⚠️ Erro ao verificar status: {status_response.status_code}")
+                    time.sleep(poll_interval)
+                    continue
+
+                batch_status = status_response.json()
+                processing_status = batch_status['processing_status']
+                request_counts = batch_status.get('request_counts', {})
+
+                processing = request_counts.get('processing', 0)
+                succeeded = request_counts.get('succeeded', 0)
+                errored = request_counts.get('errored', 0)
+                total = processing + succeeded + errored
+
+                elapsed = int(time.time() - start_time)
+                self.logger.info(
+                    f"   ⏳ Batch {batch_id}: {processing_status} "
+                    f"({succeeded}/{total} ok, {errored} erros, {elapsed}s decorridos)"
+                )
+
+                if processing_status == 'ended':
+                    # Coletar resultados
+                    results_url = batch_status.get('results_url')
+                    if results_url:
+                        results = self._stage_06_fetch_batch_results(results_url, api_key)
+                    else:
+                        # Usar endpoint direto
+                        results = self._stage_06_fetch_batch_results(
+                            f'https://api.anthropic.com/v1/messages/batches/{batch_id}/results',
+                            api_key
+                        )
+
+                    self.logger.info(f"   ✅ Batch {batch_id} finalizado: {len(results)} resultados coletados")
+                    return results
+
+            except requests.RequestException as e:
+                self.logger.warning(f"   ⚠️ Erro no polling: {e}")
+
+            time.sleep(poll_interval)
+
+        self.logger.warning(f"   ⚠️ Timeout: batch {batch_id} não concluiu em {max_wait_seconds}s")
+        return results
+
+    def _stage_06_fetch_batch_results(self, results_url: str, api_key: str) -> dict:
+        """
+        Buscar e parsear resultados da Batch API (JSONL).
+
+        Args:
+            results_url: URL dos resultados
+            api_key: Chave da API
+
+        Returns:
+            Dict de custom_id -> lista de classificações
+        """
+        import requests
+        import json
+
+        results = {}
+
+        try:
+            response = requests.get(
+                results_url,
+                headers={
+                    'x-api-key': api_key,
+                    'anthropic-version': '2023-06-01'
+                },
+                timeout=120,
+                stream=True
+            )
+
+            if response.status_code != 200:
+                self.logger.error(f"   ❌ Erro ao buscar resultados: {response.status_code}")
+                return results
+
+            # Parsear JSONL
+            for line in response.iter_lines():
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                    custom_id = entry.get('custom_id', '')
+                    result = entry.get('result', {})
+
+                    if result.get('type') == 'succeeded':
+                        message = result.get('message', {})
+                        content_blocks = message.get('content', [])
+
+                        # Extrair texto da resposta
+                        text_content = ''
+                        for block in content_blocks:
+                            if block.get('type') == 'text':
+                                text_content = block.get('text', '').strip()
+                                break
+
+                        # Parsear JSON de classificações
+                        classifications = self._stage_06_parse_batch_json(text_content)
+                        results[custom_id] = classifications
+
+                    elif result.get('type') in ('errored', 'canceled', 'expired'):
+                        results[custom_id] = []
+                        self.logger.debug(f"   ⚠️ Request {custom_id}: {result.get('type')}")
+
+                except json.JSONDecodeError:
+                    continue
+
+        except requests.RequestException as e:
+            self.logger.error(f"   ❌ Erro ao buscar resultados: {e}")
+
+        return results
+
+    def _stage_06_parse_batch_json(self, text: str) -> list:
+        """
+        Parsear JSON de classificações da resposta da API.
+        Tenta múltiplas estratégias de parsing.
+
+        Args:
+            text: Texto da resposta da API
+
+        Returns:
+            Lista de dicts com categorias e confiança
+        """
+        import json
+
+        if not text:
+            return []
+
+        # Tentativa 1: JSON direto
+        try:
+            result = json.loads(text)
+            if isinstance(result, list):
+                return result
+        except json.JSONDecodeError:
+            pass
+
+        # Tentativa 2: Extrair array JSON do texto
+        if '[' in text and ']' in text:
+            json_start = text.find('[')
+            json_end = text.rfind(']') + 1
+            try:
+                result = json.loads(text[json_start:json_end])
+                if isinstance(result, list):
+                    return result
+            except json.JSONDecodeError:
+                pass
+
+        # Tentativa 3: Extrair objetos JSON individuais
+        try:
+            objects = []
+            import re
+            for match in re.finditer(r'\{[^{}]+\}', text):
+                try:
+                    obj = json.loads(match.group())
+                    if 'categorias' in obj:
+                        objects.append(obj)
+                except json.JSONDecodeError:
+                    continue
+            if objects:
+                return objects
+        except Exception:
+            pass
+
+        return []
+
     def _stage_06_affordances_heuristic_fallback(self, df: pd.DataFrame) -> pd.DataFrame:
         """Fallback heurístico para classificação de affordances sem API."""
         self.logger.info("🔄 Aplicando classificação heurística de affordances...")
 
         text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
 
-        # Padrões heurísticos baseados em palavras-chave
+        # Padrões heurísticos expandidos (15-20 keywords por categoria)
         patterns = {
-            'noticia': ['aconteceu', 'notícia', 'informação', 'fato', 'governo', 'brasil'],
-            'midia_social': ['compartilhem', 'rt', 'retweet', 'curtir', 'like'],
-            'video_audio_gif': ['vídeo', 'audio', 'gif', 'assista', 'ouça'],
-            'opiniao': ['acho', 'penso', 'na minha opinião', 'acredito', 'creio'],
-            'mobilizacao': ['vamos', 'precisamos', 'juntos', 'ação', 'mobilizar'],
-            'ataque': ['idiota', 'burro', 'canalha', 'corrupto', 'mentiroso'],
-            'interacao': ['@', 'resposta', 'pergunta', 'dúvida'],
-            'is_forwarded': ['encaminhado', 'forward', 'repasse', 'compartilhe']
+            'noticia': [
+                'aconteceu', 'notícia', 'informação', 'fato', 'governo', 'brasil',
+                'reportagem', 'jornal', 'imprensa', 'publicou', 'divulgou', 'segundo',
+                'fonte', 'comunicado', 'nota oficial', 'decreto', 'lei', 'medida',
+                'aprovado', 'anunciou', 'declarou', 'dados', 'pesquisa', 'estudo'
+            ],
+            'midia_social': [
+                'compartilhem', 'rt', 'retweet', 'curtir', 'like', 'seguir',
+                'inscreva', 'canal', 'grupo', 'telegram', 'whatsapp', 'twitter',
+                'instagram', 'youtube', 'facebook', 'tiktok', 'sigam', 'divulguem',
+                'espalhem', 'repassem'
+            ],
+            'video_audio_gif': [
+                'vídeo', 'video', 'audio', 'áudio', 'gif', 'assista', 'ouça',
+                'podcast', 'live', 'ao vivo', 'transmissão', 'gravação', 'filmou',
+                'imagem', 'foto', 'print', 'screenshot', 'clipe', 'documentário'
+            ],
+            'opiniao': [
+                'acho', 'penso', 'na minha opinião', 'acredito', 'creio',
+                'considero', 'entendo', 'parece', 'me parece', 'na verdade',
+                'sinceramente', 'francamente', 'obviamente', 'claramente',
+                'infelizmente', 'felizmente', 'absurdo', 'ridículo', 'inaceitável'
+            ],
+            'mobilizacao': [
+                'vamos', 'precisamos', 'juntos', 'ação', 'mobilizar',
+                'protesto', 'manifestação', 'marcha', 'ato', 'convocação',
+                'compareçam', 'participem', 'lutar', 'resistir', 'unir',
+                'levantar', 'defender', 'cobrar', 'exigir', 'pressionar'
+            ],
+            'ataque': [
+                'idiota', 'burro', 'canalha', 'corrupto', 'mentiroso',
+                'ladrão', 'bandido', 'vagabundo', 'safado', 'lixo',
+                'vergonha', 'nojo', 'traidor', 'covarde', 'hipócrita',
+                'incompetente', 'criminoso', 'fascista', 'comunista', 'genocida'
+            ],
+            'interacao': [
+                '@', 'resposta', 'pergunta', 'dúvida', 'respondendo',
+                'concordo', 'discordo', 'exatamente', 'isso mesmo',
+                'verdade', 'falso', 'correto', 'errado', 'complementando'
+            ],
+            'is_forwarded': [
+                'encaminhado', 'forward', 'repasse', 'compartilhe',
+                'repassando', 'recebi', 'me mandaram', 'vejam isso',
+                'olha isso', 'leiam', 'importante', 'urgente', 'atenção'
+            ]
         }
 
-        # Aplicar classificação heurística
-        for affordance_type, keywords in patterns.items():
-            df[f'aff_{affordance_type}'] = df[text_column].apply(
-                lambda text: 1 if any(kw in str(text).lower() for kw in keywords) else 0
+        import re
+
+        def classify_text_heuristic(text):
+            """Classifica texto por heurística com scoring de confiança."""
+            text_lower = str(text).lower() if not pd.isna(text) else ''
+            if len(text_lower) < 5:
+                return [], {}, 0.0
+
+            categories = []
+            scores = {}
+            total_matches = 0
+
+            for affordance_type, keywords in patterns.items():
+                matches = sum(1 for kw in keywords if kw in text_lower)
+                scores[affordance_type] = matches
+                if matches >= 1:
+                    categories.append(affordance_type)
+                    total_matches += matches
+
+            # Detecção por padrões regex
+            if re.search(r'https?://', text_lower):
+                if 'noticia' not in categories:
+                    categories.append('noticia')
+                    scores['noticia'] = scores.get('noticia', 0) + 1
+                    total_matches += 1
+
+            if text_lower.count('@') >= 2:
+                if 'interacao' not in categories:
+                    categories.append('interacao')
+                    scores['interacao'] = scores.get('interacao', 0) + 2
+                    total_matches += 2
+
+            # Confiança baseada no total de matches
+            if total_matches == 0:
+                confidence = 0.1
+            elif total_matches <= 2:
+                confidence = 0.4
+            elif total_matches <= 4:
+                confidence = 0.6
+            elif total_matches <= 7:
+                confidence = 0.75
+            else:
+                confidence = 0.85
+
+            return categories, scores, confidence
+
+        # Aplicar classificação vetorizada
+        self.logger.info(f"   📊 Classificando {len(df)} mensagens por heurística expandida...")
+        results = df[text_column].apply(classify_text_heuristic)
+
+        # Extrair resultados
+        df['affordance_categories'] = results.apply(lambda x: x[0])
+        df['_heuristic_scores'] = results.apply(lambda x: x[1])
+        df['affordance_confidence'] = results.apply(lambda x: x[2])
+
+        # Colunas binárias por categoria
+        affordance_types = ['noticia', 'midia_social', 'video_audio_gif', 'opiniao',
+                          'mobilizacao', 'ataque', 'interacao', 'is_forwarded']
+        for affordance_type in affordance_types:
+            df[f'aff_{affordance_type}'] = df['affordance_categories'].apply(
+                lambda cats: 1 if affordance_type in cats else 0
             )
 
-        # Colunas de compatibilidade
-        df['affordance_categories'] = [[] for _ in range(len(df))]
-        df['affordance_confidence'] = 0.5  # Confiança baixa para heurística
+        # Estatísticas
+        classified = len(df[df['affordance_confidence'] > 0.1])
+        high_conf = len(df[df['affordance_confidence'] >= 0.6])
+        low_conf = len(df[(df['affordance_confidence'] > 0.1) & (df['affordance_confidence'] < 0.6)])
 
-        self.logger.info("✅ Classificação heurística aplicada como fallback")
+        self.logger.info(f"✅ Classificação heurística expandida concluída:")
+        self.logger.info(f"   📊 Total classificadas: {classified}/{len(df)} ({classified/len(df)*100:.1f}%)")
+        self.logger.info(f"   🟢 Alta confiança (>=0.6): {high_conf} ({high_conf/len(df)*100:.1f}%)")
+        self.logger.info(f"   🟡 Baixa confiança (<0.6): {low_conf} ({low_conf/len(df)*100:.1f}%)")
+
+        # Contagem por categoria
+        for aff_type in affordance_types:
+            count = df[f'aff_{aff_type}'].sum()
+            if count > 0:
+                self.logger.info(f"   📌 {aff_type}: {count} ({count/len(df)*100:.1f}%)")
+
         return df
 
     # ===============================================
@@ -2152,13 +2664,15 @@ Onde confianca é um valor entre 0.0 e 1.0."""
     @validate_stage_dependencies(required_columns=['normalized_text'], required_attrs=['political_lexicon'])
     def _stage_08_political_classification(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 05: Classificação política brasileira.
-        
-        Aplica léxico político brasileiro para classificar textos em:
-        - extrema-direita, direita, centro-direita, centro, centro-esquerda, esquerda
+        Stage 08: Classificação política brasileira.
+
+        Aplica léxico unificado (847+ termos, 9 macrotemas) para classificar textos.
+        Escopo: discurso bolsonarista/direita brasileira (2019-2023).
+        Orientações retornadas: extrema-direita, direita, centro-direita, neutral.
+        Nota: léxico não inclui termos de esquerda (fora do escopo do projeto).
         """
         try:
-            self.logger.info("🔄 Stage 05: Classificação política brasileira")
+            self.logger.info("🔄 Stage 08: Classificação política brasileira")
             
             if 'normalized_text' not in df.columns:
                 self.logger.warning("⚠️ normalized_text não encontrado, usando body")
@@ -2166,19 +2680,33 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             else:
                 text_column = 'normalized_text'
             
-            # Classificação política básica
+            # Classificação política usando léxico unificado (956 termos)
             df['political_orientation'] = df[text_column].apply(self._classify_political_orientation)
             df['political_keywords'] = df[text_column].apply(self._extract_political_keywords)
             df['political_intensity'] = df[text_column].apply(self._calculate_political_intensity)
-            
+
+            # Classificação temática - 10 categorias (political_keywords_dict.py, 98 termos)
+            try:
+                from src.core.political_keywords_dict import POLITICAL_KEYWORDS
+                for cat_name, cat_terms in POLITICAL_KEYWORDS.items():
+                    # Remover prefixo numerico (cat0_, cat2_, ..., cat10_)
+                    import re
+                    col_name = 'cat_' + re.sub(r'^cat\d+_', '', cat_name)
+                    df[col_name] = df[text_column].apply(
+                        lambda text, terms=cat_terms: sum(1 for t in terms if t in str(text).lower()) if text else 0
+                    )
+                self.logger.info(f"📊 Classificação temática: {len(POLITICAL_KEYWORDS)} categorias aplicadas")
+            except ImportError:
+                self.logger.warning("⚠️ political_keywords_dict.py não encontrado, pulando categorias temáticas")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 3
-            
-            self.logger.info(f"✅ Stage 05 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 13
+
+            self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 05: {e}")
+            self.logger.error(f"❌ Erro Stage 08: {e}")
             self.stats['processing_errors'] += 1
             return df
 
@@ -2320,12 +2848,12 @@ Onde confianca é um valor entre 0.0 e 1.0."""
     @validate_stage_dependencies(required_columns=['tfidf_score_mean'], required_attrs=['tfidf_matrix'])
     def _stage_10_clustering_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 07: Análise de clustering baseado em features linguísticas.
-        
+        Stage 10: Análise de clustering baseado em features linguísticas.
+
         Agrupa documentos similares usando características extraídas.
         """
         try:
-            self.logger.info("🔄 Stage 07: Análise de clustering")
+            self.logger.info("🔄 Stage 10: Análise de clustering")
             
             # Features numéricas para clustering
             numeric_features = []
@@ -2339,48 +2867,65 @@ Onde confianca é um valor entre 0.0 e 1.0."""
                 df['cluster_distance'] = 0.0
                 df['cluster_size'] = len(df)
             else:
-                from sklearn.cluster import KMeans
                 from sklearn.preprocessing import StandardScaler
-                
+
                 # Preparar dados
                 feature_data = df[numeric_features].fillna(0)
                 scaler = StandardScaler()
                 scaled_data = scaler.fit_transform(feature_data)
-                
-                # Clustering simples
-                n_clusters = min(5, len(df) // 10 + 1)
-                kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-                clusters = kmeans.fit_predict(scaled_data)
-                
-                df['cluster_id'] = clusters
-                df['cluster_distance'] = [
-                    min(((scaled_data[i] - center) ** 2).sum() for center in kmeans.cluster_centers_)
-                    for i in range(len(scaled_data))
-                ]
-                
+
+                # Tentar HDBSCAN (instalado no pyproject.toml, auto-detecção de k)
+                try:
+                    import hdbscan
+                    clusterer = hdbscan.HDBSCAN(
+                        min_cluster_size=max(5, len(df) // 50),
+                        min_samples=3,
+                        metric='euclidean'
+                    )
+                    clusters = clusterer.fit_predict(scaled_data)
+                    # HDBSCAN retorna -1 para noise
+                    df['cluster_id'] = clusters
+                    df['cluster_distance'] = 1.0 - clusterer.probabilities_  # prob → distância
+                    n_found = len(set(clusters) - {-1})
+                    n_noise = (clusters == -1).sum()
+                    self.logger.info(f"📊 HDBSCAN: {n_found} clusters, {n_noise} noise points")
+
+                except (ImportError, Exception) as e:
+                    # Fallback para K-Means
+                    self.logger.warning(f"⚠️ HDBSCAN indisponível ({e}), usando KMeans fallback")
+                    from sklearn.cluster import KMeans
+                    n_clusters = min(5, len(df) // 10 + 1)
+                    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                    clusters = kmeans.fit_predict(scaled_data)
+                    df['cluster_id'] = clusters
+                    df['cluster_distance'] = [
+                        min(((scaled_data[i] - center) ** 2).sum() for center in kmeans.cluster_centers_)
+                        for i in range(len(scaled_data))
+                    ]
+
                 # Tamanho dos clusters
-                cluster_sizes = pd.Series(clusters).value_counts().to_dict()
+                cluster_sizes = pd.Series(df['cluster_id']).value_counts().to_dict()
                 df['cluster_size'] = df['cluster_id'].map(cluster_sizes)
             
             self.stats['stages_completed'] += 1
             self.stats['features_extracted'] += 3
             
-            self.logger.info(f"✅ Stage 07 concluído: {len(df)} registros processados")
+            self.logger.info(f"✅ Stage 10 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 07: {e}")
+            self.logger.error(f"❌ Erro Stage 10: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     def _stage_11_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 08: Topic modeling com embeddings.
-        
+        Stage 11: Topic modeling com LDA.
+
         Descoberta automática de tópicos nos textos.
         """
         try:
-            self.logger.info("🔄 Stage 08: Topic modeling")
+            self.logger.info("🔄 Stage 11: Topic modeling")
             
             if 'tokens' not in df.columns:
                 self.logger.warning("⚠️ tokens não encontrados, usando normalized_text")
@@ -2393,8 +2938,27 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             from sklearn.feature_extraction.text import CountVectorizer
             from sklearn.decomposition import LatentDirichletAllocation
             
-            # Preparar dados
-            vectorizer = CountVectorizer(max_features=50, stop_words=None)
+            # Stopwords PT (termos funcionais que poluem LDA)
+            pt_stopwords = [
+                'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas',
+                'um', 'uma', 'uns', 'umas', 'por', 'para', 'com', 'sem', 'sob',
+                'que', 'se', 'não', 'mais', 'muito', 'como', 'mas', 'ou', 'já',
+                'também', 'só', 'seu', 'sua', 'seus', 'suas', 'ele', 'ela', 'eles',
+                'elas', 'isso', 'isto', 'esse', 'essa', 'este', 'esta', 'aqui',
+                'ali', 'lá', 'ao', 'aos', 'à', 'às', 'pelo', 'pela', 'pelos', 'pelas',
+                'entre', 'sobre', 'após', 'até', 'quando', 'onde', 'quem', 'qual',
+                'foi', 'ser', 'ter', 'está', 'são', 'tem', 'era', 'vai', 'pode',
+                'nos', 'me', 'te', 'lhe', 'o', 'a', 'os', 'as', 'e', 'é',
+                'eu', 'tu', 'nós', 'vós', 'meu', 'minha', 'teu', 'tua',
+                'nosso', 'nossa', 'nossos', 'nossas', 'todo', 'toda', 'todos', 'todas',
+                'outro', 'outra', 'outros', 'outras', 'mesmo', 'mesma', 'cada',
+                'ainda', 'então', 'depois', 'antes', 'bem', 'agora', 'sempre',
+                'nunca', 'nada', 'tudo', 'algo', 'assim', 'aquele', 'aquela',
+                'http', 'https', 'www', 'com', 'org', 'br', 'the', 'and', 'for'
+            ]
+
+            # Preparar dados (com remoção de stopwords PT)
+            vectorizer = CountVectorizer(max_features=50, stop_words=pt_stopwords)
             doc_term_matrix = vectorizer.fit_transform(text_data)
             
             # LDA simples
@@ -2418,23 +2982,23 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             self.stats['stages_completed'] += 1
             self.stats['features_extracted'] += 3
             
-            self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros processados")
+            self.logger.info(f"✅ Stage 11 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 08: {e}")
+            self.logger.error(f"❌ Erro Stage 11: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     @validate_stage_dependencies(required_columns=['normalized_text'])
     def _stage_13_temporal_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 09: Análise temporal.
-        
+        Stage 13: Análise temporal.
+
         Extrai padrões temporais dos timestamps.
         """
         try:
-            self.logger.info("🔄 Stage 09: Análise temporal")
+            self.logger.info("🔄 Stage 13: Análise temporal")
             
             if 'datetime' not in df.columns:
                 self.logger.warning("⚠️ datetime não encontrado")
@@ -2460,25 +3024,44 @@ Onde confianca é um valor entre 0.0 e 1.0."""
                     df['year'] = 2020
                     df['day_of_year'] = 1
             
+            # Burst Detection - Kleinberg (2003), KDD
+            # Detecta dias com volume anormal de mensagens
+            df['is_burst_day'] = False
+            if 'datetime' in df.columns:
+                try:
+                    dt_series = pd.to_datetime(df['datetime'], format='%d/%m/%Y %H:%M:%S', errors='coerce')
+                    dates = dt_series.dt.date
+                    daily_counts = dates.value_counts()
+                    if len(daily_counts) >= 3:
+                        mean_count = daily_counts.mean()
+                        std_count = daily_counts.std()
+                        burst_threshold = mean_count + 2 * std_count  # 2 desvios padrão
+                        burst_dates = daily_counts[daily_counts > burst_threshold].index.tolist()
+                        df['is_burst_day'] = dates.isin(burst_dates)
+                        if burst_dates:
+                            self.logger.info(f"📈 Burst detection: {len(burst_dates)} dias com volume anormal")
+                except Exception as e:
+                    self.logger.warning(f"⚠️ Burst detection: {e}")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 5
-            
-            self.logger.info(f"✅ Stage 09 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 6
+
+            self.logger.info(f"✅ Stage 13 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 09: {e}")
+            self.logger.error(f"❌ Erro Stage 13: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     def _stage_14_network_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 10: Análise de rede (coordenação e padrões).
-        
+        Stage 14: Análise de rede (coordenação e padrões).
+
         Detecta padrões de coordenação e comportamento de rede.
         """
         try:
-            self.logger.info("🔄 Stage 10: Análise de rede")
+            self.logger.info("🔄 Stage 14: Análise de rede")
             
             # Análise de coordenação básica
             if 'sender' in df.columns:
@@ -2518,35 +3101,37 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             self.stats['stages_completed'] += 1
             self.stats['features_extracted'] += 4
             
-            self.logger.info(f"✅ Stage 10 concluído: {len(df)} registros processados")
+            self.logger.info(f"✅ Stage 14 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 10: {e}")
+            self.logger.error(f"❌ Erro Stage 14: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     def _stage_15_domain_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 11: Análise de domínios.
-        
+        Stage 15: Análise de domínios.
+
         Analisa domínios e URLs para identificar padrões de mídia.
         """
         try:
-            self.logger.info("🔄 Stage 11: Análise de domínios")
+            self.logger.info("🔄 Stage 15: Análise de domínios")
             
-            # Análise de domínios
+            # Análise de domínios com trust score (Page et al. 1999, adaptado)
             if 'domain' in df.columns:
                 df['domain_type'] = df['domain'].apply(self._classify_domain_type)
-                
+                df['domain_trust_score'] = df['domain'].apply(self._calculate_domain_trust_score)
+
                 domain_counts = df['domain'].value_counts()
                 df['domain_frequency'] = df['domain'].map(domain_counts)
-                
-                # Mídia mainstream vs alternativa
-                mainstream_domains = ['youtube.com', 'twitter.com', 'facebook.com', 'instagram.com', 'g1.globo.com', 'folha.uol.com.br']
-                df['is_mainstream_media'] = df['domain'].isin(mainstream_domains)
+
+                # Mídia mainstream vs alternativa (baseado em domain_type classificado)
+                mainstream_types = ['mainstream_news', 'government']
+                df['is_mainstream_media'] = df['domain_type'].isin(mainstream_types)
             else:
                 df['domain_type'] = 'unknown'
+                df['domain_trust_score'] = 0.0
                 df['domain_frequency'] = 0
                 df['is_mainstream_media'] = False
             
@@ -2563,11 +3148,11 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             self.stats['stages_completed'] += 1
             self.stats['features_extracted'] += 5
             
-            self.logger.info(f"✅ Stage 11 concluído: {len(df)} registros processados")
+            self.logger.info(f"✅ Stage 15 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 11: {e}")
+            self.logger.error(f"❌ Erro Stage 15: {e}")
             self.stats['processing_errors'] += 1
             return df
 
@@ -2589,8 +3174,14 @@ Onde confianca é um valor entre 0.0 e 1.0."""
                 lambda x: 'positive' if x > 0.1 else ('negative' if x < -0.1 else 'neutral')
             )
             
-            # Análise de emoções básicas
-            df['emotion_intensity'] = df[text_column].apply(self._calculate_emotion_intensity)
+            # Análise de emoções básicas (usar body original para detectar !, ?, CAPS)
+            raw_col = 'body' if 'body' in df.columns else text_column
+            df['emotion_intensity'] = df.apply(
+                lambda row: self._calculate_emotion_intensity(
+                    str(row.get(text_column, '')),
+                    raw_text=str(row.get(raw_col, ''))
+                ), axis=1
+            )
             df['has_aggressive_language'] = df[text_column].apply(self._detect_aggressive_language)
             
             # Complexidade semântica
@@ -2616,12 +3207,12 @@ Onde confianca é um valor entre 0.0 e 1.0."""
 
     def _stage_16_event_context(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 13: Análise de contexto de eventos.
-        
+        Stage 16: Análise de contexto de eventos.
+
         Detecta contextos políticos e eventos relevantes.
         """
         try:
-            self.logger.info("🔄 Stage 13: Análise de contexto de eventos")
+            self.logger.info("🔄 Stage 16: Análise de contexto de eventos")
             
             text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
             
@@ -2634,6 +3225,13 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             df['election_context'] = df[text_column].apply(self._detect_election_context)
             df['protest_context'] = df[text_column].apply(self._detect_protest_context)
             
+            # Frame Analysis - Entman (1993), J Communication 43(4): 51-58
+            frame_results = df[text_column].apply(self._analyze_political_frames)
+            df['frame_conflito'] = frame_results.apply(lambda x: x.get('conflito', 0.0))
+            df['frame_responsabilizacao'] = frame_results.apply(lambda x: x.get('responsabilizacao', 0.0))
+            df['frame_moralista'] = frame_results.apply(lambda x: x.get('moralista', 0.0))
+            df['frame_economico'] = frame_results.apply(lambda x: x.get('economico', 0.0))
+
             # Análise temporal de eventos
             if 'datetime' in df.columns:
                 df['is_weekend'] = df['day_of_week'].isin([5, 6]) if 'day_of_week' in df.columns else False
@@ -2641,26 +3239,26 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             else:
                 df['is_weekend'] = False
                 df['is_business_hours'] = True
-            
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 7
-            
-            self.logger.info(f"✅ Stage 13 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 11
+
+            self.logger.info(f"✅ Stage 16 concluído: {len(df)} registros, 4 frames Entman extraídos")
             return df
             
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 13: {e}")
+            self.logger.error(f"❌ Erro Stage 16: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     def _stage_17_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 14: Análise de canais/fontes.
-        
+        Stage 17: Análise de canais/fontes.
+
         Classifica canais e fontes de informação.
         """
         try:
-            self.logger.info("🔄 Stage 14: Análise de canais")
+            self.logger.info("🔄 Stage 17: Análise de canais")
             
             # Análise de canais
             if 'channel' in df.columns:
@@ -2703,150 +3301,231 @@ Onde confianca é um valor entre 0.0 e 1.0."""
             self.stats['stages_completed'] += 1
             self.stats['features_extracted'] += 7
             
-            self.logger.info(f"✅ Stage 14 concluído: {len(df)} registros processados")
+            self.logger.info(f"✅ Stage 17 concluído: {len(df)} registros processados")
             return df
-            
+
         except Exception as e:
-            self.logger.error(f"❌ Erro Stage 14: {e}")
+            self.logger.error(f"❌ Erro Stage 17: {e}")
             self.stats['processing_errors'] += 1
             return df
 
     # ==========================================
     # HELPER METHODS FOR ANALYSIS STAGES
+    # (Integrado com lexico_unified_system.json: 956 termos, 9 macrotemas)
     # ==========================================
 
     def _classify_political_orientation(self, text: str) -> str:
-        """Classifica orientação política do texto."""
+        """Classifica orientação política usando léxico unificado (956 termos)."""
         if not text or pd.isna(text):
             return 'neutral'
-        
+
         text_lower = str(text).lower()
-        
-        # Palavras-chave para classificação política brasileira
-        extrema_direita = ['bolsonaro', 'mito', 'capitão', 'comunista', 'petralha', 'globalismo']
-        direita = ['conservador', 'tradicional', 'família', 'ordem', 'progresso']
-        centro_direita = ['liberal', 'empreendedor', 'mercado', 'economia']
-        centro = ['moderado', 'equilibrio', 'consenso']
-        centro_esquerda = ['social', 'trabalhador', 'direitos']
-        esquerda = ['lula', 'pt', 'socialismo', 'igualdade', 'justiça social']
-        
-        scores = {
-            'extrema-direita': sum(1 for word in extrema_direita if word in text_lower),
-            'direita': sum(1 for word in direita if word in text_lower),
-            'centro-direita': sum(1 for word in centro_direita if word in text_lower),
-            'centro': sum(1 for word in centro if word in text_lower),
-            'centro-esquerda': sum(1 for word in centro_esquerda if word in text_lower),
-            'esquerda': sum(1 for word in esquerda if word in text_lower)
-        }
-        
-        return max(scores.items(), key=lambda x: x[1])[0] if max(scores.values()) > 0 else 'neutral'
+        terms_map = self._political_terms_map
+
+        # Mapear macrotemas do léxico para orientação política
+        # Macrotemas de direita/extrema-direita: identidade_patriotica, inimigos_ideologicos,
+        # teorias_conspiracao, negacionismo, autoritarismo_violencia, mobilizacao_acao
+        direita_categories = [
+            'identidade_patriotica', 'inimigos_ideologicos', 'teorias_conspiracao',
+            'negacionismo', 'autoritarismo_violencia', 'mobilizacao_acao',
+            'desinformacao_verdade', 'estrategias_discursivas', 'eventos_simbolicos'
+        ]
+
+        # Contar matches por macrotema
+        scores = {}
+        for cat in direita_categories:
+            terms = terms_map.get(cat, [])
+            scores[cat] = sum(1 for term in terms if term in text_lower)
+
+        total_matches = sum(scores.values())
+        if total_matches == 0:
+            return 'neutral'
+
+        # Classificar baseado na intensidade e tipo de termos encontrados
+        radical_score = scores.get('autoritarismo_violencia', 0) + scores.get('mobilizacao_acao', 0)
+        conspiracao_score = scores.get('teorias_conspiracao', 0) + scores.get('negacionismo', 0)
+        identidade_score = scores.get('identidade_patriotica', 0) + scores.get('eventos_simbolicos', 0)
+        adversario_score = scores.get('inimigos_ideologicos', 0)
+
+        if radical_score >= 2 or (conspiracao_score >= 2 and adversario_score >= 1):
+            return 'extrema-direita'
+        elif adversario_score >= 2 or conspiracao_score >= 2:
+            return 'direita'
+        elif identidade_score >= 2:
+            return 'centro-direita'
+        elif total_matches >= 1:
+            return 'direita'
+        return 'neutral'
 
     def _extract_political_keywords(self, text: str) -> list:
-        """Extrai palavras-chave políticas do texto."""
+        """Extrai palavras-chave políticas usando léxico unificado (956 termos)."""
         if not text or pd.isna(text):
             return []
-        
-        political_keywords = [
-            'bolsonaro', 'lula', 'pt', 'psl', 'mdb', 'psdb',
-            'eleição', 'voto', 'democracia', 'ditadura', 'golpe',
-            'esquerda', 'direita', 'conservador', 'liberal'
-        ]
-        
+
         text_lower = str(text).lower()
-        found_keywords = [word for word in political_keywords if word in text_lower]
-        
-        return found_keywords[:5]  # Máximo 5 palavras-chave
+        terms_map = self._political_terms_map
+        found = []
+        for cat, terms in terms_map.items():
+            for term in terms:
+                if term in text_lower and term not in found:
+                    found.append(term)
+                    if len(found) >= 10:
+                        return found
+        return found
 
     def _calculate_political_intensity(self, text: str) -> float:
-        """Calcula intensidade do discurso político."""
+        """Calcula intensidade usando termos de mobilização e autoritarismo do léxico."""
         if not text or pd.isna(text):
             return 0.0
-        
-        intensity_words = [
-            'sempre', 'nunca', 'jamais', 'obrigatório', 'proibido',
-            'urgente', 'imediato', 'crucial', 'fundamental', 'essencial'
-        ]
-        
+
         text_lower = str(text).lower()
-        intensity_count = sum(1 for word in intensity_words if word in text_lower)
-        
-        return min(intensity_count / 10.0, 1.0)  # Normalizar entre 0 e 1
+        terms_map = self._political_terms_map
+
+        # Termos de alta intensidade: mobilização + autoritarismo + desinformação
+        intensity_terms = (
+            terms_map.get('mobilizacao_acao', []) +
+            terms_map.get('autoritarismo_violencia', []) +
+            terms_map.get('desinformacao_verdade', [])
+        )
+
+        if not intensity_terms:
+            return 0.0
+
+        match_count = sum(1 for term in intensity_terms if term in text_lower)
+        # Normalizar: 1 match=0.15, 2=0.3, 5+=0.75, 7+=1.0
+        return min(match_count * 0.15, 1.0)
 
     def _classify_domain_type(self, domain: str) -> str:
-        """Classifica tipo de domínio."""
+        """Classifica tipo de domínio com categorias expandidas."""
         if not domain or pd.isna(domain):
             return 'unknown'
-        
+
         domain_lower = str(domain).lower()
-        
-        if any(x in domain_lower for x in ['youtube', 'youtu.be']):
-            return 'video'
-        elif any(x in domain_lower for x in ['twitter', 'facebook', 'instagram']):
-            return 'social'
-        elif any(x in domain_lower for x in ['globo', 'folha', 'estadao', 'uol']):
+
+        # Categorias expandidas (baseado em domain_authority_analysis do archive)
+        trusted_news = ['folha.uol.com.br', 'g1.globo.com', 'estadao.com.br',
+                       'oglobo.globo.com', 'uol.com.br', 'bbc.com', 'reuters.com',
+                       'globo.com', 'folha.com', 'r7.com', 'terra.com.br']
+        government = ['.gov.br', '.leg.br', '.jus.br', '.mil.br']
+        video = ['youtube.com', 'youtu.be', 'vimeo.com', 'rumble.com', 'odysee.com']
+        social = ['twitter.com', 'x.com', 'facebook.com', 'instagram.com',
+                 't.me', 'telegram.me', 'whatsapp.com', 'tiktok.com']
+        blog = ['blog', 'wordpress', 'medium.com', 'substack.com', 'blogspot']
+
+        if any(trusted in domain_lower for trusted in trusted_news):
             return 'mainstream_news'
-        elif any(x in domain_lower for x in ['blog', 'wordpress', 'medium']):
+        elif any(gov in domain_lower for gov in government):
+            return 'government'
+        elif any(v in domain_lower for v in video):
+            return 'video'
+        elif any(s in domain_lower for s in social):
+            return 'social'
+        elif any(b in domain_lower for b in blog):
             return 'blog'
         else:
-            return 'other'
+            return 'alternative'
+
+    def _calculate_domain_trust_score(self, domain: str) -> float:
+        """Calcula score de confiança do domínio (Page et al. 1999, adaptado)."""
+        if not domain or pd.isna(domain):
+            return 0.0
+        dtype = self._classify_domain_type(domain)
+        trust_map = {
+            'government': 0.9, 'mainstream_news': 0.8, 'video': 0.5,
+            'social': 0.4, 'blog': 0.3, 'alternative': 0.2, 'unknown': 0.0
+        }
+        return trust_map.get(dtype, 0.0)
 
     def _calculate_sentiment_polarity(self, text: str) -> float:
-        """Calcula polaridade de sentimento básica."""
+        """Calcula polaridade com dicionário LIWC expandido (Balage Filho et al. 2013)."""
         if not text or pd.isna(text):
             return 0.0
-        
-        positive_words = ['bom', 'ótimo', 'excelente', 'maravilhoso', 'perfeito', 'amor', 'feliz']
-        negative_words = ['ruim', 'péssimo', 'terrível', 'ódio', 'raiva', 'triste', 'infeliz']
-        
+
+        # Dicionário LIWC-PT expandido (baseado em sci_validated_methods_implementation.py)
+        positive_words = [
+            'bom', 'boa', 'bons', 'boas', 'ótimo', 'ótima', 'excelente',
+            'maravilhoso', 'maravilhosa', 'perfeito', 'perfeita', 'amor',
+            'feliz', 'felicidade', 'alegria', 'alegre', 'vitória', 'sucesso',
+            'conquista', 'esperança', 'orgulho', 'admiração', 'respeito',
+            'liberdade', 'paz', 'progresso', 'avanço', 'melhoria',
+            'lindo', 'linda', 'beleza', 'incrível', 'fantástico', 'fantástica',
+            'parabéns', 'obrigado', 'obrigada', 'gratidão', 'abençoado',
+            'honra', 'glória', 'benção', 'fé', 'força', 'coragem'
+        ]
+        negative_words = [
+            'ruim', 'péssimo', 'péssima', 'terrível', 'horrível', 'ódio',
+            'raiva', 'triste', 'tristeza', 'infeliz', 'medo', 'fracasso',
+            'derrota', 'vergonha', 'nojo', 'desgraça', 'desastre',
+            'culpa', 'miséria', 'sofrimento', 'dor', 'angústia',
+            'decepção', 'frustração', 'absurdo', 'ridículo', 'ridícula',
+            'lamentável', 'deplorável', 'covarde', 'covardia', 'mentira',
+            'mentiroso', 'mentirosa', 'traição', 'traidor', 'traidora',
+            'destruição', 'morte', 'desespero', 'pânico', 'terror',
+            'criminoso', 'criminosa', 'bandido', 'bandida', 'corrupto', 'corrupção'
+        ]
+
         text_lower = str(text).lower()
-        positive_count = sum(1 for word in positive_words if word in text_lower)
-        negative_count = sum(1 for word in negative_words if word in text_lower)
-        
-        total_words = len(text_lower.split())
+        words = text_lower.split()
+        total_words = len(words)
         if total_words == 0:
             return 0.0
-        
+
+        positive_count = sum(1 for word in words if word in positive_words)
+        negative_count = sum(1 for word in words if word in negative_words)
+
         return (positive_count - negative_count) / total_words
 
-    def _calculate_emotion_intensity(self, text: str) -> float:
-        """Calcula intensidade emocional."""
-        if not text or pd.isna(text):
+    def _calculate_emotion_intensity(self, text: str, raw_text: str = None) -> float:
+        """Calcula intensidade emocional usando texto original (com pontuação)."""
+        # Usar raw_text (body original) se disponível, pois normalized_text remove pontuação
+        source = raw_text if raw_text else text
+        if not source or pd.isna(source):
             return 0.0
-        
-        # Contagem de pontuação emocional
-        emotion_markers = text.count('!') + text.count('?') + text.count('...') 
-        caps_words = sum(1 for word in str(text).split() if word.isupper() and len(word) > 2)
-        
+
+        source_str = str(source)
+        emotion_markers = source_str.count('!') + source_str.count('?') + source_str.count('...')
+        caps_words = sum(1 for word in source_str.split() if word.isupper() and len(word) > 2)
+
         return min((emotion_markers + caps_words) / 10.0, 1.0)
 
     def _detect_aggressive_language(self, text: str) -> bool:
-        """Detecta linguagem agressiva."""
+        """Detecta linguagem agressiva usando léxico (autoritarismo_violencia + inimigos)."""
         if not text or pd.isna(text):
             return False
-        
-        aggressive_words = [
-            'ódio', 'matar', 'destruir', 'eliminar', 'acabar',
-            'burro', 'idiota', 'imbecil', 'estúpido'
-        ]
-        
+
         text_lower = str(text).lower()
-        return any(word in text_lower for word in aggressive_words)
+        terms_map = self._political_terms_map
+
+        # Combinar termos de violência e agressão do léxico
+        aggressive_terms = terms_map.get('autoritarismo_violencia', [])
+        # Adicionar termos clássicos de agressão pessoal
+        extra_aggressive = [
+            'ódio', 'matar', 'destruir', 'eliminar', 'acabar',
+            'burro', 'idiota', 'imbecil', 'estúpido', 'canalha',
+            'vagabundo', 'lixo', 'verme', 'parasita', 'bandido',
+            'safado', 'nojento', 'covarde', 'traidor', 'criminoso'
+        ]
+
+        all_aggressive = set(aggressive_terms + extra_aggressive)
+        return any(term in text_lower for term in all_aggressive)
 
     def _detect_political_context(self, text: str) -> str:
         """Detecta contexto político."""
         if not text or pd.isna(text):
             return 'none'
-        
+
         text_lower = str(text).lower()
-        
-        if any(word in text_lower for word in ['eleição', 'voto', 'urna', 'candidato']):
+
+        if any(word in text_lower for word in ['eleição', 'voto', 'urna', 'candidato', 'campanha', 'debate']):
             return 'electoral'
-        elif any(word in text_lower for word in ['governo', 'ministro', 'presidente']):
+        elif any(word in text_lower for word in ['governo', 'ministro', 'presidente', 'planalto', 'congresso']):
             return 'government'
-        elif any(word in text_lower for word in ['manifestação', 'protesto', 'greve']):
+        elif any(word in text_lower for word in ['manifestação', 'protesto', 'greve', 'ato', 'marcha']):
             return 'protest'
-        elif any(word in text_lower for word in ['economia', 'inflação', 'desemprego']):
+        elif any(word in text_lower for word in ['economia', 'inflação', 'desemprego', 'pib', 'dólar']):
             return 'economic'
+        elif any(word in text_lower for word in ['pandemia', 'covid', 'vacina', 'lockdown', 'quarentena']):
+            return 'pandemic'
         else:
             return 'general'
 
@@ -2854,57 +3533,162 @@ Onde confianca é um valor entre 0.0 e 1.0."""
         """Verifica se menciona governo."""
         if not text or pd.isna(text):
             return False
-        
-        government_terms = ['governo', 'presidente', 'ministro', 'secretário', 'federal']
+
+        government_terms = [
+            'governo', 'presidente', 'ministro', 'secretário', 'federal',
+            'planalto', 'congresso', 'senado', 'câmara', 'deputado',
+            'senador', 'governador', 'prefeito', 'bolsonaro', 'lula'
+        ]
         text_lower = str(text).lower()
-        
         return any(term in text_lower for term in government_terms)
 
     def _mentions_opposition(self, text: str) -> bool:
         """Verifica se menciona oposição."""
         if not text or pd.isna(text):
             return False
-        
-        opposition_terms = ['oposição', 'contra', 'resistência', 'impeachment']
+
+        terms_map = self._political_terms_map
+        opposition_terms = terms_map.get('inimigos_ideologicos', [])
+        extra = ['oposição', 'contra', 'resistência', 'impeachment', 'fora']
+        all_terms = set(opposition_terms + extra)
+
         text_lower = str(text).lower()
-        
-        return any(term in text_lower for term in opposition_terms)
+        return any(term in text_lower for term in all_terms)
 
     def _detect_election_context(self, text: str) -> bool:
         """Detecta contexto eleitoral."""
         if not text or pd.isna(text):
             return False
-        
-        election_terms = ['eleição', 'voto', 'urna', 'candidato', 'campanha', 'debate']
+
+        election_terms = [
+            'eleição', 'eleições', 'voto', 'votos', 'urna', 'urnas',
+            'candidato', 'candidata', 'campanha', 'debate', 'apuração',
+            'segundo turno', 'primeiro turno', 'tse', 'propaganda eleitoral'
+        ]
         text_lower = str(text).lower()
-        
         return any(term in text_lower for term in election_terms)
 
     def _detect_protest_context(self, text: str) -> bool:
         """Detecta contexto de protesto."""
         if not text or pd.isna(text):
             return False
-        
-        protest_terms = ['manifestação', 'protesto', 'greve', 'ocupação', 'ato']
+
+        terms_map = self._political_terms_map
+        mobilizacao = terms_map.get('mobilizacao_acao', [])
+        extra = ['manifestação', 'protesto', 'greve', 'ocupação', 'ato', 'marcha']
+        all_terms = set(mobilizacao + extra)
+
         text_lower = str(text).lower()
-        
-        return any(term in text_lower for term in protest_terms)
+        return any(term in text_lower for term in all_terms)
 
     def _classify_channel_type(self, channel: str) -> str:
         """Classifica tipo de canal."""
         if not channel or pd.isna(channel):
             return 'unknown'
-        
+
         channel_lower = str(channel).lower()
-        
-        if any(word in channel_lower for word in ['news', 'notícia', 'jornal']):
+
+        if any(word in channel_lower for word in ['news', 'notícia', 'jornal', 'imprensa']):
             return 'news'
-        elif any(word in channel_lower for word in ['brasil', 'patriota', 'conservador']):
+        elif any(word in channel_lower for word in ['brasil', 'patriota', 'conservador', 'direita', 'bolso']):
             return 'political'
-        elif any(word in channel_lower for word in ['humor', 'meme', 'engraçado']):
+        elif any(word in channel_lower for word in ['humor', 'meme', 'engraçado', 'zueira']):
             return 'entertainment'
+        elif any(word in channel_lower for word in ['gospel', 'igreja', 'cristo', 'deus']):
+            return 'religious'
         else:
             return 'general'
+
+    # ==========================================
+    # FRAME ANALYSIS - Entman (1993)
+    # ==========================================
+
+    def _analyze_political_frames(self, text: str) -> dict:
+        """Identifica frames políticos (Entman 1993, J Communication 43(4): 51-58)."""
+        if not text or pd.isna(text):
+            return {'conflito': 0.0, 'responsabilizacao': 0.0, 'moralista': 0.0, 'economico': 0.0}
+
+        frames = {
+            'conflito': ['contra', 'ataque', 'briga', 'guerra', 'batalha', 'confronto',
+                        'disputa', 'embate', 'oposição', 'adversário', 'inimigo'],
+            'responsabilizacao': ['culpa', 'responsável', 'causou', 'provocou', 'deve',
+                                 'culpado', 'responsabilidade', 'negligência', 'omissão'],
+            'moralista': ['certo', 'errado', 'justo', 'moral', 'ética', 'valores',
+                         'pecado', 'virtude', 'honra', 'vergonha', 'dever', 'dignidade'],
+            'economico': ['economia', 'dinheiro', 'custo', 'gasto', 'investimento', 'pib',
+                         'inflação', 'desemprego', 'salário', 'imposto', 'dívida', 'mercado']
+        }
+
+        text_lower = str(text).lower()
+        result = {}
+        for frame, keywords in frames.items():
+            score = sum(1 for word in keywords if word in text_lower)
+            result[frame] = score / len(keywords)
+        return result
+
+    # ==========================================
+    # MANN-KENDALL TREND TEST - Mann (1945); Kendall (1975)
+    # ==========================================
+
+    def _mann_kendall_trend_test(self, time_series) -> dict:
+        """Teste não-paramétrico para tendência (Mann 1945, Kendall 1975)."""
+        try:
+            from scipy import stats as scipy_stats
+        except ImportError:
+            return {'statistic': 0, 'p_value': 1.0, 'trend': 'unavailable'}
+
+        n = len(time_series)
+        if n < 4:
+            return {'statistic': 0, 'p_value': 1.0, 'trend': 'insufficient_data'}
+
+        s = 0
+        for i in range(n - 1):
+            for j in range(i + 1, n):
+                s += np.sign(time_series[j] - time_series[i])
+
+        var_s = n * (n - 1) * (2 * n + 5) / 18
+        if s > 0:
+            z = (s - 1) / np.sqrt(var_s)
+        elif s < 0:
+            z = (s + 1) / np.sqrt(var_s)
+        else:
+            z = 0
+
+        p_value = 2 * (1 - scipy_stats.norm.cdf(abs(z)))
+
+        if p_value < 0.05:
+            trend = 'increasing' if z > 0 else 'decreasing'
+        else:
+            trend = 'no_trend'
+
+        return {'statistic': float(s), 'p_value': float(p_value), 'trend': trend}
+
+    # ==========================================
+    # INFORMATION CASCADE DETECTION - Leskovec et al. (2007)
+    # ==========================================
+
+    def _detect_information_cascades(self, df) -> pd.DataFrame:
+        """Detecta cascatas de informação (Leskovec et al. 2007, ACM Trans Web)."""
+        cascades = []
+        if 'is_fwrd' not in df.columns:
+            return pd.DataFrame(cascades)
+
+        forwarded = df[df['is_fwrd'] == True].copy()
+        if len(forwarded) < 3:
+            return pd.DataFrame(cascades)
+
+        forwarded['cascade_id'] = forwarded.groupby('body').ngroup()
+        for cascade_id in forwarded['cascade_id'].unique():
+            cascade = forwarded[forwarded['cascade_id'] == cascade_id]
+            if len(cascade) > 2:
+                cascades.append({
+                    'cascade_id': cascade_id,
+                    'size': len(cascade),
+                    'channels': cascade['channel'].nunique() if 'channel' in cascade.columns else 0,
+                    'content_preview': str(cascade['body'].iloc[0])[:100]
+                })
+
+        return pd.DataFrame(cascades)
 
 
 def main():

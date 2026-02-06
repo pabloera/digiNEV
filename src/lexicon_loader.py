@@ -14,15 +14,21 @@ logger = logging.getLogger('BatchScientific')
 class LexiconLoader:
     """Carregador de léxico político brasileiro"""
 
-    def __init__(self, lexicon_path: str = 'lexico_politico_hierarquizado.json'):
+    def __init__(self, lexicon_path: str = None):
         """
         Inicializa carregador de léxico.
 
         Args:
-            lexicon_path (str): Caminho para arquivo do léxico
+            lexicon_path (str): Caminho para arquivo do léxico.
+                Se None, busca automaticamente em src/core/
         """
+        if lexicon_path is None:
+            # Buscar automaticamente relativo ao diretorio do modulo
+            module_dir = Path(__file__).parent
+            lexicon_path = module_dir / 'core' / 'lexico_unified_system.json'
         self.lexicon_path = Path(lexicon_path)
         self._lexicon = None
+        self._terms_by_category_cache = None
 
     @property
     def lexicon(self) -> Optional[Dict]:
@@ -143,6 +149,33 @@ class LexiconLoader:
             logger.error(f"❌ Erro ao obter categoria do termo: {e}")
 
         return None
+
+    def get_terms_by_category_map(self) -> Dict[str, List[str]]:
+        """
+        Retorna mapa {categoria: [termos + expressoes]} para classificacao eficiente.
+        Inclui tanto palavras individuais quanto expressoes multipalavra.
+        Cached apos primeira chamada.
+        """
+        if self._terms_by_category_cache is not None:
+            return self._terms_by_category_cache
+
+        result = {}
+        if not self.lexicon:
+            return result
+
+        lexico = self.lexicon.get('lexico', {})
+        for category, category_data in lexico.items():
+            if isinstance(category_data, dict):
+                terms = []
+                subtemas = category_data.get('subtemas', {})
+                for subtema_data in subtemas.values():
+                    if isinstance(subtema_data, dict):
+                        terms.extend(subtema_data.get('palavras', []))
+                        terms.extend(subtema_data.get('expressoes', []))
+                result[category] = [t.lower() for t in terms]
+
+        self._terms_by_category_cache = result
+        return result
 
     def validate_lexicon(self) -> bool:
         """

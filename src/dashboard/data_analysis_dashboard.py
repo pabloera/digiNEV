@@ -258,15 +258,15 @@ class DataAnalysisDashboard:
                 st.metric("📊 Total de Registros", f"{total_records:,}")
 
             with col2:
-                if 'political_category' in self.df.columns:
-                    political_categories = self.df['political_category'].nunique()
+                if 'political_orientation' in self.df.columns:
+                    political_categories = self.df['political_orientation'].nunique()
                     st.metric("🏛️ Categorias Políticas", f"{political_categories}")
                 else:
                     st.metric("🏛️ Categorias Políticas", "N/A")
 
             with col3:
-                if 'cluster_name' in self.df.columns:
-                    clusters = self.df['cluster_name'].nunique()
+                if 'cluster_id' in self.df.columns:
+                    clusters = self.df['cluster_id'].nunique()
                     st.metric("🔍 Clusters Semânticos", f"{clusters}")
                 else:
                     st.metric("🔍 Clusters Semânticos", "N/A")
@@ -332,8 +332,8 @@ class DataAnalysisDashboard:
                 st.write(f"**Colunas:** {len(self.df.columns)}")
                 
                 # Top categorias políticas
-                if 'political_category' in self.df.columns:
-                    top_categories = self.df['political_category'].value_counts().head(3)
+                if 'political_orientation' in self.df.columns:
+                    top_categories = self.df['political_orientation'].value_counts().head(3)
                     st.write("**Top Categorias:**")
                     for cat, count in top_categories.items():
                         st.write(f"• {cat}: {count}")
@@ -419,13 +419,13 @@ class DataAnalysisDashboard:
         """Gera insights principais dos dados"""
         insights = []
         
-        if 'political_category' in self.df.columns:
-            top_category = self.df['political_category'].value_counts().index[0]
-            top_percentage = (self.df['political_category'].value_counts().iloc[0] / len(self.df)) * 100
+        if 'political_orientation' in self.df.columns:
+            top_category = self.df['political_orientation'].value_counts().index[0]
+            top_percentage = (self.df['political_orientation'].value_counts().iloc[0] / len(self.df)) * 100
             insights.append(f"🏛️ **Categoria política dominante:** {top_category} ({top_percentage:.1f}% das mensagens)")
         
-        if 'sentiment' in self.df.columns:
-            sentiment_counts = self.df['sentiment'].value_counts()
+        if 'sentiment_label' in self.df.columns:
+            sentiment_counts = self.df['sentiment_label'].value_counts()
             dominant_sentiment = sentiment_counts.index[0]
             sentiment_percentage = (sentiment_counts.iloc[0] / len(self.df)) * 100
             insights.append(f"😊 **Sentimento predominante:** {dominant_sentiment} ({sentiment_percentage:.1f}% das mensagens)")
@@ -440,8 +440,8 @@ class DataAnalysisDashboard:
             avg_length = self.df['text_length'].mean()
             insights.append(f"📝 **Comprimento médio das mensagens:** {avg_length:.0f} caracteres")
         
-        if 'cluster_name' in self.df.columns:
-            unique_clusters = self.df['cluster_name'].nunique()
+        if 'cluster_id' in self.df.columns:
+            unique_clusters = self.df['cluster_id'].nunique()
             insights.append(f"🔍 **Grupos temáticos identificados:** {unique_clusters} clusters semânticos distintos")
         
         return insights
@@ -713,7 +713,7 @@ class DataAnalysisDashboard:
         st.header("🏛️ Análise Política Hierárquica - Taxonomia Brasileira (4 Níveis)")
         
         # Verificar disponibilidade de dados políticos
-        political_columns = ['political_category', 'political_alignment', 'discourse_type', 'radicalization_level']
+        political_columns = ['political_orientation', 'political_orientation', 'discourse_type', 'radicalization_level']
         available_columns = [col for col in political_columns if col in self.df.columns]
         
         if not available_columns:
@@ -730,8 +730,8 @@ class DataAnalysisDashboard:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            if 'political_alignment' in self.df.columns:
-                alignment_counts = self.df['political_alignment'].value_counts()
+            if 'political_orientation' in self.df.columns:
+                alignment_counts = self.df['political_orientation'].value_counts()
                 dominant_alignment = alignment_counts.index[0]
                 alignment_pct = (alignment_counts.iloc[0] / len(self.df)) * 100
                 st.metric(
@@ -741,8 +741,8 @@ class DataAnalysisDashboard:
                 )
         
         with col2:
-            if 'political_category' in self.df.columns:
-                category_counts = self.df['political_category'].value_counts()
+            if 'political_orientation' in self.df.columns:
+                category_counts = self.df['political_orientation'].value_counts()
                 dominant_category = category_counts.index[0]
                 category_pct = (category_counts.iloc[0] / len(self.df)) * 100
                 st.metric(
@@ -778,12 +778,12 @@ class DataAnalysisDashboard:
         st.subheader("📊 2. Distribuições por Nível Hierárquico")
         
         # Nível 2: Alinhamento Político
-        if 'political_alignment' in self.df.columns:
+        if 'political_orientation' in self.df.columns:
             col1, col2 = st.columns(2)
             
             with col1:
                 st.write("**🎯 Nível 2: Alinhamento Político**")
-                alignment_counts = self.df['political_alignment'].value_counts()
+                alignment_counts = self.df['political_orientation'].value_counts()
                 
                 # Mapear cores específicas para alinhamentos políticos
                 color_map_alignment = {
@@ -807,8 +807,8 @@ class DataAnalysisDashboard:
             
             with col2:
                 st.write("**🏷️ Categoria Política Específica**")
-                if 'political_category' in self.df.columns:
-                    category_counts = self.df['political_category'].value_counts()
+                if 'political_orientation' in self.df.columns:
+                    category_counts = self.df['political_orientation'].value_counts()
                     
                     # Cores para categorias políticas
                     color_map_category = {
@@ -885,10 +885,10 @@ class DataAnalysisDashboard:
         # ============================
         st.subheader("🔗 3. Correlações entre Níveis Hierárquicos")
         
-        if 'political_alignment' in self.df.columns and 'discourse_type' in self.df.columns:
+        if 'political_orientation' in self.df.columns and 'discourse_type' in self.df.columns:
             # Matriz de correlação política × discurso
             correlation_table = pd.crosstab(
-                self.df['political_alignment'], 
+                self.df['political_orientation'], 
                 self.df['discourse_type'],
                 normalize='index'
             ) * 100
@@ -951,9 +951,9 @@ class DataAnalysisDashboard:
         col1, col2 = st.columns(2)
         
         with col1:
-            if 'political_alignment' in self.df.columns:
+            if 'political_orientation' in self.df.columns:
                 st.write("**📊 Evolução do Alinhamento Político**")
-                monthly_alignment = df_temp.groupby(['month', 'political_alignment']).size().unstack(fill_value=0)
+                monthly_alignment = df_temp.groupby(['month', 'political_orientation']).size().unstack(fill_value=0)
                 
                 if not monthly_alignment.empty:
                     fig_temporal_alignment = px.area(
@@ -982,7 +982,7 @@ class DataAnalysisDashboard:
         if len(df_temp['year'].unique()) > 1:
             st.write("**📅 Distribuição Anual por Categoria**")
             try:
-                yearly_analysis = df_temp.groupby(['year', 'political_category']).size().unstack(fill_value=0)
+                yearly_analysis = df_temp.groupby(['year', 'political_orientation']).size().unstack(fill_value=0)
                 
                 if not yearly_analysis.empty:
                     fig_yearly = px.bar(
@@ -1014,10 +1014,10 @@ class DataAnalysisDashboard:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Análise de topic_name (Nível 4)
-            if 'topic_name' in self.df.columns:
+            # Análise de dominant_topic (Nível 4)
+            if 'dominant_topic' in self.df.columns:
                 st.write("**🏷️ Tópicos Específicos Identificados**")
-                topic_counts = self.df['topic_name'].value_counts()
+                topic_counts = self.df['dominant_topic'].value_counts()
                 
                 # Filtrar apenas tópicos classificados (não "Não Classificado")
                 classified_topics = topic_counts[topic_counts.index != 'Não Classificado']
@@ -1050,10 +1050,10 @@ class DataAnalysisDashboard:
                 st.info("ℹ️ Dados de tópicos específicos não disponíveis")
         
         with col2:
-            # Análise de cluster_name (Agrupamentos Semânticos)
-            if 'cluster_name' in self.df.columns:
+            # Análise de cluster_id (Agrupamentos Semânticos)
+            if 'cluster_id' in self.df.columns:
                 st.write("**🔍 Agrupamentos Semânticos (Clusters)**")
-                cluster_counts = self.df['cluster_name'].value_counts()
+                cluster_counts = self.df['cluster_id'].value_counts()
                 
                 if len(cluster_counts) > 0:
                     # Gráfico de pizza para clusters
@@ -1114,17 +1114,17 @@ class DataAnalysisDashboard:
         st.subheader("🔬 6. Análise Comparativa Avançada")
         
         # Análise multidimensional
-        if all(col in self.df.columns for col in ['political_alignment', 'political_category', 'discourse_type']):
+        if all(col in self.df.columns for col in ['political_orientation', 'political_orientation', 'discourse_type']):
             st.write("**🎭 Análise Multidimensional: Alinhamento × Categoria × Discurso**")
             
             # Criar análise tridimensional
-            multi_analysis = self.df.groupby(['political_alignment', 'political_category', 'discourse_type']).size().reset_index(name='count')
+            multi_analysis = self.df.groupby(['political_orientation', 'political_orientation', 'discourse_type']).size().reset_index(name='count')
             
             if not multi_analysis.empty:
                 # Sunburst chart para visualização hierárquica
                 fig_sunburst = px.sunburst(
                     multi_analysis,
-                    path=['political_alignment', 'political_category', 'discourse_type'],
+                    path=['political_orientation', 'political_orientation', 'discourse_type'],
                     values='count',
                     title="Hierarquia Política: Alinhamento → Categoria → Discurso",
                     color='count',
@@ -1133,7 +1133,7 @@ class DataAnalysisDashboard:
                 st.plotly_chart(fig_sunburst, use_container_width=True)
         
         # Comparação de características textuais por categoria política
-        if all(col in self.df.columns for col in ['political_category', 'text_length', 'word_count']):
+        if all(col in self.df.columns for col in ['political_orientation', 'text_length', 'word_count']):
             st.write("**📏 Características Textuais por Categoria Política**")
             
             col1, col2 = st.columns(2)
@@ -1142,25 +1142,25 @@ class DataAnalysisDashboard:
                 # Box plot de comprimento de texto por categoria
                 fig_length_box = px.box(
                     self.df,
-                    x='political_category',
+                    x='political_orientation',
                     y='text_length',
                     title="Distribuição do Comprimento de Texto por Categoria",
-                    color='political_category',
+                    color='political_orientation',
                     color_discrete_sequence=['#3498DB', '#E74C3C', '#F39C12']
                 )
                 st.plotly_chart(fig_length_box, use_container_width=True)
             
             with col2:
                 # Estatísticas descritivas
-                text_stats = self.df.groupby('political_category')[['text_length', 'word_count']].describe()
+                text_stats = self.df.groupby('political_orientation')[['text_length', 'word_count']].describe()
                 st.write("**📊 Estatísticas Descritivas:**")
                 st.dataframe(text_stats.round(1), use_container_width=True)
         
         # Análise de densidade de entidades políticas
-        if all(col in self.df.columns for col in ['political_category', 'political_entity_density']):
+        if all(col in self.df.columns for col in ['political_orientation', 'political_entity_density']):
             st.write("**🎯 Densidade de Entidades Políticas por Categoria**")
             
-            entity_density = self.df.groupby('political_category')['political_entity_density'].agg(['mean', 'median', 'std']).round(4)
+            entity_density = self.df.groupby('political_orientation')['political_entity_density'].agg(['mean', 'median', 'std']).round(4)
             
             col1, col2 = st.columns(2)
             
@@ -1186,7 +1186,7 @@ class DataAnalysisDashboard:
         """Análise de sentimento detalhada"""
         st.header("😊 Análise de Sentimento Detalhada")
         
-        if 'sentiment' not in self.df.columns:
+        if 'sentiment_label' not in self.df.columns:
             st.warning("Dados de análise de sentimento não disponíveis")
             return
         
@@ -1194,7 +1194,7 @@ class DataAnalysisDashboard:
         
         with col1:
             # Distribuição geral de sentimentos
-            sentiment_counts = self.df['sentiment'].value_counts()
+            sentiment_counts = self.df['sentiment_label'].value_counts()
             
             colors = {
                 'positivo': '#2E8B57',
@@ -1226,12 +1226,12 @@ class DataAnalysisDashboard:
                 st.plotly_chart(fig_score, use_container_width=True)
         
         # Sentimento por categoria política
-        if 'political_category' in self.df.columns:
+        if 'political_orientation' in self.df.columns:
             st.subheader("🏛️ Sentimento por Categoria Política")
             
             sentiment_political = pd.crosstab(
-                self.df['political_category'], 
-                self.df['sentiment'], 
+                self.df['political_orientation'], 
+                self.df['sentiment_label'], 
                 normalize='index'
             ) * 100
             
@@ -1253,7 +1253,7 @@ class DataAnalysisDashboard:
             df_temp = self.df.copy()
             df_temp['month'] = df_temp['datetime'].dt.to_period('M').astype(str)
             
-            monthly_sentiment = df_temp.groupby(['month', 'sentiment']).size().unstack(fill_value=0)
+            monthly_sentiment = df_temp.groupby(['month', 'sentiment_label']).size().unstack(fill_value=0)
             
             fig_temporal_sentiment = px.area(
                 monthly_sentiment,
@@ -1388,12 +1388,12 @@ class DataAnalysisDashboard:
         """Análise de agrupamentos semânticos"""
         st.header("🔍 Análise de Agrupamentos Semânticos")
         
-        if 'cluster_name' not in self.df.columns:
+        if 'cluster_id' not in self.df.columns:
             st.warning("Dados de clustering não disponíveis")
             return
         
         # Distribuição dos clusters
-        cluster_counts = self.df['cluster_name'].value_counts()
+        cluster_counts = self.df['cluster_id'].value_counts()
         
         fig_clusters = px.bar(
             x=cluster_counts.values,
@@ -1465,12 +1465,12 @@ class DataAnalysisDashboard:
         st.header("⚖️ Análise Comparativa")
         
         # Comparação entre categorias políticas e sentimentos
-        if 'political_category' in self.df.columns and 'sentiment' in self.df.columns:
+        if 'political_orientation' in self.df.columns and 'sentiment_label' in self.df.columns:
             st.subheader("🏛️ vs 😊 Política × Sentimento")
             
             comparison_table = pd.crosstab(
-                self.df['political_category'], 
-                self.df['sentiment'],
+                self.df['political_orientation'], 
+                self.df['sentiment_label'],
                 normalize='index'
             ) * 100
             
@@ -1487,8 +1487,8 @@ class DataAnalysisDashboard:
         # Comparação temporal
         st.subheader("📊 Estatísticas Comparativas")
         
-        if 'text_length' in self.df.columns and 'political_category' in self.df.columns:
-            length_by_category = self.df.groupby('political_category')['text_length'].agg(['mean', 'median', 'std'])
+        if 'text_length' in self.df.columns and 'political_orientation' in self.df.columns:
+            length_by_category = self.df.groupby('political_orientation')['text_length'].agg(['mean', 'median', 'std'])
             st.dataframe(length_by_category, use_container_width=True)
 
     def _render_duplication_stats_page(self):

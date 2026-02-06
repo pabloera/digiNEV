@@ -1243,7 +1243,7 @@ def main():
     # Initialize dashboard
     dashboard = NetworkAnalysisDashboard()
 
-    # Sample data for testing
+    # Sample data for standalone testing only (not used in production dashboard)
     sample_data = {
         'user_id': ['user1', 'user2', 'user3', 'user4', 'user5'] * 20,
         'channel': ['canal_a', 'canal_b', 'canal_c'] * 33 + ['canal_a'],

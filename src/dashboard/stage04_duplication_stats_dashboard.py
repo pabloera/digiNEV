@@ -63,8 +63,9 @@ class Stage04DuplicationStatsView:
             return None
 
     def _create_synthetic_duplication_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Create synthetic duplication data for demonstration"""
-        # Simulate realistic duplication patterns based on actual pipeline results
+        """Create synthetic duplication data for demonstration when pipeline data is unavailable.
+        WARNING: This generates demo data, not real analysis results."""
+        st.warning("Dados de demonstracao: dupli_freq nao encontrado no pipeline. Exibindo dados sinteticos.")
         np.random.seed(42)
 
         # Most messages appear once (80%)

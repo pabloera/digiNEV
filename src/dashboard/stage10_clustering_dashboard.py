@@ -47,7 +47,7 @@ class ClusteringAnalysisDashboard:
             df = pd.read_csv(latest_file, sep=';', encoding='utf-8')
 
             # Validate required columns
-            required_columns = ['cluster_id', 'text_content', 'political_alignment']
+            required_columns = ['cluster_id', 'text_content', 'political_orientation']
             missing_columns = [col for col in required_columns if col not in df.columns]
 
             if missing_columns:
@@ -111,7 +111,7 @@ class ClusteringAnalysisDashboard:
                 'x': coords_2d[:, 0],
                 'y': coords_2d[:, 1],
                 'cluster_id': df['cluster_id'].iloc[:len(coords_2d)],
-                'political_alignment': df['political_alignment'].iloc[:len(coords_2d)],
+                'political_orientation': df['political_orientation'].iloc[:len(coords_2d)],
                 'text_preview': df['text_content'].iloc[:len(coords_2d)].str[:100] + '...',
                 'channel': df.get('channel', 'N/A').iloc[:len(coords_2d)]
             })
@@ -122,7 +122,7 @@ class ClusteringAnalysisDashboard:
                 x='x',
                 y='y',
                 color='cluster_id',
-                hover_data=['political_alignment', 'channel'],
+                hover_data=['political_orientation', 'channel'],
                 hover_name='text_preview',
                 title=f'Projeção 2D dos Documentos - {method}',
                 labels={
@@ -178,8 +178,8 @@ class ClusteringAnalysisDashboard:
                 }
 
                 # Political alignment distribution
-                if 'political_alignment' in df.columns:
-                    political_dist = cluster_data['political_alignment'].value_counts(normalize=True) * 100
+                if 'political_orientation' in df.columns:
+                    political_dist = cluster_data['political_orientation'].value_counts(normalize=True) * 100
                     profile['political_distribution'] = political_dist.to_dict()
 
                 # Content characteristics
@@ -390,8 +390,8 @@ class ClusteringAnalysisDashboard:
             st.metric("Tamanho Médio do Cluster", f"{avg_cluster_size:.1f}")
         with col4:
             # Most common political alignment
-            if 'political_alignment' in df.columns:
-                most_common = df['political_alignment'].mode()[0] if not df['political_alignment'].mode().empty else "N/A"
+            if 'political_orientation' in df.columns:
+                most_common = df['political_orientation'].mode()[0] if not df['political_orientation'].mode().empty else "N/A"
                 st.metric("Alinhamento Mais Comum", most_common)
 
         st.markdown("---")

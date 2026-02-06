@@ -387,7 +387,7 @@ class ScientificDataManager:
             'timestamp': pd.date_range('2019-01-01', periods=5, freq='Y'),
             'source': ['Telegram', 'Twitter', 'Telegram', 'WhatsApp', 'Telegram'],
             # Colunas científicas sintéticas para demonstração
-            'political_category': ['direita', 'centro', 'esquerda', 'centro-direita', 'extrema-direita'],
+            'political_orientation': ['direita', 'centro', 'esquerda', 'centro-direita', 'extrema-direita'],
             'political_confidence': [0.85, 0.72, 0.91, 0.67, 0.94],
             'sentiment_category': ['positivo', 'neutro', 'negativo', 'positivo', 'negativo'],
             'sentiment_score': [0.7, 0.1, -0.6, 0.5, -0.8],
