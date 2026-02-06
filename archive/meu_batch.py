@@ -4,7 +4,7 @@ import anthropic
 
 client = anthropic.Anthropic(
   # defaults to os.environ.get("ANTHROPIC_API_KEY")
-  api_key="REDACTED_ANTHROPIC_KEY_1",
+  api_key=os.environ.get("ANTHROPIC_API_KEY"),
 )
 
 # Seu código do batch

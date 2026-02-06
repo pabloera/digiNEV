@@ -106,8 +106,8 @@ class BatchConfig:
     """Configuration class for batch analysis"""
 
     # API Configuration
-    ANTHROPIC_API_KEY = os.getenv('REDACTED_ANTHROPIC_KEY_2')
-    VOYAGE_API_KEY = os.getenv('REDACTED_VOYAGE_KEY')
+    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
+    VOYAGE_API_KEY = os.getenv('VOYAGE_API_KEY')
 
     # Model Settings
     ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"  # Cost-optimized
