@@ -58,7 +58,7 @@ The system processes Telegram messages through a 17-stage scientific pipeline:
 | **Linguistic Analysis** | 07-09 | spaCy NLP, political classification + TCW, TF-IDF | spaCy, scikit-learn | ✅ Operational |
 | **Advanced Analysis** | 10-17 | Clustering, topics, semantics, temporal, network, domain, events, channels | scikit-learn, Python | ✅ Operational |
 
-**Status**: **17/17 stages operational** · **0 errors** in 6 end-to-end tests · **120 columns** output · **109 features** generated · **3 stages with API** (06, 08, 12)
+**Status**: **17/17 stages operational** · **0 errors** in end-to-end tests · **126 columns** output · **115 features** generated · **6 stages with API** (06, 08, 11, 12, 16, 17)
 **Output**: Research-ready DataFrames with political classification, TCW coding (10 categories), affordances (8 types), LDA topics, K-Means clusters, sentiment + granular emotions, temporal patterns, network coordination, domain analysis.
 
 ## 🔬 Research Categories (Portuguese - Academic Authenticity)
@@ -163,9 +163,9 @@ poetry run python -c "from src.utils.memory_manager import get_memory_status; pr
 - **Cost**: Batch API (50% off) + Prompt Caching (90% off input) for budget control
 - **Reliability**: **100% success rate** - all 17 pipeline stages operational
 - **Reproducibility**: Fixed model versions for consistent results
-- **AI Enhancement**: 3/17 stages using Anthropic API (06, 08, 12) with heuristic fallback
+- **AI Enhancement**: 6/17 stages using Anthropic API (06, 08, 11, 12, 16, 17) with heuristic fallback
 - **Pipeline Completion**: **17/17 stages fully implemented and validated**
-- **Data Integrity**: **120 columns generated** with comprehensive validation
+- **Data Integrity**: **126 columns generated** with comprehensive validation
 - **Production Ready**: Complete dataset processing via `process_dataset()` method
 
 ### 🇧🇷 Brazilian Research Specialization
@@ -290,8 +290,8 @@ poetry run python -c "from src.academic_config import get_academic_config; print
 
 *Specialized for studying digital authoritarianism, political polarization, and violence legitimization in Telegram messages (2019-2023)*
 
-**Status**: 17/17 stages operational, 6 end-to-end tests passed (0 errors), 120 columns output
-**Pipeline**: Reestruturação completa (8 bugs) + TCW + API híbrida (Stages 06, 08, 12)
+**Status**: 17/17 stages operational, end-to-end tests passed (0 errors), 126 columns output
+**Pipeline**: Reestruturação completa (8 bugs) + TCW + API híbrida (Stages 06, 08, 11, 12, 16, 17)
 **Validation**: Tested on 3 datasets (elec, pandemia, govbolso), 100-2000 rows, 3 time periods
 
 **Last Updated**: February 22, 2026

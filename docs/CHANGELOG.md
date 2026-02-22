@@ -1,5 +1,42 @@
 # CHANGELOG
 
+## [6.2.0] - 2026-02-22 — Full API Integration (6 Stages) + Topic Naming + Channel Classification
+
+### New Features
+- **Stage 11 API Integration**: Topic modeling híbrido (LDA + API)
+  - LDA descobre clusters de tópicos heuristicamente (100% msgs)
+  - API nomeia tópicos com rótulos descritivos em português (1 chamada)
+  - API reclassifica mensagens com topic_confidence < 0.4
+  - 2 novas colunas: `topic_label`, `topic_confidence`
+  - Resultado: tópicos nomeados como "Notícias Políticas Lula" vs "topic_0_..."
+- **Stage 16 API Integration**: Contexto de eventos híbrido
+  - Heurística detecta political_context, frames Entman, menções (100%)
+  - API detecta referências indiretas a eventos específicos brasileiros
+  - 2 novas colunas: `event_confidence`, `specific_event`
+  - Eventos: 8_de_janeiro, cpi_covid, eleicao_2022, stf_inquerito, impeachment
+  - Resultado: 22 eventos específicos detectados em 500 msgs
+- **Stage 17 API Integration**: Análise de canais híbrida
+  - Classificação por nome do canal (keyword matching, 100%)
+  - API classifica canais 'general' por amostra de conteúdo (5 msgs)
+  - Categorias API: conspiracy, military, activism (além das existentes)
+  - 2 novas colunas: `channel_confidence`, `channel_theme`
+  - Resultado: 100% dos "general" reclassificados com tipo e tema
+
+### Bug Fixes
+- **`_parse_api_json_response`**: Agora aceita dict/list como input (não só str)
+- **`import os`**: Adicionado nos Stages 11 e 17 para acesso ao `os.environ`
+
+### Validation (6 Stages com API)
+- **200 rows**: 17/17 stages, 0 erros, 126 colunas, 187s
+- **500 rows**: 17/17 stages, 0 erros, 126 colunas, 384s
+- Stage 08: neutral 9.7%, confidence mean=0.842
+- Stage 11: 5 tópicos, "Notícias Políticas Lula" nomeado via API
+- Stage 12: sarcasmo=17, anger=0.265
+- Stage 16: 22 eventos (8_janeiro=18, stf=2, eleição=1, impeachment=1)
+- Stage 17: 0 canais "general" restantes (100% reclassificados)
+
+---
+
 ## [6.1.0] - 2026-02-22 — API Expansion (Stages 08, 12) + Generic Batch API
 
 ### New Features

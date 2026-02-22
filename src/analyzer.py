@@ -2812,10 +2812,11 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         self.logger.info(f"   📊 [{stage_name}] Batch API: {api_successes} sucessos, {api_failures} falhas")
         return df
 
-    def _parse_api_json_response(self, text: str) -> list:
+    def _parse_api_json_response(self, text) -> list:
         """
         Parsear JSON de classificações da resposta da API.
         Genérico — tenta múltiplas estratégias de parsing.
+        Aceita str, dict, ou list como input.
         """
         import json
         import re
@@ -2823,12 +2824,23 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         if not text:
             return []
 
+        # Se já é list ou dict, retornar diretamente
+        if isinstance(text, list):
+            return text
+        if isinstance(text, dict):
+            return [text]
+
+        # Garantir que é string
+        text = str(text)
+
         # Tentativa 1: JSON direto
         try:
             result = json.loads(text)
             if isinstance(result, list):
                 return result
-        except json.JSONDecodeError:
+            if isinstance(result, dict):
+                return [result]
+        except (json.JSONDecodeError, TypeError):
             pass
 
         # Tentativa 2: Extrair array JSON
@@ -3547,13 +3559,25 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
 
     def _stage_11_topic_modeling(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 11: Topic modeling com LDA.
+        Stage 11: Topic modeling com LDA + API híbrida para nomeação de tópicos.
 
-        Descoberta automática de tópicos nos textos.
+        v6.1: Heurística + API híbrida.
+        Fase 1: LDA descobre clusters de tópicos (100% heurístico)
+        Fase 2: API nomeia os tópicos com rótulos significativos
+                 e reclassifica documentos com topic_probability < 0.4
+        Fallback: sem API key → tópicos nomeados por palavras-chave
+
+        Colunas geradas:
+          - dominant_topic: int (índice do tópico dominante)
+          - topic_probability: 0.0-1.0 (probabilidade do tópico dominante)
+          - topic_keywords: lista de palavras-chave do tópico
+          - topic_label: str (NOVA - rótulo descritivo do tópico via API)
+          - topic_confidence: 0.0-1.0 (NOVA - confiança na atribuição de tópico)
         """
         try:
-            self.logger.info("🔄 Stage 11: Topic modeling")
-            
+            self.logger.info("🔄 Stage 11: Topic modeling (heurística + API híbrida)")
+
+            # ── Fase 1: LDA heurístico (100% mensagens) ──
             # FIX: usar 'lemmatized_text' (output do Stage 07 spaCy) em vez de 'tokens' (inexistente)
             if 'lemmatized_text' in df.columns:
                 text_data = df['lemmatized_text'].fillna('').tolist()
@@ -3563,11 +3587,11 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 self.logger.warning("⚠️ lemmatized_text/spacy_tokens não encontrados, usando normalized_text")
                 text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
                 text_data = df[text_column].fillna('').tolist()
-            
+
             # Topic modeling básico com LDA
             from sklearn.feature_extraction.text import CountVectorizer
             from sklearn.decomposition import LatentDirichletAllocation
-            
+
             # Stopwords PT (termos funcionais que poluem LDA)
             pt_stopwords = [
                 'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas',
@@ -3590,29 +3614,168 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             # Preparar dados (com remoção de stopwords PT)
             vectorizer = CountVectorizer(max_features=50, stop_words=pt_stopwords)
             doc_term_matrix = vectorizer.fit_transform(text_data)
-            
+
             # LDA simples
             n_topics = min(5, len(df) // 20 + 1)
             lda = LatentDirichletAllocation(n_components=n_topics, random_state=42)
             doc_topic_matrix = lda.fit_transform(doc_term_matrix)
-            
+
             # Tópico dominante para cada documento
             df['dominant_topic'] = doc_topic_matrix.argmax(axis=1)
             df['topic_probability'] = doc_topic_matrix.max(axis=1)
-            
-            # Palavras-chave dos tópicos
+
+            # Palavras-chave dos tópicos (top 8 para melhor contexto na API)
             feature_names = vectorizer.get_feature_names_out()
             topic_keywords = []
             for topic_idx, topic in enumerate(lda.components_):
-                top_words = [feature_names[i] for i in topic.argsort()[::-1][:3]]
+                top_words = [feature_names[i] for i in topic.argsort()[::-1][:8]]
                 topic_keywords.append(top_words)
-            
-            df['topic_keywords'] = df['dominant_topic'].apply(lambda x: topic_keywords[x] if x < len(topic_keywords) else [])
-            
+
+            df['topic_keywords'] = df['dominant_topic'].apply(
+                lambda x: topic_keywords[x][:3] if x < len(topic_keywords) else []
+            )
+
+            # Confiança heurística: baseada em topic_probability
+            # Alta probabilidade = alta confiança na atribuição
+            df['topic_confidence'] = df['topic_probability'].apply(
+                lambda p: min(1.0, p * 1.5) if p > 0.3 else p
+            )
+
+            # Labels heurísticos (fallback): palavras-chave concatenadas
+            heuristic_labels = {}
+            for idx, kw in enumerate(topic_keywords):
+                heuristic_labels[idx] = f"topic_{idx}_{'_'.join(kw[:3])}"
+            df['topic_label'] = df['dominant_topic'].map(heuristic_labels).fillna('unknown')
+
+            # ── Fase 2: API para nomeação de tópicos ──
+            import os
+            api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+            if api_key and api_key.startswith('sk-ant-'):
+                try:
+                    model = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
+
+                    # 2a: API para nomear os clusters de tópicos (1 chamada para todos os tópicos)
+                    topic_descriptions = []
+                    for idx, kw in enumerate(topic_keywords):
+                        # Pegar 3 mensagens representativas do tópico
+                        topic_msgs = df[df['dominant_topic'] == idx]
+                        if len(topic_msgs) > 0:
+                            text_col = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+                            sample_texts = topic_msgs[text_col].dropna().head(3).tolist()
+                            sample_str = ' | '.join([str(t)[:150] for t in sample_texts])
+                        else:
+                            sample_str = '(sem exemplos)'
+                        topic_descriptions.append(
+                            f"Tópico {idx}: palavras-chave=[{', '.join(kw)}], exemplos=[{sample_str}]"
+                        )
+
+                    topic_naming_prompt = """Você é um analista de discurso político brasileiro especializado em Telegram.
+Analise os tópicos descobertos por LDA em mensagens de grupos bolsonaristas no Telegram (2019-2023).
+
+Para cada tópico, forneça:
+1. Um rótulo descritivo curto (3-5 palavras em português)
+2. Se o tópico é político, cultural, religioso, informativo ou outro
+
+Responda APENAS em JSON válido:
+[
+  {"topic_id": 0, "label": "rótulo descritivo", "category": "político|cultural|religioso|informativo|outro"},
+  ...
+]"""
+
+                    topic_text = "\n".join(topic_descriptions)
+
+                    self.logger.info(f"🤖 Stage 11: Nomeando {len(topic_keywords)} tópicos via API...")
+
+                    api_results = self._api_classify_sync(
+                        texts=[topic_text],
+                        system_prompt=topic_naming_prompt,
+                        api_key=api_key,
+                        model=model,
+                        max_tokens=500,
+                        temperature=0.1
+                    )
+
+                    if api_results:
+                        # _api_classify_sync já retorna lista de dicts parseada
+                        api_labels = {}
+                        for item in api_results:
+                            if isinstance(item, dict) and 'topic_id' in item and 'label' in item:
+                                tid = item['topic_id']
+                                api_labels[tid] = item['label']
+
+                        if api_labels:
+                            df['topic_label'] = df['dominant_topic'].map(api_labels).fillna(df['topic_label'])
+                            self.logger.info(f"   ✅ {len(api_labels)} tópicos nomeados via API")
+
+                    # 2b: API para mensagens com baixa confiança de tópico
+                    low_conf_mask = df['topic_confidence'] < 0.4
+                    low_conf_count = low_conf_mask.sum()
+
+                    if low_conf_count > 0:
+                        self.logger.info(f"   🔍 {low_conf_count} msgs com topic_confidence < 0.4")
+                        low_conf_indices = df[low_conf_mask].index.tolist()
+
+                        # Gerar lista de rótulos para o prompt
+                        available_topics = {k: v for k, v in enumerate(topic_keywords)}
+                        topic_list_str = "\n".join([
+                            f"  Tópico {k}: {df['topic_label'].iloc[df[df['dominant_topic']==k].index[0]] if len(df[df['dominant_topic']==k]) > 0 else 'unknown'} (palavras: {', '.join(v[:5])})"
+                            for k, v in available_topics.items()
+                        ])
+
+                        reclassify_prompt = f"""Você é um analista de discurso político brasileiro.
+Classifique cada mensagem no tópico mais adequado dentre os disponíveis.
+
+Tópicos disponíveis:
+{topic_list_str}
+
+Para cada mensagem, responda em JSON:
+[{{"topic_id": N, "confidence": 0.0-1.0}}]
+
+Se nenhum tópico se encaixa bem, use o mais próximo com confidence baixa."""
+
+                        text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+
+                        def parse_topic_response(response_text):
+                            """Parse API response for topic reclassification."""
+                            parsed = self._parse_api_json_response(response_text)
+                            if parsed and isinstance(parsed, list):
+                                return parsed
+                            return None
+
+                        def apply_topic_results(df_ref, idx, result):
+                            """Apply API topic results to dataframe."""
+                            if isinstance(result, dict):
+                                if 'topic_id' in result:
+                                    new_topic = result['topic_id']
+                                    if 0 <= new_topic < n_topics:
+                                        df_ref.at[idx, 'dominant_topic'] = new_topic
+                                        df_ref.at[idx, 'topic_keywords'] = topic_keywords[new_topic][:3] if new_topic < len(topic_keywords) else []
+                                        if new_topic in (api_labels if 'api_labels' in dir() else heuristic_labels):
+                                            label_map = api_labels if 'api_labels' in dir() else heuristic_labels
+                                            df_ref.at[idx, 'topic_label'] = label_map.get(new_topic, df_ref.at[idx, 'topic_label'])
+                                if 'confidence' in result:
+                                    df_ref.at[idx, 'topic_confidence'] = float(result['confidence'])
+                            return df_ref
+
+                        df = self._api_process_low_confidence(
+                            df=df,
+                            low_conf_indices=low_conf_indices,
+                            text_column=text_column,
+                            system_prompt=reclassify_prompt,
+                            parse_fn=parse_topic_response,
+                            apply_fn=apply_topic_results,
+                            stage_name='stage_11'
+                        )
+
+                except Exception as api_err:
+                    self.logger.warning(f"⚠️ Stage 11 API falhou, mantendo heurística: {api_err}")
+            else:
+                self.logger.info("   ℹ️ Sem API key — 100% heurística (tópicos por palavras-chave)")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 3
-            
-            self.logger.info(f"✅ Stage 11 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 5
+
+            self.logger.info(f"✅ Stage 11 concluído: {len(df)} registros, {n_topics} tópicos")
             return df
 
         except Exception as e:
@@ -3967,10 +4130,14 @@ Responda APENAS com JSON array válido:
         """
         Stage 16: Análise de contexto de eventos.
 
-        Detecta contextos políticos e eventos relevantes.
+        REFORMULADO v6.1: Heurística + API híbrida.
+        Fase 1: Detecção por keywords fixas (100% msgs) → political_context, frames Entman
+        Fase 2: API para mensagens com contexto 'general' → detectar referências indiretas
+                 a eventos específicos (8 de janeiro, impeachment, CPI, etc.)
+        Fallback: sem API key → 100% heurística
         """
         try:
-            self.logger.info("🔄 Stage 16: Análise de contexto de eventos")
+            self.logger.info("🔄 Stage 16: Análise de contexto de eventos (heurística + API híbrida)")
 
             # FIX: preferir lemmatized_text (output do spaCy) para melhor matching de contextos
             if 'lemmatized_text' in df.columns:
@@ -3979,22 +4146,106 @@ Responda APENAS com JSON array válido:
                 text_column = 'normalized_text'
             else:
                 text_column = 'body'
-            
-            # Contextos políticos brasileiros
+
+            initial_count = len(df)
+
+            # === FASE 1: Heurística (100% das mensagens) ===
+            self.logger.info("   📋 Fase 1: Detecção heurística de contextos...")
+
             df['political_context'] = df[text_column].apply(self._detect_political_context)
             df['mentions_government'] = df[text_column].apply(self._mentions_government)
             df['mentions_opposition'] = df[text_column].apply(self._mentions_opposition)
-            
+
             # Eventos específicos (eleições, manifestações, etc.)
             df['election_context'] = df[text_column].apply(self._detect_election_context)
             df['protest_context'] = df[text_column].apply(self._detect_protest_context)
-            
+
             # Frame Analysis - Entman (1993), J Communication 43(4): 51-58
             frame_results = df[text_column].apply(self._analyze_political_frames)
             df['frame_conflito'] = frame_results.apply(lambda x: x.get('conflito', 0.0))
             df['frame_responsabilizacao'] = frame_results.apply(lambda x: x.get('responsabilizacao', 0.0))
             df['frame_moralista'] = frame_results.apply(lambda x: x.get('moralista', 0.0))
             df['frame_economico'] = frame_results.apply(lambda x: x.get('economico', 0.0))
+
+            # Confidence: context ≠ 'general' → alta; 'general' com algum frame → média; senão → baixa
+            df['event_confidence'] = df.apply(
+                lambda row: 0.9 if row['political_context'] != 'general'
+                else 0.6 if (row['frame_conflito'] > 0 or row['frame_responsabilizacao'] > 0
+                            or row['frame_moralista'] > 0 or row['frame_economico'] > 0)
+                else 0.2,
+                axis=1
+            )
+
+            # Nova coluna para evento específico detectado
+            df['specific_event'] = 'none'
+
+            general_mask = df['political_context'] == 'general'
+            low_conf_mask = df['event_confidence'] < 0.5
+            general_count = general_mask.sum()
+            low_conf_count = low_conf_mask.sum()
+
+            self.logger.info(f"   📊 Heurística: {initial_count - general_count} com contexto, {general_count} 'general' ({general_count/initial_count*100:.1f}%)")
+            self.logger.info(f"   🟡 Baixa confiança (candidatas API): {low_conf_count} ({low_conf_count/initial_count*100:.1f}%)")
+
+            # === FASE 2: API para contexto 'general' com baixa confiança ===
+            import os
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if api_key and low_conf_count > 0:
+                api_text_col = 'body' if 'body' in df.columns else text_column
+                low_conf_indices = df.index[low_conf_mask].tolist()
+
+                system_prompt = """Você é um analista de contexto político brasileiro especializado no período 2019-2023.
+
+Para CADA mensagem numerada, identifique:
+1. Contexto político: electoral, government, protest, economic, pandemic, judicial, military, media, general
+2. Evento específico (se detectável): Exemplos:
+   - "8_de_janeiro": invasão do Congresso/STF/Planalto em 08/01/2023
+   - "impeachment": processos de impeachment
+   - "cpi_covid": CPI da COVID no Senado
+   - "eleicao_2022": eleições presidenciais 2022
+   - "manifestacao_7set": manifestações de 7 de setembro
+   - "facada": atentado contra Bolsonaro em 2018
+   - "lockdown": medidas de isolamento COVID
+   - "stf_inquerito": inquéritos do STF sobre fake news
+   - "none": sem evento específico identificável
+3. Confiança: 0.0 a 1.0
+
+IMPORTANTE: Detecte referências indiretas — "aquilo em Brasília" pode ser 8_de_janeiro,
+"a facada" pode ser o atentado, "a CPI" pode ser cpi_covid.
+
+Responda APENAS com JSON array:
+[{"id":1,"contexto":"government","evento":"cpi_covid","confianca":0.8}]"""
+
+                def _parse_event(text_content):
+                    return self._parse_api_json_response(text_content)
+
+                def _apply_event(df_ref, idx, cls):
+                    contexto = cls.get('contexto', '')
+                    valid_contexts = ['electoral', 'government', 'protest', 'economic',
+                                     'pandemic', 'judicial', 'military', 'media', 'general']
+                    if contexto in valid_contexts:
+                        df_ref.at[idx, 'political_context'] = contexto
+                    if 'evento' in cls and cls['evento'] != 'none':
+                        df_ref.at[idx, 'specific_event'] = cls['evento']
+                    if 'confianca' in cls:
+                        df_ref.at[idx, 'event_confidence'] = cls['confianca']
+                    return df_ref
+
+                df = self._api_process_low_confidence(
+                    df, low_conf_indices, api_text_col, system_prompt,
+                    _parse_event, _apply_event,
+                    stage_name='stage_16_events', batch_size=10
+                )
+
+                new_general = (df['political_context'] == 'general').sum()
+                events_detected = (df['specific_event'] != 'none').sum()
+                reclassified = general_count - new_general
+                if reclassified > 0:
+                    self.logger.info(f"   ✅ API reclassificou {reclassified} msgs de 'general' → contexto específico")
+                if events_detected > 0:
+                    self.logger.info(f"   📌 Eventos específicos detectados: {events_detected}")
+            elif not api_key:
+                self.logger.info("   ℹ️ Sem API key — usando apenas heurística (fallback completo)")
 
             # Análise temporal de eventos
             if 'datetime' in df.columns:
@@ -4005,11 +4256,16 @@ Responda APENAS com JSON array válido:
                 df['is_business_hours'] = True
 
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 11
+            self.stats['features_extracted'] += 13  # 11 original + 2 novos (event_confidence, specific_event)
 
-            self.logger.info(f"✅ Stage 16 concluído: {len(df)} registros, 4 frames Entman extraídos")
+            # Estatísticas finais
+            ctx_dist = df['political_context'].value_counts()
+            self.logger.info(f"✅ Stage 16 concluído: {len(df)} registros")
+            for ctx, count in ctx_dist.head(5).items():
+                self.logger.info(f"   📊 {ctx}: {count} ({count/len(df)*100:.1f}%)")
+
             return df
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro Stage 16: {e}")
             self.stats['processing_errors'] += 1
@@ -4017,17 +4273,34 @@ Responda APENAS com JSON array válido:
 
     def _stage_17_channel_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 17: Análise de canais/fontes.
+        Stage 17: Análise de canais/fontes + API híbrida.
 
-        Classifica canais e fontes de informação.
+        v6.1: Heurística + API híbrida para classificação de canais.
+        Fase 1: Classificação por nome do canal (keyword matching, 100% msgs)
+        Fase 2: API classifica canais 'general' usando amostra de conteúdo
+        Fallback: sem API key → 100% heurística
+
+        Colunas geradas:
+          - channel_type: news | political | entertainment | religious | general
+          - channel_activity: int (contagem de msgs no canal)
+          - is_active_channel: bool
+          - content_type: str (tipo de mídia)
+          - has_media: bool
+          - is_forwarded: bool
+          - forwarding_context: float (ratio de forwarding)
+          - sender_channel_influence: int
+          - channel_confidence: 0.0-1.0 (NOVA - confiança na classificação do canal)
+          - channel_theme: str (NOVA - tema principal do canal via API)
         """
         try:
-            self.logger.info("🔄 Stage 17: Análise de canais")
-            
+            self.logger.info("🔄 Stage 17: Análise de canais (heurística + API híbrida)")
+
+            # ── Fase 1: Heurística (100% mensagens) ──
+
             # Análise de canais
             if 'channel' in df.columns:
                 df['channel_type'] = df['channel'].apply(self._classify_channel_type)
-                
+
                 channel_counts = df['channel'].value_counts()
                 df['channel_activity'] = df['channel'].map(channel_counts)
                 df['is_active_channel'] = df['channel_activity'] > df['channel_activity'].median()
@@ -4035,7 +4308,21 @@ Responda APENAS com JSON array válido:
                 df['channel_type'] = 'unknown'
                 df['channel_activity'] = 1
                 df['is_active_channel'] = False
-            
+
+            # Confiança heurística na classificação do canal
+            df['channel_confidence'] = df['channel_type'].apply(
+                lambda t: 0.85 if t in ('news', 'political', 'religious', 'entertainment') else 0.2
+            )
+
+            # Tema padrão heurístico
+            df['channel_theme'] = df['channel_type'].map({
+                'news': 'notícias e informação',
+                'political': 'política e ideologia',
+                'entertainment': 'humor e entretenimento',
+                'religious': 'religião e fé',
+                'general': 'não classificado'
+            }).fillna('não classificado')
+
             # Análise de mídia
             if 'media_type' in df.columns:
                 df['content_type'] = df['media_type'].fillna('text')
@@ -4043,7 +4330,7 @@ Responda APENAS com JSON array válido:
             else:
                 df['content_type'] = 'text'
                 df['has_media'] = False
-            
+
             # Padrões de forwarding
             if 'is_fwrd' in df.columns:
                 df['is_forwarded'] = df['is_fwrd'].fillna(False)
@@ -4052,7 +4339,7 @@ Responda APENAS com JSON array válido:
             else:
                 df['is_forwarded'] = False
                 df['forwarding_context'] = 0.0
-            
+
             # Influência do canal
             if 'sender' in df.columns and 'channel' in df.columns:
                 sender_channel_counts = df.groupby(['sender', 'channel']).size()
@@ -4061,11 +4348,108 @@ Responda APENAS com JSON array válido:
                 )
             else:
                 df['sender_channel_influence'] = 1
-            
+
+            # ── Fase 2: API para canais 'general' (não classificados) ──
+            import os
+            api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+            if api_key and api_key.startswith('sk-ant-') and 'channel' in df.columns:
+                try:
+                    model = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
+
+                    # Identificar canais únicos com tipo 'general'
+                    general_channels = df[df['channel_type'] == 'general']['channel'].unique()
+
+                    if len(general_channels) > 0:
+                        self.logger.info(f"   🔍 {len(general_channels)} canais 'general' para classificar via API")
+
+                        # Para cada canal, pegar amostra representativa de mensagens
+                        channel_samples = []
+                        for ch in general_channels[:20]:  # Limitar a 20 canais por vez
+                            ch_msgs = df[df['channel'] == ch]
+                            text_col = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+                            sample_texts = ch_msgs[text_col].dropna().head(5).tolist()
+                            sample_str = ' | '.join([str(t)[:200] for t in sample_texts])
+                            channel_samples.append(
+                                f"Canal: '{ch}' ({len(ch_msgs)} msgs)\nExemplos: {sample_str}"
+                            )
+
+                        channel_classification_prompt = """Você é um analista de comunicação digital brasileira especializado em Telegram.
+Classifique cada canal pelo seu conteúdo predominante, baseado no nome e nas mensagens de exemplo.
+
+Categorias válidas:
+- news: jornalismo, notícias, mídia
+- political: política, ideologia, ativismo
+- entertainment: humor, memes, cultura pop
+- religious: religião, fé, igrejas
+- conspiracy: teorias conspiratórias, negacionismo
+- military: militarismo, forças armadas, segurança
+- activism: mobilização, protestos, campanhas
+
+Para cada canal, forneça:
+1. type: categoria mais adequada
+2. theme: descrição em 3-5 palavras do tema principal
+3. confidence: 0.0-1.0
+
+Responda APENAS em JSON válido:
+[
+  {"channel": "nome_canal", "type": "categoria", "theme": "descrição tema", "confidence": 0.8},
+  ...
+]"""
+
+                        channels_text = "\n---\n".join(channel_samples)
+
+                        self.logger.info(f"🤖 Stage 17: Classificando {len(general_channels[:20])} canais via API...")
+
+                        api_results = self._api_classify_sync(
+                            texts=[channels_text],
+                            system_prompt=channel_classification_prompt,
+                            api_key=api_key,
+                            model=model,
+                            max_tokens=1000,
+                            temperature=0.1
+                        )
+
+                        if api_results:
+                            # _api_classify_sync já retorna lista de dicts parseada
+                            classified_count = 0
+                            for item in api_results:
+                                if isinstance(item, dict) and 'channel' in item:
+                                    ch_name = item['channel']
+                                    ch_type = item.get('type', 'general')
+                                    ch_theme = item.get('theme', 'não classificado')
+                                    ch_conf = float(item.get('confidence', 0.7))
+
+                                    # Atualizar todas as mensagens desse canal
+                                    ch_mask = df['channel'] == ch_name
+                                    if ch_mask.any():
+                                        df.loc[ch_mask, 'channel_type'] = ch_type
+                                        df.loc[ch_mask, 'channel_theme'] = ch_theme
+                                        df.loc[ch_mask, 'channel_confidence'] = ch_conf
+                                        classified_count += 1
+                                    else:
+                                        # Tentar match parcial se exact match falhou
+                                        for orig_ch in general_channels:
+                                            if ch_name.lower() in str(orig_ch).lower() or str(orig_ch).lower() in ch_name.lower():
+                                                ch_mask2 = df['channel'] == orig_ch
+                                                df.loc[ch_mask2, 'channel_type'] = ch_type
+                                                df.loc[ch_mask2, 'channel_theme'] = ch_theme
+                                                df.loc[ch_mask2, 'channel_confidence'] = ch_conf
+                                                classified_count += 1
+                                                break
+
+                            self.logger.info(f"   ✅ {classified_count} canais reclassificados via API")
+
+                except Exception as api_err:
+                    self.logger.warning(f"⚠️ Stage 17 API falhou, mantendo heurística: {api_err}")
+            else:
+                if not (api_key and api_key.startswith('sk-ant-')):
+                    self.logger.info("   ℹ️ Sem API key — 100% heurística")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 7
-            
-            self.logger.info(f"✅ Stage 17 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 9
+
+            general_remaining = (df['channel_type'] == 'general').sum()
+            self.logger.info(f"✅ Stage 17 concluído: {len(df)} registros, 'general' restante: {general_remaining}")
             return df
 
         except Exception as e:

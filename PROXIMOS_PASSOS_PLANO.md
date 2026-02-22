@@ -6,19 +6,25 @@
 
 ---
 
-## PARTE 1: STATUS ATUAL DA API
+## PARTE 1: STATUS ATUAL DA API (v6.2)
 
-### Stage 06 (Affordances) — ÚNICO STAGE COM API ATIVA
+### 6 Stages com API Híbrida (heurística + Anthropic Claude)
 - **API**: Anthropic Claude (claude-sonnet-4-20250514)
-- **Modelo anterior** (deprecated): claude-3-5-haiku-20241022 (expirou 19/02/2026)
-- **Modelo atual**: claude-sonnet-4-20250514 (atualizado hoje)
-- **Fluxo**: Heurística → API apenas para baixa confiança (<0.6)
-- **Teste real**: 500 rows → 220 mensagens enviadas à API (73.8% baixa confiança)
-- **Resultado**: Classificação melhorada — `aff_opiniao` 6.2%→26.5%, `aff_ataque` 8.9%→17.1%
-- **Custo**: ~104s para 500 rows (22 chamadas API em batches de 10)
+- **Modelo**: claude-sonnet-4-20250514
+- **Padrão**: Heurística (100%) → confidence score → API para baixa confiança → merge
+- **Batch API**: Disponível para datasets >100 msgs (50% desconto, USE_BATCH_API=true)
+- **Prompt Caching**: Ativo em chamadas síncronas (90% desconto em input cacheado)
 
-### Demais Stages — SEM API (heurísticos puros)
-Todos os outros 16 stages usam exclusivamente:
+| Stage | Threshold | Resultado (500 rows) |
+|-------|-----------|---------------------|
+| S06 Affordances | confidence < 0.6 | opinião 6.2%→26.5%, ataque 8.9%→17.1% |
+| S08 Político | confidence < 0.4 | neutral 40%→9.7% |
+| S11 Topic Modeling | confidence < 0.4 | tópicos nomeados via API |
+| S12 Sentimento | confidence < 0.5 | +sarcasmo, +emoções granulares |
+| S16 Eventos | confidence < 0.5 | 22 eventos específicos detectados |
+| S17 Canais | tipo = 'general' | 100% reclassificados |
+
+### Demais 11 Stages — Heurísticos puros
 - scikit-learn (TF-IDF, LDA, K-Means)
 - spaCy (NER, POS, lematização)
 - Python puro (regex, contagens, estatística)
@@ -192,10 +198,10 @@ Com os 4 datasets processados, comparar:
 7. ✅ ~~Stage 12: API para sentimento contextual~~ (+5 emoções granulares + sarcasmo)
 8. ✅ ~~Testes de validação com API expandida~~ (200 + 500 rows, 0 erros, 120 colunas)
 
-### Sprint 3 (médio prazo — ~8h)
-9. Stage 16: API para detecção de contexto (3h)
-10. Stage 11: API para rotulação de tópicos (2h)
-11. Stage 17: API para classificação de canais (3h)
+### Sprint 3 (médio prazo — ~8h) ✅ CONCLUÍDO
+9. ✅ ~~Stage 16: API para detecção de contexto~~ (22 eventos detectados em 500 msgs)
+10. ✅ ~~Stage 11: API para rotulação de tópicos~~ ("Notícias Políticas Lula" etc.)
+11. ✅ ~~Stage 17: API para classificação de canais~~ (100% "general" → classificados)
 
 ### Sprint 4 (análise de dados — tempo variável)
 12. Processar datasets completos (sem API primeiro)

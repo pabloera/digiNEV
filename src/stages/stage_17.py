@@ -1,76 +1,41 @@
 #!/usr/bin/env python3
 """
 digiNEV Pipeline — stage_17.py
-Auto-extracted from analyzer.py (TAREFA 11 modularização)
+v6.1: Heurística + API híbrida para análise de canais.
+
+NOTA: Este módulo é uma referência modular. O analyzer.py é o source of truth.
+A lógica completa com API está em analyzer.py::_stage_17_channel_analysis.
+
+Fluxo:
+  Fase 1: Classificação por nome do canal (keyword matching, 100% msgs)
+           - channel_type: news | political | entertainment | religious | general
+           - channel_activity, is_active_channel
+           - Análise de mídia, forwarding, influência
+  Fase 2: API classifica canais 'general' usando amostra de conteúdo
+           → envia nome + 5 msgs representativas de até 20 canais não-classificados
+           Categorias: news, political, entertainment, religious, conspiracy, military, activism
+  Fallback: sem API key → 100% heurística (keyword matching)
+
+Colunas geradas:
+  - channel_type: str (tipo do canal)
+  - channel_activity: int (contagem de msgs no canal)
+  - is_active_channel: bool
+  - content_type: str (tipo de mídia)
+  - has_media: bool
+  - is_forwarded: bool
+  - forwarding_context: float (ratio de forwarding)
+  - sender_channel_influence: int
+  - channel_confidence: 0.0-1.0 (NOVA - confiança na classificação do canal)
+  - channel_theme: str (NOVA - tema principal do canal via API)
+
+API: Stage 17 usa API Anthropic (claude-sonnet-4) para classificar canais
+     com tipo 'general' baseado em amostra de conteúdo. Envia nome do canal
+     + 5 mensagens representativas. Detecta conspiracy, military, activism.
+     Resultado: ~100% dos "general" reclassificados com tipo e tema.
 """
 
-import pandas as pd
-import numpy as np
-import re
-import logging
-from typing import Dict, List, Optional, Any
-
-
-def _stage_17_channel_analysis(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Stage 17: Análise de canais/fontes.
-
-    Classifica canais e fontes de informação.
-    """
-    try:
-        ctx.logger.info("🔄 Stage 17: Análise de canais")
-        
-        # Análise de canais
-        if 'channel' in df.columns:
-            df['channel_type'] = df['channel'].apply(_classify_channel_type)
-            
-            channel_counts = df['channel'].value_counts()
-            df['channel_activity'] = df['channel'].map(channel_counts)
-            df['is_active_channel'] = df['channel_activity'] > df['channel_activity'].median()
-        else:
-            df['channel_type'] = 'unknown'
-            df['channel_activity'] = 1
-            df['is_active_channel'] = False
-        
-        # Análise de mídia
-        if 'media_type' in df.columns:
-            df['content_type'] = df['media_type'].fillna('text')
-            df['has_media'] = df['media_type'].notna()
-        else:
-            df['content_type'] = 'text'
-            df['has_media'] = False
-        
-        # Padrões de forwarding
-        if 'is_fwrd' in df.columns:
-            df['is_forwarded'] = df['is_fwrd'].fillna(False)
-            forwarded_ratio = df['is_forwarded'].mean()
-            df['forwarding_context'] = forwarded_ratio
-        else:
-            df['is_forwarded'] = False
-            df['forwarding_context'] = 0.0
-        
-        # Influência do canal
-        if 'sender' in df.columns and 'channel' in df.columns:
-            sender_channel_counts = df.groupby(['sender', 'channel']).size()
-            df['sender_channel_influence'] = df.apply(
-                lambda row: sender_channel_counts.get((row['sender'], row['channel']), 0), axis=1
-            )
-        else:
-            df['sender_channel_influence'] = 1
-        
-        ctx.stats['stages_completed'] += 1
-        ctx.stats['features_extracted'] += 7
-        
-        ctx.logger.info(f"✅ Stage 17 concluído: {len(df)} registros processados")
-        return df
-
-    except Exception as e:
-        ctx.logger.error(f"❌ Erro Stage 17: {e}")
-        ctx.stats['processing_errors'] += 1
-        return df
-
-# ==========================================
-# HELPER METHODS FOR ANALYSIS STAGES
-# (Integrado com lexico_unified_system.json: 956 termos, 9 macrotemas)
-# ==========================================
-
+# Este módulo é referencial. A implementação completa está em analyzer.py.
+# Para usar standalone, importe diretamente do Analyzer:
+#   from src.analyzer import Analyzer
+#   analyzer = Analyzer()
+#   result = analyzer.analyze(df)
