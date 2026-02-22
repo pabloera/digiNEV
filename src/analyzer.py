@@ -2191,7 +2191,7 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 'Content-Type': 'application/json',
                 'x-api-key': api_key,
                 'anthropic-version': '2023-06-01',
-                'anthropic-beta': 'prompt-caching-2024-07-31'
+                'anthropic-beta': 'message-batches-2024-09-24'
             }
 
             payload = {"requests": batch_chunk}
