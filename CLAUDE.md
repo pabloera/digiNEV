@@ -36,16 +36,25 @@
 
 **Stack**: Python | scikit-learn | spaCy pt_core_news_sm | pandas | numpy | Anthropic Claude API
 
-### API Integration (v6.1) — Fev 2026
-- **3 stages com API**: Stage 06 (affordances), Stage 08 (político), Stage 12 (sentimento)
-- **Padrão**: Heurística 100% → API apenas para baixa confiança (threshold configurável)
+### API Integration (v6.2) — Fev 2026
+- **6 stages com API híbrida**: Stage 06, 08, 11, 12, 16, 17
+- **Padrão**: Heurística 100% → confidence score → API para baixa confiança → merge
 - **Modelo**: `claude-sonnet-4-20250514` (Sonnet 4)
 - **Batch API**: Suportada (50% desconto), ativável via `USE_BATCH_API=true` no `.env`
 - **Prompt Caching**: Ativo (90% desconto no input repetido)
 - **Fallback**: Sem API key → 100% heurística (pipeline NUNCA falha)
-- **Colunas novas**: `political_confidence`, `sentiment_confidence`, `emotion_anger/fear/hope/disgust`, `emotion_sarcasm`
-- **Resultados reais**: Stage 08 neutral 40%→9.4% | Stage 12 +sarcasmo/emoções granulares
-- **Métodos genéricos**: `_api_classify_sync()`, `_api_submit_batch()`, `_api_poll_batch()`, `_api_process_low_confidence()`
+
+| Stage | Função | Threshold | Colunas novas |
+|-------|--------|-----------|---------------|
+| S06 | Affordances | confidence < 0.6 | (reclassifica categorias existentes) |
+| S08 | Classificação política | confidence < 0.4 | `political_confidence` |
+| S11 | Topic modeling (LDA + API) | confidence < 0.4 | `topic_label`, `topic_confidence` |
+| S12 | Sentimento/emoções | confidence < 0.5 | `sentiment_confidence`, `emotion_anger/fear/hope/disgust`, `emotion_sarcasm` |
+| S16 | Contexto de eventos | confidence < 0.5 | `event_confidence`, `specific_event` |
+| S17 | Classificação de canais | tipo = 'general' | `channel_confidence`, `channel_theme` |
+
+- **Resultados reais (500 rows)**: S08 neutral 40%→9.4% | S11 tópicos nomeados ("Notícias Políticas Lula") | S12 +sarcasmo/emoções | S16 22 eventos detectados (8_janeiro=18) | S17 100% "general" reclassificados
+- **Métodos genéricos**: `_api_classify_sync()`, `_api_submit_batch()`, `_api_poll_batch()`, `_api_process_low_confidence()`, `_parse_api_json_response()`
 
 ### Modularização (TAREFA 11) — Fev 2026
 - Cada stage extraído como módulo independente em `src/stages/stage_XX.py`
@@ -70,7 +79,7 @@ from src.analyzer import Analyzer
 
 analyzer = Analyzer()
 output = analyzer.analyze(df)  # Retorna dict
-result_df = output['data']     # DataFrame com 120 colunas (113 base + 7 API)
+result_df = output['data']     # DataFrame com 126 colunas (113 base + 13 API)
 print(f"Stages: {output['stages_completed']}/17")
 print(f"Colunas: {output['columns_generated']}")
 ```
@@ -139,8 +148,8 @@ print(f"Rows: {len(df)} → {output['total_records']} (pós-filtro)")
 - Indicadores de erosão democrática
 
 ## 📊 Saída de Dados
-- **113 colunas** geradas pelo pipeline sequencial de 17 stages (102 features + 11 originais)
-- Classificação política (extrema-direita, direita, centro-direita, neutral)
+- **126 colunas** geradas pelo pipeline sequencial de 17 stages (113 base + 13 API)
+- Classificação política (extrema-direita, direita, centro-direita, neutral) + `political_confidence`
 - Análise estatística (word_count, char_count, sentence_count, caps_ratio, emoji_ratio)
 - Features extraídas (hashtags, URLs, mentions, emojis — sobre body cru)
 - Deduplicação cross-dataset com contador de frequência
@@ -151,22 +160,36 @@ print(f"Rows: {len(df)} → {output['total_records']} (pós-filtro)")
 - TCW: tcw_codes (3-digit), tcw_categories (10 cat.), tcw_agreement (1-3)
 - TF-IDF com scores e top termos (sobre lemmatized_text)
 - Clustering K-Means com distâncias calculadas
-- Topic modeling LDA com probabilidades reais
-- Análise temporal, network, domínios, eventos, canais
+- Topic modeling LDA com `topic_label` (nomeado via API) + `topic_confidence`
+- Sentimento: `sentiment_label` + emoções granulares (anger, fear, hope, disgust, sarcasm)
+- Eventos: `specific_event` (8_janeiro, stf_inquerito, eleicao_2022, etc.) + `event_confidence`
+- Canais: `channel_type` (conspiracy, military, activism, etc.) + `channel_confidence`, `channel_theme`
+- Análise temporal, network, domínios
 
-### Resultados de Validação (4 testes ponta-a-ponta, Fev 2026)
+### Resultados de Validação — v6.0 (heurística pura, Fev 2026)
 
-| Teste | Dataset | Rows in→out | Stages | Errors | Tempo |
-|-------|---------|-------------|--------|--------|-------|
-| 1 | 4_elec (100) | 100→67 | 17/17 | 0 | 0.7s |
-| 2 | 4_elec (500) | 500→298 | 17/17 | 0 | 3.4s |
-| 3 | 2_pandemia (1000) | 1000→705 | 17/17 | 0 | 7.6s |
-| 4 | 1_govbolso (2000) | 2000→717 | 17/17 | 0 | 6.1s |
+| Teste | Dataset | Rows in→out | Stages | Errors | Colunas | Tempo |
+|-------|---------|-------------|--------|--------|---------|-------|
+| 1 | 4_elec (100) | 100→67 | 17/17 | 0 | 113 | 0.7s |
+| 2 | 4_elec (500) | 500→298 | 17/17 | 0 | 113 | 3.4s |
+| 3 | 2_pandemia (1000) | 1000→705 | 17/17 | 0 | 113 | 7.6s |
+| 4 | 1_govbolso (2000) | 2000→717 | 17/17 | 0 | 113 | 6.1s |
+
+### Resultados de Validação — v6.2 (6 API stages, Fev 2026)
+
+| Teste | Dataset | Rows in→out | Stages | Errors | Colunas | Tempo |
+|-------|---------|-------------|--------|--------|---------|-------|
+| E2E quick | 4_elec (100) | 100→67 | 17/17 | 0 | 126 | ~90s |
+| E2E standard | 4_elec (200) | 200→120 | 17/17 | 0 | 126 | ~187s |
+| E2E full | 4_elec (500) | 500→298 | 17/17 | 0 | 126 | ~384s |
 
 ## 🧪 Testes
 ```bash
-# Teste do pipeline consolidado
-python test_clean_analyzer.py
+# Teste ponta-a-ponta v6.2 (com API)
+python test_e2e_pipeline.py --quick      # 100 rows, ~90s
+python test_e2e_pipeline.py              # 200 rows, ~3min (default)
+python test_e2e_pipeline.py --full       # 500 rows, ~6min
+python test_e2e_pipeline.py --no-api     # 100% heurístico
 
 # Execução com dados reais
 python run_pipeline.py
@@ -352,9 +375,9 @@ assert required_columns.issubset(data.columns)
 
 ### Arquivos Críticos
 **Sistema Principal:**
-- `/src/analyzer.py` - Pipeline consolidado 17 estágios otimizados
+- `/src/analyzer.py` - Pipeline consolidado 17 estágios otimizados (SOURCE OF TRUTH)
 - `/run_pipeline.py` - Script de execução principal
-- `/test_clean_analyzer.py` - Teste do sistema
+- `/test_e2e_pipeline.py` - Teste ponta-a-ponta v6.2 (6 API stages, 4 modos)
 
 **Dashboard:**
 - `/src/dashboard/data_analysis_dashboard.py` - Dashboard principal
@@ -362,14 +385,20 @@ assert required_columns.issubset(data.columns)
 
 ## 📝 Atualizações Recentes
 
-### Fev 2026 — Reestruturação + Modularização
+### Fev 2026 — API Integration v6.2 (6 Stages)
+- ✅ **6 stages com API híbrida**: S06 (affordances), S08 (político), S11 (topic naming), S12 (sentimento), S16 (eventos), S17 (canais)
+- ✅ **126 colunas** output (113 base + 13 API)
+- ✅ **Teste E2E** completo: `test_e2e_pipeline.py` (quick/standard/full/stress)
+- ✅ **Validação**: 17/17 stages, 0 erros em 100/200/500 rows
+- ✅ **Resultados API**: neutral 9.4%, tópicos nomeados, 22 eventos, canais reclassificados
+
+### Fev 2026 — Reestruturação + Modularização (v6.0)
 - ✅ **8 bugs corrigidos** no pipeline (spaCy input, caps/emoji/hashtag, token names, URL detection)
 - ✅ **TCW integrado** no Stage 08 (217 códigos, 10 categorias, 181 termos únicos)
 - ✅ **Léxico expandido** com macrotemas corrupção e política externa
 - ✅ **Token matching** reformulado: set() lookup com spaCy lemmas → O(1)/token
 - ✅ **Modularização completa** (TAREFA 11): 19 arquivos em src/stages/
 - ✅ **4 testes ponta-a-ponta** em 3 datasets diferentes, 0 erros
-- ✅ **113 colunas** output consistente em todos os testes
 
 ### Out 2025 — Pipeline Consolidado
 - ✅ Pipeline otimizado em 17 stages sequenciais
@@ -379,4 +408,4 @@ assert required_columns.issubset(data.columns)
 - ✅ Dashboard unificado disponível
 
 ---
-**Version**: v.final (Reestruturação + Modularização) | **RAM**: 4GB | **Focus**: Análise discurso político brasileiro
+**Version**: v6.2 (API Integration: 6 stages hybrid) | **RAM**: 4GB | **Colunas**: 126 | **Focus**: Análise discurso político brasileiro

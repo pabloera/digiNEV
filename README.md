@@ -89,8 +89,9 @@ Categories preserved in Portuguese for research validity:
 digiNEV/
 ├── 🚀 EXECUTION
 │   ├── run_pipeline.py              # Main analysis execution
+│   ├── test_e2e_pipeline.py         # End-to-end validation (v6.2, 6 API stages)
 │   ├── academic_deploy.py           # Academic deployment & validation
-│   └── test_all_weeks_consolidated.py # System validation tests
+│   └── test_all_weeks_consolidated.py # System validation tests (legacy)
 ├── 📚 DOCUMENTATION
 │   ├── README.md                    # Project overview (this file)
 │   ├── CLAUDE.md                    # Technical documentation for developers
@@ -145,19 +146,19 @@ poetry run python run_pipeline.py --streaming --chunk-size 500
 
 ### System Validation
 ```bash
+# End-to-end pipeline test (v6.2 with API)
+poetry run python test_e2e_pipeline.py --quick   # 100 rows, ~90s
+poetry run python test_e2e_pipeline.py           # 200 rows, ~3min (default)
+poetry run python test_e2e_pipeline.py --full    # 500 rows, ~6min
+poetry run python test_e2e_pipeline.py --no-api  # Heuristic only
+
 # Validate academic environment
 poetry run python src/scripts/academic_deploy.py --validate
-
-# Test all optimizations
-poetry run python test_all_weeks_consolidated.py
-
-# Check memory usage
-poetry run python -c "from src.utils.memory_manager import get_memory_status; print(get_memory_status())"
 ```
 
 ## 💡 Key Research Features
 
-### 🎓 Academic Optimizations (v6.1.0)
+### 🎓 Academic Optimizations (v6.2.0)
 - **Performance**: 60% time reduction through parallel processing
 - **Memory**: 50% reduction (8GB → 4GB) for academic computing
 - **Cost**: Batch API (50% off) + Prompt Caching (90% off input) for budget control
@@ -206,10 +207,10 @@ poetry run python -c "from src.utils.memory_manager import get_memory_status; pr
 
 ### Citation Guidelines
 When using digiNEV in academic work:
-1. **Version**: Cite as "digiNEV v5.0.0"
+1. **Version**: Cite as "digiNEV v6.2"
 2. **Categories**: Note preservation of Portuguese political terms
 3. **Parameters**: Document analysis settings and confidence thresholds
-4. **Reproducibility**: Include model versions (Claude 3.5 Haiku, Voyage 3.5 Lite)
+4. **Reproducibility**: Include model versions (Claude Sonnet 4 — claude-sonnet-4-20250514)
 5. **Data Processing**: Report any preprocessing or filtering steps
 
 ## 📚 Documentation Structure
@@ -236,8 +237,9 @@ When using digiNEV in academic work:
 - **backup/RECOVERY_PROCEDURES.md** - System recovery instructions
 
 ### 📊 System Validation
-- **test_all_weeks_consolidated.py** - Comprehensive system validation (95% success rate)
-- **archive/FINAL_CONSOLIDATION_REPORT_v5.0.0.md** - Complete optimization achievement summary
+- **test_e2e_pipeline.py** - End-to-end pipeline validation v6.2 (6 API stages, 17/17 stages, 0 errors, 126 columns)
+- **test_all_weeks_consolidated.py** - Legacy system validation
+- **archive/FINAL_CONSOLIDATION_REPORT_v5.0.0.md** - Historical optimization report
 
 ## ⚙️ Configuration for Researchers
 
@@ -284,7 +286,7 @@ poetry run python -c "from src.academic_config import get_academic_config; print
 
 ---
 
-## 🏆 digiNEV v.final — Production Ready
+## 🏆 digiNEV v6.2 — Production Ready
 
 **Academic Research Tool for Brazilian Political Discourse Analysis**
 
