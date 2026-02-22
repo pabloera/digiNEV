@@ -2450,6 +2450,414 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
 
         return []
 
+    # ==========================================
+    # GENERIC API METHODS (shared across stages)
+    # Padrão: heurística → API para baixa confiança
+    # Suporta Batch API (50% desconto) + Prompt Caching
+    # ==========================================
+
+    def _api_classify_sync(self, texts: list, system_prompt: str, api_key: str,
+                           model: str, max_tokens: int = 800, temperature: float = 0.1) -> list:
+        """
+        Classificar batch de textos via API síncrona (até 10 textos por chamada).
+        Reutilizável por qualquer stage. Retorna lista de dicts parseados do JSON.
+        """
+        import requests as _requests
+        import json
+
+        numbered_texts = []
+        for i, text in enumerate(texts, 1):
+            text_sample = str(text)[:400] if text and not (isinstance(text, float) and pd.isna(text)) else ''
+            if len(text_sample.strip()) < 10:
+                text_sample = '(mensagem vazia ou muito curta)'
+            numbered_texts.append(f"[{i}] {text_sample}")
+
+        user_content = "Classifique estas mensagens:\n\n" + "\n\n".join(numbered_texts)
+
+        headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': api_key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-beta': 'prompt-caching-2024-07-31'
+        }
+
+        payload = {
+            'model': model,
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'system': [
+                {
+                    'type': 'text',
+                    'text': system_prompt,
+                    'cache_control': {'type': 'ephemeral'}
+                }
+            ],
+            'messages': [{'role': 'user', 'content': user_content}]
+        }
+
+        try:
+            response = _requests.post(
+                'https://api.anthropic.com/v1/messages',
+                headers=headers,
+                json=payload,
+                timeout=60
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                text_content = ''
+                for block in data.get('content', []):
+                    if block.get('type') == 'text':
+                        text_content = block.get('text', '').strip()
+                        break
+                return self._parse_api_json_response(text_content)
+            else:
+                self.logger.warning(f"   ⚠️ API retornou status {response.status_code}")
+                return []
+
+        except _requests.RequestException as e:
+            self.logger.warning(f"   ⚠️ Erro na chamada API: {e}")
+            return []
+
+    def _api_submit_batch(self, batch_requests: list, api_key: str) -> str:
+        """
+        Submeter batch de requests à Batch API. Retorna batch_id ou None.
+        """
+        import requests as _requests
+
+        headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': api_key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-beta': 'message-batches-2024-09-24'
+        }
+
+        payload = {"requests": batch_requests}
+
+        try:
+            response = _requests.post(
+                'https://api.anthropic.com/v1/messages/batches',
+                headers=headers,
+                json=payload,
+                timeout=120
+            )
+
+            if response.status_code == 200:
+                batch_response = response.json()
+                batch_id = batch_response['id']
+                self.logger.info(f"   ✅ Batch {batch_id} criado. Status: {batch_response['processing_status']}")
+                return batch_id
+            else:
+                self.logger.error(f"   ❌ Batch API erro: {response.status_code} - {response.text[:200]}")
+                return None
+
+        except _requests.RequestException as e:
+            self.logger.error(f"   ❌ Erro ao submeter batch: {e}")
+            return None
+
+    def _api_poll_batch(self, batch_id: str, api_key: str,
+                        max_wait_seconds: int = 86400, poll_interval: int = 30) -> dict:
+        """
+        Poll para resultados do batch. Retorna dict de custom_id → texto da resposta.
+        """
+        import requests as _requests
+        import json
+        import time
+
+        results = {}
+        start_time = time.time()
+
+        self.logger.info(f"   ⏳ Aguardando batch {batch_id}...")
+
+        while time.time() - start_time < max_wait_seconds:
+            try:
+                status_response = _requests.get(
+                    f'https://api.anthropic.com/v1/messages/batches/{batch_id}',
+                    headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01'},
+                    timeout=30
+                )
+
+                if status_response.status_code != 200:
+                    self.logger.warning(f"   ⚠️ Status check erro: {status_response.status_code}")
+                    time.sleep(poll_interval)
+                    continue
+
+                batch_status = status_response.json()
+                processing_status = batch_status['processing_status']
+                counts = batch_status.get('request_counts', {})
+                succeeded = counts.get('succeeded', 0)
+                errored = counts.get('errored', 0)
+                processing = counts.get('processing', 0)
+                elapsed = int(time.time() - start_time)
+
+                self.logger.info(
+                    f"   ⏳ Batch: {processing_status} ({succeeded} ok, {errored} erros, {elapsed}s)"
+                )
+
+                if processing_status == 'ended':
+                    results_url = batch_status.get('results_url')
+                    if not results_url:
+                        results_url = f'https://api.anthropic.com/v1/messages/batches/{batch_id}/results'
+
+                    # Fetch JSONL results
+                    res = _requests.get(
+                        results_url,
+                        headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01'},
+                        timeout=120,
+                        stream=True
+                    )
+                    if res.status_code == 200:
+                        for line in res.iter_lines():
+                            if not line:
+                                continue
+                            try:
+                                entry = json.loads(line)
+                                custom_id = entry.get('custom_id', '')
+                                result = entry.get('result', {})
+                                if result.get('type') == 'succeeded':
+                                    message = result.get('message', {})
+                                    for block in message.get('content', []):
+                                        if block.get('type') == 'text':
+                                            results[custom_id] = block.get('text', '').strip()
+                                            break
+                                else:
+                                    results[custom_id] = None
+                            except json.JSONDecodeError:
+                                continue
+
+                    self.logger.info(f"   ✅ Batch concluído: {len(results)} resultados")
+                    return results
+
+            except _requests.RequestException as e:
+                self.logger.warning(f"   ⚠️ Erro no polling: {e}")
+
+            time.sleep(poll_interval)
+
+        self.logger.warning(f"   ⚠️ Timeout: batch não concluiu em {max_wait_seconds}s")
+        return results
+
+    def _api_process_low_confidence(self, df: pd.DataFrame, low_conf_indices: list,
+                                     text_column: str, system_prompt: str,
+                                     parse_fn, apply_fn,
+                                     stage_name: str = 'generic',
+                                     batch_size: int = 10) -> pd.DataFrame:
+        """
+        Método genérico para processar mensagens de baixa confiança via API.
+        Usado por Stage 08, 12 e potencialmente outros.
+
+        Args:
+            df: DataFrame
+            low_conf_indices: Índices das mensagens de baixa confiança
+            text_column: Coluna com texto para enviar à API
+            system_prompt: Prompt de sistema para a API
+            parse_fn: Função para parsear resposta JSON → lista de dicts
+            apply_fn: Função para aplicar classificações ao DataFrame (df, idx, classification) → df
+            stage_name: Nome do stage (para logging)
+            batch_size: Mensagens por chamada API
+        """
+        import os
+        import time
+
+        api_key = os.getenv('ANTHROPIC_API_KEY')
+        if not api_key:
+            self.logger.warning(f"   ⚠️ [{stage_name}] ANTHROPIC_API_KEY não encontrada. Mantendo heurística.")
+            return df
+
+        configured_model = os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
+        use_batch_api = os.getenv('USE_BATCH_API', 'false').lower() in ('true', '1', 'yes')
+        low_conf_count = len(low_conf_indices)
+
+        self.logger.info(f"   🤖 [{stage_name}] API: {low_conf_count} msgs, modelo: {configured_model}")
+
+        if use_batch_api and low_conf_count > 100:
+            # === BATCH API (assíncrono, 50% desconto) ===
+            self.logger.info(f"   📦 [{stage_name}] Usando Batch API para {low_conf_count} mensagens...")
+            df = self._api_batch_process(
+                df, low_conf_indices, text_column, system_prompt,
+                parse_fn, apply_fn, api_key, configured_model,
+                stage_name, batch_size
+            )
+        else:
+            # === CHAMADAS SÍNCRONAS (batches de 10) ===
+            if use_batch_api and low_conf_count <= 100:
+                self.logger.info(f"   ℹ️ [{stage_name}] Batch API não eficiente para {low_conf_count} msgs. Usando chamadas diretas.")
+
+            api_calls = 0
+            api_successes = 0
+            api_failures = 0
+
+            for i in range(0, len(low_conf_indices), batch_size):
+                batch_indices = low_conf_indices[i:i+batch_size]
+                batch_texts = [df.loc[idx, text_column] for idx in batch_indices]
+
+                classifications = self._api_classify_sync(
+                    batch_texts, system_prompt, api_key,
+                    configured_model, max_tokens=800, temperature=0.1
+                )
+                api_calls += 1
+
+                if classifications:
+                    for j, idx in enumerate(batch_indices):
+                        if j < len(classifications):
+                            cls = classifications[j]
+                            if isinstance(cls, dict):
+                                df = apply_fn(df, idx, cls)
+                                api_successes += 1
+                            else:
+                                api_failures += 1
+                        else:
+                            api_failures += 1
+                else:
+                    api_failures += len(batch_indices)
+
+                time.sleep(0.2)
+
+                if api_calls % 50 == 0:
+                    progress = min(100, (i / len(low_conf_indices)) * 100)
+                    self.logger.info(f"   🔄 [{stage_name}] Progresso: {progress:.1f}% ({api_successes} sucessos)")
+
+            self.logger.info(f"   📊 [{stage_name}] API: {api_successes} sucessos, {api_failures} falhas em {api_calls} chamadas")
+
+        return df
+
+    def _api_batch_process(self, df: pd.DataFrame, low_conf_indices: list,
+                           text_column: str, system_prompt: str,
+                           parse_fn, apply_fn,
+                           api_key: str, model: str,
+                           stage_name: str, batch_size: int = 10) -> pd.DataFrame:
+        """
+        Processar mensagens via Batch API (assíncrona, 50% desconto).
+        Genérico para qualquer stage.
+        """
+        import json
+
+        # Fase 1: Gerar requests
+        batch_requests = []
+        request_mapping = {}  # custom_id → lista de índices
+
+        for i in range(0, len(low_conf_indices), batch_size):
+            batch_indices = low_conf_indices[i:i+batch_size]
+            batch_texts = []
+            for idx in batch_indices:
+                text = df.loc[idx, text_column]
+                text_sample = str(text)[:400] if not pd.isna(text) else ''
+                if len(text_sample.strip()) < 10:
+                    text_sample = '(mensagem vazia ou muito curta)'
+                batch_texts.append(text_sample)
+
+            numbered_texts = [f"[{j+1}] {t}" for j, t in enumerate(batch_texts)]
+            user_content = "Classifique estas mensagens:\n\n" + "\n\n".join(numbered_texts)
+
+            custom_id = f"{stage_name}_{i//batch_size:06d}"
+            request_mapping[custom_id] = batch_indices
+
+            batch_requests.append({
+                "custom_id": custom_id,
+                "params": {
+                    "model": model,
+                    "max_tokens": 800,
+                    "temperature": 0.1,
+                    "system": [
+                        {
+                            "type": "text",
+                            "text": system_prompt,
+                            "cache_control": {"type": "ephemeral"}
+                        }
+                    ],
+                    "messages": [{"role": "user", "content": user_content}]
+                }
+            })
+
+        self.logger.info(f"   📝 [{stage_name}] {len(batch_requests)} requests para Batch API")
+
+        # Fase 2: Submeter (até 10k por batch)
+        max_per_batch = 10000
+        api_successes = 0
+        api_failures = 0
+
+        for batch_start in range(0, len(batch_requests), max_per_batch):
+            chunk = batch_requests[batch_start:batch_start + max_per_batch]
+            batch_id = self._api_submit_batch(chunk, api_key)
+
+            if not batch_id:
+                api_failures += sum(len(request_mapping[r['custom_id']]) for r in chunk)
+                continue
+
+            # Fase 3: Poll para resultados
+            results = self._api_poll_batch(batch_id, api_key)
+
+            # Fase 4: Aplicar resultados
+            for custom_id, text_content in results.items():
+                if custom_id not in request_mapping:
+                    continue
+                batch_indices = request_mapping[custom_id]
+                if text_content:
+                    classifications = parse_fn(text_content)
+                    if classifications:
+                        for j, idx in enumerate(batch_indices):
+                            if j < len(classifications):
+                                cls = classifications[j]
+                                if isinstance(cls, dict):
+                                    df = apply_fn(df, idx, cls)
+                                    api_successes += 1
+                                else:
+                                    api_failures += 1
+                            else:
+                                api_failures += 1
+                    else:
+                        api_failures += len(batch_indices)
+                else:
+                    api_failures += len(batch_indices)
+
+        self.logger.info(f"   📊 [{stage_name}] Batch API: {api_successes} sucessos, {api_failures} falhas")
+        return df
+
+    def _parse_api_json_response(self, text: str) -> list:
+        """
+        Parsear JSON de classificações da resposta da API.
+        Genérico — tenta múltiplas estratégias de parsing.
+        """
+        import json
+        import re
+
+        if not text:
+            return []
+
+        # Tentativa 1: JSON direto
+        try:
+            result = json.loads(text)
+            if isinstance(result, list):
+                return result
+        except json.JSONDecodeError:
+            pass
+
+        # Tentativa 2: Extrair array JSON
+        if '[' in text and ']' in text:
+            json_start = text.find('[')
+            json_end = text.rfind(']') + 1
+            try:
+                result = json.loads(text[json_start:json_end])
+                if isinstance(result, list):
+                    return result
+            except json.JSONDecodeError:
+                pass
+
+        # Tentativa 3: Extrair objetos JSON individuais
+        try:
+            objects = []
+            for match in re.finditer(r'\{[^{}]+\}', text):
+                try:
+                    obj = json.loads(match.group())
+                    objects.append(obj)
+                except json.JSONDecodeError:
+                    continue
+            if objects:
+                return objects
+        except Exception:
+            pass
+
+        return []
+
     def _stage_06_affordances_heuristic_fallback(self, df: pd.DataFrame) -> pd.DataFrame:
         """Fallback heurístico para classificação de affordances sem API."""
         self.logger.info("🔄 Aplicando classificação heurística de affordances...")
@@ -2700,14 +3108,14 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         """
         Stage 08: Classificação política brasileira.
 
-        REFORMULADO: usa spacy_lemmas (Stage 07) com token matching via set lookup.
-        Aplica léxico unificado (914+ termos, 11 macrotemas) para classificar textos.
-        Escopo: discurso bolsonarista/direita brasileira (2019-2023).
-        Orientações retornadas: extrema-direita, direita, centro-direita, neutral.
-        Nota: léxico não inclui termos de esquerda (fora do escopo do projeto).
+        REFORMULADO v6.1: Heurística + API híbrida.
+        Fase 1: Token matching via spaCy lemmas + léxico unificado (914+ termos, 11 macrotemas)
+        Fase 2: API para mensagens "neutral" com intensidade baixa (< 0.3) → reclassificação
+        Fase 3: TCW (Tabela-Categoria-Palavra) — sempre heurístico
+        Fallback: sem API key → 100% heurística (pipeline nunca falha)
         """
         try:
-            self.logger.info("🔄 Stage 08: Classificação política brasileira (token matching via spaCy lemmas)")
+            self.logger.info("🔄 Stage 08: Classificação política brasileira (heurística + API híbrida)")
 
             # Determinar coluna de input: preferir spacy_lemmas > lemmatized_text > normalized_text
             if 'spacy_lemmas' in df.columns:
@@ -2720,10 +3128,81 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 input_col = 'normalized_text' if 'normalized_text' in df.columns else 'body'
                 self.logger.warning(f"   ⚠️ spaCy output não disponível, fallback: {input_col}")
 
-            # Classificação política usando léxico unificado
+            # === FASE 1: Heurística (100% das mensagens) ===
+            self.logger.info("   📋 Fase 1: Classificação heurística (léxico unificado)...")
             df['political_orientation'] = df[input_col].apply(self._classify_political_orientation)
             df['political_keywords'] = df[input_col].apply(self._extract_political_keywords)
             df['political_intensity'] = df[input_col].apply(self._calculate_political_intensity)
+
+            # Calcular confidence score baseado na heurística
+            # Alta confiança: orientação ≠ neutral OU intensidade ≥ 0.3
+            # Baixa confiança: orientação == neutral E intensidade < 0.3
+            df['political_confidence'] = df.apply(
+                lambda row: 0.85 if row['political_orientation'] != 'neutral'
+                else (0.5 + row['political_intensity']) if row['political_intensity'] >= 0.15
+                else 0.2 + row['political_intensity'],
+                axis=1
+            )
+
+            initial_count = len(df)
+            neutral_mask = df['political_orientation'] == 'neutral'
+            low_conf_mask = df['political_confidence'] < 0.4
+            neutral_count = neutral_mask.sum()
+            low_conf_count = low_conf_mask.sum()
+
+            self.logger.info(f"   📊 Heurística: {initial_count - neutral_count} classificados, {neutral_count} neutral ({neutral_count/initial_count*100:.1f}%)")
+            self.logger.info(f"   🟡 Baixa confiança (candidatas API): {low_conf_count} ({low_conf_count/initial_count*100:.1f}%)")
+
+            # === FASE 2: API para mensagens de baixa confiança ===
+            import os
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if api_key and low_conf_count > 0:
+                # Coluna de texto para API — usar body original (mais contexto)
+                api_text_col = 'body' if 'body' in df.columns else input_col
+
+                low_conf_indices = df.index[low_conf_mask].tolist()
+
+                system_prompt = """Você é um classificador de discurso político brasileiro especializado no período 2019-2023.
+
+Classifique CADA mensagem numerada com orientação política e intensidade:
+
+Orientações possíveis:
+- extrema-direita: Discurso autoritário, anti-democrático, negacionista, conspiracionista, violento
+- direita: Conservadorismo, nacionalismo, anti-esquerdismo, defesa de valores tradicionais
+- centro-direita: Liberal-conservador moderado, crítica pontual, sem radicalismo
+- neutral: Sem conteúdo político identificável, informativo puro, conversa casual
+
+Intensidade: 0.0 (nenhuma) a 1.0 (extrema)
+
+Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
+[{"id":1,"orientacao":"direita","intensidade":0.6,"confianca":0.85},{"id":2,"orientacao":"neutral","intensidade":0.0,"confianca":0.9},{"id":3,"orientacao":"extrema-direita","intensidade":0.9,"confianca":0.95}]"""
+
+                def _parse_political(text_content):
+                    return self._parse_api_json_response(text_content)
+
+                def _apply_political(df_ref, idx, cls):
+                    orientacao = cls.get('orientacao', '')
+                    valid_orientations = ['extrema-direita', 'direita', 'centro-direita', 'neutral']
+                    if orientacao in valid_orientations:
+                        df_ref.at[idx, 'political_orientation'] = orientacao
+                        df_ref.at[idx, 'political_confidence'] = cls.get('confianca', 0.8)
+                        if 'intensidade' in cls:
+                            df_ref.at[idx, 'political_intensity'] = cls['intensidade']
+                    return df_ref
+
+                df = self._api_process_low_confidence(
+                    df, low_conf_indices, api_text_col, system_prompt,
+                    _parse_political, _apply_political,
+                    stage_name='stage_08_political', batch_size=10
+                )
+
+                # Log melhorias
+                new_neutral_count = (df['political_orientation'] == 'neutral').sum()
+                reclassified = neutral_count - new_neutral_count
+                if reclassified > 0:
+                    self.logger.info(f"   ✅ API reclassificou {reclassified} mensagens de 'neutral' → orientação política")
+            elif not api_key:
+                self.logger.info("   ℹ️ Sem API key — usando apenas heurística (fallback completo)")
 
             # Classificação temática - 12 categorias (political_keywords_dict.py)
             try:
@@ -2836,10 +3315,18 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             except Exception as tcw_err:
                 self.logger.warning(f"⚠️ Erro TCW: {tcw_err}")
 
-            self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 19  # 15 base + 4 TCW
+            # Limpar coluna temporária se não for útil downstream
+            # political_confidence é mantida — útil para análise de qualidade
 
-            self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros processados")
+            self.stats['stages_completed'] += 1
+            self.stats['features_extracted'] += 20  # 15 base + 4 TCW + 1 confidence
+
+            # Estatísticas finais
+            orientation_dist = df['political_orientation'].value_counts()
+            self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros")
+            for orient, count in orientation_dist.items():
+                self.logger.info(f"   📊 {orient}: {count} ({count/len(df)*100:.1f}%)")
+
             return df
 
         except Exception as e:
@@ -3302,21 +3789,32 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
 
     def _stage_12_semantic_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Stage 12: Análise semântica.
-        
-        Análise semântica e de sentimento dos textos.
+        Stage 12: Análise semântica e de sentimento.
+
+        REFORMULADO v6.1: Heurística + API híbrida.
+        Fase 1: Sentimento por léxico LIWC-PT + emoção por marcadores textuais (100% msgs)
+        Fase 2: API para sentimento ambíguo (polarity ≈ 0) → sentimento contextual + emoções granulares
+        Fallback: sem API key → 100% heurística (pipeline nunca falha)
+
+        Integra resultados dos stages anteriores:
+        - Stage 07 (spaCy): spacy_tokens para diversidade semântica
+        - Stage 08 (político): political_orientation para contexto na API
         """
         try:
-            self.logger.info("🔄 Stage 12: Análise semântica")
-            
+            self.logger.info("🔄 Stage 12: Análise semântica (heurística + API híbrida)")
+
             text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
-            
-            # Análise de sentimento básica
+            initial_count = len(df)
+
+            # === FASE 1: Heurística (100% das mensagens) ===
+            self.logger.info("   📋 Fase 1: Sentimento heurístico (léxico LIWC-PT)...")
+
+            # Análise de sentimento por léxico
             df['sentiment_polarity'] = df[text_column].apply(self._calculate_sentiment_polarity)
             df['sentiment_label'] = df['sentiment_polarity'].apply(
                 lambda x: 'positive' if x > 0.1 else ('negative' if x < -0.1 else 'neutral')
             )
-            
+
             # Análise de emoções básicas (usar body original para detectar !, ?, CAPS)
             raw_col = 'body' if 'body' in df.columns else text_column
             df['emotion_intensity'] = df.apply(
@@ -3326,9 +3824,8 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 ), axis=1
             )
             df['has_aggressive_language'] = df[text_column].apply(self._detect_aggressive_language)
-            
+
             # Complexidade semântica
-            # FIX: usar 'spacy_tokens' (output real do Stage 07) em vez de 'tokens' (inexistente)
             if 'spacy_tokens' in df.columns:
                 df['semantic_diversity'] = df['spacy_tokens'].apply(
                     lambda x: len(set(x)) / len(x) if isinstance(x, list) and len(x) > 0 else 0
@@ -3337,13 +3834,130 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 df['semantic_diversity'] = df[text_column].apply(
                     lambda x: len(set(str(x).split())) / len(str(x).split()) if len(str(x).split()) > 0 else 0
                 )
-            
+
+            # Calcular confidence score do sentimento heurístico
+            # Alta confiança: |polarity| alto OU emotion_intensity alto
+            # Baixa confiança: polarity ≈ 0 E emotion_intensity baixa
+            df['sentiment_confidence'] = df.apply(
+                lambda row: min(0.95, 0.4 + abs(row['sentiment_polarity']) * 3.0 + row['emotion_intensity'] * 0.3),
+                axis=1
+            )
+
+            # Emoções granulares — inicializar com defaults
+            df['emotion_anger'] = 0.0
+            df['emotion_fear'] = 0.0
+            df['emotion_hope'] = 0.0
+            df['emotion_disgust'] = 0.0
+            df['emotion_sarcasm'] = False
+
+            # Detecção heurística básica de emoções
+            def _detect_basic_emotions(text):
+                if not text or pd.isna(text):
+                    return {'anger': 0.0, 'fear': 0.0, 'hope': 0.0, 'disgust': 0.0}
+                text_lower = str(text).lower()
+                anger_terms = ['raiva', 'ódio', 'revolta', 'indignação', 'fúria', 'absurdo', 'inaceitável', 'vergonha']
+                fear_terms = ['medo', 'terror', 'pânico', 'assustador', 'perigo', 'ameaça', 'preocupante']
+                hope_terms = ['esperança', 'fé', 'confiança', 'otimismo', 'vamos', 'juntos', 'vitória', 'futuro']
+                disgust_terms = ['nojo', 'nojento', 'repugnante', 'podre', 'imundo', 'lixo', 'vergonhoso']
+
+                words = text_lower.split()
+                total = max(len(words), 1)
+                return {
+                    'anger': min(sum(1 for w in words if w in anger_terms) / total * 10, 1.0),
+                    'fear': min(sum(1 for w in words if w in fear_terms) / total * 10, 1.0),
+                    'hope': min(sum(1 for w in words if w in hope_terms) / total * 10, 1.0),
+                    'disgust': min(sum(1 for w in words if w in disgust_terms) / total * 10, 1.0)
+                }
+
+            emotion_results = df[text_column].apply(_detect_basic_emotions)
+            df['emotion_anger'] = emotion_results.apply(lambda x: x['anger'])
+            df['emotion_fear'] = emotion_results.apply(lambda x: x['fear'])
+            df['emotion_hope'] = emotion_results.apply(lambda x: x['hope'])
+            df['emotion_disgust'] = emotion_results.apply(lambda x: x['disgust'])
+
+            low_conf_mask = df['sentiment_confidence'] < 0.5
+            low_conf_count = low_conf_mask.sum()
+            neutral_sent_count = (df['sentiment_label'] == 'neutral').sum()
+
+            self.logger.info(f"   📊 Heurística: pos={( df['sentiment_label']=='positive').sum()}, "
+                           f"neg={(df['sentiment_label']=='negative').sum()}, "
+                           f"neutral={neutral_sent_count}")
+            self.logger.info(f"   🟡 Baixa confiança (candidatas API): {low_conf_count} ({low_conf_count/initial_count*100:.1f}%)")
+
+            # === FASE 2: API para sentimento ambíguo ===
+            import os
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if api_key and low_conf_count > 0:
+                api_text_col = 'body' if 'body' in df.columns else text_column
+                low_conf_indices = df.index[low_conf_mask].tolist()
+
+                # Incluir contexto político do Stage 08 no prompt
+                system_prompt = """Você é um analista de sentimento e emoções especializado em discurso político brasileiro (2019-2023).
+
+Para CADA mensagem numerada, analise:
+1. Sentimento: positive, negative, neutral, mixed
+2. Polaridade: -1.0 (muito negativo) a 1.0 (muito positivo)
+3. Emoções granulares (0.0 a 1.0): anger (raiva), fear (medo), hope (esperança), disgust (nojo)
+4. Sarcasmo: true/false — detecte ironia, sarcasmo e inversão de sentido
+5. Confiança: 0.0 a 1.0
+
+IMPORTANTE:
+- Considere o CONTEXTO político brasileiro: "vai dar certo" em contexto bolsonarista pode ser esperança OU ironia
+- Detecte negação: "não é bom" = negativo (não positivo)
+- Detecte sarcasmo: "parabéns ao governo" pode ser irônico
+- Mensagens curtas sem contexto → "neutral" com confiança baixa
+
+Responda APENAS com JSON array válido:
+[{"id":1,"sentimento":"negative","polaridade":-0.6,"anger":0.7,"fear":0.2,"hope":0.0,"disgust":0.3,"sarcasmo":false,"confianca":0.85}]"""
+
+                def _parse_sentiment(text_content):
+                    return self._parse_api_json_response(text_content)
+
+                def _apply_sentiment(df_ref, idx, cls):
+                    sentimento = cls.get('sentimento', '')
+                    valid_sentiments = ['positive', 'negative', 'neutral', 'mixed']
+                    if sentimento in valid_sentiments:
+                        df_ref.at[idx, 'sentiment_label'] = sentimento
+                    if 'polaridade' in cls:
+                        df_ref.at[idx, 'sentiment_polarity'] = cls['polaridade']
+                    if 'confianca' in cls:
+                        df_ref.at[idx, 'sentiment_confidence'] = cls['confianca']
+                    # Emoções granulares
+                    for emo in ['anger', 'fear', 'hope', 'disgust']:
+                        if emo in cls:
+                            df_ref.at[idx, f'emotion_{emo}'] = cls[emo]
+                    if 'sarcasmo' in cls:
+                        df_ref.at[idx, 'emotion_sarcasm'] = bool(cls['sarcasmo'])
+                    return df_ref
+
+                df = self._api_process_low_confidence(
+                    df, low_conf_indices, api_text_col, system_prompt,
+                    _parse_sentiment, _apply_sentiment,
+                    stage_name='stage_12_sentiment', batch_size=10
+                )
+
+                # Log melhorias
+                new_neutral = (df['sentiment_label'] == 'neutral').sum()
+                reclassified = neutral_sent_count - new_neutral
+                sarcasm_detected = df['emotion_sarcasm'].sum()
+                if reclassified > 0:
+                    self.logger.info(f"   ✅ API reclassificou {reclassified} msgs de 'neutral' → sentimento definido")
+                if sarcasm_detected > 0:
+                    self.logger.info(f"   🎭 Sarcasmo detectado em {sarcasm_detected} mensagens")
+            elif not api_key:
+                self.logger.info("   ℹ️ Sem API key — usando apenas heurística (fallback completo)")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 5
-            
-            self.logger.info(f"✅ Stage 12 concluído: {len(df)} registros processados")
+            self.stats['features_extracted'] += 11  # 5 original + 1 confidence + 4 emotions + 1 sarcasm
+
+            # Estatísticas finais
+            sent_dist = df['sentiment_label'].value_counts()
+            self.logger.info(f"✅ Stage 12 concluído: {len(df)} registros")
+            for label, count in sent_dist.items():
+                self.logger.info(f"   📊 {label}: {count} ({count/len(df)*100:.1f}%)")
+
             return df
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erro Stage 12: {e}")
             self.stats['processing_errors'] += 1

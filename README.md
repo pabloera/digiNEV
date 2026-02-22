@@ -58,8 +58,8 @@ The system processes Telegram messages through a 17-stage scientific pipeline:
 | **Linguistic Analysis** | 07-09 | spaCy NLP, political classification + TCW, TF-IDF | spaCy, scikit-learn | ✅ Operational |
 | **Advanced Analysis** | 10-17 | Clustering, topics, semantics, temporal, network, domain, events, channels | scikit-learn, Python | ✅ Operational |
 
-**Status**: **17/17 stages operational** · **0 errors** in 4 end-to-end tests · **113 columns** output · **102 features** generated
-**Output**: Research-ready DataFrames with political classification, TCW coding (10 categories), affordances (8 types), LDA topics, K-Means clusters, sentiment, temporal patterns, network coordination, domain analysis.
+**Status**: **17/17 stages operational** · **0 errors** in 6 end-to-end tests · **120 columns** output · **109 features** generated · **3 stages with API** (06, 08, 12)
+**Output**: Research-ready DataFrames with political classification, TCW coding (10 categories), affordances (8 types), LDA topics, K-Means clusters, sentiment + granular emotions, temporal patterns, network coordination, domain analysis.
 
 ## 🔬 Research Categories (Portuguese - Academic Authenticity)
 
@@ -97,7 +97,7 @@ digiNEV/
 │   ├── ACADEMIC_USER_GUIDE.md       # Comprehensive guide for researchers
 │   └── RESEARCH_HISTORY.md          # Development timeline & TDD journey
 ├── 🧠 CORE ANALYSIS
-│   ├── src/anthropic_integration/   # 22-stage AI analysis pipeline
+│   ├── src/anthropic_integration/   # 17-stage AI analysis pipeline
 │   ├── src/optimized/              # Performance optimizations (v5.0)
 │   ├── src/dashboard/              # Research visualization interface
 │   ├── src/core/                   # Unified cache and execution systems
@@ -157,15 +157,15 @@ poetry run python -c "from src.utils.memory_manager import get_memory_status; pr
 
 ## 💡 Key Research Features
 
-### 🎓 Academic Optimizations (v5.0.0)
+### 🎓 Academic Optimizations (v6.1.0)
 - **Performance**: 60% time reduction through parallel processing
 - **Memory**: 50% reduction (8GB → 4GB) for academic computing
-- **Cost**: 40% API cost reduction with $50/month budget protection
-- **Reliability**: **100% success rate** - all 22 pipeline stages operational
+- **Cost**: Batch API (50% off) + Prompt Caching (90% off input) for budget control
+- **Reliability**: **100% success rate** - all 17 pipeline stages operational
 - **Reproducibility**: Fixed model versions for consistent results
-- **AI Enhancement**: 12/22 stages using specialized AI modules (54.5% enhancement rate)
-- **Pipeline Completion**: **22/22 stages fully implemented and integrated**
-- **Data Integrity**: **64+ columns generated** with comprehensive validation
+- **AI Enhancement**: 3/17 stages using Anthropic API (06, 08, 12) with heuristic fallback
+- **Pipeline Completion**: **17/17 stages fully implemented and validated**
+- **Data Integrity**: **120 columns generated** with comprehensive validation
 - **Production Ready**: Complete dataset processing via `process_dataset()` method
 
 ### 🇧🇷 Brazilian Research Specialization
@@ -179,8 +179,8 @@ poetry run python -c "from src.utils.memory_manager import get_memory_status; pr
 - **Confidence Scores**: All classifications include confidence metrics
 - **Error Handling**: Automatic recovery and fallback systems
 - **Export Ready**: CSV/JSON outputs for statistical analysis
-- **Pipeline Integrity**: **100% success rate** across all 22 stages
-- **Code Organization**: All stages reorganized in numerical order (01-22)
+- **Pipeline Integrity**: **100% success rate** across all 17 stages
+- **Code Organization**: All stages reorganized in numerical order (01-17)
 - **Complete Processing**: New `process_dataset()` method for full pipeline execution
 - **Brazilian Focus**: Enhanced Portuguese text processing and political keyword coverage
 
@@ -290,8 +290,8 @@ poetry run python -c "from src.academic_config import get_academic_config; print
 
 *Specialized for studying digital authoritarianism, political polarization, and violence legitimization in Telegram messages (2019-2023)*
 
-**Status**: 17/17 stages operational, 4 end-to-end tests passed (0 errors), 113 columns output
-**Pipeline**: Reestruturação completa (8 bugs corrigidos) + TCW integration + modularização
+**Status**: 17/17 stages operational, 6 end-to-end tests passed (0 errors), 120 columns output
+**Pipeline**: Reestruturação completa (8 bugs) + TCW + API híbrida (Stages 06, 08, 12)
 **Validation**: Tested on 3 datasets (elec, pandemia, govbolso), 100-2000 rows, 3 time periods
 
 **Last Updated**: February 22, 2026

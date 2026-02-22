@@ -34,7 +34,18 @@
 16. **Event Context (16)**: Detecção de contextos políticos
 17. **Channel Analysis (17)**: Classificação de canais/fontes
 
-**Stack**: Python | scikit-learn | spaCy pt_core_news_sm | pandas | numpy
+**Stack**: Python | scikit-learn | spaCy pt_core_news_sm | pandas | numpy | Anthropic Claude API
+
+### API Integration (v6.1) — Fev 2026
+- **3 stages com API**: Stage 06 (affordances), Stage 08 (político), Stage 12 (sentimento)
+- **Padrão**: Heurística 100% → API apenas para baixa confiança (threshold configurável)
+- **Modelo**: `claude-sonnet-4-20250514` (Sonnet 4)
+- **Batch API**: Suportada (50% desconto), ativável via `USE_BATCH_API=true` no `.env`
+- **Prompt Caching**: Ativo (90% desconto no input repetido)
+- **Fallback**: Sem API key → 100% heurística (pipeline NUNCA falha)
+- **Colunas novas**: `political_confidence`, `sentiment_confidence`, `emotion_anger/fear/hope/disgust`, `emotion_sarcasm`
+- **Resultados reais**: Stage 08 neutral 40%→9.4% | Stage 12 +sarcasmo/emoções granulares
+- **Métodos genéricos**: `_api_classify_sync()`, `_api_submit_batch()`, `_api_poll_batch()`, `_api_process_low_confidence()`
 
 ### Modularização (TAREFA 11) — Fev 2026
 - Cada stage extraído como módulo independente em `src/stages/stage_XX.py`
@@ -59,7 +70,7 @@ from src.analyzer import Analyzer
 
 analyzer = Analyzer()
 output = analyzer.analyze(df)  # Retorna dict
-result_df = output['data']     # DataFrame com 113 colunas
+result_df = output['data']     # DataFrame com 120 colunas (113 base + 7 API)
 print(f"Stages: {output['stages_completed']}/17")
 print(f"Colunas: {output['columns_generated']}")
 ```

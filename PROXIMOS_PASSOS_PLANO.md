@@ -187,10 +187,10 @@ Com os 4 datasets processados, comparar:
 4. Dependabot (1h)
 5. CI-CD security (30 min)
 
-### Sprint 2 (curto prazo — ~12h)
-6. Stage 08: API para classificação política de baixa confiança (6h)
-7. Stage 12: API para sentimento contextual (4h)
-8. Testes de validação com API expandida (2h)
+### Sprint 2 (curto prazo — ~12h) ✅ CONCLUÍDO
+6. ✅ ~~Stage 08: API para classificação política~~ (neutral 40%→9.4%)
+7. ✅ ~~Stage 12: API para sentimento contextual~~ (+5 emoções granulares + sarcasmo)
+8. ✅ ~~Testes de validação com API expandida~~ (200 + 500 rows, 0 erros, 120 colunas)
 
 ### Sprint 3 (médio prazo — ~8h)
 9. Stage 16: API para detecção de contexto (3h)

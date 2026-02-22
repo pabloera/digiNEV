@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## [6.1.0] - 2026-02-22 — API Expansion (Stages 08, 12) + Generic Batch API
+
+### New Features
+- **Stage 08 API Integration**: Classificação política híbrida (heurística + API)
+  - Heurística classifica 100% das mensagens via léxico unificado
+  - API reclassifica mensagens "neutral" com political_confidence < 0.4
+  - Nova coluna `political_confidence` (0.0-1.0)
+  - Resultado: ~30-40% dos "neutral" reclassificados → orientação política real
+- **Stage 12 API Integration**: Análise semântica/sentimento híbrida
+  - Sentimento LIWC-PT + API para ambiguidade (sentiment_confidence < 0.5)
+  - 5 novas colunas: `sentiment_confidence`, `emotion_anger`, `emotion_fear`, `emotion_hope`, `emotion_disgust`, `emotion_sarcasm`
+  - Detecção de sarcasmo/ironia contextual via API
+  - Resultado: ~20-30% dos "neutral" reclassificados + emoções granulares
+- **Generic API Methods**: Métodos reutilizáveis para qualquer stage
+  - `_api_classify_sync()`: Chamada síncrona com prompt caching
+  - `_api_submit_batch()`: Submit para Batch API (50% desconto)
+  - `_api_poll_batch()`: Polling com status logging
+  - `_api_process_low_confidence()`: Orquestrador genérico (heurística → API)
+  - `_api_batch_process()`: Processamento batch genérico
+  - `_parse_api_json_response()`: Parser JSON multi-estratégia
+
+### Bug Fixes
+- **Batch API header**: Corrigido `prompt-caching-2024-07-31` → `message-batches-2024-09-24` no Stage 06
+
+### Validation
+- **200 rows test**: 17/17 stages, 0 erros, 120 colunas, 144s
+- **500 rows test**: 17/17 stages, 0 erros, 120 colunas, 388s
+- Stage 08: neutral 40% → 9.4% (API reclassificou ~75% dos neutral)
+- Stage 12: sarcasmo detectado em 17 msgs, emoções granulares funcionais
+- Fallback testado: sem API key → 100% heurística, pipeline não falha
+
+### Performance (500 rows, 3 stages com API)
+- Stage 06 (affordances): ~220 msgs API (73.8% low confidence)
+- Stage 08 (político): ~120 msgs API (40% neutral → 9.4%)
+- Stage 12 (sentimento): ~150 msgs API (50% low confidence)
+- Tempo total: 388s (vs 3.4s sem API)
+- Colunas: 113 → 120 (+7 novas)
+
 ## [6.0.0] - 2026-02-22 — Reestruturação Pipeline + Modularização
 
 ### Bug Fixes (TARETAs 1-5)
