@@ -1920,7 +1920,7 @@ class Analyzer:
             self.logger.info(f"   🤖 Fase 3: Enviando {low_conf_count} mensagens à API em batches de 10...")
 
             # Modelo configurável via .env (default: Haiku 3.5)
-            configured_model = os.getenv('ANTHROPIC_MODEL', 'claude-3-5-haiku-20241022')
+            configured_model = os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
             self.logger.info(f"   🔧 Modelo API: {configured_model}")
 
             api_config = {
