@@ -6,9 +6,9 @@
     "created": "2025-09-28",
     "source": "Agregação de taxonomia_lexico_integrado.json, brazilian_political_lexicon.yaml, political_analyzer.py e batch_analysis.py",
     "period_coverage": "2019-2023",
-    "total_macrotemas": 9,
-    "total_subtemas": 41,
-    "total_palavras": 847,
+    "total_macrotemas": 11,
+    "total_subtemas": 45,
+    "total_palavras": 914,
     "methodology": "Extração exaustiva de termos nativos do discurso bolsonarista/conservador no Telegram brasileiro"
   },
   "lexico": {
@@ -644,6 +644,85 @@
             "perseguição na cpi",
             "cpi golpista",
             "inquérito tendencioso"
+          ]
+        }
+      }
+    },
+    "corrupcao_transparencia": {
+      "nome": "Corrupção e Transparência",
+      "descricao": "Discurso anticorrupção, operações policiais e escândalos políticos — integrado do TCW cat 7",
+      "subtemas": {
+        "operacoes_anticorrupcao": {
+          "nome": "Operações Anticorrupção",
+          "descricao": "Operações policiais, investigações e processos judiciais contra corrupção",
+          "palavras": [
+            "lava jato", "propina", "petrolão", "mensalão", "rachadinha",
+            "orçamento secreto", "delação premiada", "corrupto", "corrupção",
+            "suborno", "desvio", "superfaturamento", "licitação", "fraude",
+            "peculato", "improbidade", "enriquecimento ilícito"
+          ],
+          "expressoes": [
+            "combate à corrupção",
+            "tolerância zero com corrupção",
+            "rouba mas faz",
+            "prender todos os corruptos",
+            "ficha limpa"
+          ]
+        },
+        "instituicoes_fiscalizacao": {
+          "nome": "Instituições de Fiscalização",
+          "descricao": "Órgãos de controle, polícia federal e ministério público",
+          "palavras": [
+            "pf", "polícia federal", "ministério público", "mpf",
+            "procuradoria", "procurador", "delegado", "tcu",
+            "tribunal de contas", "cgu", "controladoria", "coaf",
+            "receita federal", "operação policial", "mandado", "busca e apreensão"
+          ],
+          "expressoes": [
+            "braço da justiça",
+            "investigação independente",
+            "aparelhamento do mp",
+            "blindagem política"
+          ]
+        }
+      }
+    },
+    "politica_externa": {
+      "nome": "Política Externa e Relações Internacionais",
+      "descricao": "Relações diplomáticas, alinhamento geopolítico e soberania — integrado do TCW cat 8",
+      "subtemas": {
+        "alinhamento_geopolitico": {
+          "nome": "Alinhamento Geopolítico",
+          "descricao": "Relações com EUA, Israel e posicionamento anti-China",
+          "palavras": [
+            "eua", "estados unidos", "trump", "biden", "china",
+            "israel", "palestina", "rússia", "putin", "ucrânia",
+            "alinhamento", "diplomacia", "embaixada", "embaixador",
+            "itamaraty", "ernesto araújo", "chanceler"
+          ],
+          "expressoes": [
+            "aliado dos estados unidos",
+            "parceria com israel",
+            "vírus chinês",
+            "ameaça chinesa",
+            "alinhamento automático"
+          ]
+        },
+        "organismos_internacionais": {
+          "nome": "Organismos Internacionais",
+          "descricao": "ONU, Mercosul, BRICS e fóruns multilaterais",
+          "palavras": [
+            "onu", "mercosul", "brics", "otan", "g20", "g7",
+            "globalismo", "globalista", "isolacionismo", "soberania nacional",
+            "política externa", "sanções", "acordo internacional",
+            "fórum econômico", "davos", "agenda 2030"
+          ],
+          "expressoes": [
+            "ingerência internacional",
+            "soberania acima de tudo",
+            "sair da onu",
+            "agenda globalista",
+            "nova ordem mundial"
           ]
         }
       }

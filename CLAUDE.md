@@ -34,30 +34,46 @@
 16. **Event Context (16)**: Detecção de contextos políticos
 17. **Channel Analysis (17)**: Classificação de canais/fontes
 
-**Stack**: Python | scikit-learn | spaCy pt_core_news_lg | Streamlit
+**Stack**: Python | scikit-learn | spaCy pt_core_news_sm | pandas | numpy
+
+### Modularização (TAREFA 11) — Fev 2026
+- Cada stage extraído como módulo independente em `src/stages/stage_XX.py`
+- Registry de stages: `from stages import STAGE_REGISTRY`
+- Helpers compartilhados: `from stages.helpers import _calculate_emoji_ratio, ...`
+- `src/analyzer.py` = **source of truth** (versão autoritativa inline)
+- `src/stages/` = versão modular de referência, 1:1 com os métodos inline
+- 19 arquivos: 17 stages + helpers.py + __init__.py (3327 linhas total)
+
+### Reestruturação do Pipeline (TARETAs 1-10) — Fev 2026
+- **8 bugs corrigidos**: spaCy input, caps/emoji/hashtag sobre body, token names, URL detection
+- **TCW integrado** no Stage 08 (217 códigos, 10 categorias, 181 termos)
+- **Léxico expandido**: +2 macrotemas (corrupção, política externa) no lexico_unified_system.json
+- **Keywords expandido**: +2 categorias (cat11_corrupcao, cat12_politica_externa)
+- **Token matching** via set() lookup com spaCy lemmas (O(1) por token)
 
 ## 🚀 Execução
-
-### Analyzer v.final
-```bash
-# Execução direta
-python run_pipeline.py
-
-# Teste com dados controlados
-python test_clean_analyzer.py
-
-# Dashboard acadêmico
-python -m src.dashboard.start_dashboard
-```
 
 ### Uso Programático
 ```python
 from src.analyzer import Analyzer
 
 analyzer = Analyzer()
-results = analyzer.analyze_dataset(df)
-print(f"Colunas geradas: {results['columns_generated']}")
-print(f"Stages completados: {results['stats']['stages_completed']}/17")
+output = analyzer.analyze(df)  # Retorna dict
+result_df = output['data']     # DataFrame com 113 colunas
+print(f"Stages: {output['stages_completed']}/17")
+print(f"Colunas: {output['columns_generated']}")
+```
+
+### Teste Rápido com Dados Reais
+```python
+import pandas as pd
+from src.analyzer import Analyzer
+
+df = pd.read_csv('path/to/dataset.csv', nrows=500, sep=',',
+                  quotechar='"', quoting=1, on_bad_lines='skip')
+analyzer = Analyzer()
+output = analyzer.analyze(df)
+print(f"Rows: {len(df)} → {output['total_records']} (pós-filtro)")
 ```
 
 ## 🔧 Características Principais
@@ -76,20 +92,26 @@ print(f"Stages completados: {results['stats']['stages_completed']}/17")
 ## 📁 Estrutura
 
 ```
-├── src/                         # Sistema científico consolidado
-│   ├── analyzer.py              # Analyzer v.final (núcleo principal) - 17 stages otimizados
+├── src/
+│   ├── analyzer.py              # Pipeline principal (17 stages inline) — SOURCE OF TRUTH
 │   ├── lexicon_loader.py        # Carregador de léxico político
+│   ├── core/                    # Recursos de classificação
+│   │   ├── lexico_unified_system.json  # Léxico unificado (12 macrotemas)
+│   │   ├── political_keywords_dict.py  # Keywords políticas (12 categorias)
+│   │   ├── tcw_codes.json              # TCW: 217 códigos, 181 termos
+│   │   └── tcw_categories.json         # TCW: 10 categorias temáticas
+│   ├── stages/                  # Módulos extraídos (TAREFA 11)
+│   │   ├── __init__.py          # STAGE_REGISTRY + imports
+│   │   ├── helpers.py           # 21 funções utilitárias compartilhadas
+│   │   ├── stage_01.py          # Feature Extraction
+│   │   ├── stage_02.py          # Text Preprocessing
+│   │   ├── ...                  # Stages 03-17
+│   │   └── stage_17.py          # Channel Analysis
 │   └── dashboard/               # Dashboard acadêmico
-│       ├── start_dashboard.py   # Iniciador do dashboard
-│       ├── data_analysis_dashboard.py  # Dashboard principal
-│       └── [outros dashboards]  # Dashboards especializados
 ├── config/                      # Configuração unificada
-│   ├── settings.yaml            # Configurações principais
-│   ├── processing.yaml          # Configurações de processamento
-│   └── [outras configs]         # Configurações específicas
+│   └── settings.yaml            # Configurações principais
 ├── data/                        # Datasets de pesquisa
-├── run_pipeline.py              # Script principal de execução
-└── test_clean_analyzer.py       # Teste do sistema
+└── run_pipeline.py              # Script principal de execução
 ```
 
 ### Regras Estruturais
@@ -106,22 +128,29 @@ print(f"Stages completados: {results['stats']['stages_completed']}/17")
 - Indicadores de erosão democrática
 
 ## 📊 Saída de Dados
-- **102 colunas reais** geradas pelo pipeline sequencial otimizado de 17 stages
-- Classificação política (extrema-direita, direita, centro, esquerda, neutral)
-- Análise estatística descritiva (word_count, char_count, sentence_count)
-- Features extraídas automaticamente (hashtags, URLs, mentions, emojis)
-- Deduplicação cross-dataset com contador de frequência (dupli_freq)
-- Filtros de qualidade com scores 0-100 (content_quality_score)
-- Filtro de relevância política com redução de volume
-- TF-IDF com scores reais e top termos por documento
+- **113 colunas** geradas pelo pipeline sequencial de 17 stages (102 features + 11 originais)
+- Classificação política (extrema-direita, direita, centro-direita, neutral)
+- Análise estatística (word_count, char_count, sentence_count, caps_ratio, emoji_ratio)
+- Features extraídas (hashtags, URLs, mentions, emojis — sobre body cru)
+- Deduplicação cross-dataset com contador de frequência
+- Filtros de qualidade com scores 0-100
+- Affordances (8 categorias: ataque, interação, mídia_social, mobilização, etc.)
+- spaCy: tokens, lemmas, entities, lemmatized_text (sobre body cru)
+- Classificação política com token matching via set() sobre spacy_lemmas
+- TCW: tcw_codes (3-digit), tcw_categories (10 cat.), tcw_agreement (1-3)
+- TF-IDF com scores e top termos (sobre lemmatized_text)
 - Clustering K-Means com distâncias calculadas
 - Topic modeling LDA com probabilidades reais
-- Análise temporal (hour, day_of_week, month) quando disponível
-- Coordenação de rede detectada por cluster e tempo
-- Análise de domínios e URLs com classificação
-- Análise semântica avançada com conectivos e modalidade
-- Contexto de eventos políticos brasileiros
-- Análise de canais/fontes com autoridade e padrões
+- Análise temporal, network, domínios, eventos, canais
+
+### Resultados de Validação (4 testes ponta-a-ponta, Fev 2026)
+
+| Teste | Dataset | Rows in→out | Stages | Errors | Tempo |
+|-------|---------|-------------|--------|--------|-------|
+| 1 | 4_elec (100) | 100→67 | 17/17 | 0 | 0.7s |
+| 2 | 4_elec (500) | 500→298 | 17/17 | 0 | 3.4s |
+| 3 | 2_pandemia (1000) | 1000→705 | 17/17 | 0 | 7.6s |
+| 4 | 1_govbolso (2000) | 2000→717 | 17/17 | 0 | 6.1s |
 
 ## 🧪 Testes
 ```bash
@@ -320,16 +349,23 @@ assert required_columns.issubset(data.columns)
 - `/src/dashboard/data_analysis_dashboard.py` - Dashboard principal
 - `/src/dashboard/start_dashboard.py` - Iniciador do dashboard
 
-## 📝 Atualizações Recentes (Out 2025)
-- ✅ Pipeline otimizado em 17 stages sequenciais com redução de volume inteligente
-- ✅ Analyzer.py implementado com todos os estágios funcionais e validados
-- ✅ Sistema de deduplicação cross-dataset implementado (redução 40-50%)
-- ✅ Filtros de qualidade e relevância política implementados
-- ✅ Classificação política brasileira integrada e testada
+## 📝 Atualizações Recentes
+
+### Fev 2026 — Reestruturação + Modularização
+- ✅ **8 bugs corrigidos** no pipeline (spaCy input, caps/emoji/hashtag, token names, URL detection)
+- ✅ **TCW integrado** no Stage 08 (217 códigos, 10 categorias, 181 termos únicos)
+- ✅ **Léxico expandido** com macrotemas corrupção e política externa
+- ✅ **Token matching** reformulado: set() lookup com spaCy lemmas → O(1)/token
+- ✅ **Modularização completa** (TAREFA 11): 19 arquivos em src/stages/
+- ✅ **4 testes ponta-a-ponta** em 3 datasets diferentes, 0 erros
+- ✅ **113 colunas** output consistente em todos os testes
+
+### Out 2025 — Pipeline Consolidado
+- ✅ Pipeline otimizado em 17 stages sequenciais
+- ✅ Sistema de deduplicação cross-dataset (redução 40-50%)
+- ✅ Filtros de qualidade e relevância política
+- ✅ Classificação política brasileira integrada
 - ✅ Dashboard unificado disponível
-- ✅ Sistema completamente testado e validado (102 colunas geradas)
-- ✅ Otimizações 5.0.0 ativas (5/5 semanas - 100%)
-- ✅ Documentação técnica completa e atualizada
 
 ---
-**Version**: v.final | **RAM**: 4GB | **Focus**: Análise discurso político brasileiro consolidado
+**Version**: v.final (Reestruturação + Modularização) | **RAM**: 4GB | **Focus**: Análise discurso político brasileiro

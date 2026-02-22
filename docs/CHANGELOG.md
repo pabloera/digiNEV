@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## [6.0.0] - 2026-02-22 — Reestruturação Pipeline + Modularização
+
+### Bug Fixes (TARETAs 1-5)
+- **Stage 04**: `caps_ratio` e `emoji_ratio` agora calculados sobre `body` (texto cru), não `normalized_text` (que é lowercase sem emojis)
+- **Stage 04**: Detecção de hashtags usa `hashtags_extracted` (Stage 01) em vez de regex sobre texto sem `#`
+- **Stage 06**: URL detection via `urls_extracted` (Stage 01) em vez de regex sobre texto sem `://`
+- **Stage 07**: spaCy recebe `body` (texto cru) em vez de `normalized_text` — NER, POS e sentence splitting restaurados
+- **Stage 07**: Fallback linguístico gera `spacy_lemmas` para consistência downstream
+- **Stages 09, 11, 12**: Corrigido `'tokens'` → `'lemmatized_text'`/`'spacy_tokens'` (nomes corretos)
+- **Stage 10**: Corrigido `'text_length'` → `'char_count'` (feature existente)
+
+### New Features (TARETAs 6-9)
+- **TCW Integration** (Stage 08): 217 códigos TCW (3-dígito) integrados ao Stage 08 via token matching
+  - 181 termos únicos, 10 categorias temáticas
+  - Colunas: `tcw_codes`, `tcw_categories`, `tcw_agreement`
+  - Matching via set() intersection sobre spacy_lemmas (O(1)/token)
+- **Léxico expandido**: +2 macrotemas (`corrupcao_transparencia`, `politica_externa`) no `lexico_unified_system.json`
+- **Keywords expandido**: +2 categorias (`cat11_corrupcao`, `cat12_politica_externa`) no `political_keywords_dict.py`
+- **Token matching reformulado** (Stage 08): `_classify_political_orientation`, `_extract_political_keywords`, `_calculate_political_intensity` usam set() lookup quando spaCy lemmas disponíveis
+
+### Modularização (TAREFA 11)
+- **19 arquivos** criados em `src/stages/`: 17 stage modules + `helpers.py` + `__init__.py`
+- **STAGE_REGISTRY**: lista ordenada de (número, nome, função) para orquestração
+- **21 helper functions** extraídas para `stages/helpers.py`
+- **3327 linhas** de código modularizado (1:1 com métodos inline em analyzer.py)
+- `analyzer.py` permanece como **source of truth** (versão autoritativa)
+
+### Validation
+- **4 testes ponta-a-ponta**: 100, 500, 1000, 2000 rows
+- **3 datasets**: 4_elec, 2_pandemia, 1_govbolso (períodos 2019, 2021, 2022-23)
+- **Resultados**: 17/17 stages, 0 erros, 113 colunas, 102 features em todos os testes
+- **TCW coverage**: 22-46% dos registros classificados (varia por dataset)
+- **Categorias políticas ativas**: 9-12/12 categorias (varia por período)
+
+### Performance
+- 100 rows: 0.7s | 500 rows: 3.4s | 1000 rows: 7.6s | 2000 rows: 6.1s
+- Fallbacks funcionais: sem ANTHROPIC_API_KEY → heurística; sem hdbscan → KMeans
+
 ## [5.0.1] - 2025-09-30
 
 ### Fixed

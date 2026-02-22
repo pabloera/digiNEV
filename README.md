@@ -47,24 +47,19 @@ poetry run python src/dashboard/start_dashboard.py
 # Open browser at http://localhost:8050
 ```
 
-## 📊 Analysis Pipeline (22 Research Stages)
+## 📊 Analysis Pipeline (17 Research Stages)
 
-The system processes messages through a comprehensive academic pipeline with **ALL 22/22 stages fully operational** and **12/22 stages AI-enhanced** (54.5% AI enhancement rate):
+The system processes Telegram messages through a 17-stage scientific pipeline:
 
-| Stage Group | Stages | Purpose | Technology | Status |
-|-------------|--------|---------|------------|--------|
-| **Data Preparation** | 01-04 | Chunk, encode, deduplicate, validate | Core Python | ✅ **100% Operational** |
-| **Political Classification** | 05 | Categorize political orientation | Anthropic Claude | ✅ **AI-Enhanced & Operational** |
-| **Text Processing** | 06-07 | Clean text, extract linguistic features | AI + spaCy NLP | ✅ **AI-Enhanced & Operational** |
-| **Sentiment Analysis** | 08 | Detect emotional tone and context | Anthropic Claude | ✅ **AI-Enhanced & Operational** |
-| **Topic Discovery** | 09-11 | Model topics, cluster semantically | Voyage.ai + AI | ✅ **AI-Enhanced & Operational** |
-| **Content Analysis** | 12-14 | Analyze hashtags, domains, temporal patterns | AI + Mixed methods | ✅ **All Stages Operational** |
-| **Advanced Research** | 15-18 | Network analysis, qualitative coding | AI + graph analysis | ✅ **All Stages Operational** |
-| **Validation & Search** | 19-22 | Quality assurance, hybrid semantic search | Voyage.ai + FAISS/TF-IDF | ✅ **All Stages Operational** |
+| Phase | Stages | Purpose | Technology | Status |
+|-------|--------|---------|------------|--------|
+| **Preparation** | 01-02 | Feature extraction, text preprocessing | Core Python, regex | ✅ Operational |
+| **Volume Reduction** | 03-06 | Dedup, stats, quality filter, affordances | Python, Anthropic API (optional) | ✅ Operational |
+| **Linguistic Analysis** | 07-09 | spaCy NLP, political classification + TCW, TF-IDF | spaCy, scikit-learn | ✅ Operational |
+| **Advanced Analysis** | 10-17 | Clustering, topics, semantics, temporal, network, domain, events, channels | scikit-learn, Python | ✅ Operational |
 
-**🎉 PRODUCTION STATUS**: **22/22 stages fully operational** (100% complete pipeline), **12/22 stages AI-enhanced** (54.5% AI enhancement rate)
-**✅ RECENT ACHIEVEMENTS**: Pipeline fixes successfully applied, 100% stage success rate achieved, 64+ columns generated correctly
-**📊 OUTPUT**: Research-ready datasets with 63+ analytical columns including political categories, sentiment scores, topics, network metrics, and comprehensive validation.
+**Status**: **17/17 stages operational** · **0 errors** in 4 end-to-end tests · **113 columns** output · **102 features** generated
+**Output**: Research-ready DataFrames with political classification, TCW coding (10 categories), affordances (8 types), LDA topics, K-Means clusters, sentiment, temporal patterns, network coordination, domain analysis.
 
 ## 🔬 Research Categories (Portuguese - Academic Authenticity)
 
@@ -289,33 +284,15 @@ poetry run python -c "from src.academic_config import get_academic_config; print
 
 ---
 
-## 🏆 digiNEV v5.0.0 - Production Ready
+## 🏆 digiNEV v.final — Production Ready
 
 **Academic Research Tool for Brazilian Political Discourse Analysis**
 
-*Specialized for studying digital authoritarianism, political polarization, and violence legitimization patterns in social media (2019-2023)*
+*Specialized for studying digital authoritarianism, political polarization, and violence legitimization in Telegram messages (2019-2023)*
 
-**Status**: **PRODUCTION-READY** with all 22 stages fully operational and Week 1-5 optimizations integrated
-**AI Enhancement**: 12/22 stages actively operational (54.5% enhancement rate), all AI-enhanced stages fully functional
-**Pipeline Achievement**: **22/22 stages complete** (100% operational) with **100% success rate**
-**Recent Improvements**:
-- **Stage 15 Network Analysis**: Complete implementation with get_network_analysis_report() and auto-detection capabilities for comprehensive social network analysis
-- **Stage 13 Domain Analysis**: Complete implementation with get_domain_analysis_report() and credibility analysis for Brazilian media landscape
-- **Stage 12 Hashtag Normalization**: Complete implementation with normalize_hashtags() and comprehensive categorization for Brazilian political discourse
-- **Stage 11 Clustering**: Complete implementation with perform_semantic_clustering() and comprehensive reporting
-- **Stage 10 TF-IDF Extraction**: Complete implementation with extract_semantic_features() and comprehensive reporting
-- **Stage 09 Topic Modeling**: Complete implementation with analyze_topics() and Voyage.ai integration
-- **Stage 07 Linguistic Processing**: Fixed DataFrame return and auto-detection for text columns
-- **Stage 06 Text Cleaning**: Fixed method implementations (clean_dataset, get_cleaning_report)
-- Tiered political filtering (15-35% retention improvement)
-- Enhanced Brazilian political keyword coverage
-- Progress from 31.8% to 54.5% AI enhancement operational rate
-- **Stage 19 Semantic Search**: Complete implementation with hybrid FAISS + TF-IDF search capabilities
-- **Pipeline Fixes Applied**: sentiment_score and DataFrame issues resolved
-- **Code Organization Finalized**: All tests moved, imports fixed, clean structure achieved
-- **Complete Integration**: All 22 stages successfully integrated with data flow validation
-- **Production Readiness Achieved**: 100% stage success rate with comprehensive validation
+**Status**: 17/17 stages operational, 4 end-to-end tests passed (0 errors), 113 columns output
+**Pipeline**: Reestruturação completa (8 bugs corrigidos) + TCW integration + modularização
+**Validation**: Tested on 3 datasets (elec, pandemia, govbolso), 100-2000 rows, 3 time periods
 
-**Last Updated**: September 27, 2025
+**Last Updated**: February 22, 2026
 **Academic Focus**: Social science research on Brazilian democracy and digital discourse
-**Pipeline Status**: **22/22 stages operational** - Production-ready for academic research centers

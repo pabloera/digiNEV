@@ -1,0 +1,1304 @@
+{
+  "100": {
+    "word": "ditadura",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "101": {
+    "word": "regime militar",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "102": {
+    "word": "ai-5",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "103": {
+    "word": "tortura",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "104": {
+    "word": "golpe militar",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "105": {
+    "word": "ustra",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "106": {
+    "word": "repressão",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "107": {
+    "word": "intervenção militar",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "108": {
+    "word": "revolução",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "109": {
+    "word": "nostalgismo autoritário",
+    "table": 1,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "110": {
+    "word": "covid-19",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "111": {
+    "word": "tratamento precoce",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "112": {
+    "word": "lockdown",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "113": {
+    "word": "máscaras",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "114": {
+    "word": "cloroquina",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "115": {
+    "word": "negacionismo",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "116": {
+    "word": "hidroxicloroquina",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "117": {
+    "word": "ivermectina",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "118": {
+    "word": "gripezinha",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "119": {
+    "word": "cpi da covid",
+    "table": 1,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "120": {
+    "word": "amazônia",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "121": {
+    "word": "desmatamento",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "122": {
+    "word": "indígena",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "123": {
+    "word": "agronegócio",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "124": {
+    "word": "queimadas",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "125": {
+    "word": "ibama",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "126": {
+    "word": "indígenas",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "127": {
+    "word": "terras indígenas",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "128": {
+    "word": "garimpo ilegal",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "129": {
+    "word": "mudanças climáticas",
+    "table": 1,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "130": {
+    "word": "preto",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "131": {
+    "word": "negro",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "132": {
+    "word": "minoria",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "133": {
+    "word": "discriminação",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "134": {
+    "word": "cota",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "135": {
+    "word": "racismo estrutural",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "136": {
+    "word": "ações afirmativas",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "137": {
+    "word": "movimento negro",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "138": {
+    "word": "privilégio",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "139": {
+    "word": "direitos humanos",
+    "table": 1,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "140": {
+    "word": "stf",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "141": {
+    "word": "ministro",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "142": {
+    "word": "congresso",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "143": {
+    "word": "senado",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "144": {
+    "word": "alexandre de moraes",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "145": {
+    "word": "judiciário",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "146": {
+    "word": "barroso",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "147": {
+    "word": "toffoli",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "148": {
+    "word": "xandão",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "149": {
+    "word": "cpi",
+    "table": 1,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "150": {
+    "word": "militar",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "151": {
+    "word": "ordem",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "152": {
+    "word": "patriota",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "153": {
+    "word": "golpe",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "154": {
+    "word": "general",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "155": {
+    "word": "forças armadas",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "156": {
+    "word": "segurança pública",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "157": {
+    "word": "militarização",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "158": {
+    "word": "soldado",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "159": {
+    "word": "armas",
+    "table": 1,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "160": {
+    "word": "comunismo",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "161": {
+    "word": "venezuela",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "162": {
+    "word": "cuba",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "163": {
+    "word": "socialismo",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "164": {
+    "word": "esquerda",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "165": {
+    "word": "ideologia de gênero",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "166": {
+    "word": "marxismo cultural",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "167": {
+    "word": "globalismo",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "168": {
+    "word": "pt",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "169": {
+    "word": "lula",
+    "table": 1,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "170": {
+    "word": "corrupto",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "171": {
+    "word": "lava jato",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "172": {
+    "word": "propina",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "173": {
+    "word": "petrolão",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "174": {
+    "word": "mensalão",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "175": {
+    "word": "rachadinha",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "176": {
+    "word": "orçamento secreto",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "177": {
+    "word": "ministério público",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "178": {
+    "word": "delação premiada",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "179": {
+    "word": "pf",
+    "table": 1,
+    "category": 7,
+    "category_name": "Corrupção e Transparência"
+  },
+  "180": {
+    "word": "eua",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "181": {
+    "word": "trump",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "182": {
+    "word": "china",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "183": {
+    "word": "diplomacia",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "184": {
+    "word": "onu",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "185": {
+    "word": "israel",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "186": {
+    "word": "mercosul",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "187": {
+    "word": "isolacionismo",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "188": {
+    "word": "soberania nacional",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "189": {
+    "word": "alinhamento",
+    "table": 1,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "190": {
+    "word": "deus",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "191": {
+    "word": "cristão",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "192": {
+    "word": "família",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "193": {
+    "word": "evangélico",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "194": {
+    "word": "aborto",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "195": {
+    "word": "valores tradicionais",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "196": {
+    "word": "bancada evangélica",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "197": {
+    "word": "escola sem partido",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "198": {
+    "word": "homossexualidade",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "199": {
+    "word": "costumes",
+    "table": 1,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "200": {
+    "word": "ditadura",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "201": {
+    "word": "regime militar",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "202": {
+    "word": "ai-5",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "203": {
+    "word": "tortura",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "206": {
+    "word": "repressão",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "207": {
+    "word": "intervenção militar",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "208": {
+    "word": "revolução",
+    "table": 2,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "210": {
+    "word": "covid-19",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "211": {
+    "word": "tratamento precoce",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "212": {
+    "word": "lockdown",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "213": {
+    "word": "máscaras",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "214": {
+    "word": "quarentena",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "215": {
+    "word": "negacionismo",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "217": {
+    "word": "ivermectina",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "218": {
+    "word": "pfizer",
+    "table": 2,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "220": {
+    "word": "amazônia",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "221": {
+    "word": "desmatamento",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "222": {
+    "word": "indígena",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "223": {
+    "word": "agronegócio",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "226": {
+    "word": "índio",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "227": {
+    "word": "terras indígenas",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "228": {
+    "word": "aquecimento global",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "229": {
+    "word": "garimpo",
+    "table": 2,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "230": {
+    "word": "preto",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "231": {
+    "word": "negro",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "232": {
+    "word": "minoria",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "233": {
+    "word": "discriminação",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "234": {
+    "word": "cota",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "238": {
+    "word": "privilégio",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "239": {
+    "word": "racismo ambiental",
+    "table": 2,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "240": {
+    "word": "stf",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "241": {
+    "word": "ministro",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "242": {
+    "word": "congresso",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "243": {
+    "word": "senado",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "244": {
+    "word": "alexandre de moraes",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "245": {
+    "word": "judiciário",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "246": {
+    "word": "barroso",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "247": {
+    "word": "toffoli",
+    "table": 2,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "251": {
+    "word": "ordem",
+    "table": 2,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "253": {
+    "word": "golpe",
+    "table": 2,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "254": {
+    "word": "general",
+    "table": 2,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "255": {
+    "word": "forças armadas",
+    "table": 2,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "258": {
+    "word": "soldado",
+    "table": 2,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "260": {
+    "word": "comunismo",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "261": {
+    "word": "comunista",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "262": {
+    "word": "socialismo",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "263": {
+    "word": "marxismo",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "264": {
+    "word": "terrorista",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "265": {
+    "word": "ideologia de gênero",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "266": {
+    "word": "agenda comunista",
+    "table": 2,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "284": {
+    "word": "onu",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "285": {
+    "word": "sanções",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "286": {
+    "word": "política externa",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "287": {
+    "word": "globalismo",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "288": {
+    "word": "greta",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "289": {
+    "word": "comunidades internacionais",
+    "table": 2,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "292": {
+    "word": "patriota",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "293": {
+    "word": "mimimi",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "295": {
+    "word": "liberdade",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "296": {
+    "word": "disciplina",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "297": {
+    "word": "conservador",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "299": {
+    "word": "liberdade de expressão",
+    "table": 2,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  },
+  "300": {
+    "word": "ditadura",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "301": {
+    "word": "regime militar",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "302": {
+    "word": "ai-5",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "303": {
+    "word": "tortura",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "306": {
+    "word": "repressão",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "307": {
+    "word": "intervenção militar",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "353": {
+    "word": "golpe",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "354": {
+    "word": "general",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "355": {
+    "word": "cidadão de bem",
+    "table": 3,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "358": {
+    "word": "soldado",
+    "table": 3,
+    "category": 0,
+    "category_name": "Autoritarismo e Regimes Políticos"
+  },
+  "310": {
+    "word": "covid-19",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "312": {
+    "word": "lockdown",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "313": {
+    "word": "máscaras",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "314": {
+    "word": "quarentena",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "317": {
+    "word": "distanciamento social",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "318": {
+    "word": "vacina",
+    "table": 3,
+    "category": 1,
+    "category_name": "Pandemia e Saúde Pública"
+  },
+  "320": {
+    "word": "amazônia",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "321": {
+    "word": "desmatamento",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "322": {
+    "word": "indígena",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "323": {
+    "word": "agronegócio",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "324": {
+    "word": "queimadas",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "326": {
+    "word": "índio",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "327": {
+    "word": "terras indígenas",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "328": {
+    "word": "garimpo ilegal",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "329": {
+    "word": "ong",
+    "table": 3,
+    "category": 2,
+    "category_name": "Meio Ambiente e Questões Indígenas"
+  },
+  "330": {
+    "word": "preto",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "331": {
+    "word": "negro",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "332": {
+    "word": "minoria",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "333": {
+    "word": "discriminação",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "334": {
+    "word": "cota",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "335": {
+    "word": "racismo",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "338": {
+    "word": "privilégio",
+    "table": 3,
+    "category": 3,
+    "category_name": "Questões Raciais e Sociais"
+  },
+  "340": {
+    "word": "stf",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "341": {
+    "word": "ministro",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "342": {
+    "word": "supremo",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "343": {
+    "word": "judiciário",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "344": {
+    "word": "alexandre de moraes",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "345": {
+    "word": "senador",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "346": {
+    "word": "barroso",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "347": {
+    "word": "toffoli",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "348": {
+    "word": "inquérito das fake news",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "349": {
+    "word": "ativismo judicial",
+    "table": 3,
+    "category": 4,
+    "category_name": "Instituições Democráticas e Poderes"
+  },
+  "351": {
+    "word": "ordem",
+    "table": 3,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "352": {
+    "word": "patriota",
+    "table": 3,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "356": {
+    "word": "armamentismo",
+    "table": 3,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "357": {
+    "word": "excludente de ilicitude",
+    "table": 3,
+    "category": 5,
+    "category_name": "Militarismo e Segurança"
+  },
+  "360": {
+    "word": "comunismo",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "361": {
+    "word": "comunista",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "363": {
+    "word": "marxismo",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "365": {
+    "word": "ideologia de gênero",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "366": {
+    "word": "politicamente correto",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "367": {
+    "word": "globalismo",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "368": {
+    "word": "doutrinação",
+    "table": 3,
+    "category": 6,
+    "category_name": "Ideologia e Conflito Político"
+  },
+  "388": {
+    "word": "greta",
+    "table": 3,
+    "category": 8,
+    "category_name": "Política Externa e Relações Internacionais"
+  },
+  "392": {
+    "word": "deus acima de todos",
+    "table": 3,
+    "category": 9,
+    "category_name": "Religião, Cultura e Conservadorismo"
+  }
+}

@@ -49,5 +49,17 @@ POLITICAL_KEYWORDS = {
     'cat10_polarizacao': [
         'nós contra eles', 'vergonha', 'ódio', 'orgulho', 'traição', 'luta do bem contra o mal',
         'defensores da pátria', 'inimigos do povo'
+    ],
+
+    'cat11_corrupcao': [
+        'corrupto', 'corrupção', 'lava jato', 'propina', 'petrolão', 'mensalão',
+        'rachadinha', 'orçamento secreto', 'delação premiada', 'pf', 'polícia federal',
+        'ministério público', 'mpf', 'desvio', 'superfaturamento', 'improbidade'
+    ],
+
+    'cat12_politica_externa': [
+        'eua', 'trump', 'china', 'diplomacia', 'onu', 'israel', 'mercosul',
+        'isolacionismo', 'soberania nacional', 'alinhamento', 'sanções',
+        'política externa', 'globalismo', 'brics', 'g20', 'itamaraty'
     ]
 }

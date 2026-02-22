@@ -12,8 +12,16 @@ ARQUITETURA CONSOLIDADA:
 - Dados reais processados (sem métricas inventadas)
 - Configuração unificada via config/settings.yaml
 
+MODULARIZAÇÃO (TAREFA 11):
+- Cada stage foi extraído como módulo independente em src/stages/
+- Registry de stages: from stages import STAGE_REGISTRY
+- Helpers compartilhados: from stages.helpers import _calculate_emoji_ratio, etc.
+- Os métodos inline neste arquivo são a versão autoritativa (source of truth)
+- Os módulos em stages/ são a versão modular de referência, 1:1 com os inline
+- Migração completa: substituir self._stage_XX por import de stages.stage_XX
+
 Author: digiNEV Academic Research Team
-Version: v.final (Consolidação Final)
+Version: v.final (Consolidação Final + Modularização)
 """
 
 import pandas as pd
@@ -1502,8 +1510,10 @@ class Analyzer:
                     'entities_count': 0
                 }
 
-        # Processar textos normalizados
-        spacy_results = df['normalized_text'].apply(process_text_with_spacy)
+        # FIX: spaCy deve receber 'body' (texto cru) — normalized_text é lowercase
+        # e sem pontuação, o que degrada NER, POS tagging e sentence splitting
+        spacy_input_col = 'body' if 'body' in df.columns else 'normalized_text'
+        spacy_results = df[spacy_input_col].apply(process_text_with_spacy)
 
         # Extrair dados do spaCy (removidos pos_tags e entities - não utilizados)
         df['spacy_tokens'] = spacy_results.apply(lambda x: x['tokens'])
@@ -1524,11 +1534,13 @@ class Analyzer:
 
     def _linguistic_fallback(self, df: pd.DataFrame) -> pd.DataFrame:
         """Fallback básico quando spaCy não está disponível."""
-        # Tokenização básica
-        df['spacy_tokens'] = df['normalized_text'].str.split()
+        # FIX: usar body como input (consistente com spaCy path)
+        fallback_col = 'body' if 'body' in df.columns else 'normalized_text'
+        df['spacy_tokens'] = df[fallback_col].str.split()
         df['spacy_tokens_count'] = df['spacy_tokens'].str.len()
+        df['spacy_lemmas'] = df['spacy_tokens']  # sem spaCy, lemmas = tokens
         df['spacy_entities_count'] = 0
-        df['lemmatized_text'] = df['normalized_text']  # Usar texto normalizado
+        df['lemmatized_text'] = df[fallback_col].str.lower()  # fallback: lowercase do body
 
         self.stats['stages_completed'] += 1
         self.stats['features_extracted'] += 3
@@ -1671,9 +1683,14 @@ class Analyzer:
             duplicacao_pct = (registros_duplicados / total_registros * 100) if total_registros > 0 else 0
             
             # === ANÁLISE DE HASHTAGS ===
+            # FIX: usar coluna 'hashtags_extracted' (Stage 01) ou 'body' (# removido de normalized_text)
             has_hashtags = 0
-            if 'has_hashtags' in df.columns:
-                has_hashtags = df['has_hashtags'].sum()
+            if 'hashtags_extracted' in df.columns:
+                has_hashtags = df['hashtags_extracted'].apply(
+                    lambda x: len(x) > 0 if isinstance(x, list) else bool(x)
+                ).sum()
+            elif 'body' in df.columns:
+                has_hashtags = df['body'].str.contains('#', na=False).sum()
             elif text_column in df.columns:
                 has_hashtags = df[text_column].str.contains('#', na=False).sum()
             
@@ -1701,13 +1718,16 @@ class Analyzer:
                 df['word_count'] = 0
             
             # === PROPORÇÕES DE QUALIDADE ===
-            if text_column in df.columns:
-                df['emoji_ratio'] = df[text_column].apply(self._calculate_emoji_ratio)
-                df['caps_ratio'] = df[text_column].apply(self._calculate_caps_ratio)
-                df['repetition_ratio'] = df[text_column].apply(self._calculate_repetition_ratio)
-                
-                # Detecção de idioma básica
-                df['likely_portuguese'] = df[text_column].apply(self._detect_portuguese)
+            # FIX: emoji_ratio e caps_ratio devem usar 'body' (texto cru) — normalized_text
+            # é lowercase e sem emojis, o que faz essas métricas retornarem sempre 0.0
+            raw_col = 'body' if 'body' in df.columns else text_column
+            if raw_col in df.columns:
+                df['emoji_ratio'] = df[raw_col].apply(self._calculate_emoji_ratio)
+                df['caps_ratio'] = df[raw_col].apply(self._calculate_caps_ratio)
+                df['repetition_ratio'] = df[raw_col].apply(self._calculate_repetition_ratio)
+
+                # Detecção de idioma básica (pode usar normalized_text — lowercase ok)
+                df['likely_portuguese'] = df[text_column].apply(self._detect_portuguese) if text_column in df.columns else True
             else:
                 df['emoji_ratio'] = 0.0
                 df['caps_ratio'] = 0.0
@@ -2504,7 +2524,8 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                     categories.append(affordance_type)
                     total_matches += matches
 
-            # Detecção por padrões regex
+            # FIX: regex em normalized_text nunca matcheia (: e // são removidos na normalização)
+            # A detecção de URL agora é feita fora do loop, usando 'urls_extracted' do Stage 01
             if re.search(r'https?://', text_lower):
                 if 'noticia' not in categories:
                     categories.append('noticia')
@@ -2547,6 +2568,19 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             df[f'aff_{affordance_type}'] = df['affordance_categories'].apply(
                 lambda cats: 1 if affordance_type in cats else 0
             )
+
+        # FIX: URL detection — regex em normalized_text nunca matcheia (://  removido)
+        # Usar 'urls_extracted' do Stage 01 (preserva URLs reais do body)
+        if 'urls_extracted' in df.columns:
+            has_url = df['urls_extracted'].apply(
+                lambda x: len(x) > 0 if isinstance(x, list) else bool(x) if x else False
+            )
+            # Marcar textos com URL como 'noticia' se não classificados
+            mask_url_not_noticia = has_url & (df['aff_noticia'] == 0)
+            df.loc[mask_url_not_noticia, 'aff_noticia'] = 1
+            url_boost_count = mask_url_not_noticia.sum()
+            if url_boost_count > 0:
+                self.logger.info(f"   🔗 URL detection via urls_extracted: +{url_boost_count} classificações 'noticia'")
 
         # Estatísticas
         classified = len(df[df['affordance_confidence'] > 0.1])
@@ -2666,41 +2700,144 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         """
         Stage 08: Classificação política brasileira.
 
-        Aplica léxico unificado (847+ termos, 9 macrotemas) para classificar textos.
+        REFORMULADO: usa spacy_lemmas (Stage 07) com token matching via set lookup.
+        Aplica léxico unificado (914+ termos, 11 macrotemas) para classificar textos.
         Escopo: discurso bolsonarista/direita brasileira (2019-2023).
         Orientações retornadas: extrema-direita, direita, centro-direita, neutral.
         Nota: léxico não inclui termos de esquerda (fora do escopo do projeto).
         """
         try:
-            self.logger.info("🔄 Stage 08: Classificação política brasileira")
-            
-            if 'normalized_text' not in df.columns:
-                self.logger.warning("⚠️ normalized_text não encontrado, usando body")
-                text_column = 'body'
-            else:
-                text_column = 'normalized_text'
-            
-            # Classificação política usando léxico unificado (956 termos)
-            df['political_orientation'] = df[text_column].apply(self._classify_political_orientation)
-            df['political_keywords'] = df[text_column].apply(self._extract_political_keywords)
-            df['political_intensity'] = df[text_column].apply(self._calculate_political_intensity)
+            self.logger.info("🔄 Stage 08: Classificação política brasileira (token matching via spaCy lemmas)")
 
-            # Classificação temática - 10 categorias (political_keywords_dict.py, 98 termos)
+            # Determinar coluna de input: preferir spacy_lemmas > lemmatized_text > normalized_text
+            if 'spacy_lemmas' in df.columns:
+                input_col = 'spacy_lemmas'
+                self.logger.info("   📥 Input: spacy_lemmas (token-level matching)")
+            elif 'lemmatized_text' in df.columns:
+                input_col = 'lemmatized_text'
+                self.logger.info("   📥 Input: lemmatized_text (string fallback)")
+            else:
+                input_col = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+                self.logger.warning(f"   ⚠️ spaCy output não disponível, fallback: {input_col}")
+
+            # Classificação política usando léxico unificado
+            df['political_orientation'] = df[input_col].apply(self._classify_political_orientation)
+            df['political_keywords'] = df[input_col].apply(self._extract_political_keywords)
+            df['political_intensity'] = df[input_col].apply(self._calculate_political_intensity)
+
+            # Classificação temática - 12 categorias (political_keywords_dict.py)
             try:
                 from src.core.political_keywords_dict import POLITICAL_KEYWORDS
+                import re as _re
+
                 for cat_name, cat_terms in POLITICAL_KEYWORDS.items():
-                    # Remover prefixo numerico (cat0_, cat2_, ..., cat10_)
-                    import re
-                    col_name = 'cat_' + re.sub(r'^cat\d+_', '', cat_name)
-                    df[col_name] = df[text_column].apply(
-                        lambda text, terms=cat_terms: sum(1 for t in terms if t in str(text).lower()) if text else 0
-                    )
-                self.logger.info(f"📊 Classificação temática: {len(POLITICAL_KEYWORDS)} categorias aplicadas")
+                    col_name = 'cat_' + _re.sub(r'^cat\d+_', '', cat_name)
+                    # Token matching: set intersection para single-word, substring para multi-word
+                    cat_single = set(t for t in cat_terms if ' ' not in t)
+                    cat_multi = [t for t in cat_terms if ' ' in t]
+
+                    def _count_cat_matches(lemmas_or_text, s=cat_single, m=cat_multi):
+                        if lemmas_or_text is None or (isinstance(lemmas_or_text, float) and pd.isna(lemmas_or_text)):
+                            return 0
+                        if isinstance(lemmas_or_text, list):
+                            tset = set(t.lower() for t in lemmas_or_text if t)
+                        else:
+                            tset = set(str(lemmas_or_text).lower().split())
+                        count = len(tset & s)
+                        if m:
+                            joined = ' '.join(sorted(tset))
+                            count += sum(1 for t in m if t in joined)
+                        return count
+
+                    df[col_name] = df[input_col].apply(_count_cat_matches)
+
+                self.logger.info(f"📊 Classificação temática: {len(POLITICAL_KEYWORDS)} categorias aplicadas (token matching)")
             except ImportError:
                 self.logger.warning("⚠️ political_keywords_dict.py não encontrado, pulando categorias temáticas")
 
+            # === CODIFICAÇÃO TCW (Tabela-Categoria-Palavra) ===
+            # Integrado do classificador TCW: adiciona códigos numéricos 3-dígitos
+            # e grau de concordância entre as 3 tabelas LLM
+            try:
+                import json as _json
+                from pathlib import Path as _Path
+
+                tcw_path = _Path(__file__).parent / 'core' / 'tcw_codes.json'
+                if tcw_path.exists():
+                    with open(tcw_path, 'r', encoding='utf-8') as f:
+                        tcw_codes = _json.load(f)
+
+                    # Construir lookup: word → list of codes
+                    word_to_codes = {}
+                    for code, info in tcw_codes.items():
+                        word = info['word'].lower()
+                        if word not in word_to_codes:
+                            word_to_codes[word] = []
+                        word_to_codes[word].append({
+                            'code': code,
+                            'table': info['table'],
+                            'category': info['category'],
+                            'category_name': info['category_name']
+                        })
+
+                    # Single-word e multi-word lookup sets
+                    tcw_single = set(w for w in word_to_codes if ' ' not in w)
+                    tcw_multi = [w for w in word_to_codes if ' ' in w]
+
+                    def _tcw_classify(lemmas_or_text):
+                        """Classificar texto usando codificação TCW."""
+                        if lemmas_or_text is None or (isinstance(lemmas_or_text, float) and pd.isna(lemmas_or_text)):
+                            return [], [], 0.0
+                        if isinstance(lemmas_or_text, list):
+                            tset = set(t.lower() for t in lemmas_or_text if t)
+                        else:
+                            tset = set(str(lemmas_or_text).lower().split())
+
+                        codes_found = []
+                        categories_found = set()
+
+                        # Single-word matches
+                        for word in tset & tcw_single:
+                            for entry in word_to_codes[word]:
+                                codes_found.append(entry['code'])
+                                categories_found.add(entry['category_name'])
+
+                        # Multi-word matches
+                        if tcw_multi:
+                            joined = ' '.join(sorted(tset))
+                            for mw in tcw_multi:
+                                if mw in joined:
+                                    for entry in word_to_codes[mw]:
+                                        codes_found.append(entry['code'])
+                                        categories_found.add(entry['category_name'])
+
+                        # Concordância: quantas tabelas (1-3) concordam nos códigos encontrados
+                        if codes_found:
+                            tables_seen = set()
+                            for code in codes_found:
+                                if code in tcw_codes:
+                                    tables_seen.add(tcw_codes[code]['table'])
+                            agreement = len(tables_seen) / 3.0  # 0.33, 0.67, 1.0
+                        else:
+                            agreement = 0.0
+
+                        return codes_found, list(categories_found), agreement
+
+                    tcw_results = df[input_col].apply(_tcw_classify)
+                    df['tcw_codes'] = tcw_results.apply(lambda x: x[0])
+                    df['tcw_categories'] = tcw_results.apply(lambda x: x[1])
+                    df['tcw_agreement'] = tcw_results.apply(lambda x: x[2])
+                    df['tcw_code_count'] = df['tcw_codes'].apply(len)
+
+                    tcw_classified = (df['tcw_code_count'] > 0).sum()
+                    self.logger.info(f"🔢 TCW: {tcw_classified}/{len(df)} textos classificados ({tcw_classified/len(df)*100:.1f}%)")
+                else:
+                    self.logger.warning("⚠️ tcw_codes.json não encontrado em src/core/, pulando TCW")
+            except Exception as tcw_err:
+                self.logger.warning(f"⚠️ Erro TCW: {tcw_err}")
+
             self.stats['stages_completed'] += 1
-            self.stats['features_extracted'] += 13
+            self.stats['features_extracted'] += 19  # 15 base + 4 TCW
 
             self.logger.info(f"✅ Stage 08 concluído: {len(df)} registros processados")
             return df
@@ -2729,13 +2866,15 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
                 self.stats['features_extracted'] += 3
                 return df
             
-            if 'tokens' not in df.columns:
-                self.logger.warning("⚠️ tokens não encontrados, usando normalized_text")
+            # FIX: usar 'lemmatized_text' (output do Stage 07 spaCy) em vez de 'tokens' (inexistente)
+            if 'lemmatized_text' in df.columns:
+                text_data = df['lemmatized_text'].fillna('').tolist()
+            elif 'spacy_tokens' in df.columns:
+                text_data = df['spacy_tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
+            else:
+                self.logger.warning("⚠️ lemmatized_text/spacy_tokens não encontrados, usando normalized_text")
                 text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
                 text_data = df[text_column].fillna('').tolist()
-            else:
-                # Usar tokens do spaCy
-                text_data = df['tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
             
             # Verificar se há texto não-vazio
             non_empty_texts = [text for text in text_data if text.strip()]
@@ -2857,7 +2996,8 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             
             # Features numéricas para clustering
             numeric_features = []
-            for col in ['word_count', 'text_length', 'tfidf_score_mean', 'political_intensity']:
+            # FIX: 'text_length' não existe — Stage 04 gera 'char_count'
+            for col in ['word_count', 'char_count', 'tfidf_score_mean', 'political_intensity']:
                 if col in df.columns:
                     numeric_features.append(col)
             
@@ -2927,12 +3067,15 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         try:
             self.logger.info("🔄 Stage 11: Topic modeling")
             
-            if 'tokens' not in df.columns:
-                self.logger.warning("⚠️ tokens não encontrados, usando normalized_text")
+            # FIX: usar 'lemmatized_text' (output do Stage 07 spaCy) em vez de 'tokens' (inexistente)
+            if 'lemmatized_text' in df.columns:
+                text_data = df['lemmatized_text'].fillna('').tolist()
+            elif 'spacy_tokens' in df.columns:
+                text_data = df['spacy_tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
+            else:
+                self.logger.warning("⚠️ lemmatized_text/spacy_tokens não encontrados, usando normalized_text")
                 text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
                 text_data = df[text_column].fillna('').tolist()
-            else:
-                text_data = df['tokens'].apply(lambda x: ' '.join(x) if isinstance(x, list) else str(x)).fillna('').tolist()
             
             # Topic modeling básico com LDA
             from sklearn.feature_extraction.text import CountVectorizer
@@ -3185,8 +3328,9 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             df['has_aggressive_language'] = df[text_column].apply(self._detect_aggressive_language)
             
             # Complexidade semântica
-            if 'tokens' in df.columns:
-                df['semantic_diversity'] = df['tokens'].apply(
+            # FIX: usar 'spacy_tokens' (output real do Stage 07) em vez de 'tokens' (inexistente)
+            if 'spacy_tokens' in df.columns:
+                df['semantic_diversity'] = df['spacy_tokens'].apply(
                     lambda x: len(set(x)) / len(x) if isinstance(x, list) and len(x) > 0 else 0
                 )
             else:
@@ -3213,8 +3357,14 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         """
         try:
             self.logger.info("🔄 Stage 16: Análise de contexto de eventos")
-            
-            text_column = 'normalized_text' if 'normalized_text' in df.columns else 'body'
+
+            # FIX: preferir lemmatized_text (output do spaCy) para melhor matching de contextos
+            if 'lemmatized_text' in df.columns:
+                text_column = 'lemmatized_text'
+            elif 'normalized_text' in df.columns:
+                text_column = 'normalized_text'
+            else:
+                text_column = 'body'
             
             # Contextos políticos brasileiros
             df['political_context'] = df[text_column].apply(self._detect_political_context)
@@ -3314,34 +3464,52 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
     # (Integrado com lexico_unified_system.json: 956 termos, 9 macrotemas)
     # ==========================================
 
-    def _classify_political_orientation(self, text: str) -> str:
-        """Classifica orientação política usando léxico unificado (956 termos)."""
-        if not text or pd.isna(text):
+    def _classify_political_orientation(self, lemmas_or_text) -> str:
+        """
+        Classifica orientação política usando léxico unificado.
+        REFORMULADO: aceita lista de lemmas (spaCy) ou string (fallback).
+        Token matching via set lookup — O(1) por token, zero falsos positivos.
+        """
+        if lemmas_or_text is None or (isinstance(lemmas_or_text, float) and pd.isna(lemmas_or_text)):
             return 'neutral'
 
-        text_lower = str(text).lower()
+        # Converter input para set de tokens (lemmas ou palavras)
+        if isinstance(lemmas_or_text, list):
+            token_set = set(t.lower() for t in lemmas_or_text if t)
+        else:
+            token_set = set(str(lemmas_or_text).lower().split())
+
+        if not token_set:
+            return 'neutral'
+
         terms_map = self._political_terms_map
 
-        # Mapear macrotemas do léxico para orientação política
-        # Macrotemas de direita/extrema-direita: identidade_patriotica, inimigos_ideologicos,
-        # teorias_conspiracao, negacionismo, autoritarismo_violencia, mobilizacao_acao
+        # Macrotemas de direita/extrema-direita
         direita_categories = [
             'identidade_patriotica', 'inimigos_ideologicos', 'teorias_conspiracao',
             'negacionismo', 'autoritarismo_violencia', 'mobilizacao_acao',
-            'desinformacao_verdade', 'estrategias_discursivas', 'eventos_simbolicos'
+            'desinformacao_verdade', 'estrategias_discursivas', 'eventos_simbolicos',
+            'corrupcao_transparencia', 'politica_externa'
         ]
 
-        # Contar matches por macrotema
+        # Contar matches por macrotema via set intersection
         scores = {}
         for cat in direita_categories:
             terms = terms_map.get(cat, [])
-            scores[cat] = sum(1 for term in terms if term in text_lower)
+            # Para termos compostos (multi-word), verificar no texto concatenado
+            single_word_terms = set(t for t in terms if ' ' not in t)
+            multi_word_terms = [t for t in terms if ' ' in t]
+
+            count = len(token_set & single_word_terms)
+            if multi_word_terms:
+                text_joined = ' '.join(sorted(token_set))
+                count += sum(1 for t in multi_word_terms if t in text_joined)
+            scores[cat] = count
 
         total_matches = sum(scores.values())
         if total_matches == 0:
             return 'neutral'
 
-        # Classificar baseado na intensidade e tipo de termos encontrados
         radical_score = scores.get('autoritarismo_violencia', 0) + scores.get('mobilizacao_acao', 0)
         conspiracao_score = scores.get('teorias_conspiracao', 0) + scores.get('negacionismo', 0)
         identidade_score = scores.get('identidade_patriotica', 0) + scores.get('eventos_simbolicos', 0)
@@ -3357,31 +3525,62 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
             return 'direita'
         return 'neutral'
 
-    def _extract_political_keywords(self, text: str) -> list:
-        """Extrai palavras-chave políticas usando léxico unificado (956 termos)."""
-        if not text or pd.isna(text):
+    def _extract_political_keywords(self, lemmas_or_text) -> list:
+        """
+        Extrai palavras-chave políticas usando léxico unificado.
+        REFORMULADO: token matching via set intersection.
+        """
+        if lemmas_or_text is None or (isinstance(lemmas_or_text, float) and pd.isna(lemmas_or_text)):
             return []
 
-        text_lower = str(text).lower()
+        if isinstance(lemmas_or_text, list):
+            token_set = set(t.lower() for t in lemmas_or_text if t)
+        else:
+            token_set = set(str(lemmas_or_text).lower().split())
+
+        if not token_set:
+            return []
+
         terms_map = self._political_terms_map
         found = []
         for cat, terms in terms_map.items():
-            for term in terms:
-                if term in text_lower and term not in found:
-                    found.append(term)
+            single_word_terms = set(t for t in terms if ' ' not in t)
+            matches = token_set & single_word_terms
+            for m in matches:
+                if m not in found:
+                    found.append(m)
                     if len(found) >= 10:
                         return found
+            # Multi-word terms: fallback substring
+            multi_word_terms = [t for t in terms if ' ' in t]
+            if multi_word_terms:
+                text_joined = ' '.join(sorted(token_set))
+                for t in multi_word_terms:
+                    if t in text_joined and t not in found:
+                        found.append(t)
+                        if len(found) >= 10:
+                            return found
         return found
 
-    def _calculate_political_intensity(self, text: str) -> float:
-        """Calcula intensidade usando termos de mobilização e autoritarismo do léxico."""
-        if not text or pd.isna(text):
+    def _calculate_political_intensity(self, lemmas_or_text) -> float:
+        """
+        Calcula intensidade usando termos de mobilização e autoritarismo.
+        REFORMULADO: token matching via set intersection.
+        """
+        if lemmas_or_text is None or (isinstance(lemmas_or_text, float) and pd.isna(lemmas_or_text)):
             return 0.0
 
-        text_lower = str(text).lower()
+        if isinstance(lemmas_or_text, list):
+            token_set = set(t.lower() for t in lemmas_or_text if t)
+        else:
+            token_set = set(str(lemmas_or_text).lower().split())
+
+        if not token_set:
+            return 0.0
+
         terms_map = self._political_terms_map
 
-        # Termos de alta intensidade: mobilização + autoritarismo + desinformação
+        # Termos de alta intensidade
         intensity_terms = (
             terms_map.get('mobilizacao_acao', []) +
             terms_map.get('autoritarismo_violencia', []) +
@@ -3391,8 +3590,15 @@ Responda APENAS com um JSON array válido. Exemplo para 3 mensagens:
         if not intensity_terms:
             return 0.0
 
-        match_count = sum(1 for term in intensity_terms if term in text_lower)
-        # Normalizar: 1 match=0.15, 2=0.3, 5+=0.75, 7+=1.0
+        single_word = set(t for t in intensity_terms if ' ' not in t)
+        match_count = len(token_set & single_word)
+
+        # Multi-word fallback
+        multi_word = [t for t in intensity_terms if ' ' in t]
+        if multi_word:
+            text_joined = ' '.join(sorted(token_set))
+            match_count += sum(1 for t in multi_word if t in text_joined)
+
         return min(match_count * 0.15, 1.0)
 
     def _classify_domain_type(self, domain: str) -> str:
